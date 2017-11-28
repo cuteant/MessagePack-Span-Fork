@@ -122,8 +122,8 @@ namespace Hyperion.Extensions
 //#else
     public static object GetEmptyObject(this Type type)
     {
-      return FormatterServices.GetUninitializedObject(type);
-      //return ActivatorUtils.FastCreateInstance(type);
+      //return FormatterServices.GetUninitializedObject(type);
+      return ActivatorUtils.FastCreateInstance(type);
     }
 //#endif
 

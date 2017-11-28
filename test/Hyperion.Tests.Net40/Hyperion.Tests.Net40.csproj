@@ -2,8 +2,12 @@
   <PropertyGroup>
     <RootNamespace>Hyperion.Tests</RootNamespace>
     <AssemblyName>Hyperion.Tests.Net40</AssemblyName>
-    <TargetFrameworks>net471</TargetFrameworks>
+    <TargetFramework>net471</TargetFramework>
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(NETCoreApp2RuntimeFrameworkVersion)</RuntimeFrameworkVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net471' or '$(TargetFramework)' == 'net451' or '$(TargetFramework)' == 'net40' ">
+    <DefineConstants>$(DefineConstants);SERIALIZATION</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +18,29 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Hyperion\Hyperion.csproj" />
+    <Compile Include="..\Hyperion.Tests\**\*.cs" Exclude="..\Hyperion.Tests\bin\**;..\Hyperion.Tests\obj\**" />
+    <EmbeddedResource Include="..\Hyperion.Tests\**\*.resx" Exclude="..\Hyperion.Tests\bin\**;..\Hyperion.Tests\obj\**;@(EmbeddedResource)" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="CuteAnt.Core">
+      <HintPath>..\..\src\Hyperion\bin\Debug\net40\CuteAnt.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="CuteAnt.Core.Abstractions">
+      <HintPath>..\..\src\Hyperion\bin\Debug\net40\CuteAnt.Core.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Hyperion">
+      <HintPath>..\..\src\Hyperion\bin\Debug\net40\Hyperion.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Primitives">
+      <HintPath>..\..\src\Hyperion\bin\Debug\net40\Microsoft.Extensions.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>..\..\src\Hyperion\bin\Debug\net40\System.Collections.Immutable.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reflection.Metadata">
+      <HintPath>..\..\src\Hyperion\bin\Debug\net40\System.Reflection.Metadata.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
