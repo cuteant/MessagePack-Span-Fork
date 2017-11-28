@@ -13,6 +13,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CuteAnt.Reflection;
 using Hyperion.Extensions;
 using Hyperion.ValueSerializers;
 
@@ -107,7 +108,7 @@ namespace Hyperion.SerializerFactories
 
       ObjectReader reader = (stream, session) =>
       {
-        var instance = Activator.CreateInstance(type);
+        var instance = ActivatorUtils.FastCreateInstance(type);
         if (preserveObjectReferences)
         {
           session.TrackDeserializedObject(instance);

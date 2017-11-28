@@ -11,6 +11,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using CuteAnt.Reflection;
 using Hyperion.Extensions;
 using Hyperion.ValueSerializers;
 
@@ -35,7 +36,7 @@ namespace Hyperion.SerializerFactories
             ObjectReader reader = (stream, session) =>
             {
                
-                var instance = Activator.CreateInstance(type) as IDictionary<string,object>;
+                var instance = ActivatorUtils.FastCreateInstance(type) as IDictionary<string,object>;
 
                 if (preserveObjectReferences)
                 {

@@ -39,7 +39,7 @@ namespace Hyperion.SerializerFactories
         var owner = stream.ReadObject(session) as Type;
         var arguments = stream.ReadObject(session) as Type[];
 
-#if DESKTOPCLR
+//#if DESKTOPCLR
 #if NET40
         var method = owner.GetMethod(
 #else
@@ -52,16 +52,16 @@ namespace Hyperion.SerializerFactories
               arguments,
               null);
         return method;
-#else
-        var methods = owner.GetTypeInfo()
-            .GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public |
-                        BindingFlags.NonPublic);
-        var method = methods.FirstOrDefault(m => m.Name == name &&
-                                                 m.GetParameters()
-                                                     .Select(p => p.ParameterType)
-                                                     .SequenceEqual(arguments));
-        return method;
-#endif
+//#else
+//        var methods = owner.GetTypeInfo()
+//            .GetMethods(BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public |
+//                        BindingFlags.NonPublic);
+//        var method = methods.FirstOrDefault(m => m.Name == name &&
+//                                                 m.GetParameters()
+//                                                     .Select(p => p.ParameterType)
+//                                                     .SequenceEqual(arguments));
+//        return method;
+//#endif
       };
       ObjectWriter writer = (stream, obj, session) =>
       {

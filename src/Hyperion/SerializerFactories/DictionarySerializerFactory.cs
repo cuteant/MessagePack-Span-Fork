@@ -13,6 +13,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CuteAnt.Reflection;
 using Hyperion.Extensions;
 using Hyperion.ValueSerializers;
 
@@ -51,7 +52,7 @@ namespace Hyperion.SerializerFactories
       {
         throw new NotSupportedException("Generic IDictionary<TKey,TValue> are not yet supported");
 #pragma warning disable CS0162 // Unreachable code detected
-        var instance = Activator.CreateInstance(type);
+        var instance = ActivatorUtils.FastCreateInstance(type);
 #pragma warning restore CS0162 // Unreachable code detected
         if (preserveObjectReferences)
         {

@@ -13,6 +13,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CuteAnt.Reflection;
 using Hyperion.Extensions;
 using Hyperion.ValueSerializers;
 
@@ -21,11 +22,7 @@ namespace Hyperion.SerializerFactories
   public class ImmutableCollectionsSerializerFactory : ValueSerializerFactory
   {
     private const string ImmutableCollectionsNamespace = "System.Collections.Immutable";
-#if NET40
-    private const string ImmutableCollectionsAssembly = "CuteAnt.AsyncEx";
-#else
     private const string ImmutableCollectionsAssembly = "System.Collections.Immutable";
-#endif
 
     public override bool CanSerialize(Serializer serializer, Type type)
     {
@@ -100,7 +97,8 @@ namespace Hyperion.SerializerFactories
       // we propagate null to create mock serializer - it won't be used anyway
 
       var stackTypeDef = Type.GetType(ImmutableCollectionsNamespace + ".IImmutableStack`1, " + ImmutableCollectionsAssembly, true);
-      var stackInterface = stackTypeDef.MakeGenericType(genericTypes[0]);
+      //var stackInterface = stackTypeDef.MakeGenericType(genericTypes[0]);
+      var stackInterface = stackTypeDef.GetCachedGenericType(genericTypes[0]);
 
       var isStack = stackInterface.IsAssignableFrom(type);
 

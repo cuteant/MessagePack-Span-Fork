@@ -10,6 +10,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using CuteAnt.Reflection;
 using Hyperion.Extensions;
 
 namespace Hyperion.Compilation
@@ -25,7 +26,7 @@ namespace Hyperion.Compilation
     {
       if (type.GetTypeInfo().IsValueType)
       {
-        var x = Expression.Constant(Activator.CreateInstance(type));
+        var x = Expression.Constant(ActivatorUtils.FastCreateInstance(type));
         var convert = Expression.Convert(x, typeof(object));
         return convert;
       }

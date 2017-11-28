@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using CuteAnt.Reflection;
 using Hyperion.ValueSerializers;
 
 namespace Hyperion.SerializerFactories
@@ -78,7 +79,8 @@ namespace Hyperion.SerializerFactories
 
       var keyType = GetKeyType(type);
       var valueType = GetValyeType(type);
-      var tupleType = typeof(Tuple<,>).MakeGenericType(keyType, valueType);
+      //var tupleType = typeof(Tuple<,>).MakeGenericType(keyType, valueType);
+      var tupleType = typeof(Tuple<,>).GetCachedGenericType(keyType, valueType);
       var arrType = tupleType.MakeArrayType();
 
 #if NET40

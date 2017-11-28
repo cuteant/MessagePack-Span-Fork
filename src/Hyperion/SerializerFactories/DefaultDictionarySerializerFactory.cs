@@ -11,6 +11,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using CuteAnt.Reflection;
 using Hyperion.Extensions;
 using Hyperion.ValueSerializers;
 #if NET40
@@ -46,7 +47,7 @@ namespace Hyperion.SerializerFactories
       ObjectReader reader = (stream, session) =>
       {
         var count = stream.ReadInt32(session);
-        var instance = (IDictionary)Activator.CreateInstance(type, count);
+        var instance = (IDictionary)ActivatorUtils.CreateInstance(type, count);
         if (preserveObjectReferences)
         {
           session.TrackDeserializedObject(instance);

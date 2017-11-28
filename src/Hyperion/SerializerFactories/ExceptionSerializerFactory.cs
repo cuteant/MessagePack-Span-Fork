@@ -10,6 +10,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Reflection;
+using CuteAnt.Reflection;
 using Hyperion.Extensions;
 using Hyperion.ValueSerializers;
 
@@ -51,7 +52,7 @@ namespace Hyperion.SerializerFactories
       var exceptionSerializer = new ObjectSerializer(type);
       exceptionSerializer.Initialize((stream, session) =>
       {
-        var exception = Activator.CreateInstance(type);
+        var exception = ActivatorUtils.FastCreateInstance(type);
         var className = stream.ReadString(session);
         var message = stream.ReadString(session);
         var remoteStackTraceString = stream.ReadString(session);
