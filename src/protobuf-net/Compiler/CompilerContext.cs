@@ -737,11 +737,7 @@ namespace ProtoBuf.Compiler
             }
 #else
 
-#if COREFX
-      foreach (System.Runtime.CompilerServices.InternalsVisibleToAttribute attrib in assembly.GetCustomAttributes(attributeType))
-#else
       foreach (System.Runtime.CompilerServices.InternalsVisibleToAttribute attrib in assembly.GetCustomAttributesX(attributeType, false))
-#endif
       {
         if (attrib.AssemblyName == assemblyName || attrib.AssemblyName.StartsWith(assemblyName + ","))
         {
@@ -782,45 +778,42 @@ namespace ProtoBuf.Compiler
         }
         bool isPublic;
 #if COREFX
-                if (member is TypeInfo)
-                {
-                    TypeInfo ti = (TypeInfo)member;
-                    do
-                    {
-                        isPublic = ti.IsNestedPublic || ti.IsPublic || ((ti.IsNested || ti.IsNestedAssembly || ti.IsNestedFamORAssem) && InternalsVisible(ti.Assembly));
-                    } while (isPublic && ti.IsNested && (ti = ti.DeclaringType.GetTypeInfo()) != null);
-                }
-                else if (member is FieldInfo)
-                {
-                    FieldInfo field = ((FieldInfo)member);
-                    isPublic = field.IsPublic || ((field.IsAssembly || field.IsFamilyOrAssembly) && InternalsVisible(Helpers.GetAssembly(field.DeclaringType)));
-                }
-                else if (member is PropertyInfo)
-                {
-                    isPublic = true; // defer to get/set
-                }
-                else if (member is ConstructorInfo)
-                {
-                    ConstructorInfo ctor = ((ConstructorInfo)member);
-                    isPublic = ctor.IsPublic || ((ctor.IsAssembly || ctor.IsFamilyOrAssembly) && InternalsVisible(Helpers.GetAssembly(ctor.DeclaringType)));
-                }
-                else if (member is MethodInfo)
-                {
-                    MethodInfo method = ((MethodInfo)member);
-                    isPublic = method.IsPublic || ((method.IsAssembly || method.IsFamilyOrAssembly) && InternalsVisible(Helpers.GetAssembly(method.DeclaringType)));
-                    if (!isPublic)
-                    {
-                        // allow calls to TypeModel protected methods, and methods we are in the process of creating
-                        if (
-                                member is MethodBuilder ||
-                                member.DeclaringType == MapType(typeof(TypeModel)))
-                            isPublic = true;
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException(member.GetType().Name);
-                }
+        if (member is TypeInfo)
+        {
+          TypeInfo ti = (TypeInfo)member;
+          do
+          {
+            isPublic = ti.IsNestedPublic || ti.IsPublic || ((ti.IsNested || ti.IsNestedAssembly || ti.IsNestedFamORAssem) && InternalsVisible(ti.Assembly));
+          } while (isPublic && ti.IsNested && (ti = ti.DeclaringType.GetTypeInfo()) != null);
+        }
+        else if (member is FieldInfo)
+        {
+          FieldInfo field = ((FieldInfo)member);
+          isPublic = field.IsPublic || ((field.IsAssembly || field.IsFamilyOrAssembly) && InternalsVisible(Helpers.GetAssembly(field.DeclaringType)));
+        }
+        else if (member is PropertyInfo)
+        {
+          isPublic = true; // defer to get/set
+        }
+        else if (member is ConstructorInfo)
+        {
+          ConstructorInfo ctor = ((ConstructorInfo)member);
+          isPublic = ctor.IsPublic || ((ctor.IsAssembly || ctor.IsFamilyOrAssembly) && InternalsVisible(Helpers.GetAssembly(ctor.DeclaringType)));
+        }
+        else if (member is MethodInfo)
+        {
+          MethodInfo method = ((MethodInfo)member);
+          isPublic = method.IsPublic || ((method.IsAssembly || method.IsFamilyOrAssembly) && InternalsVisible(Helpers.GetAssembly(method.DeclaringType)));
+          if (!isPublic)
+          {
+            // allow calls to TypeModel protected methods, and methods we are in the process of creating
+            if (member is MethodBuilder || member.DeclaringType == MapType(typeof(TypeModel))) { isPublic = true; }
+          }
+        }
+        else
+        {
+          throw new NotSupportedException(member.GetType().Name);
+        }
 #else
         MemberTypes memberType = member.MemberType;
         switch (memberType)
@@ -851,11 +844,7 @@ namespace ProtoBuf.Compiler
             if (!isPublic)
             {
               // allow calls to TypeModel protected methods, and methods we are in the process of creating
-              if (
-#if !SILVERLIGHT
-                                member is MethodBuilder ||
-#endif
-                                member.DeclaringType == MapType(typeof(TypeModel))) isPublic = true;
+              if (member is MethodBuilder || member.DeclaringType == MapType(typeof(TypeModel))) isPublic = true;
             }
             break;
           case MemberTypes.Property:
@@ -868,16 +857,16 @@ namespace ProtoBuf.Compiler
         if (!isPublic)
         {
 #if COREFX
-                    if (member is TypeInfo)
-                    {
-                        throw new InvalidOperationException("Non-public type cannot be used with full dll compilation: " +
-                                ((TypeInfo)member).FullName);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("Non-public member cannot be used with full dll compilation: " +
-                                member.DeclaringType.FullName + "." + member.Name);
-                    }
+          if (member is TypeInfo)
+          {
+            throw new InvalidOperationException("Non-public type cannot be used with full dll compilation: " +
+                    ((TypeInfo)member).FullName);
+          }
+          else
+          {
+            throw new InvalidOperationException("Non-public member cannot be used with full dll compilation: " +
+                    member.DeclaringType.FullName + "." + member.Name);
+          }
 
 #else
           switch (memberType)

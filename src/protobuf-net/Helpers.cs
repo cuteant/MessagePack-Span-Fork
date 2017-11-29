@@ -159,7 +159,7 @@ namespace ProtoBuf
       return float.IsInfinity(value);
 #endif
     }
-#if WINRT || COREFX
+#if WINRT //|| COREFX // ## 苦竹 屏蔽 ##
         internal static MemberInfo GetInstanceMember(TypeInfo declaringType, string name)
         {
             var members = declaringType.AsType().GetMember(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -239,7 +239,7 @@ namespace ProtoBuf
     internal static MethodInfo GetInstanceMethod(Type declaringType, string name, Type[] types)
     {
       if (types == null) types = EmptyTypes;
-#if PORTABLE || COREFX
+#if PORTABLE //|| COREFX // ## 苦竹 屏蔽 ##
             MethodInfo method = declaringType.GetMethod(name, types);
             if (method != null && method.IsStatic) method = null;
             return method;
@@ -275,7 +275,7 @@ namespace ProtoBuf
             Type.EmptyTypes;
 #endif
 
-#if WINRT || COREFX
+#if WINRT //|| COREFX  // ## 苦竹 屏蔽 ##
         private static readonly Type[] knownTypes = new Type[] {
                 typeof(bool), typeof(char), typeof(sbyte), typeof(byte),
                 typeof(short), typeof(ushort), typeof(int), typeof(uint),
@@ -333,7 +333,7 @@ namespace ProtoBuf
 
     public static ProtoTypeCode GetTypeCode(System.Type type)
     {
-#if WINRT || COREFX
+#if WINRT //|| COREFX // ## 苦竹 屏蔽 ##
             if(IsEnum(type))
             {
                 type = Enum.GetUnderlyingType(type);

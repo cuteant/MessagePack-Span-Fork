@@ -133,24 +133,25 @@ namespace ProtoBuf.Meta
         }
         internal object GetRawEnumValue()
         {
-#if WINRT || PORTABLE || CF || FX11 || COREFX
-            object value = ((FieldInfo)originalMember).GetValue(null);
-            switch(Helpers.GetTypeCode(Enum.GetUnderlyingType(((FieldInfo)originalMember).FieldType)))
-            {
-                case ProtoTypeCode.SByte: return (sbyte)value;
-                case ProtoTypeCode.Byte: return (byte)value;
-                case ProtoTypeCode.Int16: return (short)value;
-                case ProtoTypeCode.UInt16: return (ushort)value;
-                case ProtoTypeCode.Int32: return (int)value;
-                case ProtoTypeCode.UInt32: return (uint)value;
-                case ProtoTypeCode.Int64: return (long)value;
-                case ProtoTypeCode.UInt64: return (ulong)value;
-                default:
-                    throw new InvalidOperationException();
-            }
-#else
+             // ## 苦竹 屏蔽 ##
+//#if WINRT || PORTABLE || CF || FX11 || COREFX
+//            object value = ((FieldInfo)originalMember).GetValue(null);
+//            switch(Helpers.GetTypeCode(Enum.GetUnderlyingType(((FieldInfo)originalMember).FieldType)))
+//            {
+//                case ProtoTypeCode.SByte: return (sbyte)value;
+//                case ProtoTypeCode.Byte: return (byte)value;
+//                case ProtoTypeCode.Int16: return (short)value;
+//                case ProtoTypeCode.UInt16: return (ushort)value;
+//                case ProtoTypeCode.Int32: return (int)value;
+//                case ProtoTypeCode.UInt32: return (uint)value;
+//                case ProtoTypeCode.Int64: return (long)value;
+//                case ProtoTypeCode.UInt64: return (ulong)value;
+//                default:
+//                    throw new InvalidOperationException();
+//            }
+//#else
             return ((FieldInfo)originalMember).GetRawConstantValue();
-#endif
+//#endif
         }
         private static object ParseDefaultValue(Type type, object value)
         {

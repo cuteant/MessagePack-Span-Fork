@@ -985,11 +985,11 @@ namespace ProtoBuf.Meta
                 else
                 {
                     attrib = GetAttribute(attribs, "ProtoBuf.ProtoEnumAttribute");
-#if WINRT || PORTABLE || CF || FX11 || COREFX
-                    fieldNumber = Convert.ToInt32(((FieldInfo)member).GetValue(null));
-#else
+//#if WINRT || PORTABLE || CF || FX11 || COREFX
+//                    fieldNumber = Convert.ToInt32(((FieldInfo)member).GetValue(null));
+//#else
                     fieldNumber = Convert.ToInt32(((FieldInfo)member).GetRawConstantValue());
-#endif
+//#endif
                     if (attrib != null)
                     {
                         GetFieldName(ref name, attrib, nameof(ProtoEnumAttribute.Name));
@@ -1443,25 +1443,26 @@ namespace ProtoBuf.Meta
             if (mi == null) throw new ArgumentException("Unable to determine member: " + memberName, "memberName");
 
             Type miType;
-#if WINRT || PORTABLE || COREFX
-            PropertyInfo pi = mi as PropertyInfo;
-            if (pi == null)
-            {
-                FieldInfo fi = mi as FieldInfo;
-                if (fi == null)
-                {
-                    throw new NotSupportedException(mi.GetType().Name);
-                }
-                else
-                {
-                    miType = fi.FieldType;
-                }
-            }
-            else
-            {
-                miType = pi.PropertyType;
-            }
-#else   
+            // ## 苦竹 屏蔽 ##
+//#if WINRT || PORTABLE || COREFX
+//            PropertyInfo pi = mi as PropertyInfo;
+//            if (pi == null)
+//            {
+//                FieldInfo fi = mi as FieldInfo;
+//                if (fi == null)
+//                {
+//                    throw new NotSupportedException(mi.GetType().Name);
+//                }
+//                else
+//                {
+//                    miType = fi.FieldType;
+//                }
+//            }
+//            else
+//            {
+//                miType = pi.PropertyType;
+//            }
+//#else   
             switch (mi.MemberType)
             {
                 case MemberTypes.Field:
@@ -1471,7 +1472,7 @@ namespace ProtoBuf.Meta
                 default:
                     throw new NotSupportedException(mi.MemberType.ToString());
             }
-#endif
+//#endif
             ResolveListTypes(model, miType, ref itemType, ref defaultType);
 
             MemberInfo backingField = null;

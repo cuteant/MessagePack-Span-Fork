@@ -26,6 +26,7 @@ namespace ProtoBuf
 #endif
  class BclHelpers
   {
+    #region ## 苦竹 屏蔽 ##
     /// <summary>
     /// Creates a new instance of the specified type, bypassing the constructor.
     /// </summary>
@@ -34,38 +35,39 @@ namespace ProtoBuf
     /// <exception cref="NotSupportedException">If the platform does not support constructor-skipping</exception>
     public static object GetUninitializedObject(Type type)
     {
-#if COREFX
-      object obj = TryGetUninitializedObjectWithFormatterServices(type);
-      if (obj != null) return obj;
-#endif
-#if PLAT_BINARYFORMATTER && !(WINRT || PHONE8 || COREFX)
-      return System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
-#else
-      throw new NotSupportedException("Constructor-skipping is not supported on this platform");
-#endif
+//#if COREFX
+//          object obj = TryGetUninitializedObjectWithFormatterServices(type);
+//          if (obj != null) return obj;
+//#endif
+//#if PLAT_BINARYFORMATTER && !(WINRT || PHONE8 || COREFX)
+          return System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
+//#else
+//          throw new NotSupportedException("Constructor-skipping is not supported on this platform");
+//#endif
     }
 
-#if COREFX // this is inspired by DCS: https://github.com/dotnet/corefx/blob/c02d33b18398199f6acc17d375dab154e9a1df66/src/System.Private.DataContractSerialization/src/System/Runtime/Serialization/XmlFormatReaderGenerator.cs#L854-L894
-    static Func<Type, object> getUninitializedObject;
-    static internal object TryGetUninitializedObjectWithFormatterServices(Type type)
-    {
-      if (getUninitializedObject == null)
-      {
-        try
-        {
-          var formatterServiceType = typeof(string).GetTypeInfo().Assembly.GetType("System.Runtime.Serialization.FormatterServices");
-          MethodInfo method = formatterServiceType?.GetMethod("GetUninitializedObject", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-          if (method != null)
-          {
-            getUninitializedObject = (Func<Type, object>)method.CreateDelegate(typeof(Func<Type, object>));
-          }
-        }
-        catch { /* best efforts only */ }
-        if (getUninitializedObject == null) getUninitializedObject = x => null;
-      }
-      return getUninitializedObject(type);
-    }
-#endif
+    //#if COREFX // this is inspired by DCS: https://github.com/dotnet/corefx/blob/c02d33b18398199f6acc17d375dab154e9a1df66/src/System.Private.DataContractSerialization/src/System/Runtime/Serialization/XmlFormatReaderGenerator.cs#L854-L894
+    //    static Func<Type, object> getUninitializedObject;
+    //    static internal object TryGetUninitializedObjectWithFormatterServices(Type type)
+    //    {
+    //      if (getUninitializedObject == null)
+    //      {
+    //        try
+    //        {
+    //          var formatterServiceType = typeof(string).GetTypeInfo().Assembly.GetType("System.Runtime.Serialization.FormatterServices");
+    //          MethodInfo method = formatterServiceType?.GetMethod("GetUninitializedObject", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+    //          if (method != null)
+    //          {
+    //            getUninitializedObject = (Func<Type, object>)method.CreateDelegate(typeof(Func<Type, object>));
+    //          }
+    //        }
+    //        catch { /* best efforts only */ }
+    //        if (getUninitializedObject == null) getUninitializedObject = x => null;
+    //      }
+    //      return getUninitializedObject(type);
+    //    }
+    //#endif
+    #endregion
 
 #if FX11
     private BclHelpers() { } // not a static class for C# 1.2 reasons

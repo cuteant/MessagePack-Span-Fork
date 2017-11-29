@@ -87,13 +87,14 @@ namespace ProtoBuf.Serializers
           ctx.BranchIfEqual(label, false);
           break;
         default:
-#if COREFX
-                    MethodInfo method = type.GetMethod("op_Equality", new Type[] { type, type });
-                    if (method == null || !method.IsPublic || !method.IsStatic) method = null;
-#else
+          // ## 苦竹 屏蔽 ##
+//#if COREFX
+//          MethodInfo method = type.GetMethod("op_Equality", new Type[] { type, type });
+//          if (method == null || !method.IsPublic || !method.IsStatic) method = null;
+//#else
           MethodInfo method = type.GetMethod("op_Equality", BindingFlags.Public | BindingFlags.Static,
               null, new Type[] { type, type }, null);
-#endif
+//#endif
           if (method == null || method.ReturnType != ctx.MapType(typeof(bool)))
           {
             throw new InvalidOperationException("No suitable equality operator found for default-values of type: " + type.FullName);
