@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\version.sst.props" />
+  <Import Project="..\nuget.sst.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net471;net451;net40;netstandard2.0</TargetFrameworks>
+    <RootNamespace>ServiceStack.Text</RootNamespace>
+    <AssemblyName>ServiceStack.Text</AssemblyName>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet">
+    <PackageId>ServiceStack.Text.Unofficial</PackageId>
+    <Title>ServiceStack.Text.Unofficial</Title>
+    <Description>.NET's fastest JSON, JSV and CSV Text Serializers. Fast, Light, Resilient. Contains ServiceStack's high-performance text-processing powers, for more info see: https://servicestack.net/text</Description>
+    <PackageTags>JSON Text Serializer CSV JSV Dump PrettyPrint Fast</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net471' or '$(TargetFramework)' == 'net451' or '$(TargetFramework)' == 'net40' ">
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="$(MicrosoftExtensionsPrimitivesPackageVersion)" />
+    <PackageReference Include="System.Runtime" Version="$(SystemRuntimePackageVersion)" />
+    <PackageReference Include="System.Reflection.Emit" Version="$(SystemReflectionEmitPackageVersion)" />
+    <PackageReference Include="System.Reflection.Emit.LightWeight" Version="$(SystemReflectionEmitLightWeightPackageVersion)" />
+    <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpPackageVersion)" />
+  </ItemGroup>
+
+</Project>
