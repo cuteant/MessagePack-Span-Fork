@@ -1938,7 +1938,7 @@ namespace ProtoBuf.Meta
                 ResolveListTypes(itemType, ref nestedItemType, ref nestedDefaultType);
                 if (nestedItemType != null)
                 {
-                    throw TypeModel.CreateNestedListsNotSupported();
+                    throw TypeModel.CreateNestedListsNotSupported(type);
                 }
             }
 

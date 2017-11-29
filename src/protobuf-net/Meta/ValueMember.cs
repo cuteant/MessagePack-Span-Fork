@@ -444,8 +444,8 @@ namespace ProtoBuf.Meta
 
         static bool IsValidMapKeyType(Type type)
         {
-            if (type == null) return false;
-            switch(Helpers.GetTypeCode(type))
+            if (type == null || Helpers.IsEnum(type)) return false;
+            switch (Helpers.GetTypeCode(type))
             {
                 case ProtoTypeCode.Boolean:
                 case ProtoTypeCode.Byte:
@@ -784,6 +784,7 @@ namespace ProtoBuf.Meta
         public string Name
         {
             get { return Helpers.IsNullOrEmpty(name) ? originalMember.Name : name; }
+            set { SetName(value); }
         }
 
         private const byte
