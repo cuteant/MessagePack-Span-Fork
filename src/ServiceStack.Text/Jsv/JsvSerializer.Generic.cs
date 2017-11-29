@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
+using CuteAnt.Pool;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack.Text.Jsv
@@ -53,9 +54,9 @@ namespace ServiceStack.Text.Jsv
             if (value == null) return null;
             if (value is string) return value as string;
 
-            var writer = StringWriterThreadStatic.Allocate();
+            var writer = StringWriterManager.Allocate();
             JsvWriter<T>.WriteObject(writer, value);
-            return StringWriterThreadStatic.ReturnAndFree(writer);
+            return StringWriterManager.ReturnAndFree(writer);
         }
     }
 }

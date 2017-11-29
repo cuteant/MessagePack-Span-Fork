@@ -14,6 +14,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using CuteAnt.Pool;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Json;
 
@@ -69,7 +70,7 @@ namespace ServiceStack.Text
                 return result;
             }
 
-            var writer = StringWriterThreadStatic.Allocate();
+            var writer = StringWriterManager.Allocate();
             if (typeof(T) == typeof(string))
             {
                 JsonUtils.WriteString(writer, value as string);
@@ -78,14 +79,14 @@ namespace ServiceStack.Text
             {
                 JsonWriter<T>.WriteRootObject(writer, value);
             }
-            return StringWriterThreadStatic.ReturnAndFree(writer);
+            return StringWriterManager.ReturnAndFree(writer);
         }
 
         public static string SerializeToString(object value, Type type)
         {
             if (value == null) return null;
 
-            var writer = StringWriterThreadStatic.Allocate();
+            var writer = StringWriterManager.Allocate();
             if (type == typeof(string))
             {
                 JsonUtils.WriteString(writer, value as string);
@@ -94,7 +95,7 @@ namespace ServiceStack.Text
             {
                 JsonWriter.GetWriteFn(type)(writer, value);
             }
-            return StringWriterThreadStatic.ReturnAndFree(writer);
+            return StringWriterManager.ReturnAndFree(writer);
         }
 
         public static void SerializeToWriter<T>(T value, TextWriter writer)

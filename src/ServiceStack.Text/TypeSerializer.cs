@@ -20,7 +20,6 @@ using System.Text;
 using CuteAnt.Pool;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Jsv;
-using ServiceStack.Text.Pools;
 
 namespace ServiceStack.Text
 {
@@ -99,9 +98,9 @@ namespace ServiceStack.Text
                 return result;
             }
 
-            var writer = StringWriterThreadStatic.Allocate();
+            var writer = StringWriterManager.Allocate();
             JsvWriter<T>.WriteRootObject(writer, value);
-            return StringWriterThreadStatic.ReturnAndFree(writer);
+            return StringWriterManager.ReturnAndFree(writer);
         }
 
         public static string SerializeToString(object value, Type type)
@@ -110,9 +109,9 @@ namespace ServiceStack.Text
             if (type == typeof(string))
                 return value as string;
 
-            var writer = StringWriterThreadStatic.Allocate();
+            var writer = StringWriterManager.Allocate();
             JsvWriter.GetWriteFn(type)(writer, value);
-            return StringWriterThreadStatic.ReturnAndFree(writer);
+            return StringWriterManager.ReturnAndFree(writer);
         }
 
         public static void SerializeToWriter<T>(T value, TextWriter writer)

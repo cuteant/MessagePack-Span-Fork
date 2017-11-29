@@ -12,7 +12,7 @@
 
 using System;
 using System.IO;
-using System.Text;
+using CuteAnt.Pool;
 using ServiceStack.Text.Jsv;
 
 namespace ServiceStack.Text
@@ -45,9 +45,9 @@ namespace ServiceStack.Text
             if (value == null) return null;
             if (typeof(T) == typeof(string)) return value as string;
 
-            var writer = StringWriterThreadStatic.Allocate();
+            var writer = StringWriterManager.Allocate();
             JsvWriter<T>.WriteObject(writer, value);
-            return StringWriterThreadStatic.ReturnAndFree(writer);
+            return StringWriterManager.ReturnAndFree(writer);
         }
 
         public void SerializeToWriter(T value, TextWriter writer)

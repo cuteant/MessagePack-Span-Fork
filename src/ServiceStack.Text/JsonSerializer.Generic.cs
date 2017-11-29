@@ -12,11 +12,9 @@
 
 using System;
 using System.IO;
-using System.Text;
-using System.Reflection;
+using CuteAnt.Pool;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Json;
-using ServiceStack.Text.Pools;
 
 namespace ServiceStack.Text
 {
@@ -55,9 +53,9 @@ namespace ServiceStack.Text
                 return result;
             }
 
-            var writer = StringWriterThreadStatic.Allocate();
+            var writer = StringWriterManager.Allocate();
             JsonWriter<T>.WriteObject(writer, value);
-            return StringWriterThreadStatic.ReturnAndFree(writer);
+            return StringWriterManager.ReturnAndFree(writer);
         }
 
         public void SerializeToWriter(T value, TextWriter writer)

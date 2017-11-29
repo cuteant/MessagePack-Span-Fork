@@ -19,6 +19,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using CuteAnt.Pool;
 using ServiceStack.Text;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Json;
@@ -87,9 +88,9 @@ namespace ServiceStack
 
         public static string SerializeToString<T>(T value)
         {
-            var writer = StringWriterThreadStatic.Allocate();
+            var writer = StringWriterManager.Allocate();
             GetWriteFn(value.GetType())(writer, value);
-            return StringWriterThreadStatic.ReturnAndFree(writer);
+            return StringWriterManager.ReturnAndFree(writer);
         }
     }
 
