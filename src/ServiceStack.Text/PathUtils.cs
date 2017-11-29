@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using ServiceStack.Text;
+using CuteAnt.Pool;
 
 namespace ServiceStack
 {
@@ -94,9 +95,9 @@ namespace ServiceStack
 
         public static string CombinePaths(params string[] paths)
         {
-            var sb = StringBuilderThreadStatic.Allocate();
+            var sb = StringBuilderManager.Allocate();
             AppendPaths(sb, paths);
-            return StringBuilderThreadStatic.ReturnAndFree(sb);
+            return StringBuilderManager.ReturnAndFree(sb);
         }
 
         public static string AssertDir(this string dirPath)
@@ -114,20 +115,20 @@ namespace ServiceStack
             if (thesePaths.Length == 1 && thesePaths[0] == null) return path;
             var startPath = path.Length > 1 ? path.TrimEnd('/', '\\') : path;
 
-            var sb = StringBuilderThreadStatic.Allocate();
+            var sb = StringBuilderManager.Allocate();
             sb.Append(startPath);
             AppendPaths(sb, thesePaths);
-            return StringBuilderThreadStatic.ReturnAndFree(sb);
+            return StringBuilderManager.ReturnAndFree(sb);
         }
 
         public static string CombineWith(this string path, params object[] thesePaths)
         {
             if (thesePaths.Length == 1 && thesePaths[0] == null) return path;
 
-            var sb = StringBuilderThreadStatic.Allocate();
+            var sb = StringBuilderManager.Allocate();
             sb.Append(path.TrimEnd('/', '\\'));
             AppendPaths(sb, ToStrings(thesePaths));
-            return StringBuilderThreadStatic.ReturnAndFree(sb);
+            return StringBuilderManager.ReturnAndFree(sb);
         }
 
         public static string ResolvePaths(this string path)

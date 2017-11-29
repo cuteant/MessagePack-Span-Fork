@@ -13,11 +13,10 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Text;
 using ServiceStack.Text.Json;
 using ServiceStack.Text.Support;
 using System.Text.RegularExpressions;
-using ServiceStack.Text.Pools;
+using CuteAnt.Pool;
 
 namespace ServiceStack.Text.Common
 {
@@ -634,11 +633,11 @@ namespace ServiceStack.Text.Common
 
         public static string ToWcfJsonDate(DateTime dateTime)
         {
-            var sb = StringBuilderThreadStatic.Allocate();
+            var sb = StringBuilderManager.Allocate();
             using (var writer = new StringWriter(sb))
             {
                 WriteWcfJsonDate(writer, dateTime);
-                return StringBuilderThreadStatic.ReturnAndFree(sb);
+                return StringBuilderManager.ReturnAndFree(sb);
             }
         }
 
@@ -666,11 +665,11 @@ namespace ServiceStack.Text.Common
 
         public static string ToWcfJsonDateTimeOffset(DateTimeOffset dateTimeOffset)
         {
-            var sb = StringBuilderThreadStatic.Allocate();
+            var sb = StringBuilderManager.Allocate();
             using (var writer = new StringWriter(sb))
             {
                 WriteWcfJsonDateTimeOffset(writer, dateTimeOffset);
-                return StringBuilderThreadStatic.ReturnAndFree(sb);
+                return StringBuilderManager.ReturnAndFree(sb);
             }
         }
     }

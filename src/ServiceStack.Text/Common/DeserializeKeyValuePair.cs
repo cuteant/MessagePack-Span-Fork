@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Threading;
+using CuteAnt.Pool;
 using Microsoft.Extensions.Primitives;
 using ServiceStack.Text.Json;
 
@@ -137,7 +138,7 @@ namespace ServiceStack.Text.Common
 
         private static string GetTypesKey(params Type[] types)
         {
-            var sb = StringBuilderThreadStatic.Allocate();
+            var sb = StringBuilderManager.Allocate();
             foreach (var type in types)
             {
                 if (sb.Length > 0)
@@ -145,7 +146,7 @@ namespace ServiceStack.Text.Common
 
                 sb.Append(type.FullName);
             }
-            return StringBuilderThreadStatic.ReturnAndFree(sb);
+            return StringBuilderManager.ReturnAndFree(sb);
         }
     }
 }

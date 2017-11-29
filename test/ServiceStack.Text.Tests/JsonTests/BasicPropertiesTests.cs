@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Text;
+using CuteAnt.Pool;
 using NUnit.Framework;
 
 namespace ServiceStack.Text.Tests.JsonTests
@@ -169,12 +168,12 @@ namespace ServiceStack.Text.Tests.JsonTests
 
         static string DictStr(IDictionary d)
         {
-            var sb = StringBuilderCache.Allocate();
+            var sb = StringBuilderManager.Allocate();
             foreach (var key in d.Keys)
             {
                 sb.AppendLine(key + " = " + d[key]);
             }
-            return StringBuilderCache.ReturnAndFree(sb);
+            return StringBuilderManager.ReturnAndFree(sb);
         }
 
         public class ModelWithHashSet

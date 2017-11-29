@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using CuteAnt.Pool;
 using Microsoft.Extensions.Primitives;
 using ServiceStack.Text.Common;
 
@@ -482,7 +483,7 @@ namespace ServiceStack.Text.Json
             var length = input.Length;
             int start = 0;
             int count = 0;
-            var output = StringBuilderThreadStatic.Allocate();
+            var output = StringBuilderManager.Allocate();
             for (; count < length;)
             {
                 if (removeQuotes)
@@ -589,7 +590,7 @@ namespace ServiceStack.Text.Json
                 }
             }
             output.Append(input.Buffer, input.Offset + start, length - start);
-            return new StringSegment(StringBuilderThreadStatic.ReturnAndFree(output));
+            return new StringSegment(StringBuilderManager.ReturnAndFree(output));
         }
 
         /// <summary>

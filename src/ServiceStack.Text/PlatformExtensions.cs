@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading;
+using CuteAnt.Pool;
 using ServiceStack.Text;
 
 namespace ServiceStack
@@ -549,7 +550,7 @@ namespace ServiceStack
             if (argTypes == null)
                 argTypes = TypeConstants.EmptyTypeArray;
 
-            var sb = StringBuilderThreadStatic.Allocate()
+            var sb = StringBuilderManager.Allocate()
                 .Append(type.FullName);
 
             foreach (var argType in argTypes)
@@ -558,7 +559,7 @@ namespace ServiceStack
                     .Append(argType.FullName);
             }
 
-            var key = StringBuilderThreadStatic.ReturnAndFree(sb);
+            var key = StringBuilderManager.ReturnAndFree(sb);
 
             if (GenericTypeCache.TryGetValue(key, out var genericType))
                 return genericType;

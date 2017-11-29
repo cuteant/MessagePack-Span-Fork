@@ -10,6 +10,7 @@ using ServiceStack.Text;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Json;
 using System.Linq;
+using CuteAnt.Pool;
 using Microsoft.Extensions.Primitives;
 #if !(SL5 ||  __IOS__ || NETFX_CORE)
 using System.Reflection;
@@ -172,7 +173,7 @@ namespace ServiceStack
 
         internal static string Underscored(IEnumerable<char> pascalCase)
         {
-            var sb = StringBuilderCache.Allocate();
+            var sb = StringBuilderManager.Allocate();
             var i = 0;
             foreach (var c in pascalCase)
             {
@@ -183,7 +184,7 @@ namespace ServiceStack
                 sb.Append(c);
                 i++;
             }
-            return StringBuilderCache.ReturnAndFree(sb).ToLowerInvariant();
+            return StringBuilderManager.ReturnAndFree(sb).ToLowerInvariant();
         }
     }
 

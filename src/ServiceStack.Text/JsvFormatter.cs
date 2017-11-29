@@ -14,6 +14,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using CuteAnt.Pool;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack.Text
@@ -25,7 +26,7 @@ namespace ServiceStack.Text
             if (string.IsNullOrEmpty(serializedText)) return null;
 
             var tabCount = 0;
-            var sb = StringBuilderThreadStatic.Allocate();
+            var sb = StringBuilderManager.Allocate();
             var firstKeySeparator = true;
             var inString = false;
 
@@ -87,7 +88,7 @@ namespace ServiceStack.Text
                 }
             }
 
-            return StringBuilderThreadStatic.ReturnAndFree(sb);
+            return StringBuilderManager.ReturnAndFree(sb);
         }
 
         private static void AppendTabLine(StringBuilder sb, int tabCount)

@@ -17,6 +17,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CuteAnt.Pool;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Jsv;
 using ServiceStack.Text.Pools;
@@ -291,7 +292,7 @@ namespace ServiceStack.Text
         public static string Dump(this Delegate fn)
         {
             var method = fn.GetType().GetMethod("Invoke");
-            var sb = StringBuilderThreadStatic.Allocate();
+            var sb = StringBuilderManager.Allocate();
             foreach (var param in method.GetParameters())
             {
                 if (sb.Length > 0)
@@ -301,7 +302,7 @@ namespace ServiceStack.Text
             }
 
             var methodName = fn.Method.Name;
-            var info = $"{method.ReturnType.Name} {methodName}({StringBuilderThreadStatic.ReturnAndFree(sb)})";
+            var info = $"{method.ReturnType.Name} {methodName}({StringBuilderManager.ReturnAndFree(sb)})";
             return info;
         }
 
@@ -370,7 +371,7 @@ namespace ServiceStack.Text
         {
             var indent = 0;
             var quoted = false;
-            var sb = StringBuilderThreadStatic.Allocate();
+            var sb = StringBuilderManager.Allocate();
 
             for (var i = 0; i < json.Length; i++)
             {
@@ -422,7 +423,7 @@ namespace ServiceStack.Text
                         break;
                 }
             }
-            return StringBuilderThreadStatic.ReturnAndFree(sb);
+            return StringBuilderManager.ReturnAndFree(sb);
         }
     }
 

@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Globalization;
-using System.Text;
+using CuteAnt.Pool;
 
 namespace ServiceStack.Text.Support
 {
@@ -8,7 +7,7 @@ namespace ServiceStack.Text.Support
     {
         public static string ToXsdDuration(TimeSpan timeSpan)
         {
-            var sb = StringBuilderThreadStatic.Allocate();
+            var sb = StringBuilderManager.Allocate();
 
             sb.Append(timeSpan.Ticks < 0 ? "-P" : "P");
 
@@ -46,7 +45,7 @@ namespace ServiceStack.Text.Support
                 }
             }
 
-            return StringBuilderThreadStatic.ReturnAndFree(sb);
+            return StringBuilderManager.ReturnAndFree(sb);
         }
 
         public static TimeSpan FromXsdDuration(string xsdDuration)

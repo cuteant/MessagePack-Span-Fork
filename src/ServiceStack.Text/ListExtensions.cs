@@ -4,8 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using ServiceStack.Text;
+using CuteAnt.Pool;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack
@@ -19,14 +18,14 @@ namespace ServiceStack
 
         public static string Join<T>(this IEnumerable<T> values, string seperator)
         {
-            var sb = StringBuilderThreadStatic.Allocate();
+            var sb = StringBuilderManager.Allocate();
             foreach (var value in values)
             {
                 if (sb.Length > 0)
                     sb.Append(seperator);
                 sb.Append(value);
             }
-            return StringBuilderThreadStatic.ReturnAndFree(sb);
+            return StringBuilderManager.ReturnAndFree(sb);
         }
 
         public static bool IsNullOrEmpty<T>(this List<T> list)

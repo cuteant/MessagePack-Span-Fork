@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using CuteAnt.IO;
+using CuteAnt.Pool;
 using ServiceStack.Text;
 
 namespace ServiceStack
@@ -231,7 +232,7 @@ namespace ServiceStack
             if (str == null)
                 return null;
 
-            var sb = StringBuilderThreadStatic.Allocate();
+            var sb = StringBuilderManager.Allocate();
             var lastChar = (char)0;
             for (var i = 0; i < str.Length; i++)
             {
@@ -246,7 +247,7 @@ namespace ServiceStack
                 lastChar = c;
             }
 
-            return StringBuilderThreadStatic.ReturnAndFree(sb);
+            return StringBuilderManager.ReturnAndFree(sb);
         }
 
         public static byte[] Combine(this byte[] bytes, params byte[][] withBytes)
@@ -282,23 +283,23 @@ namespace ServiceStack
         public static string ToMd5Hash(this Stream stream)
         {
             var hash = System.Security.Cryptography.MD5.Create().ComputeHash(stream);
-            var sb = StringBuilderCache.Allocate();
+            var sb = StringBuilderManager.Allocate();
             foreach (byte b in hash)
             {
                 sb.Append(b.ToString("x2"));
             }
-            return StringBuilderCache.ReturnAndFree(sb);
+            return StringBuilderManager.ReturnAndFree(sb);
         }
 
         public static string ToMd5Hash(this byte[] bytes)
         {
             var hash = System.Security.Cryptography.MD5.Create().ComputeHash(bytes);
-            var sb = StringBuilderCache.Allocate();
+            var sb = StringBuilderManager.Allocate();
             foreach (byte b in hash)
             {
                 sb.Append(b.ToString("x2"));
             }
-            return StringBuilderCache.ReturnAndFree(sb);
+            return StringBuilderManager.ReturnAndFree(sb);
         }
         
     }
