@@ -325,3 +325,4 @@ TODO.txt
 /src/CuteAnt.Features
 /nuspecs
 /NuGet.Config
+/test/Hyperion.Tests.Performance/Perf

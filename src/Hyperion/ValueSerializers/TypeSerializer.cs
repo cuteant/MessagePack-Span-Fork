@@ -9,6 +9,7 @@
 
 using System;
 using System.IO;
+using CuteAnt.Reflection;
 using Hyperion.Extensions;
 
 namespace Hyperion.ValueSerializers
@@ -54,7 +55,8 @@ namespace Hyperion.ValueSerializers
                         session.TrackSerializedObject(type);
                     }
                     //type was not written before, add it to the tacked object list
-                    var name = type.GetShortAssemblyQualifiedName();
+                    //var name = type.GetShortAssemblyQualifiedName();
+                    var name = TypeUtils.GetSimpleTypeName(type);
                     StringSerializer.WriteValueImpl(stream, name, session);
                 }
             }
@@ -66,8 +68,9 @@ namespace Hyperion.ValueSerializers
             if (shortname == null)
                 return null;
 
-            var name = TypeEx.ToQualifiedAssemblyName(shortname);
-            var type = Type.GetType(name,true);
+            //var name = TypeEx.ToQualifiedAssemblyName(shortname);
+            //var type = Type.GetType(name,true);
+            var type = TypeUtils.ResolveType(shortname);
 
             //add the deserialized type to lookup
             if (session.Serializer.Options.PreserveObjectReferences)

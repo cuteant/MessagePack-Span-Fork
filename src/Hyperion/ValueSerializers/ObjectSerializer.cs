@@ -11,6 +11,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using CuteAnt.Reflection;
 using Hyperion.Extensions;
 
 namespace Hyperion.ValueSerializers
@@ -36,7 +37,8 @@ namespace Hyperion.ValueSerializers
 
             Type = type;
             //TODO: remove version info
-            var typeName = type.GetShortAssemblyQualifiedName();
+            //var typeName = type.GetShortAssemblyQualifiedName();
+            var typeName = TypeUtils.GetSimpleTypeName(type);
             // ReSharper disable once PossibleNullReferenceException
             // ReSharper disable once AssignNullToNotNullAttribute
             var typeNameBytes = typeName.ToUtf8Bytes();

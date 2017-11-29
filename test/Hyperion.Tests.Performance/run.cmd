@@ -1,0 +1,1 @@
+bin\Debug\net471\NBench.Runner.exe bin\Debug\net471\Hyperion.Tests.Performance.dll output-directory="Perf"
