@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.0;net471</TargetFrameworks>
+    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(NETCoreApp2RuntimeFrameworkVersion)</RuntimeFrameworkVersion>
+    <RootNamespace>ProtoBuf.unittest</RootNamespace>
+    <AssemblyName>protobuf-net.Test</AssemblyName>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net471' or '$(TargetFramework)' == 'net452'">
+    <RuntimeIdentifier>win</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net471' or '$(TargetFramework)' == 'net452'">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="$(TargetFramework)=='netcoreapp2.0'">
+    <DefineConstants>FEAT_COMPILER;NO_NHIBERNATE;COREFX;NO_INTERNAL_CONTEXT</DefineConstants>
+    <LibImport>core</LibImport>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetFramework)=='net471'">
+    <DefineConstants>FEAT_COMPILER;FX30;NO_INTERNAL_CONTEXT</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkPackageVersion)" />
+    <PackageReference Include="xunit" Version="$(xUnitPackageVersion)" />
+    <PackageReference Include="xunit.analyzers" Version="$(xUnitAnalyzersPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitRunnerVsPackageVersion)" />
+    <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
+
+    <!--消除引用包版本冲突-->
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net471' or '$(TargetFramework)' == 'net452'">
+    <PackageReference Include="NHibernate" Version="4.1.1.4000" />
+    <PackageReference Include="Iesi.Collections" Version="4.0.0.4000" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\protobuf-net\protobuf-net.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="protobuf-net.Test.xunit.runner.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+</Project>
