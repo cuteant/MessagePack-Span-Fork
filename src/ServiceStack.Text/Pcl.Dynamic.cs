@@ -10,13 +10,7 @@ using ServiceStack.Text;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Json;
 using System.Linq;
-using System.Text;
-#if NETSTANDARD2_0 
 using Microsoft.Extensions.Primitives;
-#else
-using ServiceStack.Text.Support;
-#endif
-
 #if !(SL5 ||  __IOS__ || NETFX_CORE)
 using System.Reflection;
 using System.Reflection.Emit;

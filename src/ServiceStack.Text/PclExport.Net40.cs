@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 using ServiceStack.Text;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Json;
-using ServiceStack.Text.Support;
+using Microsoft.Extensions.Primitives;
 
 #if !__IOS__ && !NETSTANDARD2_0
 using System.Reflection.Emit;

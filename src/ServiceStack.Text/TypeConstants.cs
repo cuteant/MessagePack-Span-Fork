@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
-using ServiceStack.Text;
-
-#if NETSTANDARD2_0
 using Microsoft.Extensions.Primitives;
-#endif
 
 namespace ServiceStack
 {

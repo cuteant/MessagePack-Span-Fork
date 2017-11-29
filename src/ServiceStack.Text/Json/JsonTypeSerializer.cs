@@ -4,14 +4,8 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Text;
-using ServiceStack.Text.Common;
-using ServiceStack.Text.Pools;
-#if NETSTANDARD2_0
 using Microsoft.Extensions.Primitives;
-#endif
-using ServiceStack.Text.Support;
+using ServiceStack.Text.Common;
 
 
 namespace ServiceStack.Text.Json

@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Globalization;
 using System.IO;
-using System.Security;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using ServiceStack.Text.Json;
-
-#if NETSTANDARD2_0
 using Microsoft.Extensions.Primitives;
-#endif
+using ServiceStack.Text.Json;
 
 namespace ServiceStack.Text
 {
@@ -24,7 +20,7 @@ namespace ServiceStack.Text
         public static StringSegment ToStringSegment(this string value) => new StringSegment(value);
 
         [MethodImpl(InlineMethod.Value)]
-        public static bool IsNullOrEmpty(this StringSegment value) => value.Buffer == null || value.Length == 0;
+        public static bool IsNullOrEmpty(this StringSegment value) => StringSegment.IsNullOrEmpty(value);
 
         public static bool IsNullOrWhiteSpace(this StringSegment value)
         {

@@ -4,12 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using ServiceStack.Text.Common;
-#if NETSTANDARD2_0
 using Microsoft.Extensions.Primitives;
-#else
-using ServiceStack.Text.Support;
-#endif
+using ServiceStack.Text.Common;
 
 namespace ServiceStack.Text.Jsv
 {

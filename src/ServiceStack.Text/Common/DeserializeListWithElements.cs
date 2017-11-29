@@ -11,16 +11,10 @@
 //
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Reflection;
 using System.Threading;
-using ServiceStack.Text.Json;
-#if NETSTANDARD2_0
 using Microsoft.Extensions.Primitives;
-#endif
-using ServiceStack.Text.Support;
 
 
 namespace ServiceStack.Text.Common

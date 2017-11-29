@@ -1,13 +1,9 @@
 ﻿//Copyright (c) ServiceStack, Inc. All Rights Reserved.
 //License: https://raw.github.com/ServiceStack/ServiceStack/master/license.txt
 
-using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-#if NETSTANDARD2_0
 using Microsoft.Extensions.Primitives;
-#endif
-using ServiceStack.Text.Support;
 
 
 namespace ServiceStack.Text.Json

@@ -12,13 +12,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Linq;
 using System.Threading;
-#if NETSTANDARD2_0 
 using Microsoft.Extensions.Primitives;
-#endif
-using ServiceStack.Text.Support;
 
 namespace ServiceStack.Text.Common
 {

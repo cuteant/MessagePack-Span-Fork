@@ -4,11 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using ServiceStack.Text.Common;
-#if NETSTANDARD2_0
 using Microsoft.Extensions.Primitives;
-#endif
-using ServiceStack.Text.Support;
+using ServiceStack.Text.Common;
 
 namespace ServiceStack.Text.Json
 {

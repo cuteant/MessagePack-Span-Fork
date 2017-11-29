@@ -3,9 +3,7 @@ using ServiceStack.Text.Support;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-#if NETCORE
 using Microsoft.Extensions.Primitives;
-#endif
 
 namespace ServiceStack.Text.Tests.Support
 {

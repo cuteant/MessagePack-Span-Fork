@@ -11,14 +11,8 @@
 //
 
 using System;
-using System.Reflection;
-using System.Linq;
-using ServiceStack.Text.Jsv;
-#if NETSTANDARD2_0
 using Microsoft.Extensions.Primitives;
-#else
-using ServiceStack.Text.Support;
-#endif
+using ServiceStack.Text.Jsv;
 
 namespace ServiceStack.Text.Common
 {

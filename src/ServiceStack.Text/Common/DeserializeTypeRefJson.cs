@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Reflection;
-using ServiceStack.Text.Json;
-#if NETSTANDARD2_0
 using Microsoft.Extensions.Primitives;
-#endif
+using ServiceStack.Text.Json;
 using ServiceStack.Text.Support;
 
 namespace ServiceStack.Text.Common
