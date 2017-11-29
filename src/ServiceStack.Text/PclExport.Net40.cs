@@ -173,15 +173,15 @@ namespace ServiceStack
             return Environment.GetEnvironmentVariable(name);
         }
 
-        public override void WriteLine(string line)
-        {
-            Console.WriteLine(line);
-        }
+        //public override void WriteLine(string line)
+        //{
+        //    Console.WriteLine(line);
+        //}
 
-        public override void WriteLine(string format, params object[] args)
-        {
-            Console.WriteLine(format, args);
-        }
+        //public override void WriteLine(string format, params object[] args)
+        //{
+        //    Console.WriteLine(format, args);
+        //}
 
         public override void AddCompression(WebRequest webReq)
         {

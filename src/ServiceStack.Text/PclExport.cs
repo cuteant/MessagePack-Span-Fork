@@ -12,6 +12,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using ServiceStack.Text;
 using ServiceStack.Text.Common;
 
@@ -39,6 +40,12 @@ namespace ServiceStack
         ;
 
         static PclExport() {}
+
+        internal protected readonly ILogger Logger;
+        public PclExport()
+        {
+            Logger = TraceLogger.GetLogger(this.GetType());
+        }
 
         public static bool ConfigureProvider(string typeName)
         {
@@ -159,10 +166,12 @@ namespace ServiceStack
 
         public virtual void WriteLine(string line)
         {
+            if (Logger.IsInformationLevelEnabled()) { Logger.LogInformation(line); }
         }
 
         public virtual void WriteLine(string line, params object[] args)
         {
+            if (Logger.IsInformationLevelEnabled()) { Logger.LogInformation(line, args); }
         }
 
         public virtual HttpWebRequest CreateWebRequest(string requestUri, bool? emulateHttpViaPost = null)

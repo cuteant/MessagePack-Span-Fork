@@ -208,23 +208,23 @@ namespace ServiceStack
 #endif
         }
 
-        public override void WriteLine(string line)
-        {
-#if NETSTANDARD2_0
-            Console.WriteLine(line);
-#else
-            System.Diagnostics.Debug.WriteLine(line);
-#endif
-        }
+//        public override void WriteLine(string line)
+//        {
+//#if NETSTANDARD2_0
+//            Console.WriteLine(line);
+//#else
+//            System.Diagnostics.Debug.WriteLine(line);
+//#endif
+//        }
 
-        public override void WriteLine(string format, params object[] args)
-        {
-#if NETSTANDARD2_0
-            Console.WriteLine(format, args);
-#else
-            System.Diagnostics.Debug.WriteLine(format, args);
-#endif
-        }
+//        public override void WriteLine(string format, params object[] args)
+//        {
+//#if NETSTANDARD2_0
+//            Console.WriteLine(format, args);
+//#else
+//            System.Diagnostics.Debug.WriteLine(format, args);
+//#endif
+//        }
 
 #if NETSTANDARD2_0
         public override void AddCompression(WebRequest webReq)
