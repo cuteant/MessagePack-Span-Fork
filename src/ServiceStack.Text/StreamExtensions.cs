@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using CuteAnt.IO;
 using ServiceStack.Text;
 
 namespace ServiceStack
@@ -97,7 +98,7 @@ namespace ServiceStack
 
             // We could do all our own work here, but using MemoryStream is easier
             // and likely to be just as efficient.
-            using (var tempStream = MemoryStreamFactory.GetStream())
+            using (var tempStream = MemoryStreamManager.GetStream())
             {
                 CopyTo(input, tempStream, buffer);
                 // No need to copy the buffer if it's the right size

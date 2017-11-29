@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using CuteAnt.IO;
 using ServiceStack.Text.Json;
 using ServiceStack.Text.Jsv;
 
@@ -604,7 +605,7 @@ namespace ServiceStack.Text.Common
                     else
                     {
                         //Trim brackets in top-level lists in QueryStrings, e.g: ?a=[1,2,3] => ?a=1,2,3
-                        using (var ms = MemoryStreamFactory.GetStream())
+                        using (var ms = MemoryStreamManager.GetStream())
                         {
                             var enumerableWriter = new StreamWriter(ms); //ms disposed in using 
                             propertyWriter.WriteFn(enumerableWriter, propertyValue);

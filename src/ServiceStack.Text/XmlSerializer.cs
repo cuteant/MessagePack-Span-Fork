@@ -2,8 +2,8 @@
 using System;
 using System.IO;
 using System.Runtime.Serialization;
-using System.Text;
 using System.Xml;
+using CuteAnt.IO;
 
 namespace ServiceStack.Text
 {
@@ -71,7 +71,7 @@ namespace ServiceStack.Text
         {
             try
             {
-                using (var ms = MemoryStreamFactory.GetStream())
+                using (var ms = MemoryStreamManager.GetStream())
                 {
                     using (var xw = XmlWriter.Create(ms, XWSettings))
                     {

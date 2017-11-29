@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using ServiceStack.Text;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Json;
+using CuteAnt.IO;
 using Microsoft.Extensions.Primitives;
 
 #if !__IOS__ && !NETSTANDARD2_0
@@ -1031,7 +1032,7 @@ namespace ServiceStack
 
         public static byte[] Compress<TXmlDto>(TXmlDto from)
         {
-            using (var ms = MemoryStreamFactory.GetStream())
+            using (var ms = MemoryStreamManager.GetStream())
             {
                 CompressToStream(from, ms);
 
