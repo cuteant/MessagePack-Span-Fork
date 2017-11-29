@@ -1,0 +1,18 @@
+<Project>
+  <!-- Set common properties regarding assembly information and nuget packages -->
+  <PropertyGroup>
+    <Authors>Marc Gravell, Seabiscuit</Authors>
+    <Company>Marc Gravell</Company>
+    <Product>protobuf-net</Product>
+    <Copyright>Marc Gravell</Copyright>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageIconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/mgravell/protobuf-net</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/mgravell/protobuf-net/master/Licence.txt</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/mgravell/protobuf-net</RepositoryUrl>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <IncludeSymbols>false</IncludeSymbols>
+    <IncludeSource>false</IncludeSource>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,65 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\version.protobuf.props" />
+  <Import Project="..\nuget.protobuf.props" />
+  
+  <PropertyGroup>
+    <TargetFrameworks>net471;net451;net40;netstandard2.0</TargetFrameworks>
+    <RootNamespace>ProtoBuf</RootNamespace>
+    <AssemblyName>protobuf-net</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- this is how we will configure the builds relatively cleanly -->
+    <ImportLibs>net</ImportLibs>
+    <FeatureCompiler>true</FeatureCompiler>
+    <FeatureServiceModel>true</FeatureServiceModel>
+    <PlatformXmlSerializer>true</PlatformXmlSerializer>
+    <PlatformBinaryFormatter>true</PlatformBinaryFormatter>
+  </PropertyGroup>
+  <!-- define configuration per-platform -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net20'">
+    <FeatureServiceModel>false</FeatureServiceModel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
+    <ImportLibs>core</ImportLibs>
+    <FeatureServiceModel>false</FeatureServiceModel>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet">
+    <PackageId>protobuf-net.unofficial</PackageId>
+    <Title>protobuf-net.unofficial</Title>
+    <Description>Protocol Buffers is the name of the binary serialization format used by Google for much of their data communications. It is designed to be: small in size - efficient data storage (far smaller than xml) cheap to process - both at the client and server platform independent - portable between different programming architectures extensible - to add new data to old messages. protobuf-net is a .NET implementation of this, allowing you to serialize your .NET objects efficiently and easily. It is compatible with most of the .NET family, including .NET 2.0/3.0/3.5/4.0, .NET CF 2.0/3.5, Mono 2.x, Silverlight, etc.</Description>
+    <PackageTags>binary serialization protocol buffers protobuf deserialization</PackageTags>
+  </PropertyGroup>
+  
+  <!-- apply the configuration options (typical via defines that switch code flows) -->
+  <PropertyGroup Condition="'$(FeatureCompiler)' == 'true'">
+    <DefineConstants>$(DefineConstants);FEAT_COMPILER</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(FeatureServiceModel)' == 'true'">
+    <DefineConstants>$(DefineConstants);FEAT_SERVICEMODEL</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(PlatformXmlSerializer)' == 'true'">
+    <DefineConstants>$(DefineConstants);PLAT_XMLSERIALIZER</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(PlatformBinaryFormatter)' == 'true'">
+    <DefineConstants>$(DefineConstants);PLAT_BINARYFORMATTER</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(ImportLibs)' == 'net'">
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(ImportLibs)|$(FeatureServiceModel)' == 'net|true'">
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Runtime.Serialization" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CuteAnt.Runtime" Version="$(CuteAntRuntimePackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\protobuf-net.abstractions\protobuf-net.abstractions.csproj" />
+  </ItemGroup>
+</Project>
