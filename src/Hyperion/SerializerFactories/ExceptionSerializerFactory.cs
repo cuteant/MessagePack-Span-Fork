@@ -47,9 +47,10 @@ namespace Hyperion.SerializerFactories
     public override bool CanDeserialize(Serializer serializer, Type type) => CanSerialize(serializer, type);
 
     public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
-        ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+      ConcurrentDictionary<Type, ValueSerializer> typeMapping)
     {
       var exceptionSerializer = new ObjectSerializer(type);
+
       exceptionSerializer.Initialize((stream, session) =>
       {
         var exception = ActivatorUtils.FastCreateInstance(type);

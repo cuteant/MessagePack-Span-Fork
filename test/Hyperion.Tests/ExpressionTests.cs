@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -345,6 +346,41 @@ namespace Hyperion.Tests
     }
 
     [Fact]
+    public void CanSerializeTargetInvocationException()
+    {
+      var exc = new TargetInvocationException(null);
+      var serializer = new Hyperion.Serializer();
+
+      using (var stream = new MemoryStream())
+      {
+        serializer.Serialize(exc, stream);
+        stream.Position = 0;
+        var deserialized = serializer.Deserialize<TargetInvocationException>(stream);
+        Assert.Equal(exc.Message, deserialized.Message);
+        Assert.Equal(exc.StackTrace, deserialized.StackTrace);
+      }
+    }
+
+    [Fact]
+    public void CanSerializeObjectDisposedException()
+    {
+      var exc = new ObjectDisposedException("Object is already disposed", new ArgumentException("One level deeper"));
+      var serializer = new Hyperion.Serializer();
+
+      using (var stream = new MemoryStream())
+      {
+        serializer.Serialize(exc, stream);
+        stream.Position = 0;
+        var deserialized = serializer.Deserialize<ObjectDisposedException>(stream);
+        Assert.Equal(exc.Message, deserialized.Message);
+        Assert.Equal(exc.StackTrace, deserialized.StackTrace);
+        Assert.Equal(exc.InnerException.GetType(), deserialized.InnerException.GetType());
+        Assert.Equal(exc.InnerException.Message, deserialized.InnerException.Message);
+        Assert.Equal(exc.InnerException.StackTrace, deserialized.InnerException.StackTrace);
+      }
+    }
+
+    [Fact]
     public void CanSerializeCatchBlock()
     {
       var expr = Expression.Catch(typeof(DummyException), Expression.Constant(2));
@@ -443,6 +479,23 @@ namespace Hyperion.Tests
         Assert.Equal(expr.Parameters[0].Name, deserialized.Parameters[0].Name);
       }
     }
+
+    [Fact]
+    public void CanSerializeLambdaExpressionContainingGenericMethod()
+    {
+      Expression<Func<Dummy, bool>> expr = dummy => dummy.TestField.Contains('s');
+      var serializer = new Serializer(new SerializerOptions(preserveObjectReferences: true));
+      using (var ms = new MemoryStream())
+      {
+        serializer.Serialize(expr, ms);
+        ms.Seek(0, SeekOrigin.Begin);
+        var deserialized = serializer.Deserialize<Expression<Func<Dummy, bool>>>(ms);
+        Assert.NotNull(((MethodCallExpression)deserialized.Body).Method);
+        Assert.True(deserialized.Compile()(new Dummy("sausages")));
+        Assert.False(deserialized.Compile()(new Dummy("field")));
+      }
+    }
+
 
     [Fact]
     public void CanSerializeInvocationExpression()
