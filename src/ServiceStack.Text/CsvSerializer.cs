@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using CuteAnt.Pool;
+using CuteAnt.Reflection;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Jsv;
 
@@ -511,7 +512,7 @@ namespace ServiceStack.Text
             if (row == null) return null; //AOT
 
             var value = readElementFn(row);
-            var to = typeof(T).CreateInstance();
+            var to = ActivatorUtils.FastCreateInstance<T>(); // typeof(T).CreateInstance();
             valueSetter(to, value);
             return to;
         }
@@ -519,7 +520,7 @@ namespace ServiceStack.Text
         public static object ReadNonEnumerableType(string row)
         {
             var value = readElementFn(row);
-            var to = typeof(T).CreateInstance();
+            var to = ActivatorUtils.FastCreateInstance<T>(); // typeof(T).CreateInstance();
             valueSetter(to, value);
             return to;
         }

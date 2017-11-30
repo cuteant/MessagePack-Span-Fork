@@ -13,9 +13,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading;
-using System.Linq;
+using CuteAnt.Reflection;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack.Text
@@ -159,16 +158,16 @@ namespace ServiceStack.Text
                 if (toInstanceOfType.HasAnyTypeDefinitionsOf(
                     typeof(ICollection<>), typeof(IList<>)))
                 {
-                    return typeof(List<T>).CreateInstance();
+                    return ActivatorUtils.FastCreateInstance<List<T>>();// typeof(List<T>).CreateInstance();
                 }
             }
 
-            return toInstanceOfType.CreateInstance();
+            return ActivatorUtils.FastCreateInstance(toInstanceOfType);// toInstanceOfType.CreateInstance();
         }
 
         public static IList TranslateToIList(IList fromList, Type toInstanceOfType)
         {
-            var to = (IList)toInstanceOfType.CreateInstance();
+            var to = ActivatorUtils.FastCreateInstance<IList>(toInstanceOfType); //(IList)toInstanceOfType.CreateInstance();
             foreach (var item in fromList)
             {
                 to.Add(item);

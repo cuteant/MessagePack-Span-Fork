@@ -9,8 +9,8 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
+using CuteAnt.Reflection;
 using ServiceStack.Text;
-using ServiceStack.Text.Common;
 
 namespace ServiceStack
 {
@@ -66,7 +66,7 @@ namespace ServiceStack
                 return (T)listResult;
             }
 
-            var to = typeof(T).CreateInstance<T>();
+            var to = ActivatorUtils.FastCreateInstance<T>();// typeof(T).CreateInstance<T>();
             return to.PopulateWith(from);
         }
 

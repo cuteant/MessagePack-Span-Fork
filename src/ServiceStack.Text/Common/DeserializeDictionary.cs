@@ -14,6 +14,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using CuteAnt.Reflection;
 using Microsoft.Extensions.Primitives;
 using ServiceStack.Text.Json;
 
@@ -145,7 +146,8 @@ namespace ServiceStack.Text.Common
             var valueParseMethod = Serializer.GetParseStringSegmentFn(typeof(object));
             if (valueParseMethod == null) return null;
 
-            var to = (IDictionary)dictType.CreateInstance();
+            //var to = (IDictionary)dictType.CreateInstance();
+            var to = ActivatorUtils.FastCreateInstance<IDictionary>(dictType);
 
             if (JsonTypeSerializer.IsEmptyMap(value, index)) return to;
 
@@ -203,7 +205,7 @@ namespace ServiceStack.Text.Common
 
             var to = (createMapType == null)
                 ? new Dictionary<TKey, TValue>()
-                : (IDictionary<TKey, TValue>)createMapType.CreateInstance();
+                : ActivatorUtils.FastCreateInstance<IDictionary<TKey, TValue>>(createMapType); //(IDictionary<TKey, TValue>)createMapType.CreateInstance();
 
             if (JsonTypeSerializer.IsEmptyMap(value, index)) return to;
 

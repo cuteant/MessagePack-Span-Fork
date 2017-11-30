@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CuteAnt.Reflection;
 
 namespace ServiceStack
 {
@@ -24,7 +25,8 @@ namespace ServiceStack
             if (genericTypeDefinition == typeof(LinkedList<>))
                 return new LinkedList<T>(withItems);
 
-            var collection = (ICollection<T>)ofCollectionType.CreateInstance();
+            //var collection = (ICollection<T>)ofCollectionType.CreateInstance();
+            var collection = ActivatorUtils.FastCreateInstance<ICollection<T>>(ofCollectionType);
             foreach (var item in withItems)
             {
                 collection.Add(item);

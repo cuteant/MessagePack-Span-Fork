@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CuteAnt.Reflection;
 using Microsoft.Extensions.Primitives;
 using ServiceStack.Text.Json;
 using ServiceStack.Text.Support;
@@ -116,7 +117,8 @@ namespace ServiceStack.Text.Common
                     else
                     {
                         JsWriter.AssertAllowedRuntimeType(explicitType);
-                        instance = explicitType.CreateInstance();
+                        //instance = explicitType.CreateInstance();
+                        instance = ActivatorUtils.FastCreateInstance(explicitType);
                     }
 
                     if (instance != null)

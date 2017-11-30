@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CuteAnt.Reflection;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Jsv;
 
@@ -128,7 +129,7 @@ namespace ServiceStack.Text
                         endsToEat--;
                 }
                 if (endsToEat > 0)
-                { 
+                {
                     //Unmatched start and end char, give up
                     i = tokenStartPos;
                     valueChar = value[i];
@@ -211,7 +212,7 @@ namespace ServiceStack.Text
             var isDataContract = typeof(T).IsDto();
             foreach (var propertyInfo in TypeConfig<T>.Properties)
             {
-                if (!propertyInfo.CanWrite || propertyInfo.GetSetMethod(nonPublic:true) == null) continue;
+                if (!propertyInfo.CanWrite || propertyInfo.GetSetMethod(nonPublic: true) == null) continue;
                 if (!TypeSerializer.CanCreateFromString(propertyInfo.PropertyType)) continue;
 
                 var propertyName = propertyInfo.Name;
@@ -253,7 +254,7 @@ namespace ServiceStack.Text
                     PropertySettersMap.TryGetValue(oldHeader, out var setter);
                     PropertySettersMap.Remove(oldHeader);
                     PropertySettersMap[newHeader] = setter;
-                    
+
                     PropertyConvertersMap.TryGetValue(oldHeader, out var converter);
                     PropertyConvertersMap.Remove(oldHeader);
                     PropertyConvertersMap[newHeader] = converter;
@@ -288,7 +289,8 @@ namespace ServiceStack.Text
 
             foreach (var record in records)
             {
-                var to = typeof(T).CreateInstance<T>();
+                //var to = typeof(T).CreateInstance<T>();
+                var to = ActivatorUtils.FastCreateInstance<T>();
                 foreach (var propertySetter in PropertySetters)
                 {
                     propertySetter(to, record);
@@ -367,7 +369,8 @@ namespace ServiceStack.Text
             for (var rowIndex = headers == null ? 0 : 1; rowIndex < rows.Count; rowIndex++)
             {
                 var row = rows[rowIndex];
-                var o = typeof(T).CreateInstance<T>();
+                //var o = typeof(T).CreateInstance<T>();
+                var o = ActivatorUtils.FastCreateInstance<T>();
 
                 var fields = CsvReader.ParseFields(row);
                 for (int i = 0; i < fields.Count; i++)

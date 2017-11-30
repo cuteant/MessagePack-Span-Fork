@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading;
+using CuteAnt.Reflection;
 using CuteAnt.Pool;
 using ServiceStack.Text;
 
@@ -684,7 +685,7 @@ namespace ServiceStack
             if (!toObjectMapCache.TryGetValue(type, out var def))
                 toObjectMapCache[type] = def = CreateObjectDictionaryDefinition(type);
 
-            var to = type.CreateInstance();
+            var to = ActivatorUtils.FastCreateInstance(type); //type.CreateInstance();
             foreach (var entry in values)
             {
                 if (!def.FieldsMap.TryGetValue(entry.Key, out var fieldDef) &&

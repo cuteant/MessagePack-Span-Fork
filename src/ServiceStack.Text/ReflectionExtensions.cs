@@ -20,7 +20,7 @@ using ServiceStack.Text.Support;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-
+using CuteAnt.Reflection;
 using ServiceStack.Text;
 
 namespace ServiceStack
@@ -33,7 +33,7 @@ namespace ServiceStack
         public static TypeCode GetTypeCode(this Type type)
         {
             return Type.GetTypeCode(type);
-        }        
+        }
 
         public static bool IsInstanceOf(this Type type, Type thisOrBaseType)
         {
@@ -331,50 +331,50 @@ namespace ServiceStack
             return true;
         }
 
-        static Dictionary<Type, EmptyCtorDelegate> ConstructorMethods = new Dictionary<Type, EmptyCtorDelegate>();
-        public static EmptyCtorDelegate GetConstructorMethod(Type type)
-        {
-            EmptyCtorDelegate emptyCtorFn;
-            if (ConstructorMethods.TryGetValue(type, out emptyCtorFn)) return emptyCtorFn;
+        //static Dictionary<Type, EmptyCtorDelegate> ConstructorMethods = new Dictionary<Type, EmptyCtorDelegate>();
+        //public static EmptyCtorDelegate GetConstructorMethod(Type type)
+        //{
+        //    EmptyCtorDelegate emptyCtorFn;
+        //    if (ConstructorMethods.TryGetValue(type, out emptyCtorFn)) return emptyCtorFn;
 
-            emptyCtorFn = GetConstructorMethodToCache(type);
+        //    emptyCtorFn = GetConstructorMethodToCache(type);
 
-            Dictionary<Type, EmptyCtorDelegate> snapshot, newCache;
-            do
-            {
-                snapshot = ConstructorMethods;
-                newCache = new Dictionary<Type, EmptyCtorDelegate>(ConstructorMethods);
-                newCache[type] = emptyCtorFn;
+        //    Dictionary<Type, EmptyCtorDelegate> snapshot, newCache;
+        //    do
+        //    {
+        //        snapshot = ConstructorMethods;
+        //        newCache = new Dictionary<Type, EmptyCtorDelegate>(ConstructorMethods);
+        //        newCache[type] = emptyCtorFn;
 
-            } while (!ReferenceEquals(
-                Interlocked.CompareExchange(ref ConstructorMethods, newCache, snapshot), snapshot));
+        //    } while (!ReferenceEquals(
+        //        Interlocked.CompareExchange(ref ConstructorMethods, newCache, snapshot), snapshot));
 
-            return emptyCtorFn;
-        }
+        //    return emptyCtorFn;
+        //}
 
-        static Dictionary<string, EmptyCtorDelegate> TypeNamesMap = new Dictionary<string, EmptyCtorDelegate>();
-        public static EmptyCtorDelegate GetConstructorMethod(string typeName)
-        {
-            EmptyCtorDelegate emptyCtorFn;
-            if (TypeNamesMap.TryGetValue(typeName, out emptyCtorFn)) return emptyCtorFn;
+        //static Dictionary<string, EmptyCtorDelegate> TypeNamesMap = new Dictionary<string, EmptyCtorDelegate>();
+        //public static EmptyCtorDelegate GetConstructorMethod(string typeName)
+        //{
+        //    EmptyCtorDelegate emptyCtorFn;
+        //    if (TypeNamesMap.TryGetValue(typeName, out emptyCtorFn)) return emptyCtorFn;
 
-            var type = JsConfig.TypeFinder(typeName);
-            if (type == null) return null;
-            emptyCtorFn = GetConstructorMethodToCache(type);
+        //    var type = JsConfig.TypeFinder(typeName);
+        //    if (type == null) return null;
+        //    emptyCtorFn = GetConstructorMethodToCache(type);
 
-            Dictionary<string, EmptyCtorDelegate> snapshot, newCache;
-            do
-            {
-                snapshot = TypeNamesMap;
-                newCache = new Dictionary<string, EmptyCtorDelegate>(TypeNamesMap) {
-                    [typeName] = emptyCtorFn
-                };
+        //    Dictionary<string, EmptyCtorDelegate> snapshot, newCache;
+        //    do
+        //    {
+        //        snapshot = TypeNamesMap;
+        //        newCache = new Dictionary<string, EmptyCtorDelegate>(TypeNamesMap) {
+        //            [typeName] = emptyCtorFn
+        //        };
 
-            } while (!ReferenceEquals(
-                Interlocked.CompareExchange(ref TypeNamesMap, newCache, snapshot), snapshot));
+        //    } while (!ReferenceEquals(
+        //        Interlocked.CompareExchange(ref TypeNamesMap, newCache, snapshot), snapshot));
 
-            return emptyCtorFn;
-        }
+        //    return emptyCtorFn;
+        //}
 
         public static EmptyCtorDelegate GetConstructorMethodToCache(Type type)
         {
@@ -436,7 +436,7 @@ namespace ServiceStack
                     ilgen.Emit(System.Reflection.Emit.OpCodes.Newobj, emptyCtor);
                     ilgen.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-                    return (EmptyCtorDelegate) dm.CreateDelegate(typeof(EmptyCtorDelegate));
+                    return (EmptyCtorDelegate)dm.CreateDelegate(typeof(EmptyCtorDelegate));
                 }
 
                 return () => Activator.CreateInstance(type);
@@ -467,9 +467,10 @@ namespace ServiceStack
         /// </summary>
         public static T New<T>(this Type type)
         {
-            var factoryFn = JsConfig.ModelFactory(type)
-                ?? GetConstructorMethod(type);
-            return (T)factoryFn();
+            //var factoryFn = JsConfig.ModelFactory(type) ?? GetConstructorMethod(type);
+            //return (T)factoryFn();
+            var factoryFn = JsConfig.ModelFactory(type);
+            return factoryFn != null ? (T)factoryFn() : ActivatorUtils.FastCreateInstance<T>(type);
         }
 
         /// <summary>
@@ -478,9 +479,10 @@ namespace ServiceStack
         /// </summary>
         public static object New(this Type type)
         {
-            var factoryFn = JsConfig.ModelFactory(type)
-                ?? GetConstructorMethod(type);
-            return factoryFn();
+            //var factoryFn = JsConfig.ModelFactory(type) ?? GetConstructorMethod(type);
+            //return factoryFn();
+            var factoryFn = JsConfig.ModelFactory(type);
+            return factoryFn != null ? factoryFn() : ActivatorUtils.FastCreateInstance(type);
         }
 
         /// <summary>
@@ -492,8 +494,9 @@ namespace ServiceStack
             if (type == null)
                 return null;
 
-            var ctorFn = GetConstructorMethod(type);
-            return ctorFn();
+            //var ctorFn = GetConstructorMethod(type);
+            //return ctorFn();
+            return ActivatorUtils.FastCreateInstance(type);
         }
 
         [MethodImpl(InlineMethod.Value)]
@@ -502,18 +505,20 @@ namespace ServiceStack
             if (type == null)
                 return default(T);
 
-            var ctorFn = GetConstructorMethod(type);
-            return (T)ctorFn();
+            //var ctorFn = GetConstructorMethod(type);
+            //return (T)ctorFn();
+            return (T)ActivatorUtils.FastCreateInstance(type);
         }
 
         [MethodImpl(InlineMethod.Value)]
         public static object CreateInstance(string typeName)
         {
-            if (typeName == null)
+            if (string.IsNullOrWhiteSpace(typeName))
                 return null;
 
-            var ctorFn = GetConstructorMethod(typeName);
-            return ctorFn();
+            //var ctorFn = GetConstructorMethod(typeName);
+            //return ctorFn();
+            return ActivatorUtils.FastCreateInstance(typeName);
         }
 
         [MethodImpl(InlineMethod.Value)]

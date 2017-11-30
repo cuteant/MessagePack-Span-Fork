@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
+using CuteAnt.Reflection;
 using Microsoft.Extensions.Primitives;
 
 
@@ -36,7 +37,7 @@ namespace ServiceStack.Text.Common
             return (s, t, d) => func(new StringSegment(s), t, v => d(v.Value));
         }
 
-        private static readonly Type[] signature = {typeof(StringSegment), typeof(Type), typeof(ParseStringSegmentDelegate)};
+        private static readonly Type[] signature = { typeof(StringSegment), typeof(Type), typeof(ParseStringSegmentDelegate) };
 
         public static Func<StringSegment, Type, ParseStringSegmentDelegate, object> GetListTypeParseStringSegmentFn(
             Type createListType, Type elementType, ParseStringSegmentDelegate parseFn)
@@ -63,7 +64,7 @@ namespace ServiceStack.Text.Common
         }
 
         public static string StripList(string value)
-        {   
+        {
             return StripList(new StringSegment(value)).Value;
         }
 
@@ -176,10 +177,13 @@ namespace ServiceStack.Text.Common
 
             var to = (createListType == null || isReadOnly)
                 ? new List<T>()
-                : (ICollection<T>)createListType.CreateInstance();
+                : ActivatorUtils.FastCreateInstance<ICollection<T>>(createListType); //(ICollection<T>)createListType.CreateInstance();
 
             if (value.Length == 0)
-                return isReadOnly ? (ICollection<T>)Activator.CreateInstance(createListType, to) : to;
+            {
+                //return isReadOnly ? (ICollection<T>)Activator.CreateInstance(createListType, to) : to;
+                return isReadOnly ? ActivatorUtils.CreateInstance<ICollection<T>>(createListType, to) : to;
+            }
 
             var tryToParseItemsAsPrimitiveTypes =
                 JsConfig.TryToParsePrimitiveTypeValues && typeof(T) == typeof(object);
@@ -207,7 +211,7 @@ namespace ServiceStack.Text.Common
                 }
                 else
                 {
-                    
+
                     while (i < valueLength)
                     {
                         var startIndex = i;

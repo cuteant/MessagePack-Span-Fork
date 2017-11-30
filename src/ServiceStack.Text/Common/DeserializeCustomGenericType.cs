@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.Extensions.Primitives;
+using CuteAnt.Reflection;
 using ServiceStack.Text.Json;
 
 namespace ServiceStack.Text.Common
@@ -27,7 +28,10 @@ namespace ServiceStack.Text.Common
             var index = 0;
             Serializer.EatMapStartChar(value, ref index);
             if (JsonTypeSerializer.IsEmptyMap(value, index))
-                return tupleType.CreateInstance();
+            {
+                //return tupleType.CreateInstance();
+                return ActivatorUtils.FastCreateInstance(tupleType);
+            }
 
             var genericArgs = tupleType.GetGenericArguments();
             var argValues = new object[genericArgs.Length];

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using CuteAnt.Reflection;
 using Microsoft.Extensions.Primitives;
 
 namespace ServiceStack.Text.Common
@@ -192,7 +193,8 @@ namespace ServiceStack.Text.Common
 
         public static object ConvertFromCollection(object enumerable)
         {
-            var to = (ICollection<T>)typeof(TCollection).CreateInstance();
+            //var to = (ICollection<T>)typeof(TCollection).CreateInstance();
+            var to = ActivatorUtils.FastCreateInstance<ICollection<T>>(typeof(TCollection));
             var from = (IEnumerable<T>)enumerable;
             foreach (var item in from)
             {
