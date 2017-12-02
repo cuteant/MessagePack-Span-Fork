@@ -541,44 +541,44 @@ namespace ServiceStack
                 ?? type.GetGenericArguments().LastOrDefault(); //new[] { str }.Select(x => new Type()) => WhereSelectArrayIterator<string,Type>
         }
 
-        static Dictionary<string, Type> GenericTypeCache = new Dictionary<string, Type>();
+        //static Dictionary<string, Type> GenericTypeCache = new Dictionary<string, Type>();
 
-        public static Type GetCachedGenericType(this Type type, params Type[] argTypes)
-        {
-            if (!type.IsGenericTypeDefinition)
-                throw new ArgumentException(type.FullName + " is not a Generic Type Definition");
+        //public static Type GetCachedGenericType(this Type type, params Type[] argTypes)
+        //{
+        //    if (!type.IsGenericTypeDefinition)
+        //        throw new ArgumentException(type.FullName + " is not a Generic Type Definition");
 
-            if (argTypes == null)
-                argTypes = TypeConstants.EmptyTypeArray;
+        //    if (argTypes == null)
+        //        argTypes = TypeConstants.EmptyTypeArray;
 
-            var sb = StringBuilderManager.Allocate()
-                .Append(type.FullName);
+        //    var sb = StringBuilderManager.Allocate()
+        //        .Append(type.FullName);
 
-            foreach (var argType in argTypes)
-            {
-                sb.Append('|')
-                    .Append(argType.FullName);
-            }
+        //    foreach (var argType in argTypes)
+        //    {
+        //        sb.Append('|')
+        //            .Append(argType.FullName);
+        //    }
 
-            var key = StringBuilderManager.ReturnAndFree(sb);
+        //    var key = StringBuilderManager.ReturnAndFree(sb);
 
-            if (GenericTypeCache.TryGetValue(key, out var genericType))
-                return genericType;
+        //    if (GenericTypeCache.TryGetValue(key, out var genericType))
+        //        return genericType;
 
-            genericType = type.MakeGenericType(argTypes);
+        //    genericType = type.MakeGenericType(argTypes);
 
-            Dictionary<string, Type> snapshot, newCache;
-            do
-            {
-                snapshot = GenericTypeCache;
-                newCache = new Dictionary<string, Type>(GenericTypeCache);
-                newCache[key] = genericType;
+        //    Dictionary<string, Type> snapshot, newCache;
+        //    do
+        //    {
+        //        snapshot = GenericTypeCache;
+        //        newCache = new Dictionary<string, Type>(GenericTypeCache);
+        //        newCache[key] = genericType;
 
-            } while (!ReferenceEquals(
-                Interlocked.CompareExchange(ref GenericTypeCache, newCache, snapshot), snapshot));
+        //    } while (!ReferenceEquals(
+        //        Interlocked.CompareExchange(ref GenericTypeCache, newCache, snapshot), snapshot));
 
-            return genericType;
-        }
+        //    return genericType;
+        //}
 
         private static readonly ConcurrentDictionary<Type, ObjectDictionaryDefinition> toObjectMapCache =
             new ConcurrentDictionary<Type, ObjectDictionaryDefinition>();

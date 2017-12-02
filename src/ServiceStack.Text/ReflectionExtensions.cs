@@ -393,7 +393,7 @@ namespace ServiceStack
                     {
                         var keyType = genericType.GetGenericArguments()[0];
                         var valueType = genericType.GetGenericArguments()[1];
-                        return GetConstructorMethodToCache(typeof(Dictionary<,>).MakeGenericType(keyType, valueType));
+                        return GetConstructorMethodToCache(typeof(Dictionary<,>).GetCachedGenericType(keyType, valueType));
                     }
 
                     genericType = type.GetTypeWithGenericTypeDefinitionOfAny(
@@ -404,7 +404,7 @@ namespace ServiceStack
                     if (genericType != null)
                     {
                         var elementType = genericType.GetGenericArguments()[0];
-                        return GetConstructorMethodToCache(typeof(List<>).MakeGenericType(elementType));
+                        return GetConstructorMethodToCache(typeof(List<>).GetCachedGenericType(elementType));
                     }
                 }
             }
@@ -419,7 +419,7 @@ namespace ServiceStack
                 for (var i = 0; i < genericArgs.Length; i++)
                     typeArgs[i] = typeof(object);
 
-                var realizedType = type.MakeGenericType(typeArgs);
+                var realizedType = type.GetCachedGenericType(typeArgs);
 
                 return realizedType.CreateInstance;
             }

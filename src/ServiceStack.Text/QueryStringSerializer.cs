@@ -20,6 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using CuteAnt.Pool;
+using CuteAnt.Reflection;
 using ServiceStack.Text;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Json;
@@ -48,7 +49,7 @@ namespace ServiceStack
                 WriteObjectDelegate writeFn;
                 if (WriteFnCache.TryGetValue(type, out writeFn)) return writeFn;
 
-                var genericType = typeof(QueryStringWriter<>).MakeGenericType(type);
+                var genericType = typeof(QueryStringWriter<>).GetCachedGenericType(type);
                 var mi = genericType.GetStaticMethod("WriteFn");
                 var writeFactoryFn = (Func<WriteObjectDelegate>)mi.MakeDelegate(
                     typeof(Func<WriteObjectDelegate>));
@@ -268,7 +269,7 @@ namespace ServiceStack
 
             var typeConfig = typeConfigCache.GetOrAdd(obj.GetType(), t =>
                 {
-                    var genericType = typeof(PropertyTypeConfig<>).MakeGenericType(t);
+                    var genericType = typeof(PropertyTypeConfig<>).GetCachedGenericType(t);
                     var fi = genericType.Fields().First(x => x.Name == "Config");
 
                     var config = (PropertyTypeConfig)fi.GetValue(null);

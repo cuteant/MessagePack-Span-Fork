@@ -13,6 +13,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using CuteAnt.Reflection;
 using Microsoft.Extensions.Primitives;
 
 namespace ServiceStack.Text.Common
@@ -38,7 +39,7 @@ namespace ServiceStack.Text.Common
             ParseArrayOfElementsDelegate parseFn;
             if (ParseDelegateCache.TryGetValue(type, out parseFn)) return parseFn.Invoke;
 
-            var genericType = typeof(DeserializeArrayWithElements<,>).MakeGenericType(type, typeof(TSerializer));
+            var genericType = typeof(DeserializeArrayWithElements<,>).GetCachedGenericType(type, typeof(TSerializer));
             var mi = genericType.GetStaticMethod("ParseGenericArray", signature);
             parseFn = (ParseArrayOfElementsDelegate)mi.CreateDelegate(typeof(ParseArrayOfElementsDelegate));
 
@@ -123,7 +124,7 @@ namespace ServiceStack.Text.Common
             ParseStringSegmentDelegate parseFn;
             if (ParseDelegateCache.TryGetValue(type, out parseFn)) return parseFn;
 
-            var genericType = typeof(DeserializeArray<,>).MakeGenericType(type, typeof(TSerializer));
+            var genericType = typeof(DeserializeArray<,>).GetCachedGenericType(type, typeof(TSerializer));
 
             var mi = genericType.GetStaticMethod("GetParseStringSegmentFn");
             var parseFactoryFn = (Func<ParseStringSegmentDelegate>)mi.MakeDelegate(

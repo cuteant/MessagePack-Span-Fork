@@ -46,7 +46,7 @@ namespace ServiceStack.Text.Common
             if (ParseDelegateCache.TryGetValue(elementType, out parseDelegate))
                 return parseDelegate.Invoke;
 
-            var genericType = typeof(DeserializeListWithElements<,>).MakeGenericType(elementType, typeof(TSerializer));
+            var genericType = typeof(DeserializeListWithElements<,>).GetCachedGenericType(elementType, typeof(TSerializer));
             var mi = genericType.GetStaticMethod("ParseGenericList", signature);
             parseDelegate = (ParseListDelegate)mi.MakeDelegate(typeof(ParseListDelegate));
 

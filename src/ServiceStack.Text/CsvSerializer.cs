@@ -25,7 +25,7 @@ namespace ServiceStack.Text
             {
                 if (WriteFnCache.TryGetValue(type, out var writeFn)) return writeFn;
 
-                var genericType = typeof(CsvSerializer<>).MakeGenericType(type);
+                var genericType = typeof(CsvSerializer<>).GetCachedGenericType(type);
                 var mi = genericType.GetStaticMethod("WriteFn");
                 var writeFactoryFn = (Func<WriteObjectDelegate>)mi.MakeDelegate(
                     typeof(Func<WriteObjectDelegate>));
@@ -58,7 +58,7 @@ namespace ServiceStack.Text
             {
                 if (ReadFnCache.TryGetValue(type, out var writeFn)) return writeFn;
 
-                var genericType = typeof(CsvSerializer<>).MakeGenericType(type);
+                var genericType = typeof(CsvSerializer<>).GetCachedGenericType(type);
                 var mi = genericType.GetStaticMethod("ReadFn");
                 var writeFactoryFn = (Func<ParseStringDelegate>)mi.MakeDelegate(
                     typeof(Func<ParseStringDelegate>));
@@ -336,7 +336,7 @@ namespace ServiceStack.Text
 
         private static WriteObjectDelegate CreateCsvWriterFn(Type elementType, string methodName)
         {
-            var genericType = typeof(CsvWriter<>).MakeGenericType(elementType);
+            var genericType = typeof(CsvWriter<>).GetCachedGenericType(elementType);
             var mi = genericType.GetStaticMethod(methodName);
             var writeFn = (WriteObjectDelegate)mi.MakeDelegate(typeof(WriteObjectDelegate));
             return writeFn;
@@ -491,7 +491,7 @@ namespace ServiceStack.Text
 
         private static ParseStringDelegate CreateCsvReadFn(Type elementType, string methodName)
         {
-            var genericType = typeof(CsvReader<>).MakeGenericType(elementType);
+            var genericType = typeof(CsvReader<>).GetCachedGenericType(elementType);
             var mi = genericType.GetStaticMethod(methodName);
             var readFn = (ParseStringDelegate)mi.MakeDelegate(typeof(ParseStringDelegate));
             return readFn;

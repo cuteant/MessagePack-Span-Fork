@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using CuteAnt.Reflection;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack.Text.Json
@@ -35,7 +36,7 @@ namespace ServiceStack.Text.Json
                 WriteObjectDelegate writeFn;
                 if (WriteFnCache.TryGetValue(type, out writeFn)) return writeFn;
 
-                var genericType = typeof(JsonWriter<>).MakeGenericType(type);
+                var genericType = typeof(JsonWriter<>).GetCachedGenericType(type);
                 var mi = genericType.GetStaticMethod("WriteFn");
                 var writeFactoryFn = (Func<WriteObjectDelegate>)mi.MakeDelegate(typeof(Func<WriteObjectDelegate>));
                 writeFn = writeFactoryFn();
@@ -70,7 +71,7 @@ namespace ServiceStack.Text.Json
                 TypeInfo writeFn;
                 if (JsonTypeInfoCache.TryGetValue(type, out writeFn)) return writeFn;
 
-                var genericType = typeof(JsonWriter<>).MakeGenericType(type);
+                var genericType = typeof(JsonWriter<>).GetCachedGenericType(type);
                 var mi = genericType.GetStaticMethod("GetTypeInfo");
                 var writeFactoryFn = (Func<TypeInfo>)mi.MakeDelegate(typeof(Func<TypeInfo>));
                 writeFn = writeFactoryFn();
@@ -196,7 +197,7 @@ namespace ServiceStack.Text.Json
         public static void WriteObject(TextWriter writer, object value)
         {
 #if __IOS__
-			if (writer == null) return;
+            if (writer == null) return;
 #endif
             TypeConfig<T>.Init();
 
@@ -220,7 +221,7 @@ namespace ServiceStack.Text.Json
         public static void WriteRootObject(TextWriter writer, object value)
         {
 #if __IOS__
-			if (writer == null) return;
+            if (writer == null) return;
 #endif
             TypeConfig<T>.Init();
 

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using CuteAnt.Reflection;
 using Microsoft.Extensions.Primitives;
 using ServiceStack.Text.Common;
 
@@ -24,7 +25,7 @@ namespace ServiceStack.Text.Jsv
 
             if (parseFactoryFn != null) return parseFactoryFn();
 
-            var genericType = typeof(JsvReader<>).MakeGenericType(type);
+            var genericType = typeof(JsvReader<>).GetCachedGenericType(type);
             var mi = genericType.GetStaticMethod("GetParseStringSegmentFn");
             parseFactoryFn = (ParseFactoryDelegate)mi.MakeDelegate(typeof(ParseFactoryDelegate));
 

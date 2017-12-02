@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using ServiceStack.Text;
-
+using CuteAnt.Reflection;
 using System.Linq.Expressions;
 
 #if DESKTOPCLR || NETSTANDARD2_0
@@ -78,7 +78,7 @@ namespace ServiceStack
             if (CacheMap.TryGetValue(type, out TypeProperties value))
                 return value;
 
-            var genericType = FactoryType.MakeGenericType(type);
+            var genericType = FactoryType.GetCachedGenericType(type);
             var instanceFi = genericType.GetPublicStaticField("Instance");
             var instance = (TypeProperties)instanceFi.GetValue(null);
 

@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading;
+using CuteAnt.Reflection;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Json;
 using ServiceStack.Text.Jsv;
@@ -1028,8 +1029,8 @@ namespace ServiceStack.Text
 
         static void Reset(Type cachesForType)
         {
-            typeof(JsConfig<>).MakeGenericType(new[] { cachesForType }).InvokeReset();
-            typeof(TypeConfig<>).MakeGenericType(new[] { cachesForType }).InvokeReset();
+            typeof(JsConfig<>).GetCachedGenericType(new[] { cachesForType }).InvokeReset();
+            typeof(TypeConfig<>).GetCachedGenericType(new[] { cachesForType }).InvokeReset();
         }
 
         internal static void InvokeReset(this Type genericType)

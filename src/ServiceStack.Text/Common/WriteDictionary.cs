@@ -16,7 +16,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
-using System.Linq;
+using CuteAnt.Reflection;
 using ServiceStack.Text.Json;
 
 namespace ServiceStack.Text.Common
@@ -76,7 +76,7 @@ namespace ServiceStack.Text.Common
             var mapKey = new MapKey(keyType, valueType);
             if (CacheFns.TryGetValue(mapKey, out writeFn)) return writeFn.Invoke;
 
-            var genericType = typeof(ToStringDictionaryMethods<,,>).MakeGenericType(keyType, valueType, typeof(TSerializer));
+            var genericType = typeof(ToStringDictionaryMethods<,,>).GetCachedGenericType(keyType, valueType, typeof(TSerializer));
             var mi = genericType.GetStaticMethod("WriteIDictionary");
             writeFn = (WriteMapDelegate)mi.MakeDelegate(typeof(WriteMapDelegate));
 

@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using CuteAnt.Pool;
+using CuteAnt.Reflection;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack.Text.Jsv
@@ -20,7 +21,7 @@ namespace ServiceStack.Text.Jsv
             ParseStringDelegate parseFn;
             if (DeserializerCache.TryGetValue(type, out parseFn)) return (T)parseFn(value);
 
-            var genericType = typeof(T).MakeGenericType(type);
+            var genericType = typeof(T).GetCachedGenericType(type);
             var mi = genericType.GetMethodInfo("DeserializeFromString", new[] { typeof(string) });
             parseFn = (ParseStringDelegate)mi.MakeDelegate(typeof(ParseStringDelegate));
 

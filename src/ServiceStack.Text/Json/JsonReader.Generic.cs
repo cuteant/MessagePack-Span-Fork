@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Extensions.Primitives;
+using CuteAnt.Reflection;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack.Text.Json
@@ -24,7 +25,7 @@ namespace ServiceStack.Text.Json
 
             if (parseFactoryFn != null) return parseFactoryFn();
 
-            var genericType = typeof(JsonReader<>).MakeGenericType(type);
+            var genericType = typeof(JsonReader<>).GetCachedGenericType(type);
             var mi = genericType.GetStaticMethod("GetParseStringSegmentFn");    
             parseFactoryFn = (ParseFactoryDelegate)mi.MakeDelegate(typeof(ParseFactoryDelegate));
 

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using CuteAnt.Reflection;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack.Text.Jsv
@@ -35,7 +36,7 @@ namespace ServiceStack.Text.Jsv
                 WriteObjectDelegate writeFn;
                 if (WriteFnCache.TryGetValue(type, out writeFn)) return writeFn;
 
-                var genericType = typeof(JsvWriter<>).MakeGenericType(type);
+                var genericType = typeof(JsvWriter<>).GetCachedGenericType(type);
                 var mi = genericType.GetStaticMethod("WriteFn");
                 var writeFactoryFn = (Func<WriteObjectDelegate>)mi.MakeDelegate(typeof(Func<WriteObjectDelegate>));
 
@@ -135,7 +136,7 @@ namespace ServiceStack.Text.Jsv
         public static void WriteObject(TextWriter writer, object value)
         {
 #if __IOS__
-			if (writer == null) return;
+            if (writer == null) return;
 #endif
             TypeConfig<T>.Init();
 
@@ -159,7 +160,7 @@ namespace ServiceStack.Text.Jsv
         public static void WriteRootObject(TextWriter writer, object value)
         {
 #if __IOS__
-			if (writer == null) return;
+            if (writer == null) return;
 #endif
             TypeConfig<T>.Init();
 
