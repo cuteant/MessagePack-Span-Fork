@@ -624,9 +624,9 @@ namespace ServiceStack
         public string Name;
         public AssignmentMember From;
         public AssignmentMember To;
-        public GetMemberDelegate GetValueFn;
-        public SetMemberDelegate SetValueFn;
-        public GetMemberDelegate ConvertValueFn;
+        public MemberGetter GetValueFn;
+        public MemberSetter SetValueFn;
+        public MemberGetter ConvertValueFn;
 
         public AssignmentEntry(string name, AssignmentMember @from, AssignmentMember to)
         {
@@ -665,22 +665,22 @@ namespace ServiceStack
         public FieldInfo FieldInfo;
         public MethodInfo MethodInfo;
 
-        public GetMemberDelegate CreateGetter()
+        public MemberGetter CreateGetter()
         {
             if (PropertyInfo != null)
-                return PropertyInfo.CreateGetter();
+                return PropertyInfo.GetValueGetter();
             if (FieldInfo != null)
-                return FieldInfo.CreateGetter();
-            return (GetMemberDelegate) MethodInfo?.CreateDelegate(typeof(GetMemberDelegate));
+                return FieldInfo.GetValueGetter();
+            return (MemberGetter) MethodInfo?.CreateDelegate(typeof(MemberGetter));
         }
 
-        public SetMemberDelegate CreateSetter()
+        public MemberSetter CreateSetter()
         {
             if (PropertyInfo != null)
-                return PropertyInfo.CreateSetter();
+                return PropertyInfo.GetValueSetter();
             if (FieldInfo != null)
-                return FieldInfo.CreateSetter();
-            return (SetMemberDelegate) MethodInfo?.MakeDelegate(typeof(SetMemberDelegate));
+                return FieldInfo.GetValueSetter();
+            return (MemberSetter) MethodInfo?.MakeDelegate(typeof(MemberSetter));
         }
     }
 
@@ -773,17 +773,17 @@ namespace ServiceStack
         }
     }
 
-    public delegate object GetMemberDelegate(object instance);
-    public delegate object GetMemberDelegate<T>(T instance);
+    //public delegate object GetMemberDelegate(object instance);
+    //public delegate object GetMemberDelegate<T>(T instance);
 
-    public delegate void SetMemberDelegate(object instance, object value);
-    public delegate void SetMemberDelegate<T>(T instance, object value);
-    public delegate void SetMemberRefDelegate(ref object instance, object propertyValue);
-    public delegate void SetMemberRefDelegate<T>(ref T instance, object value);
+    //public delegate void SetMemberDelegate(object instance, object value);
+    //public delegate void SetMemberDelegate<T>(T instance, object value);
+    //public delegate void SetMemberRefDelegate(ref object instance, object propertyValue);
+    //public delegate void SetMemberRefDelegate<T>(ref T instance, object value);
 
     internal static class TypeConverter
     {
-        public static GetMemberDelegate CreateTypeConverter(Type fromType, Type toType)
+        public static MemberGetter CreateTypeConverter(Type fromType, Type toType)
         {
             if (fromType == toType)
                 return null;

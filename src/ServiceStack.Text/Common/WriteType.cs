@@ -17,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using CuteAnt.IO;
+using CuteAnt.Reflection;
 using ServiceStack.Text.Json;
 using ServiceStack.Text.Jsv;
 
@@ -187,7 +188,7 @@ namespace ServiceStack.Text.Common
                     propertyOrder,
                     propertySuppressDefaultConfig,
                     propertySuppressDefaultAttribute,
-                    propertyInfo.CreateGetter<T>(),
+                    propertyInfo.GetValueGetter<T>(),
                     Serializer.GetWriteFn(propertyType),
                     propertyType.GetDefaultValue(),
                     shouldSerialize,
@@ -246,7 +247,7 @@ namespace ServiceStack.Text.Common
                     propertyOrder,
                     propertySuppressDefaultConfig,
                     propertySuppressDefaultAttribute,
-                    fieldInfo.CreateGetter<T>(),
+                    fieldInfo.GetValueGetter<T>(),
                     Serializer.GetWriteFn(propertyType),
                     defaultValue,
                     shouldSerialize,
@@ -281,7 +282,7 @@ namespace ServiceStack.Text.Common
             internal readonly string propertyReferenceName;
             internal readonly string propertyNameCLSFriendly;
             internal readonly string propertyNameLowercaseUnderscore;
-            internal readonly GetMemberDelegate<T> GetterFn;
+            internal readonly MemberGetter<T> GetterFn;
             internal readonly WriteObjectDelegate WriteFn;
             internal readonly object DefaultValue;
             internal readonly Func<T, bool> shouldSerialize;
@@ -290,7 +291,7 @@ namespace ServiceStack.Text.Common
 
             public TypePropertyWriter(Type propertyType, string propertyName, string propertyDeclaredTypeName, string propertyNameCLSFriendly,
                 string propertyNameLowercaseUnderscore, int propertyOrder, bool propertySuppressDefaultConfig, bool propertySuppressDefaultAttribute,
-                GetMemberDelegate<T> getterFn, WriteObjectDelegate writeFn, object defaultValue,
+                MemberGetter<T> getterFn, WriteObjectDelegate writeFn, object defaultValue,
                 Func<T, bool> shouldSerialize,
                 Func<T, string, bool?> shouldSerializeDynamic,
                 bool isEnum)

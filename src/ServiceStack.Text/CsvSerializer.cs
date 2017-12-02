@@ -239,7 +239,7 @@ namespace ServiceStack.Text
 
         private const string IgnoreResponseStatus = "ResponseStatus";
 
-        private static GetMemberDelegate valueGetter = null;
+        private static MemberGetter valueGetter = null;
         private static WriteObjectDelegate writeElementFn = null;
 
         private static WriteObjectDelegate GetWriteFn()
@@ -310,7 +310,7 @@ namespace ServiceStack.Text
             //If is DTO and has an enumerable property serialize that
             if (bestCandidateEnumerableType != null)
             {
-                valueGetter = bestCandidate.CreateGetter();
+                valueGetter = bestCandidate.GetValueGetter();
                 var elementType = bestCandidateEnumerableType.GetGenericArguments()[0];
                 writeElementFn = CreateWriteFn(elementType);
 
@@ -318,7 +318,7 @@ namespace ServiceStack.Text
             }
 
             //If is DTO and has non-enumerable, reference type property serialize that
-            valueGetter = firstCandidate.CreateGetter();
+            valueGetter = firstCandidate.GetValueGetter();
             writeElementFn = CreateWriteRowFn(firstCandidate.PropertyType);
 
             return WriteNonEnumerableType;
@@ -401,7 +401,7 @@ namespace ServiceStack.Text
             return ReadCacheFn;
         }
 
-        private static SetMemberDelegate valueSetter = null;
+        private static MemberSetter valueSetter = null;
         private static ParseStringDelegate readElementFn = null;
 
         private static ParseStringDelegate GetReadFn()
@@ -465,7 +465,7 @@ namespace ServiceStack.Text
             //If is DTO and has an enumerable property serialize that
             if (bestCandidateEnumerableType != null)
             {
-                valueSetter = bestCandidate.CreateSetter();
+                valueSetter = bestCandidate.GetValueSetter();
                 var elementType = bestCandidateEnumerableType.GetGenericArguments()[0];
                 readElementFn = CreateReadFn(elementType);
 
@@ -473,7 +473,7 @@ namespace ServiceStack.Text
             }
 
             //If is DTO and has non-enumerable, reference type property serialize that
-            valueSetter = firstCandidate.CreateSetter();
+            valueSetter = firstCandidate.GetValueSetter();
             readElementFn = CreateReadRowFn(firstCandidate.PropertyType);
 
             return ReadNonEnumerableType;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using CuteAnt.Reflection;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack.Text
@@ -138,7 +139,7 @@ namespace ServiceStack.Text
 
         public static List<string> Headers { get; set; }
 
-        internal static List<GetMemberDelegate<T>> PropertyGetters;
+        internal static List<MemberGetter<T>> PropertyGetters;
 
         private static readonly WriteObjectDelegate OptimizedWriter;
 
@@ -157,14 +158,14 @@ namespace ServiceStack.Text
         {
             Headers = new List<string>();
 
-            PropertyGetters = new List<GetMemberDelegate<T>>();
+            PropertyGetters = new List<MemberGetter<T>>();
             var isDataContract = typeof(T).IsDto();
             foreach (var propertyInfo in TypeConfig<T>.Properties)
             {
                 if (!propertyInfo.CanRead || propertyInfo.GetGetMethod(nonPublic:true) == null) continue;
                 if (!TypeSerializer.CanCreateFromString(propertyInfo.PropertyType)) continue;
 
-                PropertyGetters.Add(propertyInfo.CreateGetter<T>());
+                PropertyGetters.Add(propertyInfo.GetValueGetter<T>());
                 var propertyName = propertyInfo.Name;
                 if (isDataContract)
                 {

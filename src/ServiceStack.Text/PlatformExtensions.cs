@@ -601,11 +601,11 @@ namespace ServiceStack
             public string Name;
             public Type Type;
 
-            public GetMemberDelegate GetValueFn;
-            public SetMemberDelegate SetValueFn;
+            public MemberGetter GetValueFn;
+            public MemberSetter SetValueFn;
 
             public Type ConvertType;
-            public GetMemberDelegate ConvertValueFn;
+            public MemberGetter ConvertValueFn;
 
             public void SetValue(object instance, object value)
             {
@@ -716,8 +716,8 @@ namespace ServiceStack
                 {
                     Name = pi.Name,
                     Type = pi.PropertyType,
-                    GetValueFn = pi.CreateGetter(),
-                    SetValueFn = pi.CreateSetter(),
+                    GetValueFn = pi.GetValueGetter(),
+                    SetValueFn = pi.GetValueSetter(),
                 });
             }
 
@@ -729,8 +729,8 @@ namespace ServiceStack
                     {
                         Name = fi.Name,
                         Type = fi.FieldType,
-                        GetValueFn = fi.CreateGetter(),
-                        SetValueFn = fi.CreateSetter(),
+                        GetValueFn = fi.GetValueGetter(),
+                        SetValueFn = fi.GetValueSetter(),
                     });
                 }
             }

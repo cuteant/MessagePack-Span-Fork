@@ -12,6 +12,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using CuteAnt.Reflection;
 using Microsoft.Extensions.Logging;
 using ServiceStack.Text;
 using ServiceStack.Text.Common;
@@ -292,22 +293,22 @@ namespace ServiceStack
             return new UTF8Encoding(emitBom);
         }
 
-        public virtual SetMemberDelegate CreateSetter(FieldInfo fieldInfo)
+        public virtual MemberSetter CreateSetter(FieldInfo fieldInfo)
         {
             return fieldInfo.SetValue;
         }
 
-        public virtual SetMemberDelegate<T> CreateSetter<T>(FieldInfo fieldInfo)
+        public virtual MemberSetter<T> CreateSetter<T>(FieldInfo fieldInfo)
         {
             return (o,x) => fieldInfo.SetValue(o,x);
         }
 
-        public virtual GetMemberDelegate CreateGetter(FieldInfo fieldInfo)
+        public virtual MemberGetter CreateGetter(FieldInfo fieldInfo)
         {
             return fieldInfo.GetValue;
         }
 
-        public virtual GetMemberDelegate<T> CreateGetter<T>(FieldInfo fieldInfo)
+        public virtual MemberGetter<T> CreateGetter<T>(FieldInfo fieldInfo)
         {
             return x => fieldInfo.GetValue(x);
         }
@@ -329,7 +330,7 @@ namespace ServiceStack
                 && t.GetGenericTypeDefinition() == typeof(ICollection<>));
         }
 
-        public virtual SetMemberDelegate CreateSetter(PropertyInfo propertyInfo)
+        public virtual MemberSetter CreateSetter(PropertyInfo propertyInfo)
         {
             var propertySetMethod = propertyInfo.GetSetMethod(nonPublic:true);
             if (propertySetMethod == null) return null;
@@ -338,7 +339,7 @@ namespace ServiceStack
                 propertySetMethod.Invoke(o, new[] { convertedValue });
         }
 
-        public virtual SetMemberDelegate<T> CreateSetter<T>(PropertyInfo propertyInfo)
+        public virtual MemberSetter<T> CreateSetter<T>(PropertyInfo propertyInfo)
         {
             var propertySetMethod = propertyInfo.GetSetMethod(nonPublic:true);
             if (propertySetMethod == null) return null;
@@ -347,7 +348,7 @@ namespace ServiceStack
                 propertySetMethod.Invoke(o, new[] { convertedValue });
         }
 
-        public virtual GetMemberDelegate CreateGetter(PropertyInfo propertyInfo)
+        public virtual MemberGetter CreateGetter(PropertyInfo propertyInfo)
         {
             var getMethodInfo = propertyInfo.GetGetMethod(nonPublic:true);
             if (getMethodInfo == null) return null;
@@ -355,7 +356,7 @@ namespace ServiceStack
             return o => propertyInfo.GetGetMethod(nonPublic:true).Invoke(o, TypeConstants.EmptyObjectArray);
         }
 
-        public virtual GetMemberDelegate<T> CreateGetter<T>(PropertyInfo propertyInfo)
+        public virtual MemberGetter<T> CreateGetter<T>(PropertyInfo propertyInfo)
         {
             var getMethodInfo = propertyInfo.GetGetMethod(nonPublic:true);
             if (getMethodInfo == null) return null;

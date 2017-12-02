@@ -188,8 +188,8 @@ namespace ServiceStack.Text
     {
         public static List<string> Headers { get; set; }
 
-        internal static List<SetMemberDelegate<T>> PropertySetters;
-        internal static Dictionary<string, SetMemberDelegate<T>> PropertySettersMap;
+        internal static List<MemberSetter<T>> PropertySetters;
+        internal static Dictionary<string, MemberSetter<T>> PropertySettersMap;
 
         internal static List<ParseStringDelegate> PropertyConverters;
         internal static Dictionary<string, ParseStringDelegate> PropertyConvertersMap;
@@ -203,8 +203,8 @@ namespace ServiceStack.Text
         {
             Headers = new List<string>();
 
-            PropertySetters = new List<SetMemberDelegate<T>>();
-            PropertySettersMap = new Dictionary<string, SetMemberDelegate<T>>(PclExport.Instance.InvariantComparerIgnoreCase);
+            PropertySetters = new List<MemberSetter<T>>();
+            PropertySettersMap = new Dictionary<string, MemberSetter<T>>(PclExport.Instance.InvariantComparerIgnoreCase);
 
             PropertyConverters = new List<ParseStringDelegate>();
             PropertyConvertersMap = new Dictionary<string, ParseStringDelegate>(PclExport.Instance.InvariantComparerIgnoreCase);
@@ -216,7 +216,7 @@ namespace ServiceStack.Text
                 if (!TypeSerializer.CanCreateFromString(propertyInfo.PropertyType)) continue;
 
                 var propertyName = propertyInfo.Name;
-                var setter = propertyInfo.CreateSetter<T>();
+                var setter = propertyInfo.GetValueSetter<T>();
                 PropertySetters.Add(setter);
 
                 var converter = JsvReader.GetParseFn(propertyInfo.PropertyType);

@@ -17,6 +17,7 @@ using System.Net;
 
 using System.Collections.Specialized;
 using System.Linq.Expressions;
+using CuteAnt.Reflection;
 using Microsoft.Extensions.Primitives;
 
 namespace ServiceStack
@@ -77,6 +78,7 @@ namespace ServiceStack
 
         public NetStandardPclExport()
         {
+            this.SupportsEmit = SupportsExpression = true;
             this.PlatformName = Platforms.NetStandard;
 #if NETSTANDARD2_0
             this.DirSep = Path.DirectorySeparatorChar;
@@ -288,83 +290,83 @@ namespace ServiceStack
                 && t.GetGenericTypeDefinition() == typeof(ICollection<>));
         }
 
-        public override GetMemberDelegate CreateGetter(PropertyInfo propertyInfo)
+        public override MemberGetter CreateGetter(PropertyInfo propertyInfo)
         {
             return
 #if NETSTANDARD2_0
-                SupportsEmit ? PropertyInvoker.GetEmit(propertyInfo) :
+                SupportsEmit ? PropertyInvoker.CreateEmitGetter(propertyInfo) :
 #endif
                 SupportsExpression
-                    ? PropertyInvoker.GetExpression(propertyInfo)
+                    ? PropertyInvoker.CreateExpressionGetter(propertyInfo)
                     : base.CreateGetter(propertyInfo);
         }
 
-        public override GetMemberDelegate<T> CreateGetter<T>(PropertyInfo propertyInfo)
+        public override MemberGetter<T> CreateGetter<T>(PropertyInfo propertyInfo)
         {
             return
 #if NETSTANDARD2_0
-                SupportsEmit ? PropertyInvoker.GetEmit<T>(propertyInfo) :
+                SupportsEmit ? PropertyInvoker<T>.CreateEmitGetter(propertyInfo) :
 #endif
                 SupportsExpression
-                    ? PropertyInvoker.GetExpression<T>(propertyInfo)
+                    ? PropertyInvoker<T>.CreateExpressionGetter(propertyInfo)
                     : base.CreateGetter<T>(propertyInfo);
         }
 
-        public override SetMemberDelegate CreateSetter(PropertyInfo propertyInfo)
+        public override MemberSetter CreateSetter(PropertyInfo propertyInfo)
         {
             return
 #if NETSTANDARD2_0
-                SupportsEmit ? PropertyInvoker.SetEmit(propertyInfo) :
+                SupportsEmit ? PropertyInvoker.CreateEmitSetter(propertyInfo) :
 #endif
                 SupportsExpression
-                    ? PropertyInvoker.SetExpression(propertyInfo)
+                    ? PropertyInvoker.CreateExpressionSetter(propertyInfo)
                     : base.CreateSetter(propertyInfo);
         }
 
-        public override SetMemberDelegate<T> CreateSetter<T>(PropertyInfo propertyInfo)
+        public override MemberSetter<T> CreateSetter<T>(PropertyInfo propertyInfo)
         {
             return SupportsExpression
-                ? PropertyInvoker.SetExpression<T>(propertyInfo)
+                ? PropertyInvoker<T>.CreateExpressionSetter(propertyInfo)
                 : base.CreateSetter<T>(propertyInfo);
         }
 
-        public override GetMemberDelegate CreateGetter(FieldInfo fieldInfo)
+        public override MemberGetter CreateGetter(FieldInfo fieldInfo)
         {
             return
 #if NETSTANDARD2_0
-                SupportsEmit ? FieldInvoker.GetEmit(fieldInfo) :
+                SupportsEmit ? FieldInvoker.CreateEmitGetter(fieldInfo) :
 #endif
                 SupportsExpression
-                    ? FieldInvoker.GetExpression(fieldInfo)
+                    ? FieldInvoker.CreateExpressionGetter(fieldInfo)
                     : base.CreateGetter(fieldInfo);
         }
 
-        public override GetMemberDelegate<T> CreateGetter<T>(FieldInfo fieldInfo)
+        public override MemberGetter<T> CreateGetter<T>(FieldInfo fieldInfo)
         {
             return
 #if NETSTANDARD2_0
-                SupportsEmit ? FieldInvoker.GetEmit<T>(fieldInfo) :
+                SupportsEmit ? FieldInvoker<T>.CreateEmitGetter(fieldInfo) :
 #endif
                 SupportsExpression
-                    ? FieldInvoker.GetExpression<T>(fieldInfo)
+                    ? FieldInvoker<T>.CreateExpressionGetter(fieldInfo)
                     : base.CreateGetter<T>(fieldInfo);
         }
 
-        public override SetMemberDelegate CreateSetter(FieldInfo fieldInfo)
+        public override MemberSetter CreateSetter(FieldInfo fieldInfo)
         {
             return
 #if NETSTANDARD2_0
-                SupportsEmit ? FieldInvoker.SetEmit(fieldInfo) :
+                SupportsEmit ? FieldInvoker.CreateEmitSetter(fieldInfo) :
 #endif
                 SupportsExpression
-                    ? FieldInvoker.SetExpression(fieldInfo)
+                    ? FieldInvoker.CreateExpressionSetter(fieldInfo)
                     : base.CreateSetter(fieldInfo);
         }
 
-        public override SetMemberDelegate<T> CreateSetter<T>(FieldInfo fieldInfo)
+        public override MemberSetter<T> CreateSetter<T>(FieldInfo fieldInfo)
         {
             return SupportsExpression
-                ? FieldInvoker.SetExpression<T>(fieldInfo)
+                ? FieldInvoker<T>.CreateExpressionSetter(fieldInfo)
                 : base.CreateSetter<T>(fieldInfo);
         }
 

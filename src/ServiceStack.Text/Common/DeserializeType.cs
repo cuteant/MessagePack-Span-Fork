@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CuteAnt.Reflection;
 using Microsoft.Extensions.Primitives;
 
 namespace ServiceStack.Text.Common
@@ -206,7 +207,7 @@ namespace ServiceStack.Text.Common
     internal class TypeAccessor
     {
         internal ParseStringSegmentDelegate GetProperty;
-        internal SetMemberDelegate SetProperty;
+        internal MemberSetter SetProperty;
         internal Type PropertyType;
 
         public static Type ExtractType(ITypeSerializer Serializer, string strType)
@@ -278,7 +279,7 @@ namespace ServiceStack.Text.Common
             return getPropertyFn;
         }
 
-        private static SetMemberDelegate GetSetPropertyMethod(TypeConfig typeConfig, PropertyInfo propertyInfo)
+        private static MemberSetter GetSetPropertyMethod(TypeConfig typeConfig, PropertyInfo propertyInfo)
         {
             if (typeConfig.Type != propertyInfo.DeclaringType)
                 propertyInfo = propertyInfo.DeclaringType.GetProperty(propertyInfo.Name);
@@ -319,7 +320,7 @@ namespace ServiceStack.Text.Common
             };
         }
 
-        private static SetMemberDelegate GetSetFieldMethod(TypeConfig typeConfig, FieldInfo fieldInfo)
+        private static MemberSetter GetSetFieldMethod(TypeConfig typeConfig, FieldInfo fieldInfo)
         {
             if (typeConfig.Type != fieldInfo.DeclaringType)
                 fieldInfo = fieldInfo.DeclaringType.GetField(fieldInfo.Name);
