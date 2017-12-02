@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\version.props" />
+  <Import Project="..\nuget.props" />
+  
+  <PropertyGroup>
+    <TargetFrameworks>net471;net451;net40;netstandard2.0</TargetFrameworks>
+    <RootNamespace>CuteAnt.Extensions.Serialization</RootNamespace>
+    <AssemblyName>CuteAnt.Extensions.Serialization.Abstractions</AssemblyName>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <DefineConstants>$(DefineConstants);NETFX_CORE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet">
+    <PackageId>CuteAnt.Extensions.Serialization.Abstractions</PackageId>
+    <Title>CuteAnt.Extensions.Serialization.Abstractions</Title>
+    <Description>CuteAnt.Extensions.Serialization.Abstractions</Description>
+    <PackageTags>Serializer</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CuteAnt.Runtime" Version="$(CuteAntRuntimePackageVersion)" />
+  </ItemGroup>
+</Project>

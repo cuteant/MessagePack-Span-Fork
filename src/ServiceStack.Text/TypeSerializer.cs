@@ -426,21 +426,21 @@ namespace ServiceStack.Text
         }
     }
 
-    public class JsvStringSerializer : IStringSerializer
-    {
-        public To DeserializeFromString<To>(string serializedText)
-        {
-            return TypeSerializer.DeserializeFromString<To>(serializedText);
-        }
+    //public class JsvStringSerializer : IStringSerializer
+    //{
+    //    public To DeserializeFromString<To>(string serializedText)
+    //    {
+    //        return TypeSerializer.DeserializeFromString<To>(serializedText);
+    //    }
 
-        public object DeserializeFromString(string serializedText, Type type)
-        {
-            return TypeSerializer.DeserializeFromString(serializedText, type);
-        }
+    //    public object DeserializeFromString(string serializedText, Type type)
+    //    {
+    //        return TypeSerializer.DeserializeFromString(serializedText, type);
+    //    }
 
-        public string SerializeToString<TFrom>(TFrom @from)
-        {
-            return TypeSerializer.SerializeToString(@from);
-        }
-    }
+    //    public string SerializeToString<TFrom>(TFrom @from)
+    //    {
+    //        return TypeSerializer.SerializeToString(@from);
+    //    }
+    //}
 }
