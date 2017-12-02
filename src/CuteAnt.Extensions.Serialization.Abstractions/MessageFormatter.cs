@@ -1,7 +1,5 @@
 ﻿using System;
-#if !NETFX_CORE // In portable library we have our own implementation of Concurrent Dictionary which is in the internal namespace
 using System.Collections.Concurrent;
-#endif
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;

@@ -23,8 +23,6 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-using System;
-using System.Text;
 using Newtonsoft.Json;
 
 namespace CuteAnt.Extensions.Serialization.Json.Utilities

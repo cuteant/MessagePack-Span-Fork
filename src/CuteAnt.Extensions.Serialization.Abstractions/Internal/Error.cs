@@ -156,11 +156,11 @@ namespace CuteAnt.Extensions.Serialization
 		/// <returns>The logged <see cref="Exception"/>.</returns>
 		internal static ArgumentException InvalidEnumArgument(string parameterName, int invalidValue, Type enumClass)
 		{
-#if NETFX_CORE
-			return new ArgumentException(Error.Format(CommonWebApiResources.InvalidEnumArgument, parameterName, invalidValue, enumClass.Name), parameterName);
-#else
+//#if NETFX_CORE
+//			return new ArgumentException(Error.Format(CommonWebApiResources.InvalidEnumArgument, parameterName, invalidValue, enumClass.Name), parameterName);
+//#else
 			return new InvalidEnumArgumentException(parameterName, invalidValue, enumClass);
-#endif
+//#endif
 		}
 
 		/// <summary>Creates an <see cref="InvalidOperationException"/>.</summary>

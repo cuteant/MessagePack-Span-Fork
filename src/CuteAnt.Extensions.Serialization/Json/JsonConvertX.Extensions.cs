@@ -163,12 +163,6 @@ namespace Newtonsoft.Json
 
       // Newtonsoft.Json.Serialization.DefaultSerializationBinder.Instance属性没有公开
       DefaultSerializationBinder = new JsonSerializer().SerializationBinder;
-      _simpleTypeNameCache = new DictionaryCache<Type, string>(DictionaryCacheConstants.SIZE_MEDIUM);
-      _fullTypeNameCache = new DictionaryCache<Type, string>(DictionaryCacheConstants.SIZE_MEDIUM);
-      _typeNameSerializerCache = new DictionaryCache<Type, string>(DictionaryCacheConstants.SIZE_MEDIUM);
-      _resolveTypeCache = new ConcurrentDictionary<string, Type>(StringComparer.Ordinal);
-      _resolverLock = new ReaderWriterLockSlim();
-      _resolvers = new List<Func<string, Type>>();
     }
 
     #endregion
@@ -254,6 +248,8 @@ namespace Newtonsoft.Json
       setting.Converters.Add(DefaultIpEndPointConverter);
       setting.Converters.Add(DefaultCombGuidConverter);
 
+      setting.SerializationBinder = new JsonSerializationBinder();
+
       return setting;
     }
 
@@ -261,27 +257,21 @@ namespace Newtonsoft.Json
 
     #region -- JsonSerializer.IsCheckAdditionalContentSetX --
 
-#if !NET40
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl(InlineMethod.Value)]
     public static bool IsCheckAdditionalContentSetX(this JsonSerializer jsonSerializer)
     {
       if (null == jsonSerializer) { throw new ArgumentNullException(nameof(jsonSerializer)); }
       return s_checkAdditionalContentGetter(jsonSerializer) != null;
     }
 
-#if !NET40
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl(InlineMethod.Value)]
     public static bool? GetCheckAdditionalContent(this JsonSerializer jsonSerializer)
     {
       if (null == jsonSerializer) { throw new ArgumentNullException(nameof(jsonSerializer)); }
       return (bool?)s_checkAdditionalContentGetter(jsonSerializer);
     }
 
-#if !NET40
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl(InlineMethod.Value)]
     public static void SetCheckAdditionalContent(this JsonSerializer jsonSerializer, bool? checkAdditionalContent = null)
     {
       if (null == jsonSerializer) { throw new ArgumentNullException(nameof(jsonSerializer)); }
@@ -292,18 +282,14 @@ namespace Newtonsoft.Json
 
     #region -- JsonSerializer.Formatting --
 
-#if !NET40
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl(InlineMethod.Value)]
     public static Formatting? GetFormatting(this JsonSerializer jsonSerializer)
     {
       if (null == jsonSerializer) { throw new ArgumentNullException(nameof(jsonSerializer)); }
       return (Formatting?)s_formattingGetter(jsonSerializer);
     }
 
-#if !NET40
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl(InlineMethod.Value)]
     public static void SetFormatting(this JsonSerializer jsonSerializer, Formatting? formatting = null)
     {
       if (null == jsonSerializer) { throw new ArgumentNullException(nameof(jsonSerializer)); }
@@ -382,9 +368,7 @@ namespace Newtonsoft.Json
       //return JsonSerializer.CreateDefault(jsonSettings);
     }
 
-#if !NET40
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl(InlineMethod.Value)]
     private static JsonSerializer AllocateSerializerInternal(JsonSerializerSettings jsonSettings)
     {
       if (null == jsonSettings) { return s_defaultJsonSerializerPool.Take(); }
@@ -404,9 +388,7 @@ namespace Newtonsoft.Json
       }
     }
 
-#if !NET40
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl(InlineMethod.Value)]
     private static void FreeSerializerInternal(JsonSerializerSettings jsonSettings, JsonSerializer jsonSerializer)
     {
       if (null == jsonSettings) { s_defaultJsonSerializerPool.Return(jsonSerializer); return; }
@@ -1550,144 +1532,6 @@ namespace Newtonsoft.Json
         if (isCheckAdditionalContentNoSet) { jsonSerializer.SetCheckAdditionalContent(); }
         FreeSerializerInternal(settings, jsonSerializer);
       }
-    }
-
-    #endregion
-
-    #region -- GetTypeName & ResolveType --
-
-    private static readonly DictionaryCache<Type, string> _simpleTypeNameCache;
-    private static readonly DictionaryCache<Type, string> _fullTypeNameCache;
-    private static readonly Func<Type, string> _getSimpleTypeNameFunc = GetSimpleTypeNameInternal;
-    private static readonly Func<Type, string> _getFullTypeNameFunc = GetFullTypeNameInternal;
-
-    public static string GetTypeName(Type type, TypeNameAssemblyFormatHandling assemblyFormat = TypeNameAssemblyFormatHandling.Simple)
-    {
-      if (null == type) { throw new ArgumentNullException(nameof(type)); }
-
-      switch (assemblyFormat)
-      {
-        case TypeNameAssemblyFormatHandling.Full:
-          return _fullTypeNameCache.GetItem(type, _getFullTypeNameFunc);
-        case TypeNameAssemblyFormatHandling.Simple:
-        default:
-          return _simpleTypeNameCache.GetItem(type, _getSimpleTypeNameFunc);
-      }
-    }
-
-    private static string GetSimpleTypeNameInternal(Type t)
-    {
-      return ReflectionUtils.GetTypeName(t, TypeNameAssemblyFormatHandling.Simple, DefaultSerializationBinder);
-    }
-
-    private static string GetFullTypeNameInternal(Type t)
-    {
-      return ReflectionUtils.GetTypeName(t, TypeNameAssemblyFormatHandling.Full, DefaultSerializationBinder);
-    }
-
-
-    private const char c_keyDelimiter = ':';
-    private static readonly DictionaryCache<Type, string> _typeNameSerializerCache;
-    private static readonly Func<Type, string> _serializeTypeNameFunc = SerializeTypeNameInternal;
-
-    public static string SerializeTypeName(Type type)
-    {
-      if (null == type) { throw new ArgumentNullException(nameof(type)); }
-
-      return _typeNameSerializerCache.GetItem(type, _serializeTypeNameFunc);
-    }
-
-    private static string SerializeTypeNameInternal(Type t)
-    {
-      var typeName = GetTypeName(t);
-      return typeName.Replace(", ", ":");
-    }
-
-
-
-
-    /// <summary>Registers a custom type resolver in case you really need to manipulate the way serialization works with types.
-    /// The <paramref name="resolve"/> func is allowed to return null in case you cannot resolve the requested type.
-    /// Any exception the <paramref name="resolve"/> func might throw will not bubble up.</summary>
-    /// <param name="resolve">The resolver</param>
-    public static void RegisterResolveType(Func<string, Type> resolve)
-    {
-      using (var token = LockHelper.TakeWriterLock(_resolverLock))
-      {
-        _resolvers.Insert(0, resolve);
-      }
-    }
-
-    private static readonly ConcurrentDictionary<string, Type> _resolveTypeCache;
-    private static readonly List<Func<string, Type>> _resolvers;
-    private static readonly ReaderWriterLockSlim _resolverLock;
-
-    /// <summary>Gets <see cref="Type"/> by full name (with falling back to the first part only).</summary>
-    /// <param name="qualifiedTypeName">The type name.</param>
-    /// <returns>The <see cref="Type"/> if valid.</returns>
-    public static Type ResolveType(string qualifiedTypeName)
-    {
-      if (string.IsNullOrWhiteSpace(qualifiedTypeName)) { throw new ArgumentNullException(nameof(qualifiedTypeName)); }
-
-      if (_resolveTypeCache.TryGetValue(qualifiedTypeName, out Type resolvedType)) { return resolvedType; }
-
-      string serializedTypeName = null;
-      if (qualifiedTypeName.IndexOf(c_keyDelimiter) > 0)
-      {
-        serializedTypeName = qualifiedTypeName;
-        qualifiedTypeName = qualifiedTypeName.Replace(":", ", ");
-
-        if (_resolveTypeCache.TryGetValue(qualifiedTypeName, out resolvedType))
-        {
-          if (serializedTypeName != null) { _resolveTypeCache[serializedTypeName] = resolvedType; }
-          return resolvedType;
-        }
-      }
-
-      resolvedType = null;
-      using (var token = LockHelper.TakeReaderLock(_resolverLock))
-      {
-        foreach (var resolver in _resolvers)
-        {
-          try
-          {
-            resolvedType = resolver(qualifiedTypeName);
-            if (resolvedType != null) { break; }
-          }
-          catch { }
-        }
-      }
-
-      if (null == resolvedType) { resolvedType = ResolveTypeInternal(qualifiedTypeName); }
-
-      if (null == resolvedType) { resolvedType = TypeUtils.ResolveType(qualifiedTypeName); }
-
-      _resolveTypeCache[qualifiedTypeName] = resolvedType ?? throw new InvalidOperationException($"Could not load type '{qualifiedTypeName}'. Try add JsonConvertX.RegisterResolveType to resolve your type if the resolving continues to fail.");
-      if (serializedTypeName != null) { _resolveTypeCache[serializedTypeName] = resolvedType; }
-      return resolvedType;
-    }
-
-    private static Type ResolveTypeInternal(string qualifiedTypeName)
-    {
-      TypeNameKey typeNameKey = ReflectionUtils.SplitFullyQualifiedTypeName(qualifiedTypeName);
-
-      Type specifiedType = null;
-      try
-      {
-        specifiedType = DefaultSerializationBinder.BindToType(typeNameKey.AssemblyName, typeNameKey.TypeName);
-      }
-      catch { }
-      //catch (Exception ex)
-      //{
-      //  throw new JsonSerializationException($"Error resolving type specified in JSON '{qualifiedTypeName}'.", ex);
-      //}
-      //if (specifiedType == null)
-      //{
-      //  //throw new JsonSerializationException(string.Format(CultureInfo.InvariantCulture, "Type specified in JSON '{0}' was not resolved.", qualifiedTypeName));
-      //  throw new InvalidOperationException($"Could not load type '{qualifiedTypeName}'. Try add JsonConvertX.RegisterResolveType to resolve your type if the resolving continues to fail.");
-      //}
-
-      return specifiedType;
     }
 
     #endregion

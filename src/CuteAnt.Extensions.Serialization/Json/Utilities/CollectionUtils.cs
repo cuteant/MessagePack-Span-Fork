@@ -36,9 +36,8 @@ using CuteAnt.Extensions.Serialization.Json.Utilities.LinqBridge;
 using System.Linq;
 #endif
 using System.Globalization;
-#if HAVE_METHOD_IMPL_ATTRIBUTE
 using System.Runtime.CompilerServices;
-#endif
+using Newtonsoft.Json.Serialization;
 
 namespace CuteAnt.Extensions.Serialization.Json.Utilities
 {
@@ -250,6 +249,23 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
             return -1;
         }
 
+#if HAVE_FAST_REVERSE
+        // faster reverse in .NET Framework with value types - https://github.com/JamesNK/Newtonsoft.Json/issues/1430
+        public static void FastReverse<T>(this List<T> list)
+        {
+            int i = 0;
+            int j = list.Count - 1;
+            while (i < j)
+            {
+                T temp = list[i];
+                list[i] = list[j];
+                list[j] = temp;
+                i++;
+                j--;
+            }
+        }
+#endif
+
         private static IList<int> GetDimensions(IList values, int dimensionsCount)
         {
             IList<int> dimensions = new List<int>();
@@ -271,8 +287,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
                 }
 
                 object v = currentArray[0];
-                IList list = v as IList;
-                if (list != null)
+                if (v is IList list)
                 {
                     currentArray = list;
                 }
@@ -356,9 +371,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
         // pretty much guaranteed to be inlined, giving us fast access of that cached
         // array. With 4.5 and up we use AggressiveInlining just to be sure, so it's
         // effectively the same as calling Array.Empty<T> even when not available.
-#if HAVE_METHOD_IMPL_ATTRIBUTE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+        [MethodImpl(InlineMethod.Value)]
         public static T[] ArrayEmpty<T>()
         {
             T[] array = Enumerable.Empty<T>() as T[];

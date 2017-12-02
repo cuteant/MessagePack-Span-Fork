@@ -11,15 +11,9 @@ namespace CuteAnt.Extensions.Serialization.Json
   {
     private readonly ArrayPool<T> _inner;
 
-    public JsonArrayPool(ArrayPool<T> inner)
-    {
-      _inner = inner ?? throw new ArgumentNullException(nameof(inner));
-    }
+    public JsonArrayPool(ArrayPool<T> inner) => _inner = inner ?? throw new ArgumentNullException(nameof(inner));
 
-    public T[] Rent(int minimumLength)
-    {
-      return _inner.Rent(minimumLength);
-    }
+    public T[] Rent(int minimumLength) => _inner.Rent(minimumLength);
 
     public void Return(T[] array)
     {

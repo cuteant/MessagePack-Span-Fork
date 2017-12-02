@@ -16,10 +16,10 @@
     <PlatformBinaryFormatter>true</PlatformBinaryFormatter>
   </PropertyGroup>
   <!-- define configuration per-platform -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net20'">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net20' ">
     <FeatureServiceModel>false</FeatureServiceModel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
     <ImportLibs>core</ImportLibs>
     <FeatureServiceModel>false</FeatureServiceModel>
@@ -33,16 +33,16 @@
   </PropertyGroup>
   
   <!-- apply the configuration options (typical via defines that switch code flows) -->
-  <PropertyGroup Condition="'$(FeatureCompiler)' == 'true'">
+  <PropertyGroup Condition=" '$(FeatureCompiler)' == 'true' ">
     <DefineConstants>$(DefineConstants);FEAT_COMPILER</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(FeatureServiceModel)' == 'true'">
+  <PropertyGroup Condition=" '$(FeatureServiceModel)' == 'true' ">
     <DefineConstants>$(DefineConstants);FEAT_SERVICEMODEL</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(PlatformXmlSerializer)' == 'true'">
+  <PropertyGroup Condition=" '$(PlatformXmlSerializer)' == 'true' ">
     <DefineConstants>$(DefineConstants);PLAT_XMLSERIALIZER</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(PlatformBinaryFormatter)' == 'true'">
+  <PropertyGroup Condition=" '$(PlatformBinaryFormatter)' == 'true' ">
     <DefineConstants>$(DefineConstants);PLAT_BINARYFORMATTER</DefineConstants>
   </PropertyGroup>
 

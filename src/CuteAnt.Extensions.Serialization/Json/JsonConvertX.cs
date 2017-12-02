@@ -26,18 +26,14 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Numerics;
 using System.Xml;
+using System.Xml.Linq;
 using CuteAnt;
 using CuteAnt.Extensions.Serialization.Json.Utilities;
 using CuteAnt.Pool;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Utilities;
-#if HAVE_BIG_INTEGER
-using System.Numerics;
-#endif
-#if HAVE_XLINQ
-using System.Xml.Linq;
-#endif
 
 namespace Newtonsoft.Json
 {

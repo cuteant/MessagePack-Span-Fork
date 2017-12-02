@@ -52,8 +52,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
         {
             ValidationUtils.ArgumentNotNull(list, nameof(list));
 
-            ICollection<T> collection = list as ICollection<T>;
-            if (collection != null)
+            if (list is ICollection<T> collection)
             {
                 _genericCollection = collection;
             }
@@ -283,10 +282,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
             CopyTo((T[])array, arrayIndex);
         }
 
-        bool ICollection.IsSynchronized
-        {
-            get { return false; }
-        }
+        bool ICollection.IsSynchronized => false;
 
         object ICollection.SyncRoot
         {
@@ -319,9 +315,6 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
             return true;
         }
 
-        public object UnderlyingCollection
-        {
-            get { return (object)_genericCollection ?? _list; }
-        }
+        public object UnderlyingCollection => (object)_genericCollection ?? _list;
     }
 }

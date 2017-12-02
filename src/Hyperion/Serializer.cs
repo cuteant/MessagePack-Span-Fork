@@ -11,13 +11,11 @@ using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using CuteAnt;
 using Hyperion.Extensions;
 using Hyperion.Internal;
 using Hyperion.ValueSerializers;
-#if !NET40
-using System.Runtime.CompilerServices;
-#endif
 
 namespace Hyperion
 {
@@ -120,9 +118,7 @@ namespace Hyperion
       _serializers.TryAdd(typeof(T), instance);
     }
 
-#if !NET40
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl(InlineMethod.Value)]
     private ValueSerializer GetCustomDeserializer([NotNull] Type type)
     {
       ValueSerializer serializer;
@@ -277,9 +273,7 @@ namespace Hyperion
       //add it to the serializer lookup in case of recursive serialization
     }
 
-#if !NET40
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl(InlineMethod.Value)]
     public ValueSerializer GetDeserializerByManifest([NotNull] Stream stream, [NotNull] DeserializerSession session)
     {
       var first = stream.ReadByte();

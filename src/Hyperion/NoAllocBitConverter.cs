@@ -10,9 +10,8 @@
 using System;
 using System.Text;
 using Hyperion.ValueSerializers;
-#if !NET40
 using System.Runtime.CompilerServices;
-#endif
+using CuteAnt;
 
 namespace Hyperion
 {
@@ -71,9 +70,7 @@ namespace Hyperion
 
     internal static readonly UTF8Encoding Utf8 = (UTF8Encoding)Encoding.UTF8;
 
-#if !NET40
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl(InlineMethod.Value)]
     internal static unsafe byte[] GetBytes(string str, SerializerSession session, out int byteCount)
     {
       //if first byte is 0 = null

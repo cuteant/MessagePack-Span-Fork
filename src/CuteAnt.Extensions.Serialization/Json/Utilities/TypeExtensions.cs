@@ -128,7 +128,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
             }
             else
             {
-                return MemberTypes.Other;
+                return default(MemberTypes);
             }
 #endif
         }
@@ -169,7 +169,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
 #endif
         }
 
-        public static Type BaseTypeX(this Type type)
+        public static Type BaseType(this Type type)
         {
 #if HAVE_FULL_REFLECTION
             return type.BaseType;
@@ -248,7 +248,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
 #else
             return type.GetMember(name, bindingFlags).Where(m =>
             {
-                if (m.MemberType() != memberType)
+                if ((m.MemberType() | memberType) != memberType)
                 {
                     return false;
                 }
@@ -334,7 +334,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
             return type.GetTypeInfo().GetMembersRecursive().Where(m =>
                 m.Name == member &&
                 // test type before accessibility - accessibility doesn't support some types
-                (memberType == null || m.MemberType() == memberType) &&
+                (memberType == null || (m.MemberType() | memberType) == memberType) &&
                 TestAccessibility(m, bindingFlags)).ToArray();
         }
 
@@ -345,7 +345,13 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
 
         public static MemberInfo GetField(this Type type, string member, BindingFlags bindingFlags)
         {
-            return type.GetTypeInfo().GetDeclaredField(member);
+            MemberInfo field = type.GetTypeInfo().GetDeclaredField(member);
+            if (field == null || !TestAccessibility(field, bindingFlags))
+            {
+                return null;
+            }
+            
+            return field;
         }
 
         public static IEnumerable<PropertyInfo> GetProperties(this Type type, BindingFlags bindingFlags)
@@ -370,7 +376,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
                         members.Add(member);
                     }
                 }
-                t = (t.BaseTypeX != null) ? t.BaseTypeX.GetTypeInfo() : null;
+                t = (t.BaseType != null) ? t.BaseType.GetTypeInfo() : null;
             }
 
             return members;
@@ -389,7 +395,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
                         properties.Add(member);
                     }
                 }
-                t = (t.BaseTypeX != null) ? t.BaseTypeX.GetTypeInfo() : null;
+                t = (t.BaseType != null) ? t.BaseType.GetTypeInfo() : null;
             }
 
             return properties;
@@ -408,7 +414,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
                         fields.Add(member);
                     }
                 }
-                t = (t.BaseTypeX != null) ? t.BaseTypeX.GetTypeInfo() : null;
+                t = (t.BaseType != null) ? t.BaseType.GetTypeInfo() : null;
             }
 
             return fields;
@@ -426,7 +432,13 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
 
         public static PropertyInfo GetProperty(this Type type, string name, BindingFlags bindingFlags)
         {
-            return type.GetTypeInfo().GetDeclaredProperty(name);
+            PropertyInfo property = type.GetTypeInfo().GetDeclaredProperty(name);
+            if (property == null || !TestAccessibility(property, bindingFlags))
+            {
+                return null;
+            }
+            
+            return property;
         }
 
         public static IEnumerable<FieldInfo> GetFields(this Type type)
@@ -563,7 +575,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
                     return true;
                 }
 
-                current = current.BaseTypeX();
+                current = current.BaseType();
             }
 
             if (searchInterfaces)
@@ -590,7 +602,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
 
         public static bool ImplementInterface(this Type type, Type interfaceType)
         {
-            for (Type currentType = type; currentType != null; currentType = currentType.BaseTypeX())
+            for (Type currentType = type; currentType != null; currentType = currentType.BaseType())
             {
                 IEnumerable<Type> interfaces = currentType.GetInterfaces();
                 foreach (Type i in interfaces)

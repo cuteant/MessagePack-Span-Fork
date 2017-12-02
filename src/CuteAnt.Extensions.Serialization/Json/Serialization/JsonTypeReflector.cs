@@ -109,7 +109,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Serialization
                     return result;
                 }
 
-                currentType = currentType.BaseTypeX();
+                currentType = currentType.BaseType();
             }
 
             return null;
@@ -142,7 +142,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Serialization
                             result = CachedAttributeGetter<DataMemberAttribute>.GetAttribute(baseProperty);
                         }
 
-                        currentType = currentType.BaseTypeX();
+                        currentType = currentType.BaseType();
                     }
                 }
             }
@@ -385,7 +385,8 @@ namespace CuteAnt.Extensions.Serialization.Json.Serialization
         public static bool IsNonSerializable(object provider)
         {
 #if HAVE_FULL_REFLECTION
-            return (GetCachedAttribute<NonSerializedAttribute>(provider) != null);
+            // no inheritance
+            return (ReflectionUtils.GetAttribute<NonSerializedAttribute>(provider, false) != null);
 #else
             FieldInfo fieldInfo = provider as FieldInfo;
             if (fieldInfo != null && (fieldInfo.Attributes & FieldAttributes.NotSerialized) == FieldAttributes.NotSerialized)
@@ -402,7 +403,8 @@ namespace CuteAnt.Extensions.Serialization.Json.Serialization
         public static bool IsSerializable(object provider)
         {
 #if HAVE_FULL_REFLECTION
-            return (GetCachedAttribute<SerializableAttribute>(provider) != null);
+            // no inheritance
+            return (ReflectionUtils.GetAttribute<SerializableAttribute>(provider, false) != null);
 #else
             Type type = provider as Type;
             if (type != null && (type.GetTypeInfo().Attributes & TypeAttributes.Serializable) == TypeAttributes.Serializable)
@@ -509,7 +511,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Serialization
         {
             get
             {
-#if !(PORTABLE40 || PORTABLE || DOTNET)
+#if !(PORTABLE40 || PORTABLE || DOTNET || NETSTANDARD2_0)
                 if (DynamicCodeGeneration)
                 {
                     return DynamicReflectionDelegateFactory.Instance;

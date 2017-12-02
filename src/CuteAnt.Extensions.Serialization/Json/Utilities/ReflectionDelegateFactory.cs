@@ -26,12 +26,10 @@
 using System;
 using System.Globalization;
 using System.Reflection;
-using CuteAnt.Extensions.Serialization.Json.Serialization;
-
+using Newtonsoft.Json.Serialization;
 #if !HAVE_LINQ
 using CuteAnt.Extensions.Serialization.Json.Utilities.LinqBridge;
 #endif
-using Newtonsoft.Json.Serialization;
 
 namespace CuteAnt.Extensions.Serialization.Json.Utilities
 {
@@ -39,14 +37,12 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
     {
         public Func<T, object> CreateGet<T>(MemberInfo memberInfo)
         {
-            PropertyInfo propertyInfo = memberInfo as PropertyInfo;
-            if (propertyInfo != null)
+            if (memberInfo is PropertyInfo propertyInfo)
             {
                 return CreateGet<T>(propertyInfo);
             }
 
-            FieldInfo fieldInfo = memberInfo as FieldInfo;
-            if (fieldInfo != null)
+            if (memberInfo is FieldInfo fieldInfo)
             {
                 return CreateGet<T>(fieldInfo);
             }
@@ -56,14 +52,12 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
 
         public Action<T, object> CreateSet<T>(MemberInfo memberInfo)
         {
-            PropertyInfo propertyInfo = memberInfo as PropertyInfo;
-            if (propertyInfo != null)
+            if (memberInfo is PropertyInfo propertyInfo)
             {
                 return CreateSet<T>(propertyInfo);
             }
 
-            FieldInfo fieldInfo = memberInfo as FieldInfo;
-            if (fieldInfo != null)
+            if (memberInfo is FieldInfo fieldInfo)
             {
                 return CreateSet<T>(fieldInfo);
             }

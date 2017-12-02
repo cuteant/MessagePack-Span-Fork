@@ -184,7 +184,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
 
         private static Expression[] GetArgArray(DynamicMetaObject[] args, DynamicMetaObject value)
         {
-            var exp = value.Expression;
+            Expression exp = value.Expression;
             return new[]
             {
                 Expression.NewArrayInit(typeof(object), GetArgs(args)),
@@ -197,7 +197,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
             Type t = binder.GetType();
             while (!t.IsVisible())
             {
-                t = t.BaseTypeX();
+                t = t.BaseType();
             }
             return Expression.Constant(binder, t);
         }

@@ -31,7 +31,6 @@ using System.Text;
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using CuteAnt.Extensions.Serialization.Json.Serialization;
 using Newtonsoft.Json.Serialization;
 
 namespace CuteAnt.Extensions.Serialization.Json.Utilities
@@ -40,10 +39,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
     {
         private static readonly ExpressionReflectionDelegateFactory _instance = new ExpressionReflectionDelegateFactory();
 
-        internal static ReflectionDelegateFactory Instance
-        {
-            get { return _instance; }
-        }
+        internal static ReflectionDelegateFactory Instance => _instance;
 
         public override ObjectConstructor<object> CreateParameterizedConstructor(MethodBase method)
         {

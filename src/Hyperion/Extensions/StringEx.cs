@@ -7,25 +7,20 @@
 // -----------------------------------------------------------------------
 #endregion
 
-#if !NET40
 using System.Runtime.CompilerServices;
-#endif
+using CuteAnt;
 
 namespace Hyperion.Extensions
 {
   internal static class StringEx
   {
-#if !NET40
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl(InlineMethod.Value)]
     internal static byte[] ToUtf8Bytes(this string str)
     {
       return NoAllocBitConverter.Utf8.GetBytes(str);
     }
 
-#if !NET40
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+    [MethodImpl(InlineMethod.Value)]
     internal static string FromUtf8Bytes(byte[] bytes, int offset, int count)
     {
       return NoAllocBitConverter.Utf8.GetString(bytes, offset, count);

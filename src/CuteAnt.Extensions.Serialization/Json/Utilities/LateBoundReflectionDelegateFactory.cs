@@ -24,6 +24,7 @@
 #endregion
 
 using System;
+using Newtonsoft.Json.Serialization;
 using System.Reflection;
 using Newtonsoft.Json.Serialization;
 #if !HAVE_LINQ
@@ -36,10 +37,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
     {
         private static readonly LateBoundReflectionDelegateFactory _instance = new LateBoundReflectionDelegateFactory();
 
-        internal static ReflectionDelegateFactory Instance
-        {
-            get { return _instance; }
-        }
+        internal static ReflectionDelegateFactory Instance => _instance;
 
         public override ObjectConstructor<object> CreateParameterizedConstructor(MethodBase method)
         {
