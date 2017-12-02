@@ -120,9 +120,9 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             string json = o.ToString();
         }
 
-#if !(PORTABLE || PORTABLE40)
+#if !(PORTABLE || PORTABLE40) || NETSTANDARD2_0
 #pragma warning disable 618
-        [Test]
+    [Test]
         public void MemberSearchFlags()
         {
             PrivateMembersClass privateMembersClass = new PrivateMembersClass("PrivateString!", "InternalString!");

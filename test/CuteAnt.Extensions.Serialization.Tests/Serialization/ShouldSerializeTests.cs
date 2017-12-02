@@ -76,10 +76,10 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
         [Test]
         public void VirtualShouldSerialize()
         {
-            var setFoo = new Foo1()
+            var setFoo = new Foo2()
             {
                 name = Guid.NewGuid().ToString(),
-                myBar = new Bar1()
+                myBar = new Bar2()
                 {
                     name = Guid.NewGuid().ToString(),
                     myBaz = new Baz1[]
@@ -113,7 +113,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             };
 
             var setFooJson = Serialize(setFoo);
-            var deserializedSetFoo = JsonConvertX.DeserializeObject<Foo1>(setFooJson);
+            var deserializedSetFoo = JsonConvertX.DeserializeObject<Foo2>(setFooJson);
 
             Assert.AreEqual(setFoo.name, deserializedSetFoo.name);
             Assert.IsNotNull(deserializedSetFoo.myBar);
@@ -133,7 +133,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             Assert.AreEqual(true, setFoo.myBar.ShouldSerializemyBazCalled);
         }
 
-        private string Serialize(Foo1 f)
+        private string Serialize(Foo2 f)
         {
             //Code copied from JsonConvertX.SerializeObject(), with addition of trace writing
             JsonSerializer jsonSerializer = JsonSerializer.CreateDefault();
@@ -145,7 +145,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             using (JsonTextWriter jsonWriter = new JsonTextWriter(sw))
             {
                 jsonWriter.Formatting = Formatting.None;
-                jsonSerializer.Serialize(jsonWriter, f, typeof(Foo1));
+                jsonSerializer.Serialize(jsonWriter, f, typeof(Foo2));
             }
 
             return sw.ToString();
@@ -514,11 +514,11 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
         }
     }
 
-    public class Foo1
+    public class Foo2
     {
-        private Bar1 myBarField;
+        private Bar2 myBarField;
 
-        public Bar1 myBar
+        public Bar2 myBar
         {
             get { return myBarField; }
             set { myBarField = value; }
@@ -543,7 +543,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
         }
     }
 
-    public class Bar1
+    public class Bar2
     {
         [JsonIgnore]
         public bool ShouldSerializemyBazCalled { get; set; }

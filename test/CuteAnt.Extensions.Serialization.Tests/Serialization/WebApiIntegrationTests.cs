@@ -76,8 +76,8 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             {
                 ContractResolver = new DefaultContractResolver
                 {
-#if !(PORTABLE || DNXCORE50 || PORTABLE40) || NETSTANDARD1_3
-                    IgnoreSerializableAttribute = false
+#if !(PORTABLE || DNXCORE50 || PORTABLE40) || NETSTANDARD1_3 || NETSTANDARD2_0
+                  IgnoreSerializableAttribute = false
 #endif
                 }
             });
@@ -85,8 +85,8 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             Assert.AreEqual(expected, json);
         }
 
-#if !(PORTABLE || DNXCORE50 || PORTABLE40) || NETSTANDARD1_3
-        [Test]
+#if !(PORTABLE || DNXCORE50 || PORTABLE40) || NETSTANDARD1_3 || NETSTANDARD2_0
+    [Test]
         public void SerializeInheritedType()
         {
             InheritedType serializableType = new InheritedType("protected")
@@ -115,8 +115,8 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
         }
     }
 
-#if !(PORTABLE || DNXCORE50 || PORTABLE40) || NETSTANDARD1_3
-    [Serializable]
+#if !(PORTABLE || DNXCORE50 || PORTABLE40) || NETSTANDARD1_3 || NETSTANDARD2_0
+  [Serializable]
 #else
     [JsonObject(MemberSerialization.Fields)]
 #endif

@@ -69,10 +69,10 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
         public void GetAttributes_Property()
         {
             PropertyInfo property;
-#if DNXCORE50
+#if DNXCORE50 && !NETSTANDARD2_0
             property = CuteAnt.Extensions.Serialization.Json.Utilities.TypeExtensions.GetProperty(typeof(ReflectionTestObject), "TestProperty");
 #else
-            property = typeof(ReflectionTestObject).GetProperty("TestProperty");
+      property = typeof(ReflectionTestObject).GetProperty("TestProperty");
 #endif
 
             ReflectionAttributeProvider provider = new ReflectionAttributeProvider(property);
@@ -88,10 +88,10 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
         public void GetAttributes_Field()
         {
             FieldInfo field;
-#if DNXCORE50
+#if DNXCORE50 && !NETSTANDARD2_0
             field = (FieldInfo)CuteAnt.Extensions.Serialization.Json.Utilities.TypeExtensions.GetField(typeof(ReflectionTestObject), "TestField");
 #else
-            field = typeof(ReflectionTestObject).GetField("TestField");
+      field = typeof(ReflectionTestObject).GetField("TestField");
 #endif
 
             ReflectionAttributeProvider provider = new ReflectionAttributeProvider(field);

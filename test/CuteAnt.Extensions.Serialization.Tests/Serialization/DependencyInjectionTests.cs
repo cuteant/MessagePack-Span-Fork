@@ -23,7 +23,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-#if !(NET40 || NET35 || NET20 || DNXCORE50 || PORTABLE || PORTABLE40)
+#if !(NET40 || NET35 || NET20 || DNXCORE50 || PORTABLE || PORTABLE40) || NETSTANDARD1_0 || NETSTANDARD1_3 || NETSTANDARD2_0
 using Autofac;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json.Tests.TestObjects;
@@ -35,7 +35,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac.Core;
 using Autofac.Core.Activators.Reflection;
-using Microsoft.FSharp.Collections;
+//using Microsoft.FSharp.Collections;
 using Newtonsoft.Json.Tests.TestObjects.Organization;
 #if DNXCORE50
 using Xunit;

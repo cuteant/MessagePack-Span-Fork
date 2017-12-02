@@ -23,8 +23,6 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-using Newtonsoft.Json;
-
 namespace Newtonsoft.Json.Tests.TestObjects
 {
 #if !(NET35 || NET20)

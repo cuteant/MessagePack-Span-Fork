@@ -104,7 +104,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
       Assert.AreEqual(dynamicObject.ChildObject.Text, d.ChildObject.Text);
     }
 
-#if !(PORTABLE || PORTABLE40)
+#if !(PORTABLE || PORTABLE40) || NETSTANDARD2_0
     [Test]
     public void SerializeDynamicObjectWithObjectTracking()
     {

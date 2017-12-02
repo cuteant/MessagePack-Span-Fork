@@ -28,12 +28,13 @@ using CuteAnt.Extensions.Serialization.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif
-#if !(PORTABLE || PORTABLE40)
+#if !(PORTABLE || PORTABLE40) || NETSTANDARD2_0
 using System.Collections.ObjectModel;
 #if !(NET35 || NET20)
 using System.Dynamic;
 #endif
 using System.Text;
+//using Newtonsoft.Json.Tests.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -54,6 +55,7 @@ using CuteAnt.Extensions.Serialization.Json.Utilities;
 using System.Net;
 using System.Runtime.Serialization;
 using System.IO;
+using System.Reflection;
 using Newtonsoft.Json;
 
 namespace CuteAnt.Extensions.Serialization.Tests.Serialization
@@ -61,6 +63,66 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
     [TestFixture]
     public class TypeNameHandlingTests : TestFixtureBase
     {
+
+        [Test]
+        public void DeserializeByteArrayWithTypeName()
+        {
+            string json = @"{
+  ""$type"": ""Newtonsoft.Json.Tests.TestObjects.HasByteArray, CuteAnt.Extensions.Serialization.Tests"",
+  ""EncryptedPassword"": {
+    ""$type"": ""System.Byte[], mscorlib"",
+    ""$value"": ""cGFzc3dvcmQ=""
+  }
+}";
+            HasByteArray value = JsonConvertX.DeserializeObject<HasByteArray>(json, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Objects
+            });
+
+            CollectionAssert.AreEquivalent(Convert.FromBase64String("cGFzc3dvcmQ="), value.EncryptedPassword);
+        }
+
+        [Test]
+        public void DeserializeByteArrayWithTypeName_BadAdditionalContent()
+        {
+            string json = @"{
+  ""$type"": ""Newtonsoft.Json.Tests.TestObjects.HasByteArray, CuteAnt.Extensions.Serialization.Tests"",
+  ""EncryptedPassword"": {
+    ""$type"": ""System.Byte[], mscorlib"",
+    ""$value"": ""cGFzc3dvcmQ="",
+    ""$value"": ""cGFzc3dvcmQ=""
+  }
+}";
+
+            ExceptionAssert.Throws<JsonReaderException>(() =>
+            {
+                JsonConvertX.DeserializeObject<HasByteArray>(json, new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Objects
+                });
+            }, "Error reading bytes. Unexpected token: PropertyName. Path 'EncryptedPassword.$value', line 6, position 13.");
+        }
+
+        [Test]
+        public void DeserializeByteArrayWithTypeName_ExtraProperty()
+        {
+            string json = @"{
+  ""$type"": ""Newtonsoft.Json.Tests.TestObjects.HasByteArray, CuteAnt.Extensions.Serialization.Tests"",
+  ""EncryptedPassword"": {
+    ""$type"": ""System.Byte[], mscorlib"",
+    ""$value"": ""cGFzc3dvcmQ=""
+  },
+  ""Pie"": null
+}";
+            HasByteArray value = JsonConvertX.DeserializeObject<HasByteArray>(json, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Objects
+            });
+
+            Assert.IsNotNull(value.EncryptedPassword);
+            CollectionAssert.AreEquivalent(Convert.FromBase64String("cGFzc3dvcmQ="), value.EncryptedPassword);
+        }
+
 #if !(NET20 || NET35)
         [Test]
         public void SerializeValueTupleWithTypeName()
@@ -790,188 +852,188 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
         }
 
 #if !(NET20 || NET35)
-        [Test]
-        public void SerializeUsingCustomBinder()
-        {
-            TypeNameSerializationBinder binder = new TypeNameSerializationBinder("CuteAnt.Extensions.Serialization.Tests.Serialization.{0}, CuteAnt.Extensions.Serialization.Tests");
+//        [Test]
+//        public void SerializeUsingCustomBinder()
+//        {
+//      TypeNameSerializationBinder binder = new TypeNameSerializationBinder("CuteAnt.Extensions.Serialization.Tests.Serialization.{0}, CuteAnt.Extensions.Serialization.Tests");
 
-            IList<object> values = new List<object>
-            {
-                new Customer
-                {
-                    Name = "Caroline Customer"
-                },
-                new Purchase
-                {
-                    ProductName = "Elbow Grease",
-                    Price = 5.99m,
-                    Quantity = 1
-                }
-            };
+//            IList<object> values = new List<object>
+//            {
+//                new Customer
+//                {
+//                    Name = "Caroline Customer"
+//                },
+//                new Purchase
+//                {
+//                    ProductName = "Elbow Grease",
+//                    Price = 5.99m,
+//                    Quantity = 1
+//                }
+//            };
 
-            string json = JsonConvertX.SerializeObject(values, Formatting.Indented, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-#pragma warning disable CS0618 // Type or member is obsolete
-                Binder = binder
-#pragma warning restore CS0618 // Type or member is obsolete
-            });
+//            string json = JsonConvertX.SerializeObject(values, Formatting.Indented, new JsonSerializerSettings
+//            {
+//                TypeNameHandling = TypeNameHandling.Auto,
+//#pragma warning disable CS0618 // Type or member is obsolete
+//                Binder = binder
+//#pragma warning restore CS0618 // Type or member is obsolete
+//            });
 
-            //[
-            //  {
-            //    "$type": "Customer",
-            //    "Name": "Caroline Customer"
-            //  },
-            //  {
-            //    "$type": "Purchase",
-            //    "ProductName": "Elbow Grease",
-            //    "Price": 5.99,
-            //    "Quantity": 1
-            //  }
-            //]
+//            //[
+//            //  {
+//            //    "$type": "Customer",
+//            //    "Name": "Caroline Customer"
+//            //  },
+//            //  {
+//            //    "$type": "Purchase",
+//            //    "ProductName": "Elbow Grease",
+//            //    "Price": 5.99,
+//            //    "Quantity": 1
+//            //  }
+//            //]
 
-            StringAssert.AreEqual(@"[
-  {
-    ""$type"": ""Customer"",
-    ""Name"": ""Caroline Customer""
-  },
-  {
-    ""$type"": ""Purchase"",
-    ""ProductName"": ""Elbow Grease"",
-    ""Price"": 5.99,
-    ""Quantity"": 1
-  }
-]", json);
+//            StringAssert.AreEqual(@"[
+//  {
+//    ""$type"": ""Customer"",
+//    ""Name"": ""Caroline Customer""
+//  },
+//  {
+//    ""$type"": ""Purchase"",
+//    ""ProductName"": ""Elbow Grease"",
+//    ""Price"": 5.99,
+//    ""Quantity"": 1
+//  }
+//]", json);
 
-            IList<object> newValues = JsonConvertX.DeserializeObject<IList<object>>(json, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-#pragma warning disable CS0618 // Type or member is obsolete
-                Binder = new TypeNameSerializationBinder("CuteAnt.Extensions.Serialization.Tests.Serialization.{0}, CuteAnt.Extensions.Serialization.Tests")
-#pragma warning restore CS0618 // Type or member is obsolete
-            });
+//            IList<object> newValues = JsonConvertX.DeserializeObject<IList<object>>(json, new JsonSerializerSettings
+//            {
+//                TypeNameHandling = TypeNameHandling.Auto,
+//#pragma warning disable CS0618 // Type or member is obsolete
+//                Binder = new TypeNameSerializationBinder("CuteAnt.Extensions.Serialization.TestsSerialization.{0}, CuteAnt.Extensions.Serialization.Tests")
+//#pragma warning restore CS0618 // Type or member is obsolete
+//            });
 
-            CustomAssert.IsInstanceOfType(typeof(Customer), newValues[0]);
-            Customer customer = (Customer)newValues[0];
-            Assert.AreEqual("Caroline Customer", customer.Name);
+//            CustomAssert.IsInstanceOfType(typeof(Customer), newValues[0]);
+//            Customer customer = (Customer)newValues[0];
+//            Assert.AreEqual("Caroline Customer", customer.Name);
 
-            CustomAssert.IsInstanceOfType(typeof(Purchase), newValues[1]);
-            Purchase purchase = (Purchase)newValues[1];
-            Assert.AreEqual("Elbow Grease", purchase.ProductName);
-        }
+//            CustomAssert.IsInstanceOfType(typeof(Purchase), newValues[1]);
+//            Purchase purchase = (Purchase)newValues[1];
+//            Assert.AreEqual("Elbow Grease", purchase.ProductName);
+//        }
 
-        public class TypeNameSerializationBinder : SerializationBinder
-        {
-            public string TypeFormat { get; private set; }
+//        public class TypeNameSerializationBinder : SerializationBinder
+//        {
+//            public string TypeFormat { get; private set; }
 
-            public TypeNameSerializationBinder(string typeFormat)
-            {
-                TypeFormat = typeFormat;
-            }
+//            public TypeNameSerializationBinder(string typeFormat)
+//            {
+//                TypeFormat = typeFormat;
+//            }
 
-            public override void BindToName(Type serializedType, out string assemblyName, out string typeName)
-            {
-                assemblyName = null;
-                typeName = serializedType.Name;
-            }
+//            public override void BindToName(Type serializedType, out string assemblyName, out string typeName)
+//            {
+//                assemblyName = null;
+//                typeName = serializedType.Name;
+//            }
 
-            public override Type BindToType(string assemblyName, string typeName)
-            {
-                string resolvedTypeName = string.Format(TypeFormat, typeName);
+//            public override Type BindToType(string assemblyName, string typeName)
+//            {
+//                string resolvedTypeName = string.Format(TypeFormat, typeName);
 
-                return Type.GetType(resolvedTypeName, true);
-            }
-        }
+//                return Type.GetType(resolvedTypeName, true);
+//            }
+//        }
 #endif
 
-        [Test]
-        public void NewSerializeUsingCustomBinder()
-        {
-            NewTypeNameSerializationBinder binder = new NewTypeNameSerializationBinder("CuteAnt.Extensions.Serialization.Tests.Serialization.{0}, CuteAnt.Extensions.Serialization.Tests");
+//        [Test]
+//        public void NewSerializeUsingCustomBinder()
+//        {
+//            NewTypeNameSerializationBinder binder = new NewTypeNameSerializationBinder("Newtonsoft.Json.Tests.Serialization.{0}, CuteAnt.Extensions.Serialization.Tests");
 
-            IList<object> values = new List<object>
-            {
-                new Customer
-                {
-                    Name = "Caroline Customer"
-                },
-                new Purchase
-                {
-                    ProductName = "Elbow Grease",
-                    Price = 5.99m,
-                    Quantity = 1
-                }
-            };
+//            IList<object> values = new List<object>
+//            {
+//                new Customer
+//                {
+//                    Name = "Caroline Customer"
+//                },
+//                new Purchase
+//                {
+//                    ProductName = "Elbow Grease",
+//                    Price = 5.99m,
+//                    Quantity = 1
+//                }
+//            };
 
-            string json = JsonConvertX.SerializeObject(values, Formatting.Indented, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                SerializationBinder = binder
-            });
+//            string json = JsonConvertX.SerializeObject(values, Formatting.Indented, new JsonSerializerSettings
+//            {
+//                TypeNameHandling = TypeNameHandling.Auto,
+//                SerializationBinder = binder
+//            });
 
-            //[
-            //  {
-            //    "$type": "Customer",
-            //    "Name": "Caroline Customer"
-            //  },
-            //  {
-            //    "$type": "Purchase",
-            //    "ProductName": "Elbow Grease",
-            //    "Price": 5.99,
-            //    "Quantity": 1
-            //  }
-            //]
+//            //[
+//            //  {
+//            //    "$type": "Customer",
+//            //    "Name": "Caroline Customer"
+//            //  },
+//            //  {
+//            //    "$type": "Purchase",
+//            //    "ProductName": "Elbow Grease",
+//            //    "Price": 5.99,
+//            //    "Quantity": 1
+//            //  }
+//            //]
 
-            StringAssert.AreEqual(@"[
-  {
-    ""$type"": ""Customer"",
-    ""Name"": ""Caroline Customer""
-  },
-  {
-    ""$type"": ""Purchase"",
-    ""ProductName"": ""Elbow Grease"",
-    ""Price"": 5.99,
-    ""Quantity"": 1
-  }
-]", json);
+//            StringAssert.AreEqual(@"[
+//  {
+//    ""$type"": ""Customer"",
+//    ""Name"": ""Caroline Customer""
+//  },
+//  {
+//    ""$type"": ""Purchase"",
+//    ""ProductName"": ""Elbow Grease"",
+//    ""Price"": 5.99,
+//    ""Quantity"": 1
+//  }
+//]", json);
 
-            IList<object> newValues = JsonConvertX.DeserializeObject<IList<object>>(json, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                SerializationBinder = new NewTypeNameSerializationBinder("CuteAnt.Extensions.Serialization.Tests.Serialization.{0}, CuteAnt.Extensions.Serialization.Tests")
-            });
+//            IList<object> newValues = JsonConvertX.DeserializeObject<IList<object>>(json, new JsonSerializerSettings
+//            {
+//                TypeNameHandling = TypeNameHandling.Auto,
+//                SerializationBinder = new NewTypeNameSerializationBinder("Newtonsoft.Json.Tests.Serialization.{0}, CuteAnt.Extensions.Serialization.Tests")
+//            });
 
-            CustomAssert.IsInstanceOfType(typeof(Customer), newValues[0]);
-            Customer customer = (Customer)newValues[0];
-            Assert.AreEqual("Caroline Customer", customer.Name);
+//            CustomAssert.IsInstanceOfType(typeof(Customer), newValues[0]);
+//            Customer customer = (Customer)newValues[0];
+//            Assert.AreEqual("Caroline Customer", customer.Name);
 
-            CustomAssert.IsInstanceOfType(typeof(Purchase), newValues[1]);
-            Purchase purchase = (Purchase)newValues[1];
-            Assert.AreEqual("Elbow Grease", purchase.ProductName);
-        }
+//            CustomAssert.IsInstanceOfType(typeof(Purchase), newValues[1]);
+//            Purchase purchase = (Purchase)newValues[1];
+//            Assert.AreEqual("Elbow Grease", purchase.ProductName);
+//        }
 
-        public class NewTypeNameSerializationBinder : ISerializationBinder
-        {
-            public string TypeFormat { get; private set; }
+//        public class NewTypeNameSerializationBinder : ISerializationBinder
+//        {
+//            public string TypeFormat { get; private set; }
 
-            public NewTypeNameSerializationBinder(string typeFormat)
-            {
-                TypeFormat = typeFormat;
-            }
+//            public NewTypeNameSerializationBinder(string typeFormat)
+//            {
+//                TypeFormat = typeFormat;
+//            }
 
-            public void BindToName(Type serializedType, out string assemblyName, out string typeName)
-            {
-                assemblyName = null;
-                typeName = serializedType.Name;
-            }
+//            public void BindToName(Type serializedType, out string assemblyName, out string typeName)
+//            {
+//                assemblyName = null;
+//                typeName = serializedType.Name;
+//            }
 
-            public Type BindToType(string assemblyName, string typeName)
-            {
-                string resolvedTypeName = string.Format(TypeFormat, typeName);
+//            public Type BindToType(string assemblyName, string typeName)
+//            {
+//                string resolvedTypeName = string.Format(TypeFormat, typeName);
 
-                return Type.GetType(resolvedTypeName, true);
-            }
-        }
+//                return Type.GetType(resolvedTypeName, true);
+//            }
+//        }
 
         [Test]
         public void CollectionWithAbstractItems()
@@ -1062,7 +1124,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             // {
             //   "Address": "http://www.google.com",
             //   "Body": {
-            //     "$type": "CuteAnt.Extensions.Serialization.Tests.Serialization.SearchDetails, CuteAnt.Extensions.Serialization.Tests",
+            //     "$type": "Newtonsoft.Json.Tests.Serialization.SearchDetails, CuteAnt.Extensions.Serialization.Tests",
             //     "Query": "Json.NET",
             //     "Language": "en-us"
             //   }
@@ -1104,10 +1166,12 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
 #pragma warning restore 618
             });
 
+            string dictionaryTypeName = ReflectionUtils.GetTypeName(typeof(Dictionary<string, object>), TypeNameAssemblyFormatHandling.Simple, null);
             string urlStatusTypeName = ReflectionUtils.GetTypeName(typeof(UrlStatus), TypeNameAssemblyFormatHandling.Simple, null);
+            string listTypeName = ReflectionUtils.GetTypeName(typeof(List<UrlStatus>), TypeNameAssemblyFormatHandling.Simple, null);
 
             StringAssert.AreEqual(@"{
-  ""$type"": ""System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.Object, mscorlib]], mscorlib"",
+  ""$type"": """ + dictionaryTypeName + @""",
   ""First"": {
     ""$type"": """ + urlStatusTypeName + @""",
     ""Status"": 404,
@@ -1119,7 +1183,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
     ""Url"": ""http://www.google.com""
   },
   ""List"": {
-    ""$type"": ""System.Collections.Generic.List`1[[" + urlStatusTypeName + @"]], mscorlib"",
+    ""$type"": """ + listTypeName + @""",
     ""$values"": [
       {
         ""$type"": """ + urlStatusTypeName + @""",
@@ -1245,15 +1309,17 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             string output = JsonConvertX.SerializeObject(testerObject, Formatting.Indented, jsonSettings);
 
             string carClassRef = ReflectionUtils.GetTypeName(typeof(Car), TypeNameAssemblyFormatHandling.Simple, null);
+            string objectArrayRef = ReflectionUtils.GetTypeName(typeof(object[]), TypeNameAssemblyFormatHandling.Simple, null);
+            string byteArrayRef = ReflectionUtils.GetTypeName(typeof(byte[]), TypeNameAssemblyFormatHandling.Simple, null);
 
             StringAssert.AreEqual(output, @"{
   ""$type"": """ + carClassRef + @""",
   ""Year"": ""2000-10-05T01:01:01Z"",
   ""Objects"": {
-    ""$type"": ""System.Object[], mscorlib"",
+    ""$type"": """ + objectArrayRef + @""",
     ""$values"": [
       {
-        ""$type"": ""System.Byte[], mscorlib"",
+        ""$type"": """ + byteArrayRef + @""",
         ""$value"": ""S0FSSVJB""
       },
       ""prueba""
@@ -1270,7 +1336,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             CollectionAssert.AreEquivalent(data, d);
         }
 
-#if !(DNXCORE50)
+#if !(DNXCORE50) || NETSTANDARD2_0
         [Test]
         public void ISerializableTypeNameHandlingTest()
         {
@@ -1550,6 +1616,9 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             };
 
             string json = JsonConvertX.SerializeObject(c1, Formatting.Indented);
+
+            string listTypeName = ReflectionUtils.GetTypeName(typeof(List<object>), TypeNameAssemblyFormatHandling.Simple, null);
+
             StringAssert.AreEqual(@"{
   ""Data"": [
     {
@@ -1557,7 +1626,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
       ""MyProperty"": 1
     },
     {
-      ""$type"": ""System.Collections.Generic.List`1[[System.Object, mscorlib]], mscorlib"",
+      ""$type"": """+ listTypeName + @""",
       ""$values"": [
         [
           []
@@ -1582,7 +1651,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
       ""MyProperty"": 1
     },
     {
-      ""$type"": ""System.Collections.Generic.List`1[[System.Object, mscorlib]], mscorlib"",
+      ""$type"": """ + listTypeName + @""",
       ""$values"": [
         {
           ""$type"": ""Newtonsoft.Json.Tests.TestObjects.TestComponentSimple, CuteAnt.Extensions.Serialization.Tests"",
@@ -1629,6 +1698,9 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             };
 
             string json = JsonConvertX.SerializeObject(c1, Formatting.Indented);
+
+            string dictionaryTypeName = ReflectionUtils.GetTypeName(typeof(Dictionary<string, object>), TypeNameAssemblyFormatHandling.Simple, null);
+
             StringAssert.AreEqual(@"{
   ""Data"": {
     ""one"": {
@@ -1636,7 +1708,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
       ""MyProperty"": 1
     },
     ""two"": {
-      ""$type"": ""System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.Object, mscorlib]], mscorlib"",
+      ""$type"": """ + dictionaryTypeName + @""",
       ""one"": {
         ""one"": 1
       }
@@ -1659,7 +1731,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
       ""MyProperty"": 1
     },
     ""two"": {
-      ""$type"": ""System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.Object, mscorlib]], mscorlib"",
+      ""$type"": """ + dictionaryTypeName + @""",
       ""one"": {
         ""$type"": ""Newtonsoft.Json.Tests.TestObjects.TestComponentSimple, CuteAnt.Extensions.Serialization.Tests"",
         ""MyProperty"": 1
@@ -1704,10 +1776,13 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             };
 
             string json = JsonConvertX.SerializeObject(o1, Formatting.Indented);
+
+            string listTypeName = ReflectionUtils.GetTypeName(typeof(List<object>), TypeNameAssemblyFormatHandling.Simple, null);
+
             StringAssert.AreEqual(@"{
   ""Data"": {
     ""Prop1"": {
-      ""$type"": ""System.Collections.Generic.List`1[[System.Object, mscorlib]], mscorlib"",
+      ""$type"": """ + listTypeName + @""",
       ""$values"": [
         {
           ""MyProperty"": 1
@@ -1767,7 +1842,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
 //      ""MyProperty"": 1
 //    },
 //    ""two"": {
-//      ""$type"": ""CuteAnt.Extensions.Serialization.Tests.Linq.DynamicDictionary, CuteAnt.Extensions.Serialization.Tests"",
+//      ""$type"": ""Newtonsoft.Json.Tests.Linq.DynamicDictionary, CuteAnt.Extensions.Serialization.Tests"",
 //      ""one"": {
 //        ""MyProperty"": 2
 //      }
@@ -1794,7 +1869,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
 //      ""MyProperty"": 1
 //    },
 //    ""two"": {
-//      ""$type"": ""CuteAnt.Extensions.Serialization.Tests.Linq.DynamicDictionary, CuteAnt.Extensions.Serialization.Tests"",
+//      ""$type"": ""Newtonsoft.Json.Tests.Linq.DynamicDictionary, CuteAnt.Extensions.Serialization.Tests"",
 //      ""one"": {
 //        ""$type"": ""Newtonsoft.Json.Tests.TestObjects.TestComponentSimple, CuteAnt.Extensions.Serialization.Tests"",
 //        ""MyProperty"": 2
@@ -1811,7 +1886,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
 //        }
 #endif
 
-#if !(DNXCORE50)
+#if !(DNXCORE50) || NETSTANDARD2_0
         [Test]
         public void SerializeDeserialize_DictionaryContextContainsGuid_DeserializesItemAsGuid()
         {
@@ -1828,8 +1903,10 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             };
             string serializedString = JsonConvertX.SerializeObject(inputContext, jsonSerializerSettings);
 
+            string dictionaryTypeName = ReflectionUtils.GetTypeName(typeof(Dictionary<string, Guid>), TypeNameAssemblyFormatHandling.Simple, null);
+
             StringAssert.AreEqual(@"{
-  ""$type"": ""System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.Guid, mscorlib]], mscorlib"",
+  ""$type"": """ + dictionaryTypeName + @""",
   ""k1"": ""a6e986df-fc2c-4906-a1ef-9492388f7833""
 }", serializedString);
 
@@ -2017,10 +2094,12 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             data.Rows.Add("key", new List<MyInterfaceImplementationType> { new MyInterfaceImplementationType() { SomeProperty = "property" } });
             string serialized = JsonConvertX.SerializeObject(data, Formatting.Indented);
 
+            string listTypeName = ReflectionUtils.GetTypeName(typeof(List<MyInterfaceImplementationType>), TypeNameAssemblyFormatHandling.Simple, null);
+
             StringAssert.AreEqual(@"{
   ""Rows"": {
     ""key"": {
-      ""$type"": ""System.Collections.Generic.List`1[[CuteAnt.Extensions.Serialization.Tests.Serialization.MyInterfaceImplementationType, CuteAnt.Extensions.Serialization.Tests]], mscorlib"",
+      ""$type"": """ + listTypeName + @""",
       ""$values"": [
         {
           ""SomeProperty"": ""property""
@@ -2122,6 +2201,74 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             StringAssert.AreEqual("Hello!", objWithMessage.Message.Value.Value);
         }
 #endif
+
+#if !(NET20 || NET35)
+        [Test]
+        public void SerializerWithDefaultBinder()
+        {
+            var serializer = JsonSerializer.Create();
+#pragma warning disable CS0618
+            Assert.AreNotEqual(null, serializer.Binder);
+            Assert.IsInstanceOf(typeof(DefaultSerializationBinder), serializer.Binder);
+#pragma warning restore CS0618 // Type or member is obsolete
+            Assert.IsInstanceOf(typeof(DefaultSerializationBinder), serializer.SerializationBinder);
+        }
+
+        [Test]
+        public void ObsoleteBinderThrowsIfISerializationBinderSet()
+        {
+            var serializer = JsonSerializer.Create(new JsonSerializerSettings() { SerializationBinder = new FancyBinder() });
+            ExceptionAssert.Throws<InvalidOperationException>(() =>
+            {
+#pragma warning disable CS0618 // Type or member is obsolete
+                var serializationBinder = serializer.Binder;
+#pragma warning restore CS0618 // Type or member is obsolete
+                serializationBinder.ToString();
+            }, "Cannot get SerializationBinder because an ISerializationBinder was previously set.");
+
+            Assert.IsInstanceOf(typeof(FancyBinder), serializer.SerializationBinder);
+        }
+
+//        [Test]
+//        public void SetOldBinderAndSerializationBinderReturnsWrapper()
+//        {
+//#pragma warning disable CS0618 // Type or member is obsolete
+//            var serializer = JsonSerializer.Create(new JsonSerializerSettings() { Binder = new OldBinder() });
+//            Assert.IsInstanceOf(typeof(OldBinder), serializer.Binder);
+//#pragma warning restore CS0618 // Type or member is obsolete
+
+//            var binder = serializer.SerializationBinder;
+
+//            Assert.IsInstanceOf(typeof(SerializationBinderAdapter), binder);
+//            Assert.AreEqual(typeof(string), binder.BindToType(null, null));
+//        }
+
+        public class FancyBinder : ISerializationBinder
+        {
+            private static readonly string Annotate = new string(':', 3);
+
+            public void BindToName(Type serializedType, out string assemblyName, out string typeName)
+            {
+                assemblyName = string.Format("FancyAssemblyName=>{0}", Assembly.GetAssembly(serializedType)?.GetName().Name);
+                typeName = string.Format("{0}{1}{0}", Annotate, serializedType.Name);
+            }
+
+            public Type BindToType(string assemblyName, string typeName)
+            {
+                return null;
+            }
+        }
+
+#pragma warning disable CS0618 // Type or member is obsolete
+        public class OldBinder : SerializationBinder
+        {
+            public override Type BindToType(string assemblyName, string typeName)
+            {
+                return typeof(string);
+            }
+        }
+#pragma warning restore CS0618 // Type or member is obsolete
+#endif
     }
 
     public struct Message2
@@ -2168,7 +2315,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
         public string SomeProperty { get; set; }
     }
 
-#if !(DNXCORE50)
+#if !(DNXCORE50) || NETSTANDARD2_0
     public class ParentParent
     {
         [JsonProperty(ItemTypeNameHandling = TypeNameHandling.Auto)]
@@ -2236,7 +2383,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
         public int Quantity { get; set; }
     }
 
-#if !(DNXCORE50)
+#if !(DNXCORE50) || NETSTANDARD2_0
     public class SerializableWrapper
     {
         public object Content { get; set; }

@@ -26,16 +26,15 @@
 using System;
 using System.ComponentModel;
 #if NET20
-using CuteAnt.Extensions.Serialization.Json.Utilities.LinqBridge;
+using Newtonsoft.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif
 using CuteAnt.Extensions.Serialization.Json.Utilities;
-using Newtonsoft.Json;
 
 namespace Newtonsoft.Json.Tests.TestObjects
 {
-#if !(NET35 || NET20 || PORTABLE || PORTABLE40)
+#if !(NET35 || NET20 || PORTABLE || PORTABLE40) || NETSTANDARD1_3 || NETSTANDARD2_0
     internal class TypeConverterJsonConverter : JsonConverter
     {
         private TypeConverter GetConverter(Type type)

@@ -41,8 +41,22 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
     [TestFixture]
     public class NullValueHandlingTests : TestFixtureBase
     {
+    private const string MovieNullValueHandlingIncludeExpectedResult = @"{
+  ""Name"": ""Bad Boys III"",
+  ""Description"": ""It's no Bad Boys"",
+  ""Classification"": null,
+  ""Studio"": null,
+  ""ReleaseDate"": null,
+  ""ReleaseCountries"": null
+}";
+
+    private const string MovieNullValueHandlingIgnoreExpectedResult = @"{
+  ""Name"": ""Bad Boys III"",
+  ""Description"": ""It's no Bad Boys""
+}";
+
 #if !NET20
-        [Test]
+    [Test]
         public void DeserializeNullIntoDateTime()
         {
             DateTimeTestClass c = JsonConvertX.DeserializeObject<DateTimeTestClass>(@"{DateTimeField:null}", new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
@@ -106,24 +120,60 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
                 Formatting.Indented,
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
 
-            // {
-            //   "Name": "Bad Boys III",
-            //   "Description": "It's no Bad Boys"
-            // }
+      // {
+      //   "Name": "Bad Boys III",
+      //   "Description": "It's no Bad Boys"
+      // }
 
-            StringAssert.AreEqual(@"{
-  ""Name"": ""Bad Boys III"",
-  ""Description"": ""It's no Bad Boys"",
-  ""Classification"": null,
-  ""Studio"": null,
-  ""ReleaseDate"": null,
-  ""ReleaseCountries"": null
-}", included);
+      StringAssert.AreEqual(MovieNullValueHandlingIncludeExpectedResult, included);
 
-            StringAssert.AreEqual(@"{
-  ""Name"": ""Bad Boys III"",
-  ""Description"": ""It's no Bad Boys""
-}", ignored);
-        }
+      StringAssert.AreEqual(MovieNullValueHandlingIgnoreExpectedResult, ignored);
     }
+
+    [Test]
+    public void JsonObjectNullValueHandlingIgnore()
+    {
+      var movie = new MovieWithJsonObjectNullValueHandlingIgnore
+      {
+        Name = "Bad Boys III",
+        Description = "It's no Bad Boys"
+      };
+
+      string ignored = JsonConvertX.SerializeObject(movie,
+          Formatting.Indented,
+          new JsonSerializerSettings { NullValueHandling = NullValueHandling.Include });
+
+      // {
+      //   "Name": "Bad Boys III",
+      //   "Description": "It's no Bad Boys"
+      // }
+
+      StringAssert.AreEqual(MovieNullValueHandlingIgnoreExpectedResult, ignored);
+    }
+
+    [Test]
+    public void JsonObjectNullValueHandlingInclude()
+    {
+      var movie = new MovieWithJsonObjectNullValueHandlingInclude
+      {
+        Name = "Bad Boys III",
+        Description = "It's no Bad Boys"
+      };
+
+      string included = JsonConvertX.SerializeObject(movie,
+          Formatting.Indented,
+          new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+
+      // {
+      //   "Name": "Bad Boys III",
+      //   "Description": "It's no Bad Boys",
+      //   "Classification": null,
+      //   "Studio": null,
+      //   "ReleaseDate": null,
+      //   "ReleaseCountries": null
+      // }
+
+      StringAssert.AreEqual(MovieNullValueHandlingIncludeExpectedResult, included);
+    }
+  }
 }

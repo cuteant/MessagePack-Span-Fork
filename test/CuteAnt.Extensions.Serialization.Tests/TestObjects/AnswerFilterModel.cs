@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 // Copyright (c) 2007 James Newton-King
 //
 // Permission is hereby granted, free of charge, to any person
@@ -26,7 +26,7 @@
 using System;
 using System.Collections;
 #if NET20
-using CuteAnt.Extensions.Serialization.Json.Utilities.LinqBridge;
+using Newtonsoft.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 
@@ -34,7 +34,7 @@ using System.Linq;
 
 namespace Newtonsoft.Json.Tests.TestObjects
 {
-#if !(PORTABLE || DNXCORE50) || NETSTANDARD1_3
+#if !(PORTABLE || DNXCORE50) || NETSTANDARD1_3 || NETSTANDARD2_0
     [Serializable]
     public class AnswerFilterModel
     {

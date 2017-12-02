@@ -30,7 +30,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using Newtonsoft.Json.Schema;
-#if !(NET20 || NET35 || PORTABLE40 || PORTABLE) || NETSTANDARD1_3
+#if !(NET20 || NET35 || PORTABLE40 || PORTABLE) || NETSTANDARD1_3 || NETSTANDARD2_0
 using System.Numerics;
 #endif
 using System.Runtime.Serialization;
@@ -50,7 +50,7 @@ using CuteAnt.Extensions.Serialization.Json.Utilities;
 #if DNXCORE50
 using Xunit;
 using Test = Xunit.FactAttribute;
-using Assert = Newtonsoft.Json.Tests.XUnitAssert;
+using Assert = CuteAnt.Extensions.Serialization.Tests.XUnitAssert;
 #else
 using NUnit.Framework;
 
@@ -134,14 +134,15 @@ namespace CuteAnt.Extensions.Serialization.Tests
         [Test]
         public void DefaultSettings()
         {
-            try
+      var defaultSettings = new JsonSerializerSettings
+      {
+        Formatting = Newtonsoft.Json.Formatting.Indented
+      };
+      try
             {
-                JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-                {
-                    Formatting = Newtonsoft.Json.Formatting.Indented
-                };
+        JsonConvert.DefaultSettings = () => defaultSettings;
 
-                string json = JsonConvertX.SerializeObject(new { test = new[] { 1, 2, 3 } });
+        string json = JsonConvertX.SerializeObject(new { test = new[] { 1, 2, 3 } }, defaultSettings);
 
                 StringAssert.AreEqual(@"{
   ""test"": [
@@ -214,13 +215,14 @@ namespace CuteAnt.Extensions.Serialization.Tests
         [Test]
         public void DefaultSettings_Example()
         {
-            try
+      var defaultSettings = new JsonSerializerSettings
+      {
+        Formatting = Newtonsoft.Json.Formatting.Indented,
+        ContractResolver = new CamelCasePropertyNamesContractResolver()
+      };
+      try
             {
-                JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-                {
-                    Formatting = Newtonsoft.Json.Formatting.Indented,
-                    ContractResolver = new CamelCasePropertyNamesContractResolver()
-                };
+        JsonConvert.DefaultSettings = () => defaultSettings;
 
                 Employee e = new Employee
                 {
@@ -231,7 +233,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
                     JobTitle = "Web Dude"
                 };
 
-                string json = JsonConvertX.SerializeObject(e);
+        string json = JsonConvertX.SerializeObject(e, defaultSettings);
                 // {
                 //   "firstName": "Eric",
                 //   "lastName": "Example",
@@ -1112,8 +1114,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
             writer.Flush();
         }
 
-#if !(NET20 || NET35 || PORTABLE40 || PORTABLE) || NETSTANDARD1_3
-        [Test]
+#if !(NET20 || NET35 || PORTABLE40 || PORTABLE) || NETSTANDARD1_3 || NETSTANDARD2_0
+    [Test]
         public void IntegerLengthOverflows()
         {
             // Maximum javascript number length (in characters) is 380
@@ -1138,7 +1140,12 @@ namespace CuteAnt.Extensions.Serialization.Tests
             Assert.AreEqual(typeof(DateTime), jsonReader.ValueType);
         }
 
-        //[Test]
+#if DNXCORE50
+    [Test(Skip = "Don't run with other unit tests")]
+#else
+        [Ignore("Don't run with other unit tests")]
+        [Test]
+#endif
         public void StackOverflowTest()
         {
             StringBuilder sb = new StringBuilder();

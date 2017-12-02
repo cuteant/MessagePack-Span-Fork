@@ -25,7 +25,7 @@
 
 using System.Collections.Generic;
 #if NET20
-using CuteAnt.Extensions.Serialization.Json.Utilities.LinqBridge;
+using Newtonsoft.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif

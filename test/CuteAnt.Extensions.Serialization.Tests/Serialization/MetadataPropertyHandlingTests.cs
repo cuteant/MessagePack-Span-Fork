@@ -305,42 +305,42 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             Assert.AreEqual(employees[0], employees[1].Manager);
         }
 
-//        [Test]
-//        public void DeserializeFromJToken()
-//        {
-//            string json = @"[
-//  {
-//    ""Name"": ""Mike Manager"",
-//    ""$id"": ""1"",
-//    ""Manager"": null
-//  },
-//  {
-//    ""Name"": ""Joe User"",
-//    ""$id"": ""2"",
-//    ""Manager"": {
-//      ""$ref"": ""1""
-//    }
-//  }
-//]";
+    //        [Test]
+    //        public void DeserializeFromJToken()
+    //        {
+    //            string json = @"[
+    //  {
+    //    ""Name"": ""Mike Manager"",
+    //    ""$id"": ""1"",
+    //    ""Manager"": null
+    //  },
+    //  {
+    //    ""Name"": ""Joe User"",
+    //    ""$id"": ""2"",
+    //    ""Manager"": {
+    //      ""$ref"": ""1""
+    //    }
+    //  }
+    //]";
 
-//            JToken t1 = JToken.Parse(json);
-//            JToken t2 = t1.CloneToken();
+    //            JToken t1 = JToken.Parse(json);
+    //            JToken t2 = t1.CloneToken();
 
-//            List<EmployeeReference> employees = t1.ToObject<List<EmployeeReference>>(JsonSerializer.Create(new JsonSerializerSettings
-//            {
-//                MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
-//            }));
+    //            List<EmployeeReference> employees = t1.ToObject<List<EmployeeReference>>(JsonSerializer.Create(new JsonSerializerSettings
+    //            {
+    //                MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
+    //            }));
 
-//            Assert.AreEqual(2, employees.Count);
-//            Assert.AreEqual("Mike Manager", employees[0].Name);
-//            Assert.AreEqual("Joe User", employees[1].Name);
-//            Assert.AreEqual(employees[0], employees[1].Manager);
+    //            Assert.AreEqual(2, employees.Count);
+    //            Assert.AreEqual("Mike Manager", employees[0].Name);
+    //            Assert.AreEqual("Joe User", employees[1].Name);
+    //            Assert.AreEqual(employees[0], employees[1].Manager);
 
-//            Assert.IsTrue(JToken.DeepEquals(t1, t2));
-//        }
+    //            Assert.IsTrue(JToken.DeepEquals(t1, t2));
+    //        }
 
-#if !(PORTABLE || DNXCORE50 || PORTABLE40)
-        [Test]
+#if !(PORTABLE || DNXCORE50 || PORTABLE40) || NETSTANDARD2_0
+    [Test]
         public void DeserializeGenericObjectListWithTypeName()
         {
             string employeeRef = typeof(EmployeeReference).AssemblyQualifiedName;

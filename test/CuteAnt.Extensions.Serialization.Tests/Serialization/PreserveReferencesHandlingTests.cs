@@ -167,6 +167,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
       public string PropertyName { get; set; }
     }
 
+    [Test]
     public void SerializeReadOnlyProperty()
     {
       Child c = new Child
@@ -616,6 +617,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             };
 
       string json = JsonConvertX.SerializeObject(employees, Formatting.Indented);
+      
       StringAssert.AreEqual(@"[
   {
     ""$id"": ""1"",
@@ -782,35 +784,35 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
       Assert.AreEqual("c1", c1.Child.Child.Child.Name);
     }
 
-    [Test]
-    public void SerializeReferenceInList()
-    {
-      EmployeeReference e1 = new EmployeeReference { Name = "e1" };
-      EmployeeReference e2 = new EmployeeReference { Name = "e2" };
+//    [Test]
+//    public void SerializeReferenceInList()
+//    {
+//      EmployeeReference e1 = new EmployeeReference { Name = "e1" };
+//      EmployeeReference e2 = new EmployeeReference { Name = "e2" };
 
-      List<EmployeeReference> employees = new List<EmployeeReference> { e1, e2, e1, e2 };
+//      List<EmployeeReference> employees = new List<EmployeeReference> { e1, e2, e1, e2 };
 
-      string json = JsonConvertX.SerializeObject(employees, Formatting.Indented);
+//      string json = JsonConvertX.SerializeObject(employees, Formatting.Indented);
 
-      StringAssert.AreEqual(@"[
-  {
-    ""$id"": ""1"",
-    ""Name"": ""e1"",
-    ""Manager"": null
-  },
-  {
-    ""$id"": ""2"",
-    ""Name"": ""e2"",
-    ""Manager"": null
-  },
-  {
-    ""$ref"": ""1""
-  },
-  {
-    ""$ref"": ""2""
-  }
-]", json);
-    }
+//      StringAssert.AreEqual(@"[
+//  {
+//    ""$id"": ""1"",
+//    ""Name"": ""e1"",
+//    ""Manager"": null
+//  },
+//  {
+//    ""$id"": ""2"",
+//    ""Name"": ""e2"",
+//    ""Manager"": null
+//  },
+//  {
+//    ""$ref"": ""1""
+//  },
+//  {
+//    ""$ref"": ""2""
+//  }
+//]", json);
+//    }
 
     [Test]
     public void DeserializeReferenceInList()
@@ -846,41 +848,41 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
       Assert.AreEqual(employees[1], employees[3]);
     }
 
-    [Test]
-    public void SerializeReferenceInDictionary()
-    {
-      EmployeeReference e1 = new EmployeeReference { Name = "e1" };
-      EmployeeReference e2 = new EmployeeReference { Name = "e2" };
+//    [Test]
+//    public void SerializeReferenceInDictionary()
+//    {
+//      EmployeeReference e1 = new EmployeeReference { Name = "e1" };
+//      EmployeeReference e2 = new EmployeeReference { Name = "e2" };
 
-      Dictionary<string, EmployeeReference> employees = new Dictionary<string, EmployeeReference>
-            {
-                { "One", e1 },
-                { "Two", e2 },
-                { "Three", e1 },
-                { "Four", e2 }
-            };
+//      Dictionary<string, EmployeeReference> employees = new Dictionary<string, EmployeeReference>
+//            {
+//                { "One", e1 },
+//                { "Two", e2 },
+//                { "Three", e1 },
+//                { "Four", e2 }
+//            };
 
-      string json = JsonConvertX.SerializeObject(employees, Formatting.Indented);
+//      string json = JsonConvertX.SerializeObject(employees, Formatting.Indented);
 
-      StringAssert.AreEqual(@"{
-  ""One"": {
-    ""$id"": ""1"",
-    ""Name"": ""e1"",
-    ""Manager"": null
-  },
-  ""Two"": {
-    ""$id"": ""2"",
-    ""Name"": ""e2"",
-    ""Manager"": null
-  },
-  ""Three"": {
-    ""$ref"": ""1""
-  },
-  ""Four"": {
-    ""$ref"": ""2""
-  }
-}", json);
-    }
+//      StringAssert.AreEqual(@"{
+//  ""One"": {
+//    ""$id"": ""1"",
+//    ""Name"": ""e1"",
+//    ""Manager"": null
+//  },
+//  ""Two"": {
+//    ""$id"": ""2"",
+//    ""Name"": ""e2"",
+//    ""Manager"": null
+//  },
+//  ""Three"": {
+//    ""$ref"": ""1""
+//  },
+//  ""Four"": {
+//    ""$ref"": ""2""
+//  }
+//}", json);
+//    }
 
     [Test]
     public void DeserializeReferenceInDictionary()
@@ -1131,31 +1133,31 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
 ]", json);
     }
 
-    [Test]
-    public void ReferencedComponentList()
-    {
-      var c1 = new TestComponentSimple();
+//    [Test]
+//    public void ReferencedComponentList()
+//    {
+//      var c1 = new TestComponentSimple();
 
-      ReferencedList<TestComponentSimple> l = new ReferencedList<TestComponentSimple>();
-      l.Add(c1);
-      l.Add(new TestComponentSimple());
-      l.Add(c1);
+//      ReferencedList<TestComponentSimple> l = new ReferencedList<TestComponentSimple>();
+//      l.Add(c1);
+//      l.Add(new TestComponentSimple());
+//      l.Add(c1);
 
-      string json = JsonConvertX.SerializeObject(l, Formatting.Indented);
-      StringAssert.AreEqual(@"[
-  {
-    ""$id"": ""1"",
-    ""MyProperty"": 0
-  },
-  {
-    ""$id"": ""2"",
-    ""MyProperty"": 0
-  },
-  {
-    ""$ref"": ""1""
-  }
-]", json);
-    }
+//      string json = JsonConvertX.SerializeObject(l, Formatting.Indented);
+//      StringAssert.AreEqual(@"[
+//  {
+//    ""$id"": ""1"",
+//    ""MyProperty"": 0
+//  },
+//  {
+//    ""$id"": ""2"",
+//    ""MyProperty"": 0
+//  },
+//  {
+//    ""$ref"": ""1""
+//  }
+//]", json);
+//    }
 
     [Test]
     public void ReferencedIntDictionary()
@@ -1173,118 +1175,118 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
 }", json);
     }
 
-    [Test]
-    public void ReferencedComponentDictionary()
-    {
-      var c1 = new TestComponentSimple();
+//    [Test]
+//    public void ReferencedComponentDictionary()
+//    {
+//      var c1 = new TestComponentSimple();
 
-      ReferencedDictionary<TestComponentSimple> l = new ReferencedDictionary<TestComponentSimple>();
-      l.Add("First", c1);
-      l.Add("Second", new TestComponentSimple());
-      l.Add("Third", c1);
+//      ReferencedDictionary<TestComponentSimple> l = new ReferencedDictionary<TestComponentSimple>();
+//      l.Add("First", c1);
+//      l.Add("Second", new TestComponentSimple());
+//      l.Add("Third", c1);
 
-      string json = JsonConvertX.SerializeObject(l, Formatting.Indented);
-      StringAssert.AreEqual(@"{
-  ""First"": {
-    ""$id"": ""1"",
-    ""MyProperty"": 0
-  },
-  ""Second"": {
-    ""$id"": ""2"",
-    ""MyProperty"": 0
-  },
-  ""Third"": {
-    ""$ref"": ""1""
-  }
-}", json);
+//      string json = JsonConvertX.SerializeObject(l, Formatting.Indented);
+//      StringAssert.AreEqual(@"{
+//  ""First"": {
+//    ""$id"": ""1"",
+//    ""MyProperty"": 0
+//  },
+//  ""Second"": {
+//    ""$id"": ""2"",
+//    ""MyProperty"": 0
+//  },
+//  ""Third"": {
+//    ""$ref"": ""1""
+//  }
+//}", json);
 
-      ReferencedDictionary<TestComponentSimple> d = JsonConvertX.DeserializeObject<ReferencedDictionary<TestComponentSimple>>(json);
-      Assert.AreEqual(3, d.Count);
-      Assert.IsTrue(ReferenceEquals(d["First"], d["Third"]));
-    }
+//      ReferencedDictionary<TestComponentSimple> d = JsonConvertX.DeserializeObject<ReferencedDictionary<TestComponentSimple>>(json);
+//      Assert.AreEqual(3, d.Count);
+//      Assert.IsTrue(ReferenceEquals(d["First"], d["Third"]));
+//    }
 
-    [Test]
-    public void ReferencedObjectItems()
-    {
-      ReferenceObject o1 = new ReferenceObject();
+//    [Test]
+//    public void ReferencedObjectItems()
+//    {
+//      ReferenceObject o1 = new ReferenceObject();
 
-      o1.Component1 = new TestComponentSimple { MyProperty = 1 };
-      o1.Component2 = o1.Component1;
-      o1.ComponentNotReference = new TestComponentSimple();
-      o1.String = "String!";
-      o1.Integer = int.MaxValue;
+//      o1.Component1 = new TestComponentSimple { MyProperty = 1 };
+//      o1.Component2 = o1.Component1;
+//      o1.ComponentNotReference = new TestComponentSimple();
+//      o1.String = "String!";
+//      o1.Integer = int.MaxValue;
 
-      string json = JsonConvertX.SerializeObject(o1, Formatting.Indented);
-      string expected = @"{
-  ""Component1"": {
-    ""$id"": ""1"",
-    ""MyProperty"": 1
-  },
-  ""Component2"": {
-    ""$ref"": ""1""
-  },
-  ""ComponentNotReference"": {
-    ""MyProperty"": 0
-  },
-  ""String"": ""String!"",
-  ""Integer"": 2147483647
-}";
-      StringAssert.AreEqual(expected, json);
+//      string json = JsonConvertX.SerializeObject(o1, Formatting.Indented);
+//      string expected = @"{
+//  ""Component1"": {
+//    ""$id"": ""1"",
+//    ""MyProperty"": 1
+//  },
+//  ""Component2"": {
+//    ""$ref"": ""1""
+//  },
+//  ""ComponentNotReference"": {
+//    ""MyProperty"": 0
+//  },
+//  ""String"": ""String!"",
+//  ""Integer"": 2147483647
+//}";
+//      StringAssert.AreEqual(expected, json);
 
-      ReferenceObject referenceObject = JsonConvertX.DeserializeObject<ReferenceObject>(json);
-      Assert.IsNotNull(referenceObject);
+//      ReferenceObject referenceObject = JsonConvertX.DeserializeObject<ReferenceObject>(json);
+//      Assert.IsNotNull(referenceObject);
 
-      Assert.IsTrue(ReferenceEquals(referenceObject.Component1, referenceObject.Component2));
-    }
+//      Assert.IsTrue(ReferenceEquals(referenceObject.Component1, referenceObject.Component2));
+//    }
 
-    [Test]
-    public void PropertyItemIsReferenceObject()
-    {
-      TestComponentSimple c1 = new TestComponentSimple();
+//    [Test]
+//    public void PropertyItemIsReferenceObject()
+//    {
+//      TestComponentSimple c1 = new TestComponentSimple();
 
-      PropertyItemIsReferenceObject o1 = new PropertyItemIsReferenceObject
-      {
-        Data = new PropertyItemIsReferenceBody
-        {
-          Prop1 = c1,
-          Prop2 = c1,
-          Data = new List<TestComponentSimple>
-                    {
-                        c1
-                    }
-        }
-      };
+//      PropertyItemIsReferenceObject o1 = new PropertyItemIsReferenceObject
+//      {
+//        Data = new PropertyItemIsReferenceBody
+//        {
+//          Prop1 = c1,
+//          Prop2 = c1,
+//          Data = new List<TestComponentSimple>
+//                    {
+//                        c1
+//                    }
+//        }
+//      };
 
-      string json = JsonConvertX.SerializeObject(o1, Formatting.Indented);
-      StringAssert.AreEqual(@"{
-  ""Data"": {
-    ""Prop1"": {
-      ""$id"": ""1"",
-      ""MyProperty"": 0
-    },
-    ""Prop2"": {
-      ""$ref"": ""1""
-    },
-    ""Data"": {
-      ""$id"": ""2"",
-      ""$values"": [
-        {
-          ""MyProperty"": 0
-        }
-      ]
-    }
-  }
-}", json);
+//      string json = JsonConvertX.SerializeObject(o1, Formatting.Indented);
+//      StringAssert.AreEqual(@"{
+//  ""Data"": {
+//    ""Prop1"": {
+//      ""$id"": ""1"",
+//      ""MyProperty"": 0
+//    },
+//    ""Prop2"": {
+//      ""$ref"": ""1""
+//    },
+//    ""Data"": {
+//      ""$id"": ""2"",
+//      ""$values"": [
+//        {
+//          ""MyProperty"": 0
+//        }
+//      ]
+//    }
+//  }
+//}", json);
 
-      PropertyItemIsReferenceObject o2 = JsonConvertX.DeserializeObject<PropertyItemIsReferenceObject>(json);
+//      PropertyItemIsReferenceObject o2 = JsonConvertX.DeserializeObject<PropertyItemIsReferenceObject>(json);
 
-      TestComponentSimple c2 = o2.Data.Prop1;
-      TestComponentSimple c3 = o2.Data.Prop2;
-      TestComponentSimple c4 = o2.Data.Data[0];
+//      TestComponentSimple c2 = o2.Data.Prop1;
+//      TestComponentSimple c3 = o2.Data.Prop2;
+//      TestComponentSimple c4 = o2.Data.Data[0];
 
-      Assert.IsTrue(ReferenceEquals(c2, c3));
-      Assert.IsFalse(ReferenceEquals(c2, c4));
-    }
+//      Assert.IsTrue(ReferenceEquals(c2, c3));
+//      Assert.IsFalse(ReferenceEquals(c2, c4));
+//    }
 
     [Test]
     public void DuplicateId()

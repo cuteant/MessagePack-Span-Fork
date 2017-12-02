@@ -151,8 +151,9 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
 }", json);
         }
 
-#if !(PORTABLE || DNXCORE50 || PORTABLE40)
-        public class MainClass : ISerializable
+#if !(PORTABLE || DNXCORE50 || PORTABLE40) || NETSTANDARD1_3 || NETSTANDARD2_0
+    [Serializable]
+    public class MainClass : ISerializable
         {
             public ChildClass Child { get; set; }
 
@@ -162,7 +163,8 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             }
         }
 
-        public class ChildClass : ISerializable
+    [Serializable]
+    public class ChildClass : ISerializable
         {
             public string Name { get; set; }
             public MainClass Parent { get; set; }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NETSTANDARD
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -263,3 +264,4 @@ namespace CuteAnt.Extensions.Serialization.Tests
     }
   }
 }
+#endif

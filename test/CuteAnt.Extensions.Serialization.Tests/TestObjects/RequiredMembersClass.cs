@@ -24,7 +24,6 @@
 #endregion
 
 using System;
-using Newtonsoft.Json;
 
 namespace Newtonsoft.Json.Tests.TestObjects
 {

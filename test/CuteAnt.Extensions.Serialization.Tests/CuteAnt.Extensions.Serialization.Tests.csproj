@@ -9,33 +9,45 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkPackageVersion)" />
-    <PackageReference Include="xunit" Version="$(xUnitPackageVersion)" />
-    <PackageReference Include="xunit.analyzers" Version="$(xUnitAnalyzersPackageVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitRunnerVsPackageVersion)" />
     <PackageReference Include="Autofac.Unofficial" Version="$(AutofacUnofficialPackageVersion)" />
+    <PackageReference Include="System.Buffers" Version="$(SystemBuffersPackageVersion)" />
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutablePackageVersion)" />
+    <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization\CuteAnt.Extensions.Serialization.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data.Entity" />
-    <Reference Include="System.Data.Linq" />
+  <ItemGroup Condition=" '$(TargetFramework)'=='net452' ">
+    <PackageReference Include="NUnit" Version="$(NUnitPackageVersion)" />
+    <PackageReference Include="NUnit3TestAdapter" Version="$(NUnit3TestAdapterPackageVersion)" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Data.DataSetExtensions" />
   </ItemGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)'=='net452' ">
+    <DefineConstants>PORTABLE;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
 
-  <ItemGroup>
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  <ItemGroup Condition=" '$(TargetFramework)'=='netcoreapp2.0' ">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkPackageVersion)" />
+    <PackageReference Include="xunit" Version="$(xUnitPackageVersion)" />
+    <PackageReference Include="xunit.analyzers" Version="$(xUnitAnalyzersPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitRunnerVsPackageVersion)" />
+    <PackageReference Include="System.ObjectModel" Version="$(SystemObjectModelPackageVersion)" />
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="$(SystemRuntimeSerializationPrimitivesPackageVersion)" />
+    <PackageReference Include="System.Runtime.Serialization.Xml" Version="$(SystemRuntimeSerializationXmlPackageVersion)" />
+    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="$(SystemRuntimeSerializationFormattersPackageVersion)" />
+    <PackageReference Include="System.Xml.XmlSerializer" Version="$(SystemXmlXmlSerializerPackageVersion)" />
   </ItemGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)'=='netcoreapp2.0' ">
+    <DefineConstants>NETSTANDARD2_0;DNXCORE50;PORTABLE;HAVE_BENCHMARKS;</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
     <None Update="bunny_pancake.jpg">

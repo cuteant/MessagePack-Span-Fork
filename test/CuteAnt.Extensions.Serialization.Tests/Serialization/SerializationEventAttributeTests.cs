@@ -273,8 +273,8 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
 }", json);
         }
 
-#if !(PORTABLE || DNXCORE50)
-        public class SerializationEventContextTestObject
+#if !(PORTABLE || DNXCORE50) || NETSTANDARD2_0
+    public class SerializationEventContextTestObject
         {
             public string TestMember { get; set; }
 
@@ -304,8 +304,9 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
         }
 #endif
 
-#if !(PORTABLE || DNXCORE50)
-        public void WhenSerializationErrorDetectedBySerializer_ThenCallbackIsCalled()
+#if !(PORTABLE || DNXCORE50) || NETSTANDARD2_0
+    [Test]
+    public void WhenSerializationErrorDetectedBySerializer_ThenCallbackIsCalled()
         {
             // Verify contract is properly finding our callback
             var resolver = new DefaultContractResolver().ResolveContract(typeof(FooEvent));

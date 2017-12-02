@@ -30,7 +30,7 @@ using System.Reflection;
 #if DNXCORE50
 using Xunit;
 using Test = Xunit.FactAttribute;
-using Assert = CuteAnt.Extensions.Serialization.Tests.XUnitAssert;
+using Assert = CuteAnt.Extensions.Serialization.Json.Tests.XUnitAssert;
 #else
 using NUnit.Framework;
 #endif
@@ -38,14 +38,14 @@ using Newtonsoft.Json.Serialization;
 using CuteAnt.Extensions.Serialization.Json.Utilities;
 using Newtonsoft.Json.Tests.TestObjects;
 using Newtonsoft.Json.Tests.TestObjects.Organization;
-using CuteAnt.Extensions.Serialization.Tests.Serialization;
+using CuteAnt.Extensions.Serialization.Json.Tests.Serialization;
 #if NET20
 using CuteAnt.Extensions.Serialization.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif
 
-namespace CuteAnt.Extensions.Serialization.Tests.Utilities
+namespace CuteAnt.Extensions.Serialization.Json.Tests.Utilities
 {
     [TestFixture]
     public class DynamicReflectionDelegateFactoryTests : TestFixtureBase
@@ -159,7 +159,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Utilities
         [Test]
         public void CreateStaticMethodCall()
         {
-            MethodInfo castMethodInfo = typeof(JsonSerializerTest.DictionaryKey).GetMethod("op_Implicit", new[] { typeof(string) });
+            MethodInfo castMethodInfo = typeof(DictionaryKey).GetMethod("op_Implicit", new[] { typeof(string) });
 
             Assert.IsNotNull(castMethodInfo);
 
@@ -168,7 +168,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Utilities
             object result = call(null, "First!");
             Assert.IsNotNull(result);
 
-            JsonSerializerTest.DictionaryKey key = (JsonSerializerTest.DictionaryKey)result;
+            DictionaryKey key = (DictionaryKey)result;
             Assert.AreEqual("First!", key.Value);
         }
 
