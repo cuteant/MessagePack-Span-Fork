@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\version.props" />
+  <Import Project="..\nuget.props" />
+  <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems" Label="Shared" />
+  
+  <PropertyGroup>
+    <TargetFrameworks>net471;net451;net40;netstandard2.0</TargetFrameworks>
+    <RootNamespace>CuteAnt.Extensions.Serialization</RootNamespace>
+    <AssemblyName>CuteAnt.Extensions.Serialization.ServiceStack</AssemblyName>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet">
+    <PackageId>CuteAnt.Extensions.Serialization.ServiceStack</PackageId>
+    <Title>CuteAnt.Extensions.Serialization.ServiceStack</Title>
+    <Description>CuteAnt.Extensions.Serialization.ServiceStack</Description>
+    <PackageTags>Serializer</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CuteAnt.Extensions.Serialization.Abstractions\CuteAnt.Extensions.Serialization.Abstractions.csproj" />
+    <ProjectReference Include="..\ServiceStack.Text\ServiceStack.Text.csproj" />
+  </ItemGroup>
+</Project>
