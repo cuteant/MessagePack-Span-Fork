@@ -6,7 +6,7 @@
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(NETCoreApp2RuntimeFrameworkVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <DebugType Condition="'$(TargetFramework)' != '' AND '$(TargetFramework)' != 'netcoreapp2.0'">portable</DebugType>
+    <DebugType Condition=" '$(TargetFramework)' != '' AND '$(TargetFramework)' != 'netcoreapp2.0' ">portable</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
