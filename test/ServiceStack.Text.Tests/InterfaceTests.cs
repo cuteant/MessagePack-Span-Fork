@@ -31,8 +31,11 @@ namespace ServiceStack.Text.Tests
 
             var assembly = typeof(string).Assembly.GetName().Name;
 
+            //Assert.That(messageString, Is.EqualTo(
+            //"{__type:\"ServiceStack.Messaging.Message`1[[System.String, " + assembly + "]], ServiceStack.Interfaces\","
+            // + "Id:00000000000000000000000000000000,CreatedDate:0001-01-01,Priority:0,RetryAttempts:0,Options:1,Body:test}"));
             Assert.That(messageString, Is.EqualTo(
-            "{__type:\"ServiceStack.Messaging.Message`1[[System.String, " + assembly + "]], ServiceStack.Interfaces\","
+            "{__type:\"ServiceStack.Messaging.Message`1[[System.String]], ServiceStack.Interfaces\","
              + "Id:00000000000000000000000000000000,CreatedDate:0001-01-01,Priority:0,RetryAttempts:0,Options:1,Body:test}"));
         }
 

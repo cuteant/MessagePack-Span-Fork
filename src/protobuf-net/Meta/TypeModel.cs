@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections;
 using CuteAnt.IO;
+using CuteAnt.Reflection;
 #if FEAT_IKVM
 using Type = IKVM.Reflection.Type;
 using IKVM.Reflection;
@@ -1490,7 +1491,9 @@ namespace ProtoBuf.Meta
           if (!Helpers.IsNullOrEmpty(args.FormattedName)) return args.FormattedName;
         }
       }
-      return type.AssemblyQualifiedName;
+      // ## 苦竹 修改 ##
+      //return type.AssemblyQualifiedName;
+      return TypeUtils.GetSimpleTypeName(type);
     }
 
     internal static System.Type DeserializeType(TypeModel model, string value)
@@ -1506,7 +1509,9 @@ namespace ProtoBuf.Meta
           if (args.Type != null) return args.Type;
         }
       }
-      return System.Type.GetType(value);
+      // ## 苦竹 修改 ##
+      //return System.Type.GetType(value);
+      return TypeUtils.ResolveType(value);
     }
 
     /// <summary>

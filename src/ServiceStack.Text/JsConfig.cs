@@ -526,7 +526,7 @@ namespace ServiceStack.Text
             {
                 return (JsConfigScope.Current != null ? JsConfigScope.Current.TypeWriter : null)
                     ?? sTypeWriter
-                    ?? AssemblyUtils.WriteType;
+                    ?? TypeUtils.GetSimpleTypeName; // ## 苦竹 修改 AssemblyUtils.WriteType; ##
             }
             set
             {

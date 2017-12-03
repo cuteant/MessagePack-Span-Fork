@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using CuteAnt.Reflection;
 using ServiceStack.Common.Support;
 
 namespace ServiceStack.Text
@@ -26,28 +27,29 @@ namespace ServiceStack.Text
         /// <returns></returns>
         public static Type FindType(string typeName)
         {
-            Type type = null;
-            if (TypeCache.TryGetValue(typeName, out type)) return type;
+            //Type type = null;
+            //if (TypeCache.TryGetValue(typeName, out type)) return type;
 
-            type = Type.GetType(typeName);
-            if (type == null)
-            {
-                var typeDef = new AssemblyTypeDefinition(typeName);
-                type = !string.IsNullOrEmpty(typeDef.AssemblyName) 
-                    ? FindType(typeDef.TypeName, typeDef.AssemblyName) 
-                    : FindTypeFromLoadedAssemblies(typeDef.TypeName);
-            }
+            //type = Type.GetType(typeName);
+            //if (type == null)
+            //{
+            //    var typeDef = new AssemblyTypeDefinition(typeName);
+            //    type = !string.IsNullOrEmpty(typeDef.AssemblyName) 
+            //        ? FindType(typeDef.TypeName, typeDef.AssemblyName) 
+            //        : FindTypeFromLoadedAssemblies(typeDef.TypeName);
+            //}
 
-            Dictionary<string, Type> snapshot, newCache;
-            do
-            {
-                snapshot = TypeCache;
-                newCache = new Dictionary<string, Type>(TypeCache) { [typeName] = type };
+            //Dictionary<string, Type> snapshot, newCache;
+            //do
+            //{
+            //    snapshot = TypeCache;
+            //    newCache = new Dictionary<string, Type>(TypeCache) { [typeName] = type };
 
-            } while (!ReferenceEquals(
-                Interlocked.CompareExchange(ref TypeCache, newCache, snapshot), snapshot));
-
-            return type;
+            //} while (!ReferenceEquals(
+            //    Interlocked.CompareExchange(ref TypeCache, newCache, snapshot), snapshot));
+            //return type;
+            if (TypeUtils.TryResolveType(typeName, out var type)) { return type; }
+            return null;
         }
 
         /// <summary>
@@ -121,7 +123,8 @@ namespace ServiceStack.Text
 
         public static string WriteType(Type type)
         {
-            return type.ToTypeString();
+            //return type.ToTypeString();
+            return TypeUtils.GetSimpleTypeName(type);
         }
     }
 }

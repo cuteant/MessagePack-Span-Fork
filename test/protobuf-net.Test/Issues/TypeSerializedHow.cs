@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using CuteAnt.Reflection;
 using Xunit;
 
 namespace ProtoBuf.Issues
@@ -33,8 +34,9 @@ namespace ProtoBuf.Issues
 
             var clone = Serializer.ChangeType<ModelWithTypeMember,EquivModel>(obj);
             Assert.Equal(123, clone.Id);
-            Assert.Equal(typeof(Uri).AssemblyQualifiedName, clone.SomeType);
-        }
+            //Assert.Equal(typeof(Uri).AssemblyQualifiedName, clone.SomeType);
+            Assert.Equal(TypeUtils.GetSimpleTypeName(typeof(Uri)), clone.SomeType);
+    }
 
         [Fact]
         public void TypeGeneratesProto()
