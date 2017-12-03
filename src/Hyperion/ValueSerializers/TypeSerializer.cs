@@ -56,7 +56,7 @@ namespace Hyperion.ValueSerializers
                     }
                     //type was not written before, add it to the tacked object list
                     //var name = type.GetShortAssemblyQualifiedName();
-                    var name = TypeUtils.GetSimpleTypeName(type);
+                    var name = RuntimeTypeNameFormatter.Format(type);
                     StringSerializer.WriteValueImpl(stream, name, session);
                 }
             }

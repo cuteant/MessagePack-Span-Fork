@@ -124,7 +124,7 @@ namespace ServiceStack.Text
         public static string WriteType(Type type)
         {
             //return type.ToTypeString();
-            return TypeUtils.GetSimpleTypeName(type);
+            return RuntimeTypeNameFormatter.Format(type);
         }
     }
 }

@@ -1493,7 +1493,7 @@ namespace ProtoBuf.Meta
       }
       // ## 苦竹 修改 ##
       //return type.AssemblyQualifiedName;
-      return TypeUtils.GetSimpleTypeName(type);
+      return RuntimeTypeNameFormatter.Format(type);
     }
 
     internal static System.Type DeserializeType(TypeModel model, string value)

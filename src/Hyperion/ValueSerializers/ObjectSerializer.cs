@@ -38,7 +38,7 @@ namespace Hyperion.ValueSerializers
             Type = type;
             //TODO: remove version info
             //var typeName = type.GetShortAssemblyQualifiedName();
-            var typeName = TypeUtils.GetSimpleTypeName(type);
+            var typeName = RuntimeTypeNameFormatter.Format(type);
             // ReSharper disable once PossibleNullReferenceException
             // ReSharper disable once AssignNullToNotNullAttribute
             var typeNameBytes = typeName.ToUtf8Bytes();
