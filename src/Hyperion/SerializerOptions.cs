@@ -21,7 +21,7 @@ namespace Hyperion
     internal static readonly Surrogate[] EmptySurrogates = new Surrogate[0];
     public static readonly Surrogate[] DefaultSurrogates = new Surrogate[]
     {
-      Surrogate.Create<DateTimeOffset, DateTimeOffsetSurrogate>(DateTimeOffsetSurrogate.ToSurrogate, DateTimeOffsetSurrogate.FromSurrogate),
+      //Surrogate.Create<DateTimeOffset, DateTimeOffsetSurrogate>(DateTimeOffsetSurrogate.ToSurrogate, DateTimeOffsetSurrogate.FromSurrogate),
       // 内部序列化 TimeSpan 字节数要小些
       //Surrogate.Create<TimeSpan, TimeSpanSurrogate>(TimeSpanSurrogate.ToSurrogate, TimeSpanSurrogate.FromSurrogate),
       Surrogate.Create<Uri, UriSurrogate>(UriSurrogate.ToSurrogate, UriSurrogate.FromSurrogate),
