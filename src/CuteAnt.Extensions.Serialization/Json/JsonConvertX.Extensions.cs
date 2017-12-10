@@ -161,8 +161,7 @@ namespace Newtonsoft.Json
       DefaultDeserializerSettings = CreateDefaultSerializerSettings();
       DefaultDeserializerSettings.DateParseHandling = DateParseHandling.None;
 
-      // Newtonsoft.Json.Serialization.DefaultSerializationBinder.Instance属性没有公开
-      DefaultSerializationBinder = new JsonSerializer().SerializationBinder;
+      DefaultSerializationBinder = JsonSerializationBinder.Instance;
     }
 
     #endregion

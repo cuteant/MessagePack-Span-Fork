@@ -71,11 +71,6 @@ namespace ServiceStack
             return File.ReadAllText(filePath);
         }
 
-        public override string ToTitleCase(string value)
-        {
-            return TextInfo.ToTitleCase(value).Replace("_", String.Empty);
-        }
-
         public override string ToInvariantUpper(char value)
         {
             return value.ToString(CultureInfo.InvariantCulture).ToUpper();
@@ -596,7 +591,7 @@ namespace ServiceStack
   }
 #endif
 
-#if NET451 || NET471 || NETFX_CORE
+#if NET451 || NET471 || NETSTANDARD2_0
     public class Net45PclExport : Net40PclExport
     {
         public static new Net45PclExport Provider = new Net45PclExport();
@@ -605,8 +600,10 @@ namespace ServiceStack
         {
 #if NET451
             PlatformName = "NET45 " + Environment.OSVersion.Platform.ToString();
-#else
+#elif NET471
             PlatformName = "NET47 " + Environment.OSVersion.Platform.ToString();
+#else
+            PlatformName = "NETSTANDARD " + Environment.OSVersion.Platform.ToString();
 #endif
         }
 

@@ -13,10 +13,10 @@
 using System;
 using System.Globalization;
 using System.IO;
-using ServiceStack.Text.Json;
-using ServiceStack.Text.Support;
 using System.Text.RegularExpressions;
 using CuteAnt.Pool;
+using ServiceStack.Text.Json;
+using ServiceStack.Text.Support;
 
 namespace ServiceStack.Text.Common
 {
@@ -52,7 +52,6 @@ namespace ServiceStack.Text.Common
         /// If AlwaysUseUtc is set to true then convert all DateTime to UTC. If PreserveUtc is set to true then UTC dates will not convert to local
         /// </summary>
         /// <param name="dateTime"></param>
-        /// <param name="parsedAsUtc"></param>
         /// <returns></returns>
         public static DateTime Prepare(this DateTime dateTime, bool parsedAsUtc = false)
         {
@@ -442,6 +441,7 @@ namespace ServiceStack.Text.Common
 
         public static string ToShortestXsdDateTimeString(DateTime dateTime)
         {
+            dateTime = dateTime.UseConfigSpecifiedSetting();
             var timeOfDay = dateTime.TimeOfDay;
 
             var isStartOfDay = timeOfDay.Ticks == 0;
@@ -582,13 +582,18 @@ namespace ServiceStack.Text.Common
 
         internal static TimeZoneInfo LocalTimeZone = GetLocalTimeZoneInfo();
 
-        public static void WriteWcfJsonDate(TextWriter writer, DateTime dateTime)
+        private static DateTime UseConfigSpecifiedSetting(this DateTime dateTime)
         {
             if (JsConfig.AssumeUtc && dateTime.Kind == DateTimeKind.Unspecified)
             {
-                dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+                return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
             }
+            return dateTime;
+        }
 
+        public static void WriteWcfJsonDate(TextWriter writer, DateTime dateTime)
+        {
+            dateTime = dateTime.UseConfigSpecifiedSetting();
             switch (JsConfig.DateHandler)
             {
                 case DateHandler.ISO8601:

@@ -106,6 +106,20 @@ namespace ServiceStack
             return url + prefix + key + "=" + val.UrlEncode();
         }
 
+        public static bool HasRequestBody(string httpMethod)
+        {
+            switch (httpMethod)
+            {
+                case HttpMethods.Get:
+                case HttpMethods.Delete:
+                case HttpMethods.Head:
+                case HttpMethods.Options:
+                    return false;
+            }
+
+            return true;
+        }
+
         public static string GetJsonFromUrl(this string url,
             Action<HttpWebRequest> requestFilter = null, Action<HttpWebResponse> responseFilter = null)
         {
@@ -519,6 +533,10 @@ namespace ServiceStack
                 {
                     writer.Write(requestBody);
                 }
+            }
+            else if (method != null && HasRequestBody(method))
+            {
+                webReq.ContentLength = 0;
             }
 
             using (var webRes = PclExport.Instance.GetResponse(webReq))
@@ -1419,7 +1437,7 @@ namespace ServiceStack
 
     public static class HttpMethods
     {
-        static readonly string[] allVerbs = new[] {
+        static readonly string[] allVerbs = {
             "OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "CONNECT", // RFC 2616
             "PROPFIND", "PROPPATCH", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK",    // RFC 2518
             "VERSION-CONTROL", "REPORT", "CHECKOUT", "CHECKIN", "UNCHECKOUT",
@@ -1434,14 +1452,8 @@ namespace ServiceStack
 
         public static HashSet<string> AllVerbs = new HashSet<string>(allVerbs);
 
-        public static bool HasVerb(string httpVerb)
-        {
-#if NETFX_CORE
-            return allVerbs.Any(p => p.Equals(httpVerb.ToUpper()));
-#else
-            return AllVerbs.Contains(httpVerb.ToUpper());
-#endif
-        }
+        public static bool Exists(string httpMethod) => AllVerbs.Contains(httpMethod.ToUpper());
+        public static bool HasVerb(string httpVerb) => Exists(httpVerb);
 
         public const string Get = "GET";
         public const string Put = "PUT";

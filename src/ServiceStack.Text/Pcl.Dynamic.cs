@@ -12,7 +12,8 @@ using ServiceStack.Text.Json;
 using System.Linq;
 using CuteAnt.Pool;
 using Microsoft.Extensions.Primitives;
-#if !(SL5 ||  __IOS__ || NETFX_CORE)
+
+#if !(__IOS__)
 using System.Reflection;
 using System.Reflection.Emit;
 #endif
@@ -188,7 +189,7 @@ namespace ServiceStack
         }
     }
 
-#if !(SL5 ||  __IOS__ || NETFX_CORE)
+#if !(__IOS__)
     public static class DynamicProxy
     {
         public static T GetInstanceFor<T>()
