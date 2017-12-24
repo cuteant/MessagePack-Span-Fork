@@ -5,11 +5,11 @@
     <Company>CuteAnt Development Team(cuteant@outlook.com)</Company>
     <Product>CuteAnt</Product>
     <Copyright>Copyright © CuteAnt Development Team</Copyright>
-    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
-    <PackageProjectUrl>http://git.oschina.net/cuteant</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/cuteant/CuteAnt.Serialization/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/cuteant/CuteAnt.Serialization</PackageProjectUrl>
     <PackageIconUrl>http://go.microsoft.com/fwlink/?LinkID=288859</PackageIconUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>http://git.oschina.net/cuteant</RepositoryUrl>
+    <RepositoryUrl>https://github.com/cuteant/CuteAnt.Serialization.git</RepositoryUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
     <IncludeSymbols>false</IncludeSymbols>
     <IncludeSource>false</IncludeSource>
