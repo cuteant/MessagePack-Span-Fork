@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2010
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1F97D5A4-285F-4962-8F8C-BCEF8278143B}"
 EndProject
@@ -54,6 +54,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CuteAnt.Extensions.Serialization.ServiceStack", "src\CuteAnt.Extensions.Serialization.ServiceStack\CuteAnt.Extensions.Serialization.ServiceStack.csproj", "{5E666721-75A0-451F-A95A-730ED7D8B746}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CuteAnt.Extensions.Serialization.Protobuf", "src\CuteAnt.Extensions.Serialization.Protobuf\CuteAnt.Extensions.Serialization.Protobuf.csproj", "{09A05F56-0B9D-4230-B19E-9AD404DDEF46}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagePack", "src\MessagePack\MessagePack.csproj", "{C82DFDED-7943-4F53-958F-7E281EDC6920}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -127,6 +129,10 @@ Global
 		{09A05F56-0B9D-4230-B19E-9AD404DDEF46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09A05F56-0B9D-4230-B19E-9AD404DDEF46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09A05F56-0B9D-4230-B19E-9AD404DDEF46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C82DFDED-7943-4F53-958F-7E281EDC6920}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C82DFDED-7943-4F53-958F-7E281EDC6920}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C82DFDED-7943-4F53-958F-7E281EDC6920}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C82DFDED-7943-4F53-958F-7E281EDC6920}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -151,6 +157,7 @@ Global
 		{5660C366-2E9C-4093-B574-CE04646757B6} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{5E666721-75A0-451F-A95A-730ED7D8B746} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{09A05F56-0B9D-4230-B19E-9AD404DDEF46} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
+		{C82DFDED-7943-4F53-958F-7E281EDC6920} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93230366-D5C3-4397-83D3-ED46E43B8121}
