@@ -4,7 +4,7 @@
     <Authors>ServiceStack, Seabiscuit</Authors>
     <Company>ServiceStack</Company>
     <Product>ServiceStack.Text</Product>
-    <Copyright>ServiceStack 2016 and contributors</Copyright>
+    <Copyright>ServiceStack 2018 and contributors</Copyright>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <PackageIconUrl>https://servicestack.net/img/logo-32.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/ServiceStack/ServiceStack.Text</PackageProjectUrl>
