@@ -1,0 +1,17 @@
+<Project>
+  <!-- Set common properties regarding assembly information and nuget packages -->
+  <PropertyGroup>
+    <Authors>neuecc, Seabiscuit</Authors>
+    <Company>neuecc</Company>
+    <Product>MessagePack</Product>
+    <Copyright>neuecc 2018</Copyright>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageProjectUrl>https://github.com/neuecc/MessagePack-CSharp/</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/neuecc/MessagePack-CSharp/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/neuecc/MessagePack-CSharp.git</RepositoryUrl>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <IncludeSymbols>false</IncludeSymbols>
+    <IncludeSource>false</IncludeSource>
+  </PropertyGroup>
+</Project>

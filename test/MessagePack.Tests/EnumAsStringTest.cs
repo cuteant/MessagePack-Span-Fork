@@ -1,5 +1,6 @@
 ﻿using MessagePack.Resolvers;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace MessagePack.Tests
@@ -29,7 +30,7 @@ namespace MessagePack.Tests
 
     public class EnumAsStringTest
     {
-        public static object enumData = new object[]
+        public static IEnumerable<object[]> enumData = new []
         {
             // simple
             new object[] { AsString.Foo, null, "Foo", "null" },

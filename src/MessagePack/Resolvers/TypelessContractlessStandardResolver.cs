@@ -1,4 +1,4 @@
-﻿#if NETSTANDARD
+﻿#if NETSTANDARD || DESKTOPCLR
 using MessagePack.Formatters;
 
 namespace MessagePack.Resolvers

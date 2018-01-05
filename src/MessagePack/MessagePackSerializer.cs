@@ -119,7 +119,7 @@ namespace MessagePack
             stream.Write(buffer, 0, len);
         }
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
         /// <summary>
         /// Serialize to stream(async).
@@ -204,7 +204,7 @@ namespace MessagePack
 
             if (!readStrict)
             {
-#if NETSTANDARD && !NET45
+#if NETSTANDARD || NET_4_5_GREATER
 
                 var ms = stream as MemoryStream;
                 if (ms != null)
@@ -238,7 +238,7 @@ namespace MessagePack
             }
         }
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
         public static System.Threading.Tasks.Task<T> DeserializeAsync<T>(Stream stream)
         {
