@@ -1027,6 +1027,21 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             Assert.AreEqual("Could not convert string to DateTime: 200NOTDATE. Path 'dateTime1', line 7, position 27.", errorMessages[2]);
         }
 
+        [Test]
+        public void HandleErrorInDictionaryObject()
+        {
+            var json = @"{
+                model1: { String1: 's1', Int1: 'x' },
+                model2: { String1: 's2', Int1: 2 }
+            }";
+            var dictionary = JsonConvert.DeserializeObject<TolerantDictionary<string, DataModel>>(json);
+
+            Assert.AreEqual(1, dictionary.Count);
+            Assert.IsTrue(dictionary.ContainsKey("model2"));
+            Assert.AreEqual("s2", dictionary["model2"].String1);
+            Assert.AreEqual(2, dictionary["model2"].Int1);
+        }
+
         private class DataModel
         {
             public string String1 { get; set; }
@@ -1132,6 +1147,18 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
         [OnError]
         internal void OnError(StreamingContext context, ErrorContext errorContext)
         {
+        }
+    }
+
+    /// <summary>
+    /// A dictionary that ignores deserialization errors and excludes bad items
+    /// </summary>
+    public class TolerantDictionary<TKey, TValue> : Dictionary<TKey, TValue>
+    {
+        [OnError]
+        public void OnDeserializationError(StreamingContext streamingContext, ErrorContext errorContext)
+        {
+            errorContext.Handled = true;
         }
     }
 }

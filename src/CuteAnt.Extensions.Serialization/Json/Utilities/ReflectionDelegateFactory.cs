@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 // Copyright (c) 2007 James Newton-King
 //
 // Permission is hereby granted, free of charge, to any person
@@ -27,6 +27,7 @@ using System;
 using System.Globalization;
 using System.Reflection;
 using Newtonsoft.Json.Serialization;
+
 #if !HAVE_LINQ
 using CuteAnt.Extensions.Serialization.Json.Utilities.LinqBridge;
 #endif
@@ -39,6 +40,12 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
         {
             if (memberInfo is PropertyInfo propertyInfo)
             {
+                // https://github.com/dotnet/corefx/issues/26053
+                if (propertyInfo.PropertyType.IsByRef)
+                {
+                    throw new InvalidOperationException("Could not create getter for {0}. ByRef return values are not supported.".FormatWith(CultureInfo.InvariantCulture, propertyInfo));
+                }
+
                 return CreateGet<T>(propertyInfo);
             }
 

@@ -14,11 +14,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkPackageVersion)" />
+    <PackageReference Include="Mono.Cecil" Version="$(MonoCecilPackageVersion)" />
     <PackageReference Include="NUnit" Version="$(NUnitPackageVersion)" />
     <PackageReference Include="NUnit3TestAdapter" Version="$(NUnit3TestAdapterPackageVersion)" />
     <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
     <PackageReference Include="protobuf-net" Version="$(ProtobufNetPackageVersion)" />
-    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
@@ -38,9 +39,6 @@
     <DefineConstants>$(DefineConstants);NETCORE_SUPPORT;NETCORE;NETSTANDARD2_0</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition=" '$(ImportLibs)' == 'netcore' ">
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkPackageVersion)" />
-    <PackageReference Include="Mono.Cecil" Version="$(MonoCecilPackageVersion)" />
-
     <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Interfaces.dll" />
     <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Client.dll" />
     <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Common.dll" />
