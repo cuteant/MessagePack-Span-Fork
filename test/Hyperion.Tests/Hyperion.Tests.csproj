@@ -2,11 +2,10 @@
   <PropertyGroup>
     <RootNamespace>Hyperion.Tests</RootNamespace>
     <AssemblyName>Hyperion.Tests</AssemblyName>
-    <TargetFrameworks>netcoreapp2.0;net452</TargetFrameworks>
-    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(NETCoreApp2RuntimeFrameworkVersion)</RuntimeFrameworkVersion>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp2.0;net452</TargetFrameworks>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' or '$(TargetFramework)' == 'net451' or '$(TargetFramework)' == 'net40' ">
+  <PropertyGroup Condition=" '$(ImportLibs)' == 'netfx' ">
     <DefineConstants>$(DefineConstants);SERIALIZATION</DefineConstants>
   </PropertyGroup>
 

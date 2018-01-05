@@ -18,20 +18,20 @@
     <PackageTags>serialization akka.net poco</PackageTags>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net471' or '$(TargetFramework)' == 'net451' or '$(TargetFramework)' == 'net40' ">
+  <PropertyGroup Condition=" '$(ImportLibs)' == 'netfx' ">
     <DefineConstants>$(DefineConstants);SERIALIZATION;UNSAFE</DefineConstants>
   </PropertyGroup>
   
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+  <PropertyGroup Condition=" '$(ImportLibs)' == 'netcore' ">
     <DefineConstants>$(DefineConstants);UNSAFE</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net471' or '$(TargetFramework)' == 'net451' or '$(TargetFramework)' == 'net40' ">
+  <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+  <ItemGroup Condition=" '$(ImportLibs)' == 'netcore' ">
     <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpPackageVersion)" />
   </ItemGroup>
 

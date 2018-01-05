@@ -2,11 +2,7 @@
   <PropertyGroup>
     <RootNamespace>ServiceStack.Text.Tests</RootNamespace>
     <AssemblyName>ServiceStack.Text.Tests</AssemblyName>
-    <TargetFrameworks>netcoreapp2.0;net451</TargetFrameworks>
-    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(NETCoreApp2RuntimeFrameworkVersion)</RuntimeFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup>
-    <DebugType Condition=" '$(TargetFramework)' != '' AND '$(TargetFramework)' != 'netcoreapp2.0' ">portable</DebugType>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp2.0;net451</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +15,7 @@
     <PackageReference Include="NUnit3TestAdapter" Version="$(NUnit3TestAdapterPackageVersion)" />
     <PackageReference Include="Mono.Cecil" Version="$(MonoCecilPackageVersion)" />
     <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
-    <PackageReference Include="protobuf-net" Version="2.3.2" />
+    <PackageReference Include="protobuf-net" Version="$(ProtobufNetPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
@@ -37,10 +33,10 @@
     <Reference Include="..\..\lib\net45\ServiceStack.dll" />
     <Reference Include="..\..\lib\net45\Northwind.Common.dll" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+  <PropertyGroup Condition=" '$(ImportLibs)' == 'netcore' ">
     <DefineConstants>$(DefineConstants);NETCORE_SUPPORT;NETCORE;NETSTANDARD2_0</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+  <ItemGroup Condition=" '$(ImportLibs)' == 'netcore' ">
     <PackageReference Include="System.Drawing.Primitives" Version="$(SystemDrawingPrimitivesPackageVersion)" />
     <PackageReference Include="System.Collections.Specialized" Version="$(SystemCollectionsSpecializedPackageVersion)" />
     <PackageReference Include="System.Runtime" Version="$(SystemRuntimePackageVersion)" />

@@ -9,7 +9,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <!-- this is how we will configure the builds relatively cleanly -->
-    <ImportLibs>net</ImportLibs>
     <FeatureCompiler>true</FeatureCompiler>
     <FeatureServiceModel>true</FeatureServiceModel>
     <PlatformXmlSerializer>true</PlatformXmlSerializer>
@@ -21,7 +20,6 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
-    <ImportLibs>core</ImportLibs>
     <FeatureServiceModel>false</FeatureServiceModel>
   </PropertyGroup>
 
@@ -46,10 +44,10 @@
     <DefineConstants>$(DefineConstants);PLAT_BINARYFORMATTER</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(ImportLibs)' == 'net'">
+  <ItemGroup Condition="'$(ImportLibs)' == 'netfx'">
     <Reference Include="System" />
   </ItemGroup>
-  <ItemGroup Condition="'$(ImportLibs)|$(FeatureServiceModel)' == 'net|true'">
+  <ItemGroup Condition="'$(ImportLibs)|$(FeatureServiceModel)' == 'netfx|true'">
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Runtime.Serialization" />
