@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using CuteAnt.Reflection;
 
 namespace MessagePack.Formatters
 {
@@ -78,19 +79,19 @@ namespace MessagePack.Formatters
 
         public static Func<string, Type> BindToType { get; set; }
 
-        static Type DefaultBindToType(string typeName)
-        {
-            return Type.GetType(typeName, false);
-        }
+        //static Type DefaultBindToType(string typeName)
+        //{
+        //    return Type.GetType(typeName, false);
+        //}
 
         // mscorlib or System.Private.CoreLib
         static bool isMscorlib = typeof(int).AssemblyQualifiedName.Contains("mscorlib");
 
-        /// <summary>
-        /// When type name does not have Version, Culture, Public token - sometimes can not find type, example - ExpandoObject
-        /// In that can set to `false`
-        /// </summary>
-        public static volatile bool RemoveAssemblyVersion = true;
+        ///// <summary>
+        ///// When type name does not have Version, Culture, Public token - sometimes can not find type, example - ExpandoObject
+        ///// In that can set to `false`
+        ///// </summary>
+        //public static volatile bool RemoveAssemblyVersion = true;
 
         static TypelessFormatter()
         {
@@ -108,31 +109,31 @@ namespace MessagePack.Formatters
                 return new object();
             }));
 
-            BindToType = DefaultBindToType;
+            BindToType = TypeUtils.ResolveType; // DefaultBindToType;
         }
 
-        // see:http://msdn.microsoft.com/en-us/library/w3f99sx1.aspx
-        // subtract Version, Culture and PublicKeyToken from AssemblyQualifiedName 
-        static string BuildTypeName(Type type)
-        {
-            if (RemoveAssemblyVersion)
-            {
-                string full = type.AssemblyQualifiedName;
+        //// see:http://msdn.microsoft.com/en-us/library/w3f99sx1.aspx
+        //// subtract Version, Culture and PublicKeyToken from AssemblyQualifiedName 
+        //static string BuildTypeName(Type type)
+        //{
+        //    if (RemoveAssemblyVersion)
+        //    {
+        //        string full = type.AssemblyQualifiedName;
 
-                var shortened = SubtractFullNameRegex.Replace(full, "");
-                if (Type.GetType(shortened, false) == null)
-                {
-                    // if type cannot be found with shortened name - use full name
-                    shortened = full;
-                }
+        //        var shortened = SubtractFullNameRegex.Replace(full, "");
+        //        if (Type.GetType(shortened, false) == null)
+        //        {
+        //            // if type cannot be found with shortened name - use full name
+        //            shortened = full;
+        //        }
 
-                return shortened;
-            }
-            else
-            {
-                return type.AssemblyQualifiedName;
-            }
-        }
+        //        return shortened;
+        //    }
+        //    else
+        //    {
+        //        return type.AssemblyQualifiedName;
+        //    }
+        //}
 
         public int Serialize(ref byte[] bytes, int offset, object value, IFormatterResolver formatterResolver)
         {
@@ -158,7 +159,7 @@ namespace MessagePack.Formatters
                 }
                 else
                 {
-                    typeName = StringEncoding.UTF8.GetBytes(BuildTypeName(type));
+                    typeName = StringEncoding.UTF8.GetBytes(RuntimeTypeNameFormatter.Format(type));// BuildTypeName(type));
                 }
                 typeNameCache.TryAdd(type, typeName);
             }

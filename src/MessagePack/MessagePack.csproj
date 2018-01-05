@@ -23,6 +23,9 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CuteAnt.Core" Version="$(CuteAntCorePackageVersion)" />
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'net40' ">
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
     <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
