@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using CuteAnt.Pool;
@@ -92,6 +93,12 @@ namespace ServiceStack
             var writer = StringWriterManager.Allocate();
             GetWriteFn(value.GetType())(writer, value);
             return StringWriterManager.ReturnAndFree(writer);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+        public static void InitAot<T>()
+        {
+            QueryStringWriter<T>.WriteFn();
         }
     }
 

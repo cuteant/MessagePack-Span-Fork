@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using CuteAnt.Reflection;
 using ServiceStack.Text.Common;
@@ -133,6 +134,15 @@ namespace ServiceStack.Text.Json
         internal static WriteObjectDelegate GetValueTypeToStringMethod(Type type)
         {
             return Instance.GetValueTypeToStringMethod(type);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+        public static void InitAot<T>()
+        {
+            Text.Json.JsonWriter<T>.WriteFn();
+            Text.Json.JsonWriter.Instance.GetWriteFn<T>();
+            Text.Json.JsonWriter.Instance.GetValueTypeToStringMethod(typeof(T));
+            JsWriter.GetTypeSerializer<Text.Json.JsonTypeSerializer>().GetWriteFn<T>();
         }
     }
 

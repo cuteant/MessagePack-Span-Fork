@@ -90,8 +90,7 @@ namespace ServiceStack.Text.Common
 
         public static object ParseCollectionType(StringSegment value, Type createType, Type elementType, ParseStringSegmentDelegate parseFn)
         {
-            ParseCollectionDelegate parseDelegate;
-            if (ParseDelegateCache.TryGetValue(elementType, out parseDelegate))
+            if (ParseDelegateCache.TryGetValue(elementType, out ParseCollectionDelegate parseDelegate))
                 return parseDelegate(value, createType, parseFn);
 
             var mi = typeof(DeserializeCollection<TSerializer>).GetStaticMethod("ParseCollection", 

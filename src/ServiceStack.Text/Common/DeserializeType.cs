@@ -282,7 +282,7 @@ namespace ServiceStack.Text.Common
         private static MemberSetter GetSetPropertyMethod(TypeConfig typeConfig, PropertyInfo propertyInfo)
         {
             if (typeConfig.Type != propertyInfo.DeclaringType)
-                propertyInfo = propertyInfo.DeclaringType.GetProperty(propertyInfo.Name);
+                propertyInfo = propertyInfo.DeclaringType.GetProperty(propertyInfo.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
             if (!propertyInfo.CanWrite && !typeConfig.EnableAnonymousFieldSetters) return null;
 
@@ -323,7 +323,7 @@ namespace ServiceStack.Text.Common
         private static MemberSetter GetSetFieldMethod(TypeConfig typeConfig, FieldInfo fieldInfo)
         {
             if (typeConfig.Type != fieldInfo.DeclaringType)
-                fieldInfo = fieldInfo.DeclaringType.GetField(fieldInfo.Name);
+                fieldInfo = fieldInfo.DeclaringType.GetField(fieldInfo.Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
             return PclExport.Instance.CreateSetter(fieldInfo);
         }

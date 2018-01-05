@@ -4,13 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using CuteAnt.Reflection;
 using ServiceStack.Text.Common;
 
 namespace ServiceStack.Text.Jsv
 {
-    internal static class JsvWriter
+    public static class JsvWriter
     {
         public static readonly JsWriter<JsvTypeSerializer> Instance = new JsWriter<JsvTypeSerializer>();
 
@@ -33,8 +34,8 @@ namespace ServiceStack.Text.Jsv
         {
             try
             {
-                WriteObjectDelegate writeFn;
-                if (WriteFnCache.TryGetValue(type, out writeFn)) return writeFn;
+                if (WriteFnCache.TryGetValue(type, out var writeFn))
+                    return writeFn;
 
                 var genericType = typeof(JsvWriter<>).GetCachedGenericType(type);
                 var mi = genericType.GetStaticMethod("WriteFn");
@@ -95,6 +96,15 @@ namespace ServiceStack.Text.Jsv
         {
             return Instance.GetValueTypeToStringMethod(type);
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+        public static void InitAot<T>()
+        {
+            Text.Jsv.JsvWriter<T>.WriteFn();
+            Text.Jsv.JsvWriter.Instance.GetWriteFn<T>();
+            Text.Jsv.JsvWriter.Instance.GetValueTypeToStringMethod(typeof(T));
+            JsWriter.GetTypeSerializer<Text.Jsv.JsvTypeSerializer>().GetWriteFn<T>();
+        }
     }
 
     /// <summary>
@@ -135,9 +145,8 @@ namespace ServiceStack.Text.Jsv
 
         public static void WriteObject(TextWriter writer, object value)
         {
-#if __IOS__
-            if (writer == null) return;
-#endif
+            if (writer == null) return; //AOT
+
             TypeConfig<T>.Init();
 
             try
@@ -159,9 +168,8 @@ namespace ServiceStack.Text.Jsv
 
         public static void WriteRootObject(TextWriter writer, object value)
         {
-#if __IOS__
-            if (writer == null) return;
-#endif
+            if (writer == null) return; //AOT
+
             TypeConfig<T>.Init();
 
             JsState.Depth = 0;
