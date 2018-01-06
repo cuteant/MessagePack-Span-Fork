@@ -12,9 +12,8 @@
 
   <PropertyGroup Label="NuGet">
     <PackageId>Hyperion.Unofficial</PackageId>
-    <Title>Hyperion.Unofficial</Title>
-    <Description>Hyperion, fast binary POCO serializer.
-    The complete port of the Hyperion assembly to support .NET 4.0 and newer.</Description>
+    <Title>Hyperion (Unofficial)</Title>
+    <Description>This package includes a mostly complete port of the Hyperion(for more info see: https://github.com/akkadotnet/Hyperion) assembly to support .NET 4.0 and newer.</Description>
     <PackageTags>serialization akka.net poco</PackageTags>
   </PropertyGroup>
 

@@ -12,8 +12,8 @@
 
   <PropertyGroup Label="NuGet">
     <PackageId>ServiceStack.Text.Unofficial</PackageId>
-    <Title>ServiceStack.Text.Unofficial</Title>
-    <Description>.NET's fastest JSON, JSV and CSV Text Serializers. Fast, Light, Resilient. Contains ServiceStack's high-performance text-processing powers, for more info see: https://servicestack.net/text</Description>
+    <Title>ServiceStack.Text (Unofficial)</Title>
+    <Description>This package includes a mostly complete port of the ServiceStack.Text(for more info see: https://github.com/ServiceStack/ServiceStack.Text) assembly to support .NET 4.0 and newer.</Description>
     <PackageTags>JSON Text Serializer CSV JSV Dump PrettyPrint Fast</PackageTags>
   </PropertyGroup>
 
