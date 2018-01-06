@@ -12,7 +12,10 @@
 
   <PropertyGroup Label="NuGet">
     <PackageId>MessagePack.ImmutableCollection.Unofficial</PackageId>
-    <Title>MessagePack for C# Extension Support for ImmutableCollection (Unofficial)</Title>
+    <Title>
+      MessagePack for C# Extension Support for ImmutableCollection (Unofficial).
+      The complete port of the MessagePack.ImmutableCollection assembly to support .NET 4.0 and newer.
+    </Title>
     <Description>Extremely Fast MessagePack Serializer for C#(.NET, .NET Core, Unity, Xamarin). Extension support for System.Collections.Immutable.</Description>
     <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer</PackageTags>
   </PropertyGroup>

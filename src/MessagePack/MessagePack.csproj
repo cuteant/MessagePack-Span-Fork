@@ -12,7 +12,10 @@
 
   <PropertyGroup Label="NuGet">
     <PackageId>MessagePack.Unofficial</PackageId>
-    <Title>MessagePack for C# (Unofficial)</Title>
+    <Title>
+      MessagePack for C# (Unofficial).
+      The complete port of the MessagePack assembly to support .NET 4.0 and newer.
+    </Title>
     <Description>Extremely Fast MessagePack(MsgPack) Serializer for C#(.NET, .NET Core, Unity, Xamarin).</Description>
     <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer, Unity, Xamarin</PackageTags>
   </PropertyGroup>

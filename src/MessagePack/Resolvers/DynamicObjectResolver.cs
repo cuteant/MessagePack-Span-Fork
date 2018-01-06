@@ -1252,7 +1252,7 @@ typeof(int), typeof(int) });
             public static readonly MethodInfo TypeGetProperty = ExpressionUtility.GetMethodInfo((Type t) => t.GetTypeInfo().GetProperty(default(string), default(BindingFlags)));
 #endif
             public static readonly MethodInfo TypeGetField = ExpressionUtility.GetMethodInfo((Type t) => t.GetTypeInfo().GetField(default(string), default(BindingFlags)));
-            public static readonly MethodInfo GetCustomAttributeMessagePackFormatterAttribute = ExpressionUtility.GetMethodInfo(() => CustomAttributeExtensions.GetCustomAttribute<MessagePackFormatterAttribute>(default(MemberInfo), default(bool)));
+            public static readonly MethodInfo GetCustomAttributeMessagePackFormatterAttribute = ExpressionUtility.GetMethodInfo(() => AttributeX.GetCustomAttributeX<MessagePackFormatterAttribute>(default(MemberInfo), default(bool)));
             public static readonly MethodInfo ActivatorCreateInstance = ExpressionUtility.GetMethodInfo(() => Activator.CreateInstance(default(Type), default(object[]))); // 注意：这儿不能使用 ActivatorUtils.CreateInstance
 
             internal static class MessagePackFormatterAttr
@@ -1343,8 +1343,8 @@ typeof(int), typeof(int) });
                 var hiddenIntKey = 0;
                 foreach (var item in type.GetRuntimeProperties())
                 {
-                    if (item.GetCustomAttribute<IgnoreMemberAttribute>(true) != null) continue;
-                    if (item.GetCustomAttribute<IgnoreDataMemberAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<IgnoreMemberAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<IgnoreDataMemberAttribute>(true) != null) continue;
                     if (item.IsIndexer()) continue;
 
                     var getMethod = item.GetGetMethod(true);
@@ -1370,9 +1370,9 @@ typeof(int), typeof(int) });
                 }
                 foreach (var item in type.GetRuntimeFields())
                 {
-                    if (item.GetCustomAttribute<IgnoreMemberAttribute>(true) != null) continue;
-                    if (item.GetCustomAttribute<IgnoreDataMemberAttribute>(true) != null) continue;
-                    if (item.GetCustomAttribute<System.Runtime.CompilerServices.CompilerGeneratedAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<IgnoreMemberAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<IgnoreDataMemberAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<System.Runtime.CompilerServices.CompilerGeneratedAttribute>(true) != null) continue;
                     if (item.IsStatic) continue;
 
                     var member = new EmittableMember
@@ -1402,8 +1402,8 @@ typeof(int), typeof(int) });
 
                 foreach (var item in type.GetRuntimeProperties())
                 {
-                    if (item.GetCustomAttribute<IgnoreMemberAttribute>(true) != null) continue;
-                    if (item.GetCustomAttribute<IgnoreDataMemberAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<IgnoreMemberAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<IgnoreDataMemberAttribute>(true) != null) continue;
                     if (item.IsIndexer()) continue;
 
                     var getMethod = item.GetGetMethod(true);
@@ -1421,7 +1421,7 @@ typeof(int), typeof(int) });
                     if (contractAttr != null)
                     {
                         // MessagePackObjectAttribute
-                        key = item.GetCustomAttribute<KeyAttribute>(true);
+                        key = item.GetCustomAttributeX<KeyAttribute>(true);
                         if (key == null)
                         {
                             throw new MessagePackDynamicObjectResolverException("all public members must mark KeyAttribute or IgnoreMemberAttribute." + " type: " + type.FullName + " member:" + item.Name);
@@ -1432,7 +1432,7 @@ typeof(int), typeof(int) });
                     else
                     {
                         // DataContractAttribute
-                        var pseudokey = item.GetCustomAttribute<DataMemberAttribute>(true);
+                        var pseudokey = item.GetCustomAttributeX<DataMemberAttribute>(true);
                         if (pseudokey == null)
                         {
                             throw new MessagePackDynamicObjectResolverException("all public members must mark DataMemberAttribute or IgnoreMemberAttribute." + " type: " + type.FullName + " member:" + item.Name);
@@ -1485,9 +1485,9 @@ typeof(int), typeof(int) });
 
                 foreach (var item in type.GetRuntimeFields())
                 {
-                    if (item.GetCustomAttribute<IgnoreMemberAttribute>(true) != null) continue;
-                    if (item.GetCustomAttribute<IgnoreDataMemberAttribute>(true) != null) continue;
-                    if (item.GetCustomAttribute<System.Runtime.CompilerServices.CompilerGeneratedAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<IgnoreMemberAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<IgnoreDataMemberAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<System.Runtime.CompilerServices.CompilerGeneratedAttribute>(true) != null) continue;
                     if (item.IsStatic) continue;
 
                     var member = new EmittableMember
@@ -1502,7 +1502,7 @@ typeof(int), typeof(int) });
                     if (contractAttr != null)
                     {
                         // MessagePackObjectAttribute
-                        key = item.GetCustomAttribute<KeyAttribute>(true);
+                        key = item.GetCustomAttributeX<KeyAttribute>(true);
                         if (key == null)
                         {
                             throw new MessagePackDynamicObjectResolverException("all public members must mark KeyAttribute or IgnoreMemberAttribute." + " type: " + type.FullName + " member:" + item.Name);
@@ -1513,7 +1513,7 @@ typeof(int), typeof(int) });
                     else
                     {
                         // DataContractAttribute
-                        var pseudokey = item.GetCustomAttribute<DataMemberAttribute>(true);
+                        var pseudokey = item.GetCustomAttributeX<DataMemberAttribute>(true);
                         if (pseudokey == null)
                         {
                             throw new MessagePackDynamicObjectResolverException("all public members must mark DataMemberAttribute or IgnoreMemberAttribute." + " type: " + type.FullName + " member:" + item.Name);
@@ -1567,7 +1567,7 @@ typeof(int), typeof(int) });
 
             // GetConstructor
             IEnumerator<ConstructorInfo> ctorEnumerator = null;
-            var ctor = ti.DeclaredConstructors.Where(x => x.IsPublic).SingleOrDefault(x => x.GetCustomAttribute<SerializationConstructorAttribute>(false) != null);
+            var ctor = ti.DeclaredConstructors.Where(x => x.IsPublic).SingleOrDefault(x => x.GetCustomAttributeX<SerializationConstructorAttribute>(false) != null);
             if (ctor == null)
             {
                 ctorEnumerator =
@@ -1750,11 +1750,11 @@ typeof(int), typeof(int) });
             {
                 if (IsProperty)
                 {
-                    return (MessagePackFormatterAttribute)PropertyInfo.GetCustomAttribute<MessagePackFormatterAttribute>(true);
+                    return (MessagePackFormatterAttribute)PropertyInfo.GetCustomAttributeX<MessagePackFormatterAttribute>(true);
                 }
                 else
                 {
-                    return (MessagePackFormatterAttribute)FieldInfo.GetCustomAttribute<MessagePackFormatterAttribute>(true);
+                    return (MessagePackFormatterAttribute)FieldInfo.GetCustomAttributeX<MessagePackFormatterAttribute>(true);
                 }
             }
 
