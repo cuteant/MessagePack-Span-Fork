@@ -464,7 +464,7 @@ namespace MessagePack.Internal
         public static readonly MethodInfo GetKeyMethod = typeof(AutomataKeyGen).GetRuntimeMethod("GetKey", new[] { typeof(byte).MakePointerType().MakeByRefType(), typeof(int).MakeByRefType() });
 #endif
 
-#if !NETSTANDARD
+#if !(NETSTANDARD || DESKTOPCLR)
 
         static MethodInfo dynamicGetKeyMethod;
         static readonly object gate = new object();
