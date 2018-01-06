@@ -1253,7 +1253,7 @@ typeof(int), typeof(int) });
 #endif
             public static readonly MethodInfo TypeGetField = ExpressionUtility.GetMethodInfo((Type t) => t.GetTypeInfo().GetField(default(string), default(BindingFlags)));
             public static readonly MethodInfo GetCustomAttributeMessagePackFormatterAttribute = ExpressionUtility.GetMethodInfo(() => CustomAttributeExtensions.GetCustomAttribute<MessagePackFormatterAttribute>(default(MemberInfo), default(bool)));
-            public static readonly MethodInfo ActivatorCreateInstance = ExpressionUtility.GetMethodInfo(() => ActivatorUtils.CreateInstance(default(Type), default(object[])));
+            public static readonly MethodInfo ActivatorCreateInstance = ExpressionUtility.GetMethodInfo(() => Activator.CreateInstance(default(Type), default(object[]))); // 注意：这儿不能使用 ActivatorUtils.CreateInstance
 
             internal static class MessagePackFormatterAttr
             {
