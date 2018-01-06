@@ -34,10 +34,9 @@ namespace MessagePack
         {
             if (bytes == null || bytes.Length == 0) return "";
 
-            int readSize;
             if (MessagePackBinary.GetMessagePackType(bytes, 0) == MessagePackType.Extension)
             {
-                var header = MessagePackBinary.ReadExtensionFormatHeader(bytes, 0, out readSize);
+                var header = MessagePackBinary.ReadExtensionFormatHeader(bytes, 0, out int readSize);
                 if (header.TypeCode == ExtensionTypeCode)
                 {
                     // decode lz4
