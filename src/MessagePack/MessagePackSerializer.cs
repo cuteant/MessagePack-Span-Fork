@@ -1,6 +1,9 @@
 ﻿using MessagePack.Internal;
 using System;
 using System.IO;
+#if !NET40
+using System.Buffers;
+#endif
 
 namespace MessagePack
 {
@@ -9,6 +12,8 @@ namespace MessagePack
     /// </summary>
     public static partial class MessagePackSerializer
     {
+        private const int c_defaultCopyBufferSize = 1024 * 64;
+
         static IFormatterResolver defaultResolver;
 
         /// <summary>
@@ -138,7 +143,8 @@ namespace MessagePack
             if (resolver == null) resolver = DefaultResolver;
             var formatter = resolver.GetFormatterWithVerify<T>();
 
-            var rentBuffer = BufferPool.Default.Rent();
+            var bufferPool = ArrayPool<byte>.Shared;
+            var rentBuffer = bufferPool.Rent(c_defaultCopyBufferSize);
             try
             {
                 var buffer = rentBuffer;
@@ -149,7 +155,7 @@ namespace MessagePack
             }
             finally
             {
-                BufferPool.Default.Return(rentBuffer);
+                bufferPool.Return(rentBuffer);
             }
         }
 #endif
@@ -252,7 +258,8 @@ namespace MessagePack
 
         public static async System.Threading.Tasks.Task<T> DeserializeAsync<T>(Stream stream, IFormatterResolver resolver)
         {
-            var rentBuffer = BufferPool.Default.Rent();
+            var bufferPool = ArrayPool<byte>.Shared;
+            var rentBuffer = bufferPool.Rent(c_defaultCopyBufferSize);
             var buf = rentBuffer;
             try
             {
@@ -271,7 +278,7 @@ namespace MessagePack
             }
             finally
             {
-                BufferPool.Default.Return(rentBuffer);
+                bufferPool.Return(rentBuffer);
             }
         }
 #endif
