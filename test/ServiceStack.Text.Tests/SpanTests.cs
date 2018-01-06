@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !TEST40
+using System;
 
 using NUnit.Framework;
 
@@ -17,3 +18,4 @@ namespace ServiceStack.Text.Tests
         }
     }
 }
+#endif

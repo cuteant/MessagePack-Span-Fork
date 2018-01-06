@@ -66,7 +66,11 @@ namespace MessagePack.ImmutableCollection
                 {
                     return CreateInstance(formatterType, ti.GenericTypeArguments);
                 }
+#if NET40
+                else if (isNullable && nullableElementType.IsConstructedGenericType() && nullableElementType.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
+#else
                 else if (isNullable && nullableElementType.IsConstructedGenericType && nullableElementType.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
+#endif
                 {
                     return CreateInstance(typeof(NullableFormatter<>), new[] { nullableElementType });
                 }

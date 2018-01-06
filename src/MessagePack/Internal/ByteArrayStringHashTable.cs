@@ -120,7 +120,7 @@ namespace MessagePack.Internal
 #endif
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         static ulong ByteArrayGetHashCode(byte[] x, int offset, int count)
         {

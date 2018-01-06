@@ -161,7 +161,7 @@ namespace MessagePack.Internal
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         static byte Parse(byte[] bytes, int highOffset)
         {
@@ -169,7 +169,7 @@ namespace MessagePack.Internal
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         static byte SwitchParse(byte b)
         {

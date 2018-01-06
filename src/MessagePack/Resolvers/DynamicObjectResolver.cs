@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
+using CuteAnt.Reflection;
 
 namespace MessagePack.Resolvers
 {
@@ -69,7 +70,7 @@ namespace MessagePack.Resolvers
                     {
                         return;
                     }
-                    formatter = (IMessagePackFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).MakeGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
                     return;
                 }
 
@@ -82,7 +83,7 @@ namespace MessagePack.Resolvers
                 var formatterTypeInfo = DynamicObjectTypeBuilder.BuildType(assembly, typeof(T), false, false);
                 if (formatterTypeInfo == null) return;
 
-                formatter = (IMessagePackFormatter<T>)Activator.CreateInstance(formatterTypeInfo.AsType());
+                formatter = (IMessagePackFormatter<T>)ActivatorUtils.FastCreateInstance(formatterTypeInfo.AsType());
             }
         }
     }
@@ -126,7 +127,7 @@ namespace MessagePack.Resolvers
                     {
                         return;
                     }
-                    formatter = (IMessagePackFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).MakeGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
                     return;
                 }
 
@@ -202,7 +203,7 @@ namespace MessagePack.Resolvers
                     {
                         return;
                     }
-                    formatter = (IMessagePackFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).MakeGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
                     return;
                 }
 
@@ -215,7 +216,7 @@ namespace MessagePack.Resolvers
                 var formatterTypeInfo = DynamicObjectTypeBuilder.BuildType(assembly, typeof(T), true, true);
                 if (formatterTypeInfo == null) return;
 
-                formatter = (IMessagePackFormatter<T>)Activator.CreateInstance(formatterTypeInfo.AsType());
+                formatter = (IMessagePackFormatter<T>)ActivatorUtils.FastCreateInstance(formatterTypeInfo.AsType());
             }
         }
     }
@@ -259,7 +260,7 @@ namespace MessagePack.Resolvers
                     {
                         return;
                     }
-                    formatter = (IMessagePackFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).MakeGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
                     return;
                 }
 
@@ -319,7 +320,7 @@ namespace MessagePack.Internal
             var serializationInfo = MessagePack.Internal.ObjectSerializationInfo.CreateOrNull(type, forceStringKey, contractless, false);
             if (serializationInfo == null) return null;
 
-            var formatterType = typeof(IMessagePackFormatter<>).MakeGenericType(type);
+            var formatterType = typeof(IMessagePackFormatter<>).GetCachedGenericType(type);
             var typeBuilder = assembly.DefineType("MessagePack.Formatters." + SubtractFullNameRegex.Replace(type.FullName, "").Replace(".", "_") + "Formatter" + Interlocked.Increment(ref nameSequence), TypeAttributes.Public | TypeAttributes.Sealed, null, new[] { formatterType });
 
             FieldBuilder stringByteKeysField = null;
@@ -388,7 +389,11 @@ namespace MessagePack.Internal
                 }, 1); // firstArgIndex:0 is this.
             }
 
+#if NET40
+            return typeBuilder.CreateType().GetTypeInfo();
+#else
             return typeBuilder.CreateTypeInfo();
+#endif
         }
 
         public static object BuildFormatterToDynamicMethod(Type type, bool forceStringKey, bool contractless, bool allowPrivate)
@@ -419,7 +424,7 @@ namespace MessagePack.Internal
                 var attr = item.GetMessagePackFormatterAttribtue();
                 if (attr != null)
                 {
-                    var formatter = Activator.CreateInstance(attr.FormatterType, attr.Arguments);
+                    var formatter = ActivatorUtils.CreateInstance(attr.FormatterType, attr.Arguments);
                     serializeCustomFormatters.Add(formatter);
                 }
                 else
@@ -432,7 +437,7 @@ namespace MessagePack.Internal
                 var attr = item.GetMessagePackFormatterAttribtue();
                 if (attr != null)
                 {
-                    var formatter = Activator.CreateInstance(attr.FormatterType, attr.Arguments);
+                    var formatter = ActivatorUtils.CreateInstance(attr.FormatterType, attr.Arguments);
                     deserializeCustomFormatters.Add(formatter);
                 }
                 else
@@ -481,11 +486,11 @@ namespace MessagePack.Internal
                 }, 1);
             }
 
-            object serializeDelegate = serialize.CreateDelegate(typeof(AnonymousSerializeFunc<>).MakeGenericType(type));
+            object serializeDelegate = serialize.CreateDelegate(typeof(AnonymousSerializeFunc<>).GetCachedGenericType(type));
             object deserializeDelegate = (deserialize == null)
                 ? (object)null
-                : (object)deserialize.CreateDelegate(typeof(AnonymousDeserializeFunc<>).MakeGenericType(type));
-            var resultFormatter = Activator.CreateInstance(typeof(AnonymousSerializableFormatter<>).MakeGenericType(type),
+                : (object)deserialize.CreateDelegate(typeof(AnonymousDeserializeFunc<>).GetCachedGenericType(type));
+            var resultFormatter = ActivatorUtils.CreateInstance(typeof(AnonymousSerializableFormatter<>).GetCachedGenericType(type),
                 new[] { stringByteKeysField.ToArray(), serializeCustomFormatters.ToArray(), deserializeCustomFormatters.ToArray(), serializeDelegate, deserializeDelegate });
             return resultFormatter;
         }
@@ -739,7 +744,7 @@ namespace MessagePack.Internal
                     argValue.EmitLoad();
                     member.EmitLoadValue(il);
                     argResolver.EmitLoad();
-                    il.EmitCall(typeof(IMessagePackFormatter<>).MakeGenericType(t).GetRuntimeMethod("Serialize", new[] { refByte, typeof(int), t, typeof(IFormatterResolver) }));
+                    il.EmitCall(typeof(IMessagePackFormatter<>).GetCachedGenericType(t).GetRuntimeMethod("Serialize", new[] { refByte, typeof(int), t, typeof(IFormatterResolver) }));
                 }, argBytes, argOffset);
             }
             else if (IsOptimizeTargetType(t))
@@ -1084,7 +1089,7 @@ namespace MessagePack.Internal
                 argOffset.EmitLoad();
                 argResolver.EmitLoad();
                 argReadSize.EmitLoad();
-                il.EmitCall(typeof(IMessagePackFormatter<>).MakeGenericType(t).GetRuntimeMethod("Deserialize", new[] { typeof(byte[]), typeof(int), typeof(IFormatterResolver), refInt }));
+                il.EmitCall(typeof(IMessagePackFormatter<>).GetCachedGenericType(t).GetRuntimeMethod("Deserialize", new[] { typeof(byte[]), typeof(int), typeof(IFormatterResolver), refInt }));
             }
             else if (IsOptimizeTargetType(t))
             {
@@ -1194,8 +1199,8 @@ namespace MessagePack.Internal
         static readonly Type refByte = typeof(byte[]).MakeByRefType();
         static readonly Type refInt = typeof(int).MakeByRefType();
         static readonly MethodInfo getFormatterWithVerify = typeof(FormatterResolverExtensions).GetRuntimeMethods().First(x => x.Name == "GetFormatterWithVerify");
-        static readonly Func<Type, MethodInfo> getSerialize = t => typeof(IMessagePackFormatter<>).MakeGenericType(t).GetRuntimeMethod("Serialize", new[] { refByte, typeof(int), t, typeof(IFormatterResolver) });
-        static readonly Func<Type, MethodInfo> getDeserialize = t => typeof(IMessagePackFormatter<>).MakeGenericType(t).GetRuntimeMethod("Deserialize", new[] { typeof(byte[]), typeof(int), typeof(IFormatterResolver), refInt });
+        static readonly Func<Type, MethodInfo> getSerialize = t => typeof(IMessagePackFormatter<>).GetCachedGenericType(t).GetRuntimeMethod("Serialize", new[] { refByte, typeof(int), t, typeof(IFormatterResolver) });
+        static readonly Func<Type, MethodInfo> getDeserialize = t => typeof(IMessagePackFormatter<>).GetCachedGenericType(t).GetRuntimeMethod("Deserialize", new[] { typeof(byte[]), typeof(int), typeof(IFormatterResolver), refInt });
         // static readonly ConstructorInfo dictionaryConstructor = typeof(ByteArrayStringHashTable).GetTypeInfo().DeclaredConstructors.First(x => { var p = x.GetParameters(); return p.Length == 1 && p[0].ParameterType == typeof(int); });
         // static readonly MethodInfo dictionaryAdd = typeof(ByteArrayStringHashTable).GetRuntimeMethod("Add", new[] { typeof(string), typeof(int) });
         // static readonly MethodInfo dictionaryTryGetValue = typeof(ByteArrayStringHashTable).GetRuntimeMethod("TryGetValue", new[] { typeof(ArraySegment<byte>), refInt });
@@ -1241,10 +1246,14 @@ typeof(int), typeof(int) });
         internal static class EmitInfo
         {
             public static readonly MethodInfo GetTypeFromHandle = ExpressionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(default(RuntimeTypeHandle)));
+#if NET40
+            public static readonly MethodInfo TypeGetProperty = ExpressionUtility.GetMethodInfo((Type t) => t.GetProperty(default(string), default(BindingFlags)));
+#else
             public static readonly MethodInfo TypeGetProperty = ExpressionUtility.GetMethodInfo((Type t) => t.GetTypeInfo().GetProperty(default(string), default(BindingFlags)));
+#endif
             public static readonly MethodInfo TypeGetField = ExpressionUtility.GetMethodInfo((Type t) => t.GetTypeInfo().GetField(default(string), default(BindingFlags)));
             public static readonly MethodInfo GetCustomAttributeMessagePackFormatterAttribute = ExpressionUtility.GetMethodInfo(() => CustomAttributeExtensions.GetCustomAttribute<MessagePackFormatterAttribute>(default(MemberInfo), default(bool)));
-            public static readonly MethodInfo ActivatorCreateInstance = ExpressionUtility.GetMethodInfo(() => Activator.CreateInstance(default(Type), default(object[])));
+            public static readonly MethodInfo ActivatorCreateInstance = ExpressionUtility.GetMethodInfo(() => ActivatorUtils.CreateInstance(default(Type), default(object[])));
 
             internal static class MessagePackFormatterAttr
             {
@@ -1315,8 +1324,8 @@ typeof(int), typeof(int) });
             var ti = type.GetTypeInfo();
             var isClass = ti.IsClass || ti.IsInterface || ti.IsAbstract;
 
-            var contractAttr = ti.GetCustomAttribute<MessagePackObjectAttribute>();
-            var dataContractAttr = ti.GetCustomAttribute<DataContractAttribute>();
+            var contractAttr = type.GetCustomAttributeX<MessagePackObjectAttribute>();
+            var dataContractAttr = type.GetCustomAttributeX<DataContractAttribute>();
             if (contractAttr == null && dataContractAttr == null && !forceStringKey && !contractless)
             {
                 return null;

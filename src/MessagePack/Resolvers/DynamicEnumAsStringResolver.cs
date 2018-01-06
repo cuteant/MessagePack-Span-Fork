@@ -4,6 +4,7 @@ using MessagePack.Formatters;
 using MessagePack.Internal;
 using System;
 using System.Reflection;
+using CuteAnt.Reflection;
 
 namespace MessagePack.Resolvers
 {
@@ -43,7 +44,7 @@ namespace MessagePack.Resolvers
                     {
                         return;
                     }
-                    formatter = (IMessagePackFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).MakeGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
                     return;
                 }
                 else if (!ti.IsEnum)

@@ -249,7 +249,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static void EnsureCapacity(ref byte[] bytes, int offset, int appendLength)
         {
@@ -298,7 +298,7 @@ namespace MessagePack
 
         // Buffer.BlockCopy version of Array.Resize
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static void FastResize(ref byte[] array, int newSize)
         {
@@ -320,7 +320,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static byte[] FastCloneWithResize(byte[] array, int newSize)
         {
@@ -339,7 +339,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static MessagePackType GetMessagePackType(byte[] bytes, int offset)
         {
@@ -347,7 +347,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int ReadNext(byte[] bytes, int offset)
         {
@@ -355,7 +355,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int ReadNextBlock(byte[] bytes, int offset)
         {
@@ -400,7 +400,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteNil(ref byte[] bytes, int offset)
         {
@@ -411,7 +411,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static Nil ReadNil(byte[] bytes, int offset, out int readSize)
         {
@@ -427,7 +427,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static bool IsNil(byte[] bytes, int offset)
         {
@@ -654,7 +654,7 @@ namespace MessagePack
         /// </summary>
         /// <returns></returns>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteFixedMapHeaderUnsafe(ref byte[] bytes, int offset, int count)
         {
@@ -667,7 +667,7 @@ namespace MessagePack
         /// Write map count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteMapHeader(ref byte[] bytes, int offset, int count)
         {
@@ -681,7 +681,7 @@ namespace MessagePack
         /// Write map count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteMapHeader(ref byte[] bytes, int offset, uint count)
         {
@@ -721,7 +721,7 @@ namespace MessagePack
         /// Write map format header, always use map32 format(length is fixed, 5).
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteMapHeaderForceMap32Block(ref byte[] bytes, int offset, uint count)
         {
@@ -741,7 +741,7 @@ namespace MessagePack
         /// Return map count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int ReadMapHeader(byte[] bytes, int offset, out int readSize)
         {
@@ -755,7 +755,7 @@ namespace MessagePack
         /// Return map count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static uint ReadMapHeaderRaw(byte[] bytes, int offset, out int readSize)
         {
@@ -763,7 +763,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int GetArrayHeaderLength(int count)
         {
@@ -786,7 +786,7 @@ namespace MessagePack
         /// </summary>
         /// <returns></returns>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteFixedArrayHeaderUnsafe(ref byte[] bytes, int offset, int count)
         {
@@ -799,7 +799,7 @@ namespace MessagePack
         /// Write array count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteArrayHeader(ref byte[] bytes, int offset, int count)
         {
@@ -813,7 +813,7 @@ namespace MessagePack
         /// Write array count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteArrayHeader(ref byte[] bytes, int offset, uint count)
         {
@@ -853,7 +853,7 @@ namespace MessagePack
         /// Write array format header, always use array32 format(length is fixed, 5).
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteArrayHeaderForceArray32Block(ref byte[] bytes, int offset, uint count)
         {
@@ -873,7 +873,7 @@ namespace MessagePack
         /// Return array count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int ReadArrayHeader(byte[] bytes, int offset, out int readSize)
         {
@@ -887,7 +887,7 @@ namespace MessagePack
         /// Return array count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static uint ReadArrayHeaderRaw(byte[] bytes, int offset, out int readSize)
         {
@@ -895,7 +895,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteBoolean(ref byte[] bytes, int offset, bool value)
         {
@@ -906,7 +906,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static bool ReadBoolean(byte[] bytes, int offset, out int readSize)
         {
@@ -915,7 +915,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteByte(ref byte[] bytes, int offset, byte value)
         {
@@ -935,7 +935,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteByteForceByteBlock(ref byte[] bytes, int offset, byte value)
         {
@@ -946,7 +946,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static byte ReadByte(byte[] bytes, int offset, out int readSize)
         {
@@ -954,7 +954,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteBytes(ref byte[] bytes, int offset, byte[] value)
         {
@@ -969,7 +969,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteBytes(ref byte[] dest, int dstOffset, byte[] src, int srcOffset, int count)
         {
@@ -1024,7 +1024,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static byte[] ReadBytes(byte[] bytes, int offset, out int readSize)
         {
@@ -1032,7 +1032,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static ArraySegment<byte> ReadBytesSegment(byte[] bytes, int offset, out int readSize)
         {
@@ -1040,7 +1040,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteSByte(ref byte[] bytes, int offset, sbyte value)
         {
@@ -1060,7 +1060,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteSByteForceSByteBlock(ref byte[] bytes, int offset, sbyte value)
         {
@@ -1071,7 +1071,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static sbyte ReadSByte(byte[] bytes, int offset, out int readSize)
         {
@@ -1079,7 +1079,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteSingle(ref byte[] bytes, int offset, float value)
         {
@@ -1107,7 +1107,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static float ReadSingle(byte[] bytes, int offset, out int readSize)
         {
@@ -1115,7 +1115,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteDouble(ref byte[] bytes, int offset, double value)
         {
@@ -1151,7 +1151,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static double ReadDouble(byte[] bytes, int offset, out int readSize)
         {
@@ -1159,7 +1159,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteInt16(ref byte[] bytes, int offset, short value)
         {
@@ -1216,7 +1216,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteInt16ForceInt16Block(ref byte[] bytes, int offset, short value)
         {
@@ -1228,7 +1228,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static short ReadInt16(byte[] bytes, int offset, out int readSize)
         {
@@ -1239,7 +1239,7 @@ namespace MessagePack
         /// Unsafe. If value is guranteed 0 ~ MessagePackCode.MaxFixInt(127), can use this method.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WritePositiveFixedIntUnsafe(ref byte[] bytes, int offset, int value)
         {
@@ -1249,7 +1249,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteInt32(ref byte[] bytes, int offset, int value)
         {
@@ -1329,7 +1329,7 @@ namespace MessagePack
         /// Acquire static message block(always 5 bytes).
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteInt32ForceInt32Block(ref byte[] bytes, int offset, int value)
         {
@@ -1343,7 +1343,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int ReadInt32(byte[] bytes, int offset, out int readSize)
         {
@@ -1351,7 +1351,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteInt64(ref byte[] bytes, int offset, long value)
         {
@@ -1456,7 +1456,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteInt64ForceInt64Block(ref byte[] bytes, int offset, long value)
         {
@@ -1474,7 +1474,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static long ReadInt64(byte[] bytes, int offset, out int readSize)
         {
@@ -1482,7 +1482,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteUInt16(ref byte[] bytes, int offset, ushort value)
         {
@@ -1510,7 +1510,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteUInt16ForceUInt16Block(ref byte[] bytes, int offset, ushort value)
         {
@@ -1522,7 +1522,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static ushort ReadUInt16(byte[] bytes, int offset, out int readSize)
         {
@@ -1530,7 +1530,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteUInt32(ref byte[] bytes, int offset, uint value)
         {
@@ -1568,7 +1568,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteUInt32ForceUInt32Block(ref byte[] bytes, int offset, uint value)
         {
@@ -1582,7 +1582,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static uint ReadUInt32(byte[] bytes, int offset, out int readSize)
         {
@@ -1590,7 +1590,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteUInt64(ref byte[] bytes, int offset, ulong value)
         {
@@ -1642,7 +1642,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteUInt64ForceUInt64Block(ref byte[] bytes, int offset, ulong value)
         {
@@ -1660,7 +1660,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static ulong ReadUInt64(byte[] bytes, int offset, out int readSize)
         {
@@ -1668,7 +1668,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteChar(ref byte[] bytes, int offset, char value)
         {
@@ -1676,7 +1676,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static char ReadChar(byte[] bytes, int offset, out int readSize)
         {
@@ -1687,7 +1687,7 @@ namespace MessagePack
         /// Unsafe. If value is guranteed length is 0 ~ 31, can use this method.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteFixedStringUnsafe(ref byte[] bytes, int offset, string value, int byteCount)
         {
@@ -1702,7 +1702,7 @@ namespace MessagePack
         /// Unsafe. If pre-calculated byteCount of target string, can use this method.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteStringUnsafe(ref byte[] bytes, int offset, string value, int byteCount)
         {
@@ -1744,7 +1744,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteStringBytes(ref byte[] bytes, int offset, byte[] utf8stringBytes)
         {
@@ -1924,7 +1924,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static string ReadString(byte[] bytes, int offset, out int readSize)
         {
@@ -1932,7 +1932,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static ArraySegment<byte> ReadStringSegment(byte[] bytes, int offset, out int readSize)
         {
@@ -1940,7 +1940,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteExtensionFormatHeader(ref byte[] bytes, int offset, sbyte typeCode, int dataLength)
         {
@@ -2010,7 +2010,7 @@ namespace MessagePack
         /// Write extension format header, always use ext32 format(length is fixed, 6).
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteExtensionFormatHeaderForceExt32Block(ref byte[] bytes, int offset, sbyte typeCode, int dataLength)
         {
@@ -2025,7 +2025,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteExtensionFormat(ref byte[] bytes, int offset, sbyte typeCode, byte[] data)
         {
@@ -2127,7 +2127,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static ExtensionResult ReadExtensionFormat(byte[] bytes, int offset, out int readSize)
         {
@@ -2138,7 +2138,7 @@ namespace MessagePack
         /// return byte length of ExtensionFormat.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static ExtensionHeader ReadExtensionFormatHeader(byte[] bytes, int offset, out int readSize)
         {
@@ -2146,7 +2146,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int GetExtensionFormatHeaderLength(int dataLength)
         {
@@ -2181,7 +2181,7 @@ namespace MessagePack
         // Ext8(12,-1) => nanoseconds + seconds | [-584554047284-02-23 16:59:44 UTC, 584554051223-11-09 07:00:16.000000000 UTC) range
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteDateTime(ref byte[] bytes, int offset, DateTime dateTime)
         {
@@ -2276,7 +2276,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static DateTime ReadDateTime(byte[] bytes, int offset, out int readSize)
         {
@@ -2571,7 +2571,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int ReadNext(Stream stream)
         {
@@ -2580,7 +2580,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int ReadNextBlock(Stream stream)
         {
@@ -2590,7 +2590,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteNil(Stream stream)
         {
@@ -2599,7 +2599,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static Nil ReadNil(Stream stream)
         {
@@ -2611,7 +2611,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static bool IsNil(Stream stream)
         {
@@ -2626,7 +2626,7 @@ namespace MessagePack
         /// </summary>
         /// <returns></returns>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteFixedMapHeaderUnsafe(Stream stream, int count)
         {
@@ -2638,7 +2638,7 @@ namespace MessagePack
         /// Write map count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteMapHeader(Stream stream, int count)
         {
@@ -2652,7 +2652,7 @@ namespace MessagePack
         /// Write map count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteMapHeader(Stream stream, uint count)
         {
@@ -2666,7 +2666,7 @@ namespace MessagePack
         /// Write map format header, always use map32 format(length is fixed, 5).
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteMapHeaderForceMap32Block(Stream stream, uint count)
         {
@@ -2680,7 +2680,7 @@ namespace MessagePack
         /// Return map count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int ReadMapHeader(Stream stream)
         {
@@ -2697,7 +2697,7 @@ namespace MessagePack
         /// Return map count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static uint ReadMapHeaderRaw(Stream stream)
         {
@@ -2712,7 +2712,7 @@ namespace MessagePack
         /// </summary>
         /// <returns></returns>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteFixedArrayHeaderUnsafe(Stream stream, int count)
         {
@@ -2724,7 +2724,7 @@ namespace MessagePack
         /// Write array count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteArrayHeader(Stream stream, int count)
         {
@@ -2738,7 +2738,7 @@ namespace MessagePack
         /// Write array count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteArrayHeader(Stream stream, uint count)
         {
@@ -2752,7 +2752,7 @@ namespace MessagePack
         /// Write array format header, always use array32 format(length is fixed, 5).
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteArrayHeaderForceArray32Block(Stream stream, uint count)
         {
@@ -2766,7 +2766,7 @@ namespace MessagePack
         /// Return array count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int ReadArrayHeader(Stream stream)
         {
@@ -2780,7 +2780,7 @@ namespace MessagePack
         /// Return array count.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static uint ReadArrayHeaderRaw(Stream stream)
         {
@@ -2791,7 +2791,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteBoolean(Stream stream, bool value)
         {
@@ -2802,7 +2802,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static bool ReadBoolean(Stream stream)
         {
@@ -2814,7 +2814,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteByte(Stream stream, byte value)
         {
@@ -2825,7 +2825,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteByteForceByteBlock(Stream stream, byte value)
         {
@@ -2836,7 +2836,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static byte ReadByte(Stream stream)
         {
@@ -2848,7 +2848,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteBytes(Stream stream, byte[] value)
         {
@@ -2859,7 +2859,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteBytes(Stream stream, byte[] src, int srcOffset, int count)
         {
@@ -2870,7 +2870,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static byte[] ReadBytes(Stream stream)
         {
@@ -2882,7 +2882,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteSByte(Stream stream, sbyte value)
         {
@@ -2893,7 +2893,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteSByteForceSByteBlock(Stream stream, sbyte value)
         {
@@ -2904,7 +2904,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static sbyte ReadSByte(Stream stream)
         {
@@ -2916,7 +2916,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteSingle(Stream stream, float value)
         {
@@ -2927,7 +2927,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static float ReadSingle(Stream stream)
         {
@@ -2939,7 +2939,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteDouble(Stream stream, double value)
         {
@@ -2950,7 +2950,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static double ReadDouble(Stream stream)
         {
@@ -2962,7 +2962,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteInt16(Stream stream, short value)
         {
@@ -2973,7 +2973,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteInt16ForceInt16Block(Stream stream, short value)
         {
@@ -2984,7 +2984,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static short ReadInt16(Stream stream)
         {
@@ -2999,7 +2999,7 @@ namespace MessagePack
         /// Unsafe. If value is guranteed 0 ~ MessagePackCode.MaxFixInt(127), can use this method.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WritePositiveFixedIntUnsafe(Stream stream, int value)
         {
@@ -3010,7 +3010,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteInt32(Stream stream, int value)
         {
@@ -3024,7 +3024,7 @@ namespace MessagePack
         /// Acquire static message block(always 5 bytes).
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteInt32ForceInt32Block(Stream stream, int value)
         {
@@ -3035,7 +3035,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int ReadInt32(Stream stream)
         {
@@ -3047,7 +3047,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteInt64(Stream stream, long value)
         {
@@ -3058,7 +3058,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteInt64ForceInt64Block(Stream stream, long value)
         {
@@ -3069,7 +3069,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static long ReadInt64(Stream stream)
         {
@@ -3081,7 +3081,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteUInt16(Stream stream, ushort value)
         {
@@ -3092,7 +3092,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteUInt16ForceUInt16Block(Stream stream, ushort value)
         {
@@ -3103,7 +3103,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static ushort ReadUInt16(Stream stream)
         {
@@ -3115,7 +3115,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteUInt32(Stream stream, uint value)
         {
@@ -3126,7 +3126,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteUInt32ForceUInt32Block(Stream stream, uint value)
         {
@@ -3137,7 +3137,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static uint ReadUInt32(Stream stream)
         {
@@ -3149,7 +3149,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteUInt64(Stream stream, ulong value)
         {
@@ -3160,7 +3160,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteUInt64ForceUInt64Block(Stream stream, ulong value)
         {
@@ -3171,7 +3171,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static ulong ReadUInt64(Stream stream)
         {
@@ -3183,7 +3183,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteChar(Stream stream, char value)
         {
@@ -3194,7 +3194,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static char ReadChar(Stream stream)
         {
@@ -3209,7 +3209,7 @@ namespace MessagePack
         /// Unsafe. If value is guranteed length is 0 ~ 31, can use this method.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteFixedStringUnsafe(Stream stream, string value, int byteCount)
         {
@@ -3223,7 +3223,7 @@ namespace MessagePack
         /// Unsafe. If pre-calculated byteCount of target string, can use this method.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteStringUnsafe(Stream stream, string value, int byteCount)
         {
@@ -3234,7 +3234,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteStringBytes(Stream stream, byte[] utf8stringBytes)
         {
@@ -3261,7 +3261,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static string ReadString(Stream stream)
         {
@@ -3273,7 +3273,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteExtensionFormatHeader(Stream stream, sbyte typeCode, int dataLength)
         {
@@ -3287,7 +3287,7 @@ namespace MessagePack
         /// Write extension format header, always use ext32 format(length is fixed, 6).
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteExtensionFormatHeaderForceExt32Block(Stream stream, sbyte typeCode, int dataLength)
         {
@@ -3298,7 +3298,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteExtensionFormat(Stream stream, sbyte typeCode, byte[] data)
         {
@@ -3309,7 +3309,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static ExtensionResult ReadExtensionFormat(Stream stream)
         {
@@ -3324,7 +3324,7 @@ namespace MessagePack
         /// return byte length of ExtensionFormat.
         /// </summary>
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static ExtensionHeader ReadExtensionFormatHeader(Stream stream)
         {
@@ -3336,7 +3336,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static int WriteDateTime(Stream stream, DateTime dateTime)
         {
@@ -3347,7 +3347,7 @@ namespace MessagePack
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static DateTime ReadDateTime(Stream stream)
         {

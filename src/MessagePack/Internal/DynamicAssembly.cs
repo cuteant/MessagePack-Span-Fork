@@ -21,10 +21,14 @@ namespace MessagePack.Internal
 
         public DynamicAssembly(string moduleName)
         {
-#if NET_35
-            this.moduleName = moduleName;
-            this.assemblyBuilder = System.AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(moduleName), AssemblyBuilderAccess.RunAndSave);
-            this.moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName, moduleName + ".dll");
+#if NET40
+
+            var assemblyName = moduleName;
+            moduleName = assemblyName + ".dll";
+            AssemblyName an = new AssemblyName();
+            an.Name = assemblyName;
+            this.assemblyBuilder = System.AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
+            this.moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName);
 #else
 #if NETSTANDARD || DESKTOPCLR
             this.assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(moduleName), AssemblyBuilderAccess.Run);

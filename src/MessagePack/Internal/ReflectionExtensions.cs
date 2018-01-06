@@ -22,7 +22,11 @@ namespace MessagePack.Internal
 
         public static bool IsAnonymous(this System.Reflection.TypeInfo type)
         {
+#if NET40
+            return type.AsType().GetCustomAttributeX<CompilerGeneratedAttribute>() != null
+#else
             return type.GetCustomAttribute<CompilerGeneratedAttribute>() != null
+#endif
                 && type.IsGenericType && type.Name.Contains("AnonymousType")
                 && (type.Name.StartsWith("<>") || type.Name.StartsWith("VB$"))
                 && (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
@@ -37,17 +41,29 @@ namespace MessagePack.Internal
 
         public static bool IsConstructedGenericType(this System.Reflection.TypeInfo type)
         {
+#if NET40
+            return type.AsType().IsConstructedGenericType();
+#else
             return type.AsType().IsConstructedGenericType;
+#endif
         }
 
         public static MethodInfo GetGetMethod(this PropertyInfo propInfo)
         {
+#if NET40
+            return propInfo.GetGetMethod(true);
+#else
             return propInfo.GetMethod;
+#endif
         }
 
         public static MethodInfo GetSetMethod(this PropertyInfo propInfo)
         {
+#if NET40
+            return propInfo.GetSetMethod(true);
+#else
             return propInfo.SetMethod;
+#endif
         }
 
 #endif

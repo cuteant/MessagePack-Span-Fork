@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 using Xunit;
 
 namespace MessagePack.Tests
@@ -94,6 +95,17 @@ namespace MessagePack.Tests
                 r2.MyProperty3.Is("foofoofoofoo");
                 r2.MyProperty4.Is("bar");
             }
+        }
+
+        [Fact]
+        public void CreateNestedClass()
+        {
+            var obj = CuteAnt.Reflection.ActivatorUtils.FastCreateInstance<MyClass>();
+            Assert.NotNull(obj);
+            var attr = typeof(MyClass).GetCustomAttributeX<MessagePackObjectAttribute>();
+            Assert.NotNull(attr);
+            var attr1 = typeof(MyClass).GetCustomAttribute<MessagePackObjectAttribute>();
+            Assert.NotNull(attr1);
         }
     }
 }

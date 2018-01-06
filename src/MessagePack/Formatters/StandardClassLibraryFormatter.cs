@@ -493,6 +493,7 @@ namespace MessagePack.Formatters
         }
     }
 
+#if !NET40
     public sealed class TaskUnitFormatter : IMessagePackFormatter<Task>
     {
         public static readonly IMessagePackFormatter<Task> Instance = new TaskUnitFormatter();
@@ -573,6 +574,7 @@ namespace MessagePack.Formatters
             return new ValueTask<T>(v);
         }
     }
+#endif
 
 #endif
 }

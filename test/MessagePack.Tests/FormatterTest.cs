@@ -162,6 +162,7 @@ namespace MessagePack.Tests
             Convert(nullLz).IsNull();
         }
 
+#if !TEST40
         [Fact]
         public void TaskTest()
         {
@@ -186,6 +187,7 @@ namespace MessagePack.Tests
             ValueTask<int>? nullValueTask2 = null;
             Convert(nullValueTask2).IsNull();
         }
+#endif
 
         [Fact]
         public void DateTimeOffsetTest()

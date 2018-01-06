@@ -6,6 +6,7 @@ using MessagePack.Internal;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+using CuteAnt.Reflection;
 
 namespace MessagePack.Resolvers
 {
@@ -66,7 +67,7 @@ namespace MessagePack.Resolvers
                     {
                         return;
                     }
-                    formatter = (IMessagePackFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).MakeGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
                     return;
                 }
                 else if (!ti.IsEnum)
@@ -75,14 +76,14 @@ namespace MessagePack.Resolvers
                 }
 
                 var formatterTypeInfo = BuildType(typeof(T));
-                formatter = (IMessagePackFormatter<T>)Activator.CreateInstance(formatterTypeInfo.AsType());
+                formatter = (IMessagePackFormatter<T>)ActivatorUtils.FastCreateInstance(formatterTypeInfo.AsType());
             }
         }
 
         static TypeInfo BuildType(Type enumType)
         {
             var underlyingType = Enum.GetUnderlyingType(enumType);
-            var formatterType = typeof(IMessagePackFormatter<>).MakeGenericType(enumType);
+            var formatterType = typeof(IMessagePackFormatter<>).GetCachedGenericType(enumType);
 
             var typeBuilder = assembly.DefineType("MessagePack.Formatters." + enumType.FullName.Replace(".", "_") + "Formatter" + Interlocked.Increment(ref nameSequence), TypeAttributes.Public | TypeAttributes.Sealed, null, new[] { formatterType });
 
@@ -114,7 +115,11 @@ namespace MessagePack.Resolvers
                 il.Emit(OpCodes.Ret);
             }
 
+#if NET40
+            return typeBuilder.CreateType().GetTypeInfo();
+#else
             return typeBuilder.CreateTypeInfo();
+#endif
         }
     }
 }

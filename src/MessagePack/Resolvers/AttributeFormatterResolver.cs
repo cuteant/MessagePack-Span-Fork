@@ -2,6 +2,7 @@
 using System;
 using System.Reflection;
 using System.Linq; // require UNITY_WSA
+using CuteAnt.Reflection;
 
 namespace MessagePack.Resolvers
 {
@@ -31,7 +32,7 @@ namespace MessagePack.Resolvers
 #if UNITY_WSA && !NETFX_CORE
                 var attr = (MessagePackFormatterAttribute)typeof(T).GetCustomAttributes(typeof(MessagePackFormatterAttribute), true).FirstOrDefault();
 #else
-                var attr = typeof(T).GetTypeInfo().GetCustomAttribute<MessagePackFormatterAttribute>();
+                var attr = typeof(T).GetCustomAttributeX<MessagePackFormatterAttribute>();
 #endif
                 if (attr == null)
                 {
@@ -40,11 +41,11 @@ namespace MessagePack.Resolvers
 
                 if (attr.Arguments == null)
                 {
-                    formatter = (IMessagePackFormatter<T>)Activator.CreateInstance(attr.FormatterType);
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.FastCreateInstance(attr.FormatterType);
                 }
                 else
                 {
-                    formatter = (IMessagePackFormatter<T>)Activator.CreateInstance(attr.FormatterType, attr.Arguments);
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(attr.FormatterType, attr.Arguments);
                 }
             }
         }

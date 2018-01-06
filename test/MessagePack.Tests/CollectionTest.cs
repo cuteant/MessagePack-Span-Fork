@@ -42,32 +42,42 @@ namespace MessagePack.Tests
             var a = (IList<int>)new int[] { 1, 10, 100 };
             var b = (ICollection<int>)new int[] { 1, 10, 100 };
             var c = (Enumerable.Range(1, 100).AsEnumerable());
+#if !TEST40
             var d = (IReadOnlyList<int>)new int[] { 1, 10, 100 };
             var e = (IReadOnlyCollection<int>)new int[] { 1, 10, 100 };
+#endif
             var f = (ISet<int>)new HashSet<int>(new[] { 1, 10, 100 });
             var g = (ILookup<bool, int>)Enumerable.Range(1, 100).ToLookup(x => x % 2 == 0);
 
             Convert(a).Is(a);
             Convert(b).Is(b);
             Convert(c).Is(c);
+#if !TEST40
             Convert(d).Is(d);
             Convert(e).Is(e);
+#endif
             Convert(f).Is(f);
+#if !TEST40 // xunit2.1.0 不支持
             Convert(g).Is(g);
+#endif
 
             a = null;
             b = null;
             c = null;
+#if !TEST40
             d = null;
             e = null;
+#endif
             f = null;
             g = null;
 
             Convert(a).Is(a);
             Convert(b).Is(b);
             Convert(c).IsNull();
+#if !TEST40
             Convert(d).Is(d);
             Convert(e).Is(e);
+#endif
             Convert(f).Is(f);
             Convert(g).Is(g);
         }

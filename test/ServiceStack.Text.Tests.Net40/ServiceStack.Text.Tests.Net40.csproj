@@ -2,28 +2,27 @@
   <PropertyGroup>
     <RootNamespace>ServiceStack.Text.Tests</RootNamespace>
     <AssemblyName>ServiceStack.Text.Tests</AssemblyName>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp2.0;net452</TargetFrameworks>
+    <TargetFramework>net45</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <SignAssembly>false</SignAssembly>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <DefineConstants>$(DefineConstants);TEST40;DESKTOPCLR</DefineConstants>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>false</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ServiceStack.Text\ServiceStack.Text.csproj" />
+    <Compile Include="..\ServiceStack.Text.Tests\**\*.cs" Exclude="..\ServiceStack.Text.Tests\bin\**;..\ServiceStack.Text.Tests\obj\**" />
+    <EmbeddedResource Include="..\ServiceStack.Text.Tests\**\*.resx" Exclude="..\ServiceStack.Text.Tests\bin\**;..\ServiceStack.Text.Tests\obj\**;@(EmbeddedResource)" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkPackageVersion)" />
-    <PackageReference Include="Mono.Cecil" Version="$(MonoCecilPackageVersion)" />
     <PackageReference Include="NUnit" Version="$(NUnitPackageVersion)" />
     <PackageReference Include="NUnit3TestAdapter" Version="$(NUnit3TestAdapterPackageVersion)" />
     <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
-    <PackageReference Include="protobuf-net" Version="$(ProtobufNetPackageVersion)" />
+    <PackageReference Include="protobuf-net" Version="2.3.2" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+  <ItemGroup>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -36,17 +35,13 @@
     <Reference Include="..\..\lib\net45\ServiceStack.dll" />
     <Reference Include="..\..\lib\net45\Northwind.Common.dll" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(ImportLibs)' == 'netcore' ">
-    <DefineConstants>$(DefineConstants);NETCORE_SUPPORT;NETCORE;NETSTANDARD2_0</DefineConstants>
-  </PropertyGroup>
-  <ItemGroup Condition=" '$(ImportLibs)' == 'netcore' ">
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Interfaces.dll" />
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Client.dll" />
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Common.dll" />
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.dll" />
-    <Reference Include="..\..\lib\netstandard2.0\Northwind.Common.dll" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ServiceStack.Text\ServiceStack.Text.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
+
 </Project>

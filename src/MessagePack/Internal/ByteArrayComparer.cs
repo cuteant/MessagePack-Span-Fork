@@ -12,7 +12,7 @@ namespace MessagePack.Internal
 
         static readonly bool Is32Bit = (IntPtr.Size == 4);
 
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
         public static int GetHashCode(byte[] bytes, int offset, int count)
         {
             if (Is32Bit)
@@ -28,7 +28,7 @@ namespace MessagePack.Internal
 #endif
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static unsafe bool Equals(byte[] xs, int xsOffset, int xsCount, byte[] ys)
         {
@@ -36,7 +36,7 @@ namespace MessagePack.Internal
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static unsafe bool Equals(byte[] xs, int xsOffset, int xsCount, byte[] ys, int ysOffset, int ysCount)
         {
@@ -98,7 +98,7 @@ namespace MessagePack.Internal
 
 #else
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static bool Equals(byte[] xs, int xsOffset, int xsCount, byte[] ys)
         {
@@ -116,7 +116,7 @@ namespace MessagePack.Internal
         }
 
 #if NETSTANDARD || DESKTOPCLR
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static bool Equals(byte[] xs, int xsOffset, int xsCount, byte[] ys, int ysOffset, int ysCount)
         {

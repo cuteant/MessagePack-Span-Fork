@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Collections.ObjectModel;
 using System.Collections;
-
+using CuteAnt.Reflection;
 #if NETSTANDARD || DESKTOPCLR
 using System.Threading.Tasks;
 #endif
@@ -65,17 +65,23 @@ namespace MessagePack.Internal
 #if NETSTANDARD || DESKTOPCLR
               {typeof(ObservableCollection<>), typeof(ObservableCollectionFormatter<>)},
               {typeof(ReadOnlyObservableCollection<>),(typeof(ReadOnlyObservableCollectionFormatter<>))},
+#if !NET40
               {typeof(IReadOnlyList<>), typeof(InterfaceReadOnlyListFormatter<>)},
               {typeof(IReadOnlyCollection<>), typeof(InterfaceReadOnlyCollectionFormatter<>)},
+#endif
               {typeof(ISet<>), typeof(InterfaceSetFormatter<>)},
               {typeof(System.Collections.Concurrent.ConcurrentBag<>), typeof(ConcurrentBagFormatter<>)},
               {typeof(System.Collections.Concurrent.ConcurrentQueue<>), typeof(ConcurrentQueueFormatter<>)},
               {typeof(System.Collections.Concurrent.ConcurrentStack<>), typeof(ConcurrentStackFormatter<>)},
+#if !NET40
               {typeof(ReadOnlyDictionary<,>), typeof(ReadOnlyDictionaryFormatter<,>)},
               {typeof(IReadOnlyDictionary<,>), typeof(InterfaceReadOnlyDictionaryFormatter<,>)},
+#endif
               {typeof(System.Collections.Concurrent.ConcurrentDictionary<,>), typeof(ConcurrentDictionaryFormatter<,>)},
               {typeof(Lazy<>), typeof(LazyFormatter<>)},
+#if !NET40
               {typeof(Task<>), typeof(TaskValueFormatter<>)},
+#endif
 #endif
         };
 
@@ -94,19 +100,19 @@ namespace MessagePack.Internal
                         return ByteArrayFormatter.Instance;
                     }
 
-                    return Activator.CreateInstance(typeof(ArrayFormatter<>).MakeGenericType(t.GetElementType()));
+                    return ActivatorUtils.FastCreateInstance(typeof(ArrayFormatter<>).GetCachedGenericType(t.GetElementType()));
                 }
                 else if (rank == 2)
                 {
-                    return Activator.CreateInstance(typeof(TwoDimentionalArrayFormatter<>).MakeGenericType(t.GetElementType()));
+                    return ActivatorUtils.FastCreateInstance(typeof(TwoDimentionalArrayFormatter<>).GetCachedGenericType(t.GetElementType()));
                 }
                 else if (rank == 3)
                 {
-                    return Activator.CreateInstance(typeof(ThreeDimentionalArrayFormatter<>).MakeGenericType(t.GetElementType()));
+                    return ActivatorUtils.FastCreateInstance(typeof(ThreeDimentionalArrayFormatter<>).GetCachedGenericType(t.GetElementType()));
                 }
                 else if (rank == 4)
                 {
-                    return Activator.CreateInstance(typeof(FourDimentionalArrayFormatter<>).MakeGenericType(t.GetElementType()));
+                    return ActivatorUtils.FastCreateInstance(typeof(FourDimentionalArrayFormatter<>).GetCachedGenericType(t.GetElementType()));
                 }
                 else
                 {
@@ -131,6 +137,7 @@ namespace MessagePack.Internal
 
 #if NETSTANDARD || DESKTOPCLR
 
+#if !NET40
                 // ValueTask
                 else if (genericType == typeof(ValueTask<>))
                 {
@@ -140,9 +147,14 @@ namespace MessagePack.Internal
                 {
                     return CreateInstance(typeof(NullableFormatter<>), new[] { nullableElementType });
                 }
+#endif
 
                 // Tuple
+#if NET40
+                else if (ti.AsType().FullName.StartsWith("System.Tuple"))
+#else
                 else if (ti.FullName.StartsWith("System.Tuple"))
+#endif
                 {
                     Type tupleFormatterType = null;
                     switch (ti.GenericTypeArguments.Length)
@@ -179,7 +191,11 @@ namespace MessagePack.Internal
                 }
 
                 // ValueTuple
+#if NET40
+                else if (ti.AsType().FullName.StartsWith("System.ValueTuple"))
+#else
                 else if (ti.FullName.StartsWith("System.ValueTuple"))
+#endif
                 {
                     Type tupleFormatterType = null;
                     switch (ti.GenericTypeArguments.Length)
@@ -282,11 +298,11 @@ namespace MessagePack.Internal
                 }
                 if (typeof(IList).GetTypeInfo().IsAssignableFrom(ti) && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
                 {
-                    return Activator.CreateInstance(typeof(NonGenericListFormatter<>).MakeGenericType(t));
+                    return ActivatorUtils.FastCreateInstance(typeof(NonGenericListFormatter<>).GetCachedGenericType(t));
                 }
                 else if (typeof(IDictionary).GetTypeInfo().IsAssignableFrom(ti) && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
                 {
-                    return Activator.CreateInstance(typeof(NonGenericDictionaryFormatter<>).MakeGenericType(t));
+                    return ActivatorUtils.FastCreateInstance(typeof(NonGenericDictionaryFormatter<>).GetCachedGenericType(t));
                 }
             }
 
@@ -295,7 +311,7 @@ namespace MessagePack.Internal
 
         static object CreateInstance(Type genericType, Type[] genericTypeArguments, params object[] arguments)
         {
-            return Activator.CreateInstance(genericType.MakeGenericType(genericTypeArguments), arguments);
+            return ActivatorUtils.CreateInstance(genericType.GetCachedGenericType(genericTypeArguments), arguments);
         }
     }
 }

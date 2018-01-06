@@ -3,7 +3,7 @@
   <Import Project="..\nuget.pack.props" />
   
   <PropertyGroup>
-    <TargetFrameworks>net471;net451;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net471;net451;net40</TargetFrameworks>
     <RootNamespace>MessagePack.ImmutableCollection</RootNamespace>
     <AssemblyName>MessagePack.ImmutableCollection</AssemblyName>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
@@ -24,6 +24,10 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
     <PackageReference Include="Net40.Collections.Immutable" Version="$(SystemCollectionsImmutableNet40PackageVersion)" />
   </ItemGroup>
+
+  <ImportGroup Condition=" '$(TargetFramework)' == 'net40' ">
+    <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems" Label="Shared" />
+  </ImportGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MessagePack\MessagePack.csproj" />

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using CuteAnt.Reflection;
 
 namespace MessagePack.Formatters
 {
@@ -58,7 +59,7 @@ namespace MessagePack.Formatters
 
                         var t = type;
                         {
-                            var formatterType = typeof(IMessagePackFormatter<>).MakeGenericType(t);
+                            var formatterType = typeof(IMessagePackFormatter<>).GetCachedGenericType(t);
                             var param0 = Expression.Parameter(typeof(object), "formatter");
                             var param1 = Expression.Parameter(typeof(byte[]).MakeByRefType(), "bytes");
                             var param2 = Expression.Parameter(typeof(int), "offset");

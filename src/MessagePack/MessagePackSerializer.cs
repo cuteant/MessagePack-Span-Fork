@@ -121,6 +121,7 @@ namespace MessagePack
 
 #if NETSTANDARD || DESKTOPCLR
 
+#if !NET40
         /// <summary>
         /// Serialize to stream(async).
         /// </summary>
@@ -151,6 +152,7 @@ namespace MessagePack
                 BufferPool.Default.Return(rentBuffer);
             }
         }
+#endif
 
 #endif
 
@@ -240,6 +242,7 @@ namespace MessagePack
 
 #if NETSTANDARD || DESKTOPCLR
 
+#if !NET40
         public static System.Threading.Tasks.Task<T> DeserializeAsync<T>(Stream stream)
         {
             return DeserializeAsync<T>(stream, defaultResolver);
@@ -271,6 +274,7 @@ namespace MessagePack
                 BufferPool.Default.Return(rentBuffer);
             }
         }
+#endif
 
 #endif
 

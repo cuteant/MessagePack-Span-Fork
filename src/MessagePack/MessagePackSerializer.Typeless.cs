@@ -32,10 +32,12 @@ namespace MessagePack
                 MessagePackSerializer.Serialize(stream, obj, defaultResolver);
             }
 
+#if !NET40
             public static System.Threading.Tasks.Task SerializeAsync(Stream stream, object obj)
             {
                 return MessagePackSerializer.SerializeAsync(stream, obj, defaultResolver);
             }
+#endif
 
             public static object Deserialize(byte[] bytes)
             {
@@ -52,10 +54,12 @@ namespace MessagePack
                 return MessagePackSerializer.Deserialize<object>(stream, defaultResolver, readStrict);
             }
 
+#if !NET40
             public static System.Threading.Tasks.Task<object> DeserializeAsync(Stream stream)
             {
                 return MessagePackSerializer.DeserializeAsync<object>(stream, defaultResolver);
             }
+#endif
 
             class CompositeResolver : IFormatterResolver
             {

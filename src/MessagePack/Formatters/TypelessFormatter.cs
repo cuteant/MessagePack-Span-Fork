@@ -185,7 +185,7 @@ namespace MessagePack.Formatters
                             throw new FormatterNotRegisteredException(type.FullName + " is not registered in this resolver. resolver:" + formatterResolver.GetType().Name);
                         }
 
-                        var formatterType = typeof(IMessagePackFormatter<>).MakeGenericType(type);
+                        var formatterType = typeof(IMessagePackFormatter<>).GetCachedGenericType(type);
                         var param0 = Expression.Parameter(typeof(object), "formatter");
                         var param1 = Expression.Parameter(typeof(byte[]).MakeByRefType(), "bytes");
                         var param2 = Expression.Parameter(typeof(int), "offset");
@@ -298,7 +298,7 @@ namespace MessagePack.Formatters
                             throw new FormatterNotRegisteredException(type.FullName + " is not registered in this resolver. resolver:" + formatterResolver.GetType().Name);
                         }
 
-                        var formatterType = typeof(IMessagePackFormatter<>).MakeGenericType(type);
+                        var formatterType = typeof(IMessagePackFormatter<>).GetCachedGenericType(type);
                         var param0 = Expression.Parameter(typeof(object), "formatter");
                         var param1 = Expression.Parameter(typeof(byte[]), "bytes");
                         var param2 = Expression.Parameter(typeof(int), "offset");
