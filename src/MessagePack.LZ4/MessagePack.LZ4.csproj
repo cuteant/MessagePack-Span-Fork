@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\version.pack.props" />
+  <Import Project="..\nuget.pack.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net471;net451;net40</TargetFrameworks>
+    <RootNamespace>MessagePack</RootNamespace>
+    <AssemblyName>MessagePack.LZ4</AssemblyName>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);ENABLE_UNSAFE_MSGPACK;</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet">
+    <PackageId>MessagePack.LZ4.Unofficial</PackageId>
+    <Title>MessagePack.LZ4 (Unofficial).</Title>
+    <Description>This package includes a mostly complete port of the MessagePack(for more info see: https://github.com/neuecc/MessagePack-CSharp/) assembly to support .NET 4.0 and newer.</Description>
+    <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer, Unity, Xamarin</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
+    <PackageReference Include="lz4net" Version="$(Lz4netPackageVersion)" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="lz4net.netcore.signed" Version="$(Lz4netNETCoreSignedPackageVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MessagePack\MessagePack.csproj" />
+  </ItemGroup>
+</Project>

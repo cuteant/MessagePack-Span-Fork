@@ -30,7 +30,11 @@
   <ItemGroup Condition=" '$(TargetFramework)' != 'net40' ">
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
   </ItemGroup>
+  <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
+    <PackageReference Include="lz4net" Version="$(Lz4netPackageVersion)" />
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="lz4net.netcore.signed" Version="$(Lz4netNETCoreSignedPackageVersion)" />
     <PackageReference Include="System.Reflection.Emit" Version="$(SystemReflectionEmitPackageVersion)" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="$(SystemReflectionEmitLightweightPackageVersion)" />
   </ItemGroup>
@@ -44,11 +48,9 @@
     <None Remove="Resolvers\*.meta" />
     <None Remove="Internal\*.meta" />
     <None Remove="Formatters\*.meta" />
-    <None Remove="LZ4\Codec\*.meta" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="LZ4\Codec\LZ4Codec.Safe.cs" />
     <None Include="MessagePackSerializer.Typeless.cs" />
   </ItemGroup>
 

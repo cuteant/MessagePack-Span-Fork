@@ -42,6 +42,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "protobuf-net.Test.Net40", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.Text.Tests.Net40", "test\ServiceStack.Text.Tests.Net40\ServiceStack.Text.Tests.Net40.csproj", "{8FB50542-FD25-4860-A164-26942AE2BC41}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagePack.LZ4", "src\MessagePack.LZ4\MessagePack.LZ4.csproj", "{BA48EC63-8B7D-403D-9843-FD5DC9215C75}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems*{c7f8dbe6-77b7-494d-af00-018f7579548c}*SharedItemsImports = 13
@@ -91,6 +93,10 @@ Global
 		{8FB50542-FD25-4860-A164-26942AE2BC41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FB50542-FD25-4860-A164-26942AE2BC41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FB50542-FD25-4860-A164-26942AE2BC41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA48EC63-8B7D-403D-9843-FD5DC9215C75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA48EC63-8B7D-403D-9843-FD5DC9215C75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA48EC63-8B7D-403D-9843-FD5DC9215C75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA48EC63-8B7D-403D-9843-FD5DC9215C75}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -107,6 +113,7 @@ Global
 		{068BC4C3-973F-4D6A-82BE-C78D9C01A556} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{540F4DD1-FF68-41B3-94A5-7F76C692205D} = {ABC72801-895A-4C64-B795-B8CD5B56CEA8}
 		{8FB50542-FD25-4860-A164-26942AE2BC41} = {ABC72801-895A-4C64-B795-B8CD5B56CEA8}
+		{BA48EC63-8B7D-403D-9843-FD5DC9215C75} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93230366-D5C3-4397-83D3-ED46E43B8121}

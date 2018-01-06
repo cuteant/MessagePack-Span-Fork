@@ -1,6 +1,6 @@
 ﻿using MessagePack.Formatters;
 using MessagePack.Internal;
-using MessagePack.LZ4;
+using LZ4;
 using System;
 using System.Globalization;
 using System.IO;

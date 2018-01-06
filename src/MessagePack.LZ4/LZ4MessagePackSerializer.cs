@@ -1,7 +1,7 @@
 ﻿using MessagePack.Internal;
 using System;
 using System.IO;
-using MessagePack.LZ4;
+using LZ4;
 
 namespace MessagePack
 {
