@@ -13,6 +13,9 @@ namespace MessagePack
     public static partial class MessagePackSerializer
     {
         private const int c_defaultCopyBufferSize = 1024 * 64;
+#if !NET40
+        private static readonly ArrayPool<byte> s_bufferPool = ArrayPool<byte>.Shared;
+#endif
 
         static IFormatterResolver defaultResolver;
 
@@ -143,8 +146,7 @@ namespace MessagePack
             if (resolver == null) resolver = DefaultResolver;
             var formatter = resolver.GetFormatterWithVerify<T>();
 
-            var bufferPool = ArrayPool<byte>.Shared;
-            var rentBuffer = bufferPool.Rent(c_defaultCopyBufferSize);
+            var rentBuffer = s_bufferPool.Rent(c_defaultCopyBufferSize);
             try
             {
                 var buffer = rentBuffer;
@@ -155,7 +157,7 @@ namespace MessagePack
             }
             finally
             {
-                bufferPool.Return(rentBuffer);
+                s_bufferPool.Return(rentBuffer);
             }
         }
 #endif
@@ -172,8 +174,7 @@ namespace MessagePack
             if (resolver == null) resolver = DefaultResolver;
             var formatter = resolver.GetFormatterWithVerify<T>();
 
-            int readSize;
-            return formatter.Deserialize(bytes, 0, resolver, out readSize);
+            return formatter.Deserialize(bytes, 0, resolver, out int readSize);
         }
 
         public static T Deserialize<T>(ArraySegment<byte> bytes)
@@ -186,8 +187,7 @@ namespace MessagePack
             if (resolver == null) resolver = DefaultResolver;
             var formatter = resolver.GetFormatterWithVerify<T>();
 
-            int readSize;
-            return formatter.Deserialize(bytes.Array, bytes.Offset, resolver, out readSize);
+            return formatter.Deserialize(bytes.Array, bytes.Offset, resolver, out int readSize);
         }
 
         public static T Deserialize<T>(Stream stream)
@@ -214,15 +214,12 @@ namespace MessagePack
             {
 #if NETSTANDARD || NET_4_5_GREATER
 
-                var ms = stream as MemoryStream;
-                if (ms != null)
+                if (stream is MemoryStream ms)
                 {
                     // optimize for MemoryStream
-                    ArraySegment<byte> buffer;
-                    if (ms.TryGetBuffer(out buffer))
+                    if (ms.TryGetBuffer(out ArraySegment<byte> buffer))
                     {
-                        int readSize;
-                        return formatter.Deserialize(buffer.Array, buffer.Offset, resolver, out readSize);
+                        return formatter.Deserialize(buffer.Array, buffer.Offset, resolver, out int readSize);
                     }
                 }
 #endif
@@ -233,16 +230,13 @@ namespace MessagePack
 
                     FillFromStream(stream, ref buffer);
 
-                    int readSize;
-                    return formatter.Deserialize(buffer, 0, resolver, out readSize);
+                    return formatter.Deserialize(buffer, 0, resolver, out int readSize);
                 }
             }
             else
             {
-                int _;
-                var bytes = MessagePackBinary.ReadMessageBlockFromStreamUnsafe(stream, false, out _);
-                int readSize;
-                return formatter.Deserialize(bytes, 0, resolver, out readSize);
+                var bytes = MessagePackBinary.ReadMessageBlockFromStreamUnsafe(stream, false, out var _);
+                return formatter.Deserialize(bytes, 0, resolver, out int readSize);
             }
         }
 
@@ -258,8 +252,7 @@ namespace MessagePack
 
         public static async System.Threading.Tasks.Task<T> DeserializeAsync<T>(Stream stream, IFormatterResolver resolver)
         {
-            var bufferPool = ArrayPool<byte>.Shared;
-            var rentBuffer = bufferPool.Rent(c_defaultCopyBufferSize);
+            var rentBuffer = s_bufferPool.Rent(c_defaultCopyBufferSize);
             var buf = rentBuffer;
             try
             {
@@ -278,7 +271,7 @@ namespace MessagePack
             }
             finally
             {
-                bufferPool.Return(rentBuffer);
+                s_bufferPool.Return(rentBuffer);
             }
         }
 #endif

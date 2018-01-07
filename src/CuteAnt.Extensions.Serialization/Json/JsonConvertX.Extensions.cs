@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Buffers;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using CuteAnt;
 using CuteAnt.Buffers;
 using CuteAnt.Collections;
@@ -15,9 +13,11 @@ using CuteAnt.Extensions.Serialization.Json;
 using CuteAnt.Extensions.Serialization.Json.Utilities;
 using CuteAnt.Pool;
 using CuteAnt.Reflection;
-using CuteAnt.Runtime;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+#if !NET40
+using CuteAnt.IO.Pipelines;
+#endif
 
 namespace Newtonsoft.Json
 {
@@ -409,25 +409,26 @@ namespace Newtonsoft.Json
 
     #region -- Serialize to Byte-Array --
 
-    private const int c_buffersize = 1024 * 2;
+    private const int c_initialBufferSize = JsonMessageFormatterExtensions.c_initialBufferSize;
+    private const int c_zeroSize = 0;
 
     /// <summary>Serializes the specified object to a JSON byte array.</summary>
     /// <param name="value">The object to serialize.</param>
-    /// <param name="bufferSize">The buffer size.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static byte[] SerializeToByteArray(object value, int bufferSize = c_buffersize)
+    public static byte[] SerializeToByteArray(object value, int initialBufferSize = c_initialBufferSize)
     {
-      return SerializeToByteArray(value, null, (JsonSerializerSettings)null, bufferSize);
+      return SerializeToByteArray(value, null, (JsonSerializerSettings)null, initialBufferSize);
     }
 
     /// <summary>Serializes the specified object to a JSON byte array using formatting.</summary>
     /// <param name="value">The object to serialize.</param>
     /// <param name="formatting">Indicates how the output should be formatted.</param>
-    /// <param name="bufferSize">The buffer size.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static byte[] SerializeToByteArray(object value, Formatting formatting, int bufferSize = c_buffersize)
+    public static byte[] SerializeToByteArray(object value, Formatting formatting, int initialBufferSize = c_initialBufferSize)
     {
-      return SerializeToByteArray(value, formatting, (JsonSerializerSettings)null, bufferSize);
+      return SerializeToByteArray(value, formatting, (JsonSerializerSettings)null, initialBufferSize);
     }
 
     /// <summary>Serializes the specified object to a JSON byte array using a collection of <see cref="JsonConverter"/>.</summary>
@@ -472,11 +473,11 @@ namespace Newtonsoft.Json
     /// <param name="value">The object to serialize.</param>
     /// <param name="settings">The <see cref="JsonSerializerSettings"/> used to serialize the object.
     /// If this is <c>null</c>, default serialization settings will be used.</param>
-    /// <param name="bufferSize">The buffer size.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static byte[] SerializeToByteArray(object value, JsonSerializerSettings settings, int bufferSize = c_buffersize)
+    public static byte[] SerializeToByteArray(object value, JsonSerializerSettings settings, int initialBufferSize = c_initialBufferSize)
     {
-      return SerializeToByteArray(value, null, settings, bufferSize);
+      return SerializeToByteArray(value, null, settings, initialBufferSize);
     }
 
     /// <summary>Serializes the specified object to a JSON byte array using a type, formatting and <see cref="JsonSerializerSettings"/>.</summary>
@@ -486,14 +487,14 @@ namespace Newtonsoft.Json
     /// <param name="type">The type of the value being serialized.
     /// This parameter is used when <see cref="JsonSerializer.TypeNameHandling"/> is <see cref="TypeNameHandling.Auto"/> to write out the type name if the type of the value does not match.
     /// Specifying the type is optional.</param>
-    /// <param name="bufferSize">The buffer size.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static byte[] SerializeToByteArray(object value, Type type, JsonSerializerSettings settings, int bufferSize = c_buffersize)
+    public static byte[] SerializeToByteArray(object value, Type type, JsonSerializerSettings settings, int initialBufferSize = c_initialBufferSize)
     {
       var jsonSerializer = AllocateSerializerInternal(settings);
       try
       {
-        return SerializeToByteArrayInternal(value, type, jsonSerializer, bufferSize);
+        return SerializeToByteArrayInternal(value, type, jsonSerializer, initialBufferSize);
       }
       finally
       {
@@ -506,11 +507,11 @@ namespace Newtonsoft.Json
     /// <param name="formatting">Indicates how the output should be formatted.</param>
     /// <param name="settings">The <see cref="JsonSerializerSettings"/> used to serialize the object.
     /// If this is <c>null</c>, default serialization settings will be used.</param>
-    /// <param name="bufferSize">The buffer size.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static byte[] SerializeToByteArray(object value, Formatting formatting, JsonSerializerSettings settings, int bufferSize = c_buffersize)
+    public static byte[] SerializeToByteArray(object value, Formatting formatting, JsonSerializerSettings settings, int initialBufferSize = c_initialBufferSize)
     {
-      return SerializeToByteArray(value, null, formatting, settings, bufferSize);
+      return SerializeToByteArray(value, null, formatting, settings, initialBufferSize);
     }
 
     /// <summary>Serializes the specified object to a JSON byte array using a type, formatting and <see cref="JsonSerializerSettings"/>.</summary>
@@ -521,9 +522,9 @@ namespace Newtonsoft.Json
     /// <param name="type">The type of the value being serialized.
     /// This parameter is used when <see cref="JsonSerializer.TypeNameHandling"/> is <see cref="TypeNameHandling.Auto"/> to write out the type name if the type of the value does not match.
     /// Specifying the type is optional.</param>
-    /// <param name="bufferSize">The buffer size.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static byte[] SerializeToByteArray(object value, Type type, Formatting formatting, JsonSerializerSettings settings, int bufferSize = c_buffersize)
+    public static byte[] SerializeToByteArray(object value, Type type, Formatting formatting, JsonSerializerSettings settings, int initialBufferSize = c_initialBufferSize)
     {
       var jsonSerializer = AllocateSerializerInternal(settings);
       var previousFormatting = jsonSerializer.GetFormatting();
@@ -531,7 +532,7 @@ namespace Newtonsoft.Json
       {
         jsonSerializer.Formatting = formatting;
 
-        return SerializeToByteArrayInternal(value, type, jsonSerializer, bufferSize);
+        return SerializeToByteArrayInternal(value, type, jsonSerializer, initialBufferSize);
       }
       finally
       {
@@ -540,12 +541,13 @@ namespace Newtonsoft.Json
       }
     }
 
-    private static byte[] SerializeToByteArrayInternal(object value, Type type, JsonSerializer jsonSerializer, int bufferSize = c_buffersize)
+    private static byte[] SerializeToByteArrayInternal(object value, Type type, JsonSerializer jsonSerializer, int initialBufferSize = c_initialBufferSize)
     {
+#if NET40
       using (var pooledOutputStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledOutputStream.Object;
-        outputStream.Reinitialize(bufferSize);
+        outputStream.Reinitialize(initialBufferSize);
         using (JsonTextWriter jsonWriter = new JsonTextWriter(new StreamWriterX(outputStream)))
         {
           jsonWriter.ArrayPool = GlobalCharacterArrayPool;
@@ -557,6 +559,26 @@ namespace Newtonsoft.Json
         }
         return outputStream.ToByteArray();
       }
+#else
+      using (var pooledPipe = PipelineManager.Create())
+      {
+        var pipe = pooledPipe.Object;
+        var outputStream = new PipelineStream(pipe, initialBufferSize);
+        using (JsonTextWriter jsonWriter = new JsonTextWriter(new StreamWriterX(outputStream)))
+        {
+          jsonWriter.ArrayPool = GlobalCharacterArrayPool;
+          //jsonWriter.CloseOutput = false;
+          jsonWriter.Formatting = jsonSerializer.Formatting;
+
+          jsonSerializer.Serialize(jsonWriter, value, type);
+          jsonWriter.Flush();
+        }
+        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
+        var length = (int)readBuffer.Length;
+        if (c_zeroSize == length) { return EmptyArray<byte>.Instance; }
+        return readBuffer.ToArray();
+      }
+#endif
     }
 
     #endregion
@@ -565,28 +587,28 @@ namespace Newtonsoft.Json
 
     /// <summary>Serializes the specified object to a JSON byte array.</summary>
     /// <param name="value">The object to serialize.</param>
-    /// <param name="bufferSize">The buffer size.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static ArraySegmentWrapper<Byte> SerializeToArraySegment(object value, int bufferSize = c_buffersize)
+    public static ArraySegment<Byte> SerializeToArraySegment(object value, int initialBufferSize = c_initialBufferSize)
     {
-      return SerializeToArraySegment(value, null, (JsonSerializerSettings)null, bufferSize);
+      return SerializeToArraySegment(value, null, (JsonSerializerSettings)null, initialBufferSize);
     }
 
     /// <summary>Serializes the specified object to a JSON byte array using formatting.</summary>
     /// <param name="value">The object to serialize.</param>
     /// <param name="formatting">Indicates how the output should be formatted.</param>
-    /// <param name="bufferSize">The buffer size.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static ArraySegmentWrapper<Byte> SerializeToArraySegment(object value, Formatting formatting, int bufferSize = c_buffersize)
+    public static ArraySegment<Byte> SerializeToArraySegment(object value, Formatting formatting, int initialBufferSize = c_initialBufferSize)
     {
-      return SerializeToArraySegment(value, formatting, (JsonSerializerSettings)null, bufferSize);
+      return SerializeToArraySegment(value, formatting, (JsonSerializerSettings)null, initialBufferSize);
     }
 
     /// <summary>Serializes the specified object to a JSON byte array using a collection of <see cref="JsonConverter"/>.</summary>
     /// <param name="value">The object to serialize.</param>
     /// <param name="converters">A collection of converters used while serializing.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static ArraySegmentWrapper<Byte> SerializeToArraySegment(object value, params JsonConverter[] converters)
+    public static ArraySegment<Byte> SerializeToArraySegment(object value, params JsonConverter[] converters)
     {
       if (converters != null && converters.Length > 0)
       {
@@ -605,7 +627,7 @@ namespace Newtonsoft.Json
     /// <param name="formatting">Indicates how the output should be formatted.</param>
     /// <param name="converters">A collection of converters used while serializing.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static ArraySegmentWrapper<Byte> SerializeToArraySegment(object value, Formatting formatting, params JsonConverter[] converters)
+    public static ArraySegment<Byte> SerializeToArraySegment(object value, Formatting formatting, params JsonConverter[] converters)
     {
       if (converters != null && converters.Length > 0)
       {
@@ -624,11 +646,11 @@ namespace Newtonsoft.Json
     /// <param name="value">The object to serialize.</param>
     /// <param name="settings">The <see cref="JsonSerializerSettings"/> used to serialize the object.
     /// If this is <c>null</c>, default serialization settings will be used.</param>
-    /// <param name="bufferSize">The buffer size.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static ArraySegmentWrapper<Byte> SerializeToArraySegment(object value, JsonSerializerSettings settings, int bufferSize = c_buffersize)
+    public static ArraySegment<Byte> SerializeToArraySegment(object value, JsonSerializerSettings settings, int initialBufferSize = c_initialBufferSize)
     {
-      return SerializeToArraySegment(value, null, settings, bufferSize);
+      return SerializeToArraySegment(value, null, settings, initialBufferSize);
     }
 
     /// <summary>Serializes the specified object to a JSON byte array using a type, formatting and <see cref="JsonSerializerSettings"/>.</summary>
@@ -638,14 +660,14 @@ namespace Newtonsoft.Json
     /// <param name="type">The type of the value being serialized.
     /// This parameter is used when <see cref="JsonSerializer.TypeNameHandling"/> is <see cref="TypeNameHandling.Auto"/> to write out the type name if the type of the value does not match.
     /// Specifying the type is optional.</param>
-    /// <param name="bufferSize">The buffer size.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static ArraySegmentWrapper<Byte> SerializeToArraySegment(object value, Type type, JsonSerializerSettings settings, int bufferSize = c_buffersize)
+    public static ArraySegment<Byte> SerializeToArraySegment(object value, Type type, JsonSerializerSettings settings, int initialBufferSize = c_initialBufferSize)
     {
       var jsonSerializer = AllocateSerializerInternal(settings);
       try
       {
-        return SerializeToArraySegmentInternal(value, type, jsonSerializer, bufferSize);
+        return SerializeToArraySegmentInternal(value, type, jsonSerializer, initialBufferSize);
       }
       finally
       {
@@ -658,11 +680,11 @@ namespace Newtonsoft.Json
     /// <param name="formatting">Indicates how the output should be formatted.</param>
     /// <param name="settings">The <see cref="JsonSerializerSettings"/> used to serialize the object.
     /// If this is <c>null</c>, default serialization settings will be used.</param>
-    /// <param name="bufferSize">The buffer size.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static ArraySegmentWrapper<Byte> SerializeToArraySegment(object value, Formatting formatting, JsonSerializerSettings settings, int bufferSize = c_buffersize)
+    public static ArraySegment<Byte> SerializeToArraySegment(object value, Formatting formatting, JsonSerializerSettings settings, int initialBufferSize = c_initialBufferSize)
     {
-      return SerializeToArraySegment(value, null, formatting, settings, bufferSize);
+      return SerializeToArraySegment(value, null, formatting, settings, initialBufferSize);
     }
 
     /// <summary>Serializes the specified object to a JSON byte array using a type, formatting and <see cref="JsonSerializerSettings"/>.</summary>
@@ -673,9 +695,9 @@ namespace Newtonsoft.Json
     /// <param name="type">The type of the value being serialized.
     /// This parameter is used when <see cref="JsonSerializer.TypeNameHandling"/> is <see cref="TypeNameHandling.Auto"/> to write out the type name if the type of the value does not match.
     /// Specifying the type is optional.</param>
-    /// <param name="bufferSize">The buffer size.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns>A JSON string representation of the object.</returns>
-    public static ArraySegmentWrapper<Byte> SerializeToArraySegment(object value, Type type, Formatting formatting, JsonSerializerSettings settings, int bufferSize = c_buffersize)
+    public static ArraySegment<Byte> SerializeToArraySegment(object value, Type type, Formatting formatting, JsonSerializerSettings settings, int initialBufferSize = c_initialBufferSize)
     {
       var jsonSerializer = AllocateSerializerInternal(settings);
       var previousFormatting = jsonSerializer.GetFormatting();
@@ -683,7 +705,7 @@ namespace Newtonsoft.Json
       {
         jsonSerializer.Formatting = formatting;
 
-        return SerializeToArraySegmentInternal(value, type, jsonSerializer, bufferSize);
+        return SerializeToArraySegmentInternal(value, type, jsonSerializer, initialBufferSize);
       }
       finally
       {
@@ -692,13 +714,13 @@ namespace Newtonsoft.Json
       }
     }
 
-    private static ArraySegmentWrapper<Byte> SerializeToArraySegmentInternal(object value, Type type, JsonSerializer jsonSerializer, int bufferSize = c_buffersize)
+    private static ArraySegment<Byte> SerializeToArraySegmentInternal(object value, Type type, JsonSerializer jsonSerializer, int initialBufferSize = c_initialBufferSize)
     {
-      const int _buffersize = 1024 * 2;
+#if NET40
       using (var pooledOutputStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledOutputStream.Object;
-        outputStream.Reinitialize(_buffersize);
+        outputStream.Reinitialize(initialBufferSize);
         using (JsonTextWriter jsonWriter = new JsonTextWriter(new StreamWriterX(outputStream)))
         {
           jsonWriter.ArrayPool = GlobalCharacterArrayPool;
@@ -710,6 +732,28 @@ namespace Newtonsoft.Json
         }
         return outputStream.ToArraySegment();
       }
+#else
+      using (var pooledPipe = PipelineManager.Create())
+      {
+        var pipe = pooledPipe.Object;
+        var outputStream = new PipelineStream(pipe, initialBufferSize);
+        using (JsonTextWriter jsonWriter = new JsonTextWriter(new StreamWriterX(outputStream)))
+        {
+          jsonWriter.ArrayPool = GlobalCharacterArrayPool;
+          //jsonWriter.CloseOutput = false;
+          jsonWriter.Formatting = jsonSerializer.Formatting;
+
+          jsonSerializer.Serialize(jsonWriter, value, type);
+          jsonWriter.Flush();
+        }
+        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
+        var length = (int)readBuffer.Length;
+        if (c_zeroSize == length) { return default; }
+        var buffer = BufferManager.Shared.Rent(length);
+        readBuffer.CopyTo(buffer);
+        return new ArraySegment<byte>(buffer, 0, length);
+      }
+#endif
     }
 
     #endregion

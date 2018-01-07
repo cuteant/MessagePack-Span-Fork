@@ -12,8 +12,12 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
-using CuteAnt.Buffers;
 using Microsoft.Extensions.Logging;
+#if !NET40
+using CuteAnt.IO.Pipelines;
+#else
+using CuteAnt.Buffers;
+#endif
 
 namespace CuteAnt.Extensions.Serialization
 {
@@ -21,6 +25,8 @@ namespace CuteAnt.Extensions.Serialization
   public class XmlMessageFormatter : MessageFormatter
   {
     #region @@ Fields @@
+
+    protected static readonly ILogger s_logger = TraceLogger.GetLogger(typeof(XmlMessageFormatter));
 
     private ConcurrentDictionary<Type, Object> _serializerCache = new ConcurrentDictionary<Type, Object>();
     private XmlDictionaryReaderQuotas _readerQuotas = FormattingUtilities.CreateDefaultReaderQuotas();
@@ -213,16 +219,51 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
+    #region -- DeepCopy --
+
+    public override object DeepCopy(object source)
+    {
+      if (source == null) { return null; }
+
+      var type = source.GetType();
+#if NET40
+      const int _bufferSize = 2 * 1024;
+
+      using (var pooledOutputStream = BufferManagerOutputStreamManager.Create())
+      {
+        var outputStream = pooledOutputStream.Object;
+        outputStream.Reinitialize(_bufferSize);
+        WriteToStream(type, source, outputStream);
+        using (var pooledStreamReader = BufferManagerStreamReaderManager.Create())
+        {
+          var inputStream = pooledStreamReader.Object;
+          inputStream.Reinitialize(outputStream.ToReadOnlyStream(), false);
+          return ReadFromStream(type, inputStream);
+        }
+      }
+#else
+      using (var pooledPipe = PipelineManager.Create())
+      {
+        var pipeStream = new PipelineStream(pooledPipe.Object);
+        WriteToStream(type, source, pipeStream);
+        pipeStream.Flush();
+        return ReadFromStream(type, pipeStream);
+      }
+#endif
+    }
+
+    #endregion
+
     #region -- ReadFromStreamAsync --
 
     ///// <summary>Called during deserialization to read an object of the specified <paramref name="type"/>
     ///// from the specified <paramref name="readStream"/>.</summary>
     ///// <param name="type">The type of object to read.</param>
-    ///// <param name="readStream">The <see cref="BufferManagerStreamReader"/> from which to read.</param>
+    ///// <param name="readStream">The <see cref="Stream"/> from which to read.</param>
     ///// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
     ///// <returns>A <see cref="Task"/> whose result will be the object instance that has been read.</returns>
     //[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-    //public override Task<Object> ReadFromStreamAsync(Type type, BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    //public override Task<Object> ReadFromStreamAsync(Type type, Stream readStream, Encoding effectiveEncoding)
     //{
     //  if (type == null) { throw new ArgumentNullException(nameof(type)); }
     //  if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
@@ -242,7 +283,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- ReadFromStream --
 
     /// <inheritdoc />
-    public override Object ReadFromStream(Type type, BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    public override Object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
@@ -278,7 +319,7 @@ namespace CuteAnt.Extensions.Serialization
       }
       catch (Exception e)
       {
-        Logger.LogError(e.ToString());
+        s_logger.LogError(e.ToString());
         return GetDefaultValueForType(type);
       }
     }
@@ -322,7 +363,7 @@ namespace CuteAnt.Extensions.Serialization
 
     ///// <inheritdoc/>
     //[SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-    //public override Task WriteToStreamAsync(Type type, Object value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    //public override Task WriteToStreamAsync(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
     //{
     //  if (type == null) { throw new ArgumentNullException(nameof(type)); }
     //  if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
@@ -343,7 +384,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- WriteToStream --
 
     /// <inheritdoc />
-    public override void WriteToStream(Type type, Object value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    public override void WriteToStream(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
@@ -358,11 +399,7 @@ namespace CuteAnt.Extensions.Serialization
         isRemapped = TryGetDelegatingTypeForIQueryableGenericOrSame(ref type);
       }
 
-      if (null == value)
-      {
-        writeStream.Write7BitEncodedInt(SIZE_ZERO);
-        return;
-      }
+      if (null == value) { return; }
 
       if (isRemapped && value != null)
       {

@@ -1,5 +1,4 @@
-﻿#if NETSTANDARD
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -11,49 +10,28 @@ namespace CuteAnt.Extensions.Serialization.Tests
   public class JsonSerializerTests
   {
     [Fact]
-    public void JsonSerializer_ResolveType_Test()
-    {
-      var type = typeof(int);
-      var typeName = type.FullName;
-      var simpleTypeName = JsonConvertX.GetTypeName(type, TypeNameAssemblyFormatHandling.Simple);
-      var fullTypeName = JsonConvertX.GetTypeName(type, TypeNameAssemblyFormatHandling.Full);
-      var serializedTypeName = JsonConvertX.SerializeTypeName(type);
-      var type1 = JsonConvertX.ResolveType(simpleTypeName);
-      var type2 = JsonConvertX.ResolveType(fullTypeName);
-      var type3 = JsonConvertX.ResolveType(typeName);
-      var type4 = JsonConvertX.ResolveType(serializedTypeName);
-      Assert.Equal(type, type1);
-      Assert.Equal(type, type2);
-      Assert.Equal(type, type3);
-      Assert.Equal(type, type4);
-      Assert.Equal(type1, type2);
-      Assert.Equal(type1, type3);
-      Assert.Equal(type1, type4);
-    }
-
-    [Fact]
     public void JsonSerializer_IsCheckAdditionalContentSet()
     {
       JsonSerializer jsonSerializer = null;
       Assert.Throws<ArgumentNullException>("jsonSerializer", () => jsonSerializer.IsCheckAdditionalContentSetX());
 
       jsonSerializer = JsonSerializer.CreateDefault();
-      Assert.Equal(false, jsonSerializer.IsCheckAdditionalContentSetX());
+      Assert.False(jsonSerializer.IsCheckAdditionalContentSetX());
 
       jsonSerializer = JsonSerializer.CreateDefault(new JsonSerializerSettings { CheckAdditionalContent = true });
-      Assert.Equal(true, jsonSerializer.IsCheckAdditionalContentSetX());
+      Assert.True(jsonSerializer.IsCheckAdditionalContentSetX());
 
       jsonSerializer = JsonSerializer.CreateDefault(new JsonSerializerSettings { CheckAdditionalContent = false });
-      Assert.Equal(true, jsonSerializer.IsCheckAdditionalContentSetX());
+      Assert.True(jsonSerializer.IsCheckAdditionalContentSetX());
 
       jsonSerializer.SetCheckAdditionalContent(null);
-      Assert.Equal(null, jsonSerializer.GetCheckAdditionalContent());
+      Assert.Null(jsonSerializer.GetCheckAdditionalContent());
 
       jsonSerializer.SetCheckAdditionalContent(true);
-      Assert.Equal(true, jsonSerializer.GetCheckAdditionalContent());
+      Assert.True(jsonSerializer.GetCheckAdditionalContent());
 
       jsonSerializer.SetCheckAdditionalContent(false);
-      Assert.Equal(false, jsonSerializer.GetCheckAdditionalContent());
+      Assert.False(jsonSerializer.GetCheckAdditionalContent());
     }
 
     [Fact]
@@ -65,7 +43,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       jsonSerializer = JsonSerializer.CreateDefault();
 
       jsonSerializer.SetFormatting(null);
-      Assert.Equal(null, jsonSerializer.GetFormatting());
+      Assert.Null(jsonSerializer.GetFormatting());
 
       jsonSerializer.SetFormatting(Formatting.None);
       Assert.Equal(Formatting.None, jsonSerializer.GetFormatting());
@@ -264,4 +242,3 @@ namespace CuteAnt.Extensions.Serialization.Tests
     }
   }
 }
-#endif

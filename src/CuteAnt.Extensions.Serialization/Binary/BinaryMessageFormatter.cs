@@ -1,11 +1,10 @@
-﻿#if !NETSTANDARD
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using CuteAnt.Buffers;
 using CuteAnt.IO;
 
 namespace CuteAnt.Extensions.Serialization
@@ -54,7 +53,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- ReadFromStream --
 
     /// <inheritdoc />
-    public override object ReadFromStream(Type type, BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    public override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       //if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
@@ -70,7 +69,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- WriteToStream --
 
     /// <inheritdoc />
-    public override void WriteToStream(Type type, object value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
     {
       //if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
@@ -118,4 +117,3 @@ namespace CuteAnt.Extensions.Serialization
     #endregion
   }
 }
-#endif

@@ -19,7 +19,4 @@
     <PackageTags>Serializer</PackageTags>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CuteAnt.Runtime" Version="$(CuteAntRuntimePackageVersion)" />
-  </ItemGroup>
 </Project>

@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\version.props" />
+  <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Logging.Sources\CuteAnt.Extensions.Logging.Sources.projitems" Label="Shared" />
   <Import Project="..\nuget.props" />
   
   <PropertyGroup>
@@ -15,6 +16,10 @@
     <Description>CuteAnt.Extensions.Serialization.Hyperion</Description>
     <PackageTags>Serializer</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CuteAnt.Runtime" Version="$(CuteAntRuntimePackageVersion)" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CuteAnt.Extensions.Serialization.Abstractions\CuteAnt.Extensions.Serialization.Abstractions.csproj" />

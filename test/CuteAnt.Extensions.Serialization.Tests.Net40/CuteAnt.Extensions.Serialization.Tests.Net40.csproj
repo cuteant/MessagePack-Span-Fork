@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp2.0;net452</TargetFrameworks>
+    <TargetFrameworks>net40</TargetFrameworks>
     <RootNamespace>CuteAnt.Extensions.Serialization.Tests</RootNamespace>
     <AssemblyName>CuteAnt.Extensions.Serialization.Tests</AssemblyName>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
@@ -9,9 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac.Unofficial" Version="$(AutofacUnofficialPackageVersion)" />
-    <PackageReference Include="System.Buffers" Version="$(SystemBuffersPackageVersion)" />
-    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutablePackageVersion)" />
-    <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,7 +16,7 @@
     <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization\CuteAnt.Extensions.Serialization.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(ImportLibs)'=='netfx' ">
+  <ItemGroup>
     <PackageReference Include="NUnit" Version="$(NUnitPackageVersion)" />
     <PackageReference Include="NUnit3TestAdapter" Version="$(NUnit3TestAdapterPackageVersion)" />
     <Reference Include="Microsoft.CSharp" />
@@ -30,32 +27,28 @@
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Data.DataSetExtensions" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(ImportLibs)'=='netfx' ">
-    <DefineConstants>$(DefineConstants);PORTABLE;$(AdditionalConstants)</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition=" '$(ImportLibs)'=='netcore' ">
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkPackageVersion)" />
-    <PackageReference Include="xunit" Version="$(xUnitPackageVersion)" />
-    <PackageReference Include="xunit.analyzers" Version="$(xUnitAnalyzersPackageVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitRunnerVsPackageVersion)" />
-  </ItemGroup>
-  <PropertyGroup Condition=" '$(ImportLibs)'=='netcore' ">
-    <DefineConstants>$(DefineConstants);NETSTANDARD2_0;DNXCORE50;PORTABLE;HAVE_BENCHMARKS;</DefineConstants>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);NET40;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="bunny_pancake.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="large.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="large_sample.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="PoisonText.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Compile Include="..\CuteAnt.Extensions.Serialization.Tests\**\*.cs" Exclude="..\CuteAnt.Extensions.Serialization.Tests\bin\**;..\CuteAnt.Extensions.Serialization.Tests\obj\**" />
+    <EmbeddedResource Include="..\CuteAnt.Extensions.Serialization.Tests\**\*.resx" Exclude="..\CuteAnt.Extensions.Serialization.Tests\bin\**;..\CuteAnt.Extensions.Serialization.Tests\obj\**;@(EmbeddedResource)" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\CuteAnt.Extensions.Serialization.Tests\bunny_pancake.jpg" Link="bunny_pancake.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\CuteAnt.Extensions.Serialization.Tests\large.json" Link="large.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\CuteAnt.Extensions.Serialization.Tests\large_sample.xml" Link="large_sample.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\CuteAnt.Extensions.Serialization.Tests\PoisonText.txt" Link="PoisonText.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

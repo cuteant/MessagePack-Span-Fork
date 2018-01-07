@@ -6,10 +6,14 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using CuteAnt.AsyncEx;
-using CuteAnt.Buffers;
 using CuteAnt.Text;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+#if !NET40
+using CuteAnt.IO.Pipelines;
+#else
+using CuteAnt.Buffers;
+#endif
 
 namespace CuteAnt.Extensions.Serialization
 {
@@ -17,6 +21,8 @@ namespace CuteAnt.Extensions.Serialization
   public abstract class BaseJsonMessageFormatter : MessageFormatter, IJsonMessageFormatter
   {
     #region @@ Fields @@
+
+    protected static readonly ILogger s_logger = TraceLogger.GetLogger("CuteAnt.Extensions.Serialization.JsonMessageFormatter");
 
     // Though MaxDepth is not supported in portable library, we still override JsonReader's MaxDepth
     private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
@@ -213,16 +219,52 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
+    #region -- DeepCopy --
+
+    public override object DeepCopy(object source)
+    {
+      if (source == null) { return null; }
+
+      var type = source.GetType();
+#if NET40
+      const int _bufferSize = 2 * 1024;
+
+      using (var pooledOutputStream = BufferManagerOutputStreamManager.Create())
+      {
+        var outputStream = pooledOutputStream.Object;
+        outputStream.Reinitialize(_bufferSize);
+        WriteToStream(type, source, outputStream);
+        using (var pooledStreamReader = BufferManagerStreamReaderManager.Create())
+        {
+          var inputStream = pooledStreamReader.Object;
+          inputStream.Reinitialize(outputStream.ToReadOnlyStream(), false);
+          return ReadFromStream(type, inputStream);
+        }
+      }
+#else
+      using (var pooledPipe = PipelineManager.Create())
+      {
+        var pipeStream = new PipelineStream(pooledPipe.Object);
+        WriteToStream(type, source, pipeStream);
+        pipeStream.Flush();
+        return ReadFromStream(type, pipeStream);
+      }
+#endif
+    }
+
+    #endregion
+
     #region -- ReadFromStreamAsync --
 
+#if !NET40
     /// <summary>Called during deserialization to read an object of the specified <paramref name="type"/>
     /// from the specified <paramref name="readStream"/>.</summary>
     /// <param name="type">The <see cref="Type"/> of object to read.</param>
-    /// <param name="readStream">The <see cref="BufferManagerStreamReader"/> from which to read.</param>
+    /// <param name="readStream">The <see cref="Stream"/> from which to read.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
     /// <returns>A <see cref="Task"/> whose result will be the object instance that has been read.</returns>
     [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-    public override async Task<Object> ReadFromStreamAsync(Type type, BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    public override async Task<Object> ReadFromStreamAsync(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       if (IsStrictMode && type == null) { throw new ArgumentNullException(nameof(type)); }
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
@@ -230,6 +272,7 @@ namespace CuteAnt.Extensions.Serialization
       await TaskConstants.Completed;
       return ReadFromStream(type, readStream, effectiveEncoding);
     }
+#endif
 
     #endregion
 
@@ -238,10 +281,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>Called during deserialization to read an object of the specified <paramref name="type"/>
     /// from the specified <paramref name="readStream"/>.</summary>
     /// <param name="type">The <see cref="Type"/> of object to read.</param>
-    /// <param name="readStream">The <see cref="BufferManagerStreamReader"/> from which to read.</param>
+    /// <param name="readStream">The <see cref="Stream"/> from which to read.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
     /// <returns>The <see cref="object"/> instance that has been read.</returns>
-    public override Object ReadFromStream(Type type, BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    public override Object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       return ReadFromStream(type, readStream, effectiveEncoding, null);
     }
@@ -297,7 +340,7 @@ namespace CuteAnt.Extensions.Serialization
     private void JsonErrorHandler(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e)
     {
       var errorContext = e.ErrorContext;
-      Logger.LogError(errorContext.Error.ToString());
+      s_logger.LogError(errorContext.Error.ToString());
       errorContext.Handled = true;
     }
 
@@ -389,15 +432,16 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- WriteToStreamAsync --
 
+#if !NET40
     /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> of the given <paramref name="type"/>
     /// to the given <paramref name="writeStream"/>.</summary>
     /// <param name="type">The type of the object to write.</param>
     /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
-    /// <param name="writeStream">The <see cref="BufferManagerOutputStream"/> to which to write.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
     /// <returns>A <see cref="Task"/> that will perform the write.</returns>
     [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-    public override async Task WriteToStreamAsync(Type type, Object value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    public override async Task WriteToStreamAsync(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (IsStrictMode && type == null) { throw new ArgumentNullException(nameof(type)); }
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
@@ -405,6 +449,7 @@ namespace CuteAnt.Extensions.Serialization
       WriteToStream(type, value, writeStream, effectiveEncoding);
       await TaskConstants.Completed;
     }
+#endif
 
     #endregion
 
@@ -414,9 +459,9 @@ namespace CuteAnt.Extensions.Serialization
     /// to the specified <paramref name="writeStream"/>.</summary>
     /// <param name="type">The <see cref="Type"/> of object to write.</param>
     /// <param name="value">The object to write.</param>
-    /// <param name="writeStream">The <see cref="BufferManagerOutputStream"/> to which to write.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
-    public override void WriteToStream(Type type, Object value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    public override void WriteToStream(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
     {
       WriteToStream(type, value, writeStream, effectiveEncoding, null);
     }

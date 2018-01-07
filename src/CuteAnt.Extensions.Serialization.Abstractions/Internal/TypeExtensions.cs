@@ -13,6 +13,8 @@ namespace CuteAnt.Extensions.Serialization
 {
   internal static class TypeExtensions
   {
+    private const MethodImplOptions s_aggressiveInlining = (MethodImplOptions)256;
+
 #if NETFX_CORE
     private static bool EqualTo(this Type[] t1, Type[] t2)
     {
@@ -41,7 +43,7 @@ namespace CuteAnt.Extensions.Serialization
     }
 #endif
 
-    [MethodImpl(InlineMethod.Value)]
+    [MethodImpl(s_aggressiveInlining)]
     public static Type ExtractGenericInterface(this Type queryType, Type interfaceType)
     {
       Func<Type, bool> matchesInterface = t => t.IsGenericType() && t.GetGenericTypeDefinition() == interfaceType;
@@ -49,13 +51,13 @@ namespace CuteAnt.Extensions.Serialization
     }
 
 #if NETFX_CORE
-    [MethodImpl(InlineMethod.Value)]
+    [MethodImpl(s_aggressiveInlining)]
     public static Type[] GetGenericArguments(this Type type)
     {
       return type.GetTypeInfo().GenericTypeArguments;
     }
 
-    [MethodImpl(InlineMethod.Value)]
+    [MethodImpl(s_aggressiveInlining)]
     public static Type[] GetInterfaces(this Type type)
     {
       return type.GetTypeInfo().ImplementedInterfaces.ToArray();
@@ -63,14 +65,14 @@ namespace CuteAnt.Extensions.Serialization
 #endif
 
 #if NETFX_CORE
-    [MethodImpl(InlineMethod.Value)]
+    [MethodImpl(s_aggressiveInlining)]
     public static bool IsAssignableFrom(this Type type, Type c)
     {
       return type.GetTypeInfo().IsAssignableFrom(c.GetTypeInfo());
     }
 #endif
 
-    [MethodImpl(InlineMethod.Value)]
+    [MethodImpl(s_aggressiveInlining)]
     public static bool IsGenericType(this Type type)
     {
 #if NETFX_CORE
@@ -80,7 +82,7 @@ namespace CuteAnt.Extensions.Serialization
 #endif
     }
 
-    [MethodImpl(InlineMethod.Value)]
+    [MethodImpl(s_aggressiveInlining)]
     public static bool IsInterface(this Type type)
     {
 #if NETFX_CORE
@@ -90,7 +92,7 @@ namespace CuteAnt.Extensions.Serialization
 #endif
     }
 
-    [MethodImpl(InlineMethod.Value)]
+    [MethodImpl(s_aggressiveInlining)]
     public static bool IsValueType(this Type type)
     {
 #if NETFX_CORE

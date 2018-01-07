@@ -390,7 +390,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             var possibleErrs = new[]
             {
 #if !(NET20 || NET35)
-                "[1] - 1 - The string was not recognized as a valid DateTime. There is an unknown word starting at index 0.",
+                "[1] - 1 - The string 'I am not a date and will error!' was not recognized as a valid DateTime. There is an unknown word starting at index '0'.",
                 "[1] - 1 - String was not recognized as a valid DateTime."
 #else
     // handle typo fix in later versions of .NET

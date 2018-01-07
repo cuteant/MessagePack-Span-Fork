@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using CuteAnt.AsyncEx;
-using CuteAnt.Buffers;
 using CuteAnt.IO;
 using Hyperion;
 using Hyperion.SerializerFactories;
@@ -19,6 +17,8 @@ namespace CuteAnt.Extensions.Serialization
   /// <summary><see cref="MessageFormatter"/> class to handle wire.</summary>
   public class HyperionMessageFormatter : MessageFormatter
   {
+    protected static readonly ILogger s_logger = TraceLogger.GetLogger(typeof(HyperionMessageFormatter));
+
     /// <summary>The default singlegton instance</summary>
     public static readonly HyperionMessageFormatter DefaultInstance = new HyperionMessageFormatter();
 
@@ -80,7 +80,7 @@ namespace CuteAnt.Extensions.Serialization
     }
 
     /// <inheritdoc />
-    public override object ReadFromStream(Type type, BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    public override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
@@ -92,22 +92,24 @@ namespace CuteAnt.Extensions.Serialization
       }
       catch (Exception ex)
       {
-        Logger.LogError(ex.ToString());
+        s_logger.LogError(ex.ToString());
         return GetDefaultValueForType(type);
       }
     }
 
+#if !NET40
     /// <inheritdoc />
-    public override async Task<Object> ReadFromStreamAsync(Type type, BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    public override async Task<Object> ReadFromStreamAsync(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
       await TaskConstants.Completed;
       return ReadFromStream(type, readStream, effectiveEncoding);
     }
+#endif
 
     /// <inheritdoc />
-    public override void WriteToStream(Type type, object value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
@@ -115,13 +117,15 @@ namespace CuteAnt.Extensions.Serialization
       _serializer.Serialize(value, writeStream);
     }
 
+#if !NET40
     /// <inheritdoc />
-    public override async Task WriteToStreamAsync(Type type, Object value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    public override async Task WriteToStreamAsync(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
       WriteToStream(type, value, writeStream, effectiveEncoding);
       await TaskConstants.Completed;
     }
+#endif
   }
 }

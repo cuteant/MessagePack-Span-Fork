@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Data;
+using System.IO;
 using System.Text;
-using CuteAnt.Buffers;
+using CuteAnt.IO;
 using Microsoft.Extensions.Logging;
 using ServiceStack.Text;
 #if NET40
@@ -14,6 +13,8 @@ namespace CuteAnt.Extensions.Serialization
   /// <summary><see cref="MessageFormatter"/> class to handle wire.</summary>
   public class JsvMessageFormatter : MessageFormatter
   {
+    protected static readonly ILogger s_logger = TraceLogger.GetLogger(typeof(JsvMessageFormatter));
+
     /// <summary>The default singlegton instance</summary>
     public static readonly JsvMessageFormatter DefaultInstance = new JsvMessageFormatter();
 
@@ -29,10 +30,27 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
+    #region -- DeepCopy --
+
+    public override object DeepCopy(object source)
+    {
+      if (source == null) { return null; }
+
+      var type = source.GetType();
+      using (var ms = MemoryStreamManager.GetStream())
+      {
+        TypeSerializer.SerializeToStream(source, type, ms);
+        ms.Seek(0, System.IO.SeekOrigin.Begin);
+        return TypeSerializer.DeserializeFromStream(type, ms);
+      }
+    }
+
+    #endregion
+
     #region -- ReadFromStream --
 
     /// <inheritdoc />
-    public override object ReadFromStream(Type type, BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    public override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
@@ -45,17 +63,17 @@ namespace CuteAnt.Extensions.Serialization
       }
       catch (Exception ex)
       {
-        Logger.LogError(ex.ToString());
+        s_logger.LogError(ex.ToString());
         return GetDefaultValueForType(type);
       }
     }
 
     /// <inheritdoc />
-    public override T ReadFromStream<T>(BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    public override T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
     {
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
-      if (readStream.Position == readStream.Length) { return default(T); }
+      if (readStream.Position == readStream.Length) { return default; }
 
       try
       {
@@ -63,8 +81,8 @@ namespace CuteAnt.Extensions.Serialization
       }
       catch (Exception ex)
       {
-        Logger.LogError(ex.ToString());
-        return default(T);
+        s_logger.LogError(ex.ToString());
+        return default;
       }
     }
 
@@ -73,7 +91,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- WriteToStream --
 
     /// <inheritdoc />
-    public override void WriteToStream(Type type, object value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
@@ -82,7 +100,7 @@ namespace CuteAnt.Extensions.Serialization
     }
 
     /// <inheritdoc />
-    public override void WriteToStream<T>(T value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    public override void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 

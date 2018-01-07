@@ -3,15 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CuteAnt.AsyncEx;
-using CuteAnt.Buffers;
-using CuteAnt.Reflection;
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CuteAnt.Extensions.Serialization
 {
@@ -43,7 +39,6 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>Initializes a new instance of the <see cref="MessageFormatter"/> class.</summary>
     protected MessageFormatter()
     {
-      Logger = NullLogger.Instance;
     }
 
     /// <summary>Initializes a new instance of the <see cref="MessageFormatter"/> class.</summary>
@@ -66,21 +61,7 @@ namespace CuteAnt.Extensions.Serialization
       set { _requiredMemberSelector = value; }
     }
 
-    /// <summary>Gets or sets the <see cref="ILogger"/>.</summary>
-    public ILogger Logger { get; set; }
-
     //internal virtual bool CanWriteAnyTypes { get { return true; } }
-
-    #endregion
-
-    #region -- Initialize --
-
-    /// <summary>Initializes the external serializer. Called once when the serialization manager creates 
-    /// an instance of this type</summary>
-    public virtual void Initialize(ILogger logger)
-    {
-      Logger = logger ?? NullLogger.Instance;
-    }
 
     #endregion
 
@@ -89,26 +70,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>Tries to create a copy of source.</summary>
     /// <param name="source">The item to create a copy of</param>
     /// <returns>The copy</returns>
-    public virtual object DeepCopy(object source)
-    {
-      if (source == null) { return null; }
-
-      const int _bufferSize = 2 * 1024;
-
-      var type = source.GetType();
-      using (var pooledOutputStream = BufferManagerOutputStreamManager.Create())
-      {
-        var outputStream = pooledOutputStream.Object;
-        outputStream.Reinitialize(_bufferSize);
-        WriteToStream(type, source, outputStream);
-        using (var pooledStreamReader = BufferManagerStreamReaderManager.Create())
-        {
-          var inputStream = pooledStreamReader.Object;
-          inputStream.Reinitialize(outputStream.ToReadOnlyStream(), false);
-          return ReadFromStream(type, inputStream);
-        }
-      }
-    }
+    public abstract object DeepCopy(object source);
 
     #endregion
 
@@ -118,7 +80,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="reader">The reader used for binary deserialization</param>
     /// <param name="expectedType">The type that should be deserialzied</param>
     /// <returns>The deserialized object</returns>
-    public object Deserialize(Type expectedType, BufferManagerStreamReader reader)
+    public object Deserialize(Type expectedType, Stream reader)
     {
       return ReadFromStream(expectedType, reader, null);
     }
@@ -130,11 +92,11 @@ namespace CuteAnt.Extensions.Serialization
     /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
     /// </remarks>
     /// <param name="type">The type of the object to deserialize.</param>
-    /// <param name="readStream">The <see cref="BufferManagerStreamReader"/> to read.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
     /// <returns>an object of the given type.</returns>
     /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
     /// <seealso cref="CanReadType(Type)"/>
-    public object ReadFromStream(Type type, BufferManagerStreamReader readStream)
+    public object ReadFromStream(Type type, Stream readStream)
     {
       return ReadFromStream(type, readStream, null);
     }
@@ -146,12 +108,12 @@ namespace CuteAnt.Extensions.Serialization
     /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
     /// </remarks>
     /// <param name="type">The type of the object to deserialize.</param>
-    /// <param name="readStream">The <see cref="BufferManagerStreamReader"/> to read.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
     /// <returns>An object of the given type.</returns>
     /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
     /// <seealso cref="CanReadType(Type)"/>
-    public virtual object ReadFromStream(Type type, BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    public virtual object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       throw Error.NotSupported(FormattingSR.MediaTypeFormatterCannotRead, GetType().Name);
     }
@@ -163,11 +125,11 @@ namespace CuteAnt.Extensions.Serialization
     /// supports reading.</para>
     /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
     /// </remarks>
-    /// <param name="readStream">The <see cref="BufferManagerStreamReader"/> to read.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
     /// <returns>An object of the given type.</returns>
     /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
     /// <seealso cref="CanReadType(Type)"/>
-    public T ReadFromStream<T>(BufferManagerStreamReader readStream)
+    public T ReadFromStream<T>(Stream readStream)
     {
       return ReadFromStream<T>(readStream, null);
     }
@@ -179,16 +141,17 @@ namespace CuteAnt.Extensions.Serialization
     /// supports reading.</para>
     /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
     /// </remarks>
-    /// <param name="readStream">The <see cref="BufferManagerStreamReader"/> to read.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
     /// <returns>An object of the given type.</returns>
     /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
     /// <seealso cref="CanReadType(Type)"/>
-    public virtual T ReadFromStream<T>(BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    public virtual T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
     {
       return (T)ReadFromStream(typeof(T), readStream, effectiveEncoding);
     }
 
+#if !NET40
     /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given <paramref name="type"/> from the given <paramref name="readStream"/></summary>
     /// <remarks>
     /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
@@ -196,17 +159,21 @@ namespace CuteAnt.Extensions.Serialization
     /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
     /// </remarks>
     /// <param name="type">The type of the object to deserialize.</param>
-    /// <param name="readStream">The <see cref="BufferManagerStreamReader"/> to read.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
     /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
     /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
     /// <seealso cref="CanReadType(Type)"/>
-    public virtual async Task<Object> ReadFromStreamAsync(Type type, BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    public virtual async Task<Object> ReadFromStreamAsync(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       if (type == null) { throw Error.ArgumentNull(nameof(type)); }
       if (readStream == null) { throw Error.ArgumentNull(nameof(readStream)); }
 
-      await TaskConstants.Completed;
+#if NET451
+      await TaskAsyncHelper.Completed;
+#else
+      await Task.CompletedTask;
+#endif
       return ReadFromStream(type, readStream, effectiveEncoding);
     }
 
@@ -217,14 +184,21 @@ namespace CuteAnt.Extensions.Serialization
     /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
     /// </remarks>
     /// <param name="type">The type of the object to deserialize.</param>
-    /// <param name="readStream">The <see cref="BufferManagerStreamReader"/> to read.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
     /// <seealso cref="CanReadType(Type)"/>
-    public Task<Object> ReadFromStreamAsync(Type type, BufferManagerStreamReader readStream, Encoding effectiveEncoding, CancellationToken cancellationToken)
+    public Task<Object> ReadFromStreamAsync(Type type, Stream readStream, Encoding effectiveEncoding, CancellationToken cancellationToken)
     {
-      if (cancellationToken.IsCancellationRequested) { return TaskConstants<Object>.Canceled; }
+      if (cancellationToken.IsCancellationRequested)
+      {
+#if NET451
+        return TaskAsyncHelper.Canceled<object>();
+#else
+        return Task.FromCanceled<object>(cancellationToken);
+#endif
+      }
 
       return ReadFromStreamAsync(type, readStream, effectiveEncoding);
     }
@@ -236,12 +210,12 @@ namespace CuteAnt.Extensions.Serialization
     /// supports reading.</para>
     /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
     /// </remarks>
-    /// <param name="readStream">The <see cref="BufferManagerStreamReader"/> to read.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
     /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
     /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
     /// <seealso cref="CanReadType(Type)"/>
-    public async Task<T> ReadFromStreamAsync<T>(BufferManagerStreamReader readStream, Encoding effectiveEncoding)
+    public async Task<T> ReadFromStreamAsync<T>(Stream readStream, Encoding effectiveEncoding)
     {
       return (T)(await ReadFromStreamAsync(typeof(T), readStream, effectiveEncoding).ConfigureAwait(false));
     }
@@ -253,17 +227,25 @@ namespace CuteAnt.Extensions.Serialization
     /// supports reading.</para>
     /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
     /// </remarks>
-    /// <param name="readStream">The <see cref="BufferManagerStreamReader"/> to read.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
     /// <seealso cref="CanReadType(Type)"/>
-    public Task<T> ReadFromStreamAsync<T>(BufferManagerStreamReader readStream, Encoding effectiveEncoding, CancellationToken cancellationToken)
+    public Task<T> ReadFromStreamAsync<T>(Stream readStream, Encoding effectiveEncoding, CancellationToken cancellationToken)
     {
-      if (cancellationToken.IsCancellationRequested) { return TaskConstants<T>.Canceled; }
+      if (cancellationToken.IsCancellationRequested)
+      {
+#if NET451
+        return TaskAsyncHelper.Canceled<T>();
+#else
+        return Task.FromCanceled<T>(cancellationToken);
+#endif
+      }
 
       return ReadFromStreamAsync<T>(readStream, effectiveEncoding);
     }
+#endif
 
     #endregion
 
@@ -273,7 +255,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="item">The instance of the object being serialized</param>
     /// <param name="writer">The writer used for serialization</param>
     /// <param name="expectedType">The type that the deserializer will expect</param>
-    public void Serialize(object item, BufferManagerOutputStream writer, Type expectedType)
+    public void Serialize(object item, Stream writer, Type expectedType)
     {
       WriteToStream(expectedType, item, writer, null);
     }
@@ -287,10 +269,10 @@ namespace CuteAnt.Extensions.Serialization
     /// </remarks>
     /// <param name="type">The type of the object to write.</param>
     /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
-    /// <param name="writeStream">The <see cref="BufferManagerOutputStream"/> to which to write.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
     /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
     /// <seealso cref="CanWriteType(Type)"/>
-    public void WriteToStream(Type type, Object value, BufferManagerOutputStream writeStream)
+    public void WriteToStream(Type type, Object value, Stream writeStream)
     {
       WriteToStream(type, value, writeStream, null);
     }
@@ -304,11 +286,11 @@ namespace CuteAnt.Extensions.Serialization
     /// </remarks>
     /// <param name="type">The type of the object to write.</param>
     /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
-    /// <param name="writeStream">The <see cref="BufferManagerOutputStream"/> to which to write.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
     /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
     /// <seealso cref="CanWriteType(Type)"/>
-    public virtual void WriteToStream(Type type, Object value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    public virtual void WriteToStream(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
     {
       throw Error.NotSupported(FormattingSR.MediaTypeFormatterCannotWrite, GetType().Name);
     }
@@ -322,10 +304,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
     /// </remarks>
     /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
-    /// <param name="writeStream">The <see cref="BufferManagerOutputStream"/> to which to write.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
     /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
     /// <seealso cref="CanWriteType(Type)"/>
-    public void WriteToStream<T>(T value, BufferManagerOutputStream writeStream)
+    public void WriteToStream<T>(T value, Stream writeStream)
     {
       WriteToStream(typeof(T), value, writeStream, null);
     }
@@ -339,15 +321,16 @@ namespace CuteAnt.Extensions.Serialization
     /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
     /// </remarks>
     /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
-    /// <param name="writeStream">The <see cref="BufferManagerOutputStream"/> to which to write.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
     /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
     /// <seealso cref="CanWriteType(Type)"/>
-    public virtual void WriteToStream<T>(T value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    public virtual void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding)
     {
       WriteToStream(typeof(T), value, writeStream, effectiveEncoding);
     }
 
+#if !NET40
     /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> of the given <paramref name="type"/>
     /// to the given <paramref name="writeStream"/>.</summary>
     /// <remarks>
@@ -357,18 +340,22 @@ namespace CuteAnt.Extensions.Serialization
     /// </remarks>
     /// <param name="type">The type of the object to write.</param>
     /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
-    /// <param name="writeStream">The <see cref="BufferManagerOutputStream"/> to which to write.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
     /// <returns>A <see cref="Task"/> that will perform the write.</returns>
     /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
     /// <seealso cref="CanWriteType(Type)"/>
-    public virtual async Task WriteToStreamAsync(Type type, Object value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    public virtual async Task WriteToStreamAsync(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (type == null) { throw Error.ArgumentNull(nameof(type)); }
       if (writeStream == null) { throw Error.ArgumentNull(nameof(writeStream)); }
 
+#if NET451
+      await TaskAsyncHelper.Completed;
+#else
+      await Task.CompletedTask;
+#endif
       WriteToStream(type, value, writeStream, effectiveEncoding);
-      await TaskConstants.Completed;
     }
 
     /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> of the given <paramref name="type"/>
@@ -380,14 +367,21 @@ namespace CuteAnt.Extensions.Serialization
     /// </remarks>
     /// <param name="type">The type of the object to write.</param>
     /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
-    /// <param name="writeStream">The <see cref="BufferManagerOutputStream"/> to which to write.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task"/> that will perform the write.</returns>
     /// <seealso cref="CanWriteType(Type)"/>
-    public Task WriteToStreamAsync(Type type, Object value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding, CancellationToken cancellationToken)
+    public Task WriteToStreamAsync(Type type, Object value, Stream writeStream, Encoding effectiveEncoding, CancellationToken cancellationToken)
     {
-      if (cancellationToken.IsCancellationRequested) { return TaskConstants.Canceled; }
+      if (cancellationToken.IsCancellationRequested)
+      {
+#if NET451
+        return TaskAsyncHelper.Canceled<object>();
+#else
+        return Task.FromCanceled<object>(cancellationToken);
+#endif
+      }
 
       return WriteToStreamAsync(type, value, writeStream, effectiveEncoding);
     }
@@ -401,12 +395,12 @@ namespace CuteAnt.Extensions.Serialization
     /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
     /// </remarks>
     /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
-    /// <param name="writeStream">The <see cref="BufferManagerOutputStream"/> to which to write.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
     /// <returns>A <see cref="Task"/> that will perform the write.</returns>
     /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
     /// <seealso cref="CanWriteType(Type)"/>
-    public Task WriteToStreamAsync<T>(T value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding)
+    public Task WriteToStreamAsync<T>(T value, Stream writeStream, Encoding effectiveEncoding)
     {
       return WriteToStreamAsync(typeof(T), value, writeStream, effectiveEncoding);
     }
@@ -420,17 +414,25 @@ namespace CuteAnt.Extensions.Serialization
     /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
     /// </remarks>
     /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
-    /// <param name="writeStream">The <see cref="BufferManagerOutputStream"/> to which to write.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
     /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="Task"/> that will perform the write.</returns>
     /// <seealso cref="CanWriteType(Type)"/>
-    public Task WriteToStreamAsync<T>(T value, BufferManagerOutputStream writeStream, Encoding effectiveEncoding, CancellationToken cancellationToken)
+    public Task WriteToStreamAsync<T>(T value, Stream writeStream, Encoding effectiveEncoding, CancellationToken cancellationToken)
     {
-      if (cancellationToken.IsCancellationRequested) { return TaskConstants.Canceled; }
+      if (cancellationToken.IsCancellationRequested)
+      {
+#if NET451
+        return TaskAsyncHelper.Canceled<T>();
+#else
+        return Task.FromCanceled<T>(cancellationToken);
+#endif
+      }
 
       return WriteToStreamAsync<T>(value, writeStream, effectiveEncoding);
     }
+#endif
 
     #endregion
 
@@ -503,8 +505,7 @@ namespace CuteAnt.Extensions.Serialization
 
     internal static ConstructorInfo GetTypeRemappingConstructor(Type type)
     {
-      ConstructorInfo constructorInfo;
-      _delegatingEnumerableConstructorCache.TryGetValue(type, out constructorInfo);
+      _delegatingEnumerableConstructorCache.TryGetValue(type, out ConstructorInfo constructorInfo);
       return constructorInfo;
     }
 
@@ -531,11 +532,34 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
-    #region **& GetDefaultValueForType &**
+    #region --& GetDefaultValueForType &--
+
+    private const MethodImplOptions s_aggressiveInlining = (MethodImplOptions)256;
+    private static Dictionary<Type, object> s_defaultValueTypes = new Dictionary<Type, object>();
 
     /// <summary>Gets the default value for the specified type.</summary>
-    [MethodImpl(InlineMethod.Value)]
-    public static Object GetDefaultValueForType(Type type) => type?.GetDefaultValue();
+    public static object GetDefaultValueForType(Type type)
+    {
+      if (null == type) { return null; }
+
+      if (!type.IsValueType) return null;
+
+      if (s_defaultValueTypes.TryGetValue(type, out object defaultValue)) return defaultValue;
+
+      defaultValue = Activator.CreateInstance(type);
+
+      Dictionary<Type, object> snapshot, newCache;
+      do
+      {
+        snapshot = s_defaultValueTypes;
+        newCache = new Dictionary<Type, object>(s_defaultValueTypes)
+        {
+          [type] = defaultValue
+        };
+      } while (!ReferenceEquals(Interlocked.CompareExchange(ref s_defaultValueTypes, newCache, snapshot), snapshot));
+
+      return defaultValue;
+    }
 
     #endregion
   }
