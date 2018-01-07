@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Data;
 using System.IO;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
-using CuteAnt.Buffers;
-using CuteAnt.Extensions.Serialization.Protobuf;
-using CuteAnt.Runtime;
-using CuteAnt.Text;
 using Microsoft.Extensions.Logging;
+using ProtoBuf;
 using ProtoBuf.Meta;
+#if NET40
+using System.Reflection;
+#endif
 
 namespace CuteAnt.Extensions.Serialization
 {
@@ -22,7 +18,7 @@ namespace CuteAnt.Extensions.Serialization
 
     #region @@ Properties @@
 
-    internal static readonly RuntimeTypeModel s_model;
+    internal protected static readonly RuntimeTypeModel s_model;
     private static readonly ConcurrentHashSet<Type> s_unsupportedTypeInfoSet = new ConcurrentHashSet<Type>();
 
     /// <summary>The default singlegton instance</summary>
@@ -94,11 +90,14 @@ namespace CuteAnt.Extensions.Serialization
       if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
-      if (readStream.Position == readStream.Length) { return GetDefaultValueForType(type); }
+      // 不是 Stream 都会实现 Position、Length 这两个属性
+      //if (readStream.Position == readStream.Length) { return GetDefaultValueForType(type); }
 
       try
       {
-        return s_model.Deserialize(readStream, null, type, null);
+        // protobuf-net，读取空数据流并不会返回空对象，而是根据类型实例化一个
+        //return s_model.Deserialize(readStream, null, type, null);
+        return s_model.DeserializeWithLengthPrefix(readStream, null, s_model.MapType(type), PrefixStyle.Fixed32BigEndian, 0);
       }
       catch (Exception ex)
       {
@@ -119,7 +118,8 @@ namespace CuteAnt.Extensions.Serialization
 
       if (null == value) { return; }
 
-      s_model.Serialize(writeStream, value, null);
+      //s_model.Serialize(writeStream, value, null);
+      s_model.SerializeWithLengthPrefix(writeStream, value, s_model.MapType(type), PrefixStyle.Fixed32BigEndian, 0);
     }
 
     #endregion

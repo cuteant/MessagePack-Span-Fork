@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ProtoBuf;
 using Xunit;
@@ -18,6 +19,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
     }
   }
 
+  [Serializable]
   [ProtoContract]
   public class SerializerPocoSerializable
   {
@@ -52,6 +54,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
     }
   }
 
+  [Serializable]
   [ProtoContract]
   public class ChildPocco
   {

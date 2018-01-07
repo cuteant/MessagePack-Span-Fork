@@ -1,4 +1,4 @@
-﻿using System.Linq;
+﻿using System.IO;
 using System.Threading.Tasks;
 using CuteAnt.Buffers;
 using Xunit;
@@ -21,6 +21,16 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var poco = SerializerPocoSerializable.Create();
       var newPoco = (SerializerPocoSerializable)_formatter.DeepCopy(poco);
       Helper.ComparePoco(poco, newPoco);
+    }
+
+    [Fact]
+    public void EmptyStreamTest()
+    {
+      var ms = new MemoryStream();
+      _formatter.WriteToStream(typeof(SerializerPocoSerializable), default(SerializerPocoSerializable), ms);
+      ms.Position = 0;
+      var obj = _formatter.ReadFromStream(typeof(SerializerPocoSerializable), ms);
+      Assert.Null(obj);
     }
 
     [Fact]
@@ -90,5 +100,15 @@ namespace CuteAnt.Extensions.Serialization.Tests
   public class JsvMessageFormatterTest : SerializeTestBase
   {
     public JsvMessageFormatterTest() : base(JsvMessageFormatter.DefaultInstance) { }
+  }
+
+  public class XmlMessageFormatterTest : SerializeTestBase
+  {
+    public XmlMessageFormatterTest() : base(XmlMessageFormatter.DefaultInstance) { }
+  }
+
+  public class BinaryMessageFormatterTest : SerializeTestBase
+  {
+    public BinaryMessageFormatterTest() : base(BinaryMessageFormatter.DefaultInstance) { }
   }
 }

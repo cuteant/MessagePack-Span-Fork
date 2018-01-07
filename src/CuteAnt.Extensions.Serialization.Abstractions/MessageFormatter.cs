@@ -76,15 +76,6 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- Read --
 
-    /// <summary>Tries to deserialize an item.</summary>
-    /// <param name="reader">The reader used for binary deserialization</param>
-    /// <param name="expectedType">The type that should be deserialzied</param>
-    /// <returns>The deserialized object</returns>
-    public object Deserialize(Type expectedType, Stream reader)
-    {
-      return ReadFromStream(expectedType, reader, null);
-    }
-
     /// <summary>Returns an object of the given <paramref name="type"/> from the given <paramref name="readStream"/></summary>
     /// <remarks>
     /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
@@ -250,15 +241,6 @@ namespace CuteAnt.Extensions.Serialization
     #endregion
 
     #region -- Write --
-
-    /// <summary>Tries to serialize an item.</summary>
-    /// <param name="item">The instance of the object being serialized</param>
-    /// <param name="writer">The writer used for serialization</param>
-    /// <param name="expectedType">The type that the deserializer will expect</param>
-    public void Serialize(object item, Stream writer, Type expectedType)
-    {
-      WriteToStream(expectedType, item, writer, null);
-    }
 
     /// <summary>Tries to serializes the given <paramref name="value"/> of the given <paramref name="type"/>
     /// to the given <paramref name="writeStream"/>.</summary>

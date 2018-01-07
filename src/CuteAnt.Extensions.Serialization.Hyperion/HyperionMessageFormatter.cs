@@ -22,8 +22,8 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>The default singlegton instance</summary>
     public static readonly HyperionMessageFormatter DefaultInstance = new HyperionMessageFormatter();
 
-    internal readonly Hyperion.Serializer _serializer;
-    internal readonly Hyperion.Serializer _copier;
+    internal protected readonly Hyperion.Serializer _serializer;
+    internal protected readonly Hyperion.Serializer _copier;
 
     /// <summary>Constructor</summary>
     public HyperionMessageFormatter()
@@ -84,7 +84,8 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
-      if (readStream.Position == readStream.Length) { return GetDefaultValueForType(type); }
+      // 不是 Stream 都会实现 Position、Length 这两个属性
+      //if (readStream.Position == readStream.Length) { return GetDefaultValueForType(type); }
 
       try
       {
@@ -114,6 +115,7 @@ namespace CuteAnt.Extensions.Serialization
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
       if (null == value) { return; }
+
       _serializer.Serialize(value, writeStream);
     }
 

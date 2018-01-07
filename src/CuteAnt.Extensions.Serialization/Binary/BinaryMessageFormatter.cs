@@ -6,12 +6,15 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using CuteAnt.IO;
+using Microsoft.Extensions.Logging;
 
 namespace CuteAnt.Extensions.Serialization
 {
   /// <summary>BinaryMessageFormatter</summary>
   public class BinaryMessageFormatter : MessageFormatter
   {
+    private static readonly ILogger s_logger = TraceLogger.GetLogger<BinaryMessageFormatter>();
+
     /// <summary>The default singlegton instance</summary>
     public static readonly BinaryMessageFormatter DefaultInstance = new BinaryMessageFormatter();
 
@@ -58,10 +61,19 @@ namespace CuteAnt.Extensions.Serialization
       //if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
-      if (readStream.Position == readStream.Length) { return type != null ? GetDefaultValueForType(type) : null; }
+      // 不是 Stream 都会实现 Position、Length 这两个属性
+      //if (readStream.Position == readStream.Length) { return type != null ? GetDefaultValueForType(type) : null; }
 
-      var formatter = new BinaryFormatter();
-      return formatter.Deserialize(readStream);
+      try
+      {
+        var formatter = new BinaryFormatter();
+        return formatter.Deserialize(readStream);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return GetDefaultValueForType(type);
+      }
     }
 
     #endregion
@@ -73,6 +85,8 @@ namespace CuteAnt.Extensions.Serialization
     {
       //if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+
+      if (null == value) { return; }
 
       var formatter = new BinaryFormatter();
       formatter.Serialize(writeStream, value);

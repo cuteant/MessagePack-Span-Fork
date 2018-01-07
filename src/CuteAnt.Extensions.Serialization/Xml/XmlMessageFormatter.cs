@@ -12,12 +12,8 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using CuteAnt.IO;
 using Microsoft.Extensions.Logging;
-#if !NET40
-using CuteAnt.IO.Pipelines;
-#else
-using CuteAnt.Buffers;
-#endif
 
 namespace CuteAnt.Extensions.Serialization
 {
@@ -226,30 +222,12 @@ namespace CuteAnt.Extensions.Serialization
       if (source == null) { return null; }
 
       var type = source.GetType();
-#if NET40
-      const int _bufferSize = 2 * 1024;
-
-      using (var pooledOutputStream = BufferManagerOutputStreamManager.Create())
+      using (var ms = MemoryStreamManager.GetStream())
       {
-        var outputStream = pooledOutputStream.Object;
-        outputStream.Reinitialize(_bufferSize);
-        WriteToStream(type, source, outputStream);
-        using (var pooledStreamReader = BufferManagerStreamReaderManager.Create())
-        {
-          var inputStream = pooledStreamReader.Object;
-          inputStream.Reinitialize(outputStream.ToReadOnlyStream(), false);
-          return ReadFromStream(type, inputStream);
-        }
+        WriteToStream(type, source, ms, Encoding.UTF8);
+        ms.Seek(0, System.IO.SeekOrigin.Begin);
+        return ReadFromStream(type, ms, Encoding.UTF8);
       }
-#else
-      using (var pooledPipe = PipelineManager.Create())
-      {
-        var pipeStream = new PipelineStream(pooledPipe.Object);
-        WriteToStream(type, source, pipeStream);
-        pipeStream.Flush();
-        return ReadFromStream(type, pipeStream);
-      }
-#endif
     }
 
     #endregion
@@ -288,11 +266,10 @@ namespace CuteAnt.Extensions.Serialization
       if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
+      // 不是 Stream 都会实现 Position、Length 这两个属性
       // If content length is 0 then return default value for this type
-      if (readStream.Position == readStream.Length)
-      {
-        return GetDefaultValueForType(type);
-      }
+      //if (readStream.Position == readStream.Length) { return GetDefaultValueForType(type); }
+
       if (effectiveEncoding == null) { effectiveEncoding = Encoding.UTF8; }
 
       object serializer = GetDeserializer(type);
@@ -389,6 +366,8 @@ namespace CuteAnt.Extensions.Serialization
       if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
+      if (null == value) { return; }
+
       var isRemapped = false;
       if (UseXmlSerializer)
       {
@@ -398,8 +377,6 @@ namespace CuteAnt.Extensions.Serialization
       {
         isRemapped = TryGetDelegatingTypeForIQueryableGenericOrSame(ref type);
       }
-
-      if (null == value) { return; }
 
       if (isRemapped && value != null)
       {

@@ -55,7 +55,8 @@ namespace CuteAnt.Extensions.Serialization
       if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
-      if (readStream.Position == readStream.Length) { return GetDefaultValueForType(type); }
+      // 不是 Stream 都会实现 Position、Length 这两个属性
+      //if (readStream.Position == readStream.Length) { return GetDefaultValueForType(type); }
 
       try
       {
@@ -96,6 +97,8 @@ namespace CuteAnt.Extensions.Serialization
       if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
+      if (null == value) { return; }
+
       TypeSerializer.SerializeToStream(value, type, writeStream);
     }
 
@@ -103,6 +106,8 @@ namespace CuteAnt.Extensions.Serialization
     public override void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+
+      if (null == value) { return; }
 
       TypeSerializer.SerializeToStream<T>(value, writeStream);
     }

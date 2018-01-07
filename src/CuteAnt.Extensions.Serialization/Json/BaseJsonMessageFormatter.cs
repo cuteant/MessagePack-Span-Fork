@@ -6,14 +6,10 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using CuteAnt.AsyncEx;
+using CuteAnt.IO;
 using CuteAnt.Text;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-#if !NET40
-using CuteAnt.IO.Pipelines;
-#else
-using CuteAnt.Buffers;
-#endif
 
 namespace CuteAnt.Extensions.Serialization
 {
@@ -226,30 +222,12 @@ namespace CuteAnt.Extensions.Serialization
       if (source == null) { return null; }
 
       var type = source.GetType();
-#if NET40
-      const int _bufferSize = 2 * 1024;
-
-      using (var pooledOutputStream = BufferManagerOutputStreamManager.Create())
+      using (var ms = MemoryStreamManager.GetStream())
       {
-        var outputStream = pooledOutputStream.Object;
-        outputStream.Reinitialize(_bufferSize);
-        WriteToStream(type, source, outputStream);
-        using (var pooledStreamReader = BufferManagerStreamReaderManager.Create())
-        {
-          var inputStream = pooledStreamReader.Object;
-          inputStream.Reinitialize(outputStream.ToReadOnlyStream(), false);
-          return ReadFromStream(type, inputStream);
-        }
+        WriteToStream(type, source, ms, Encoding.UTF8);
+        ms.Seek(0, System.IO.SeekOrigin.Begin);
+        return ReadFromStream(type, ms, Encoding.UTF8);
       }
-#else
-      using (var pooledPipe = PipelineManager.Create())
-      {
-        var pipeStream = new PipelineStream(pooledPipe.Object);
-        WriteToStream(type, source, pipeStream);
-        pipeStream.Flush();
-        return ReadFromStream(type, pipeStream);
-      }
-#endif
     }
 
     #endregion
