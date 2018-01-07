@@ -60,7 +60,6 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public override JsonReader CreateJsonReader(Type type, Stream readStream, Encoding effectiveEncoding, IArrayPool<char> charPool)
     {
-      if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
       if (effectiveEncoding == null) { throw new ArgumentNullException(nameof(effectiveEncoding)); }
 
       return new JsonTextReader(new StreamReaderX(readStream, effectiveEncoding)) { ArrayPool = charPool };
@@ -73,7 +72,6 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public override JsonWriter CreateJsonWriter(Type type, Stream writeStream, Encoding effectiveEncoding, IArrayPool<char> charPool)
     {
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
       if (effectiveEncoding == null) { throw new ArgumentNullException(nameof(effectiveEncoding)); }
 
       var jsonWriter = new JsonTextWriter(new StreamWriterX(writeStream, effectiveEncoding)) { ArrayPool = charPool };

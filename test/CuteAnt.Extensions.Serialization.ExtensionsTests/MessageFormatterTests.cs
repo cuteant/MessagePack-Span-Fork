@@ -24,14 +24,96 @@ namespace CuteAnt.Extensions.Serialization.Tests
     }
 
     [Fact]
+    public void SerializeWithoutTypeTest()
+    {
+      var poco = SerializerPocoSerializable.Create();
+      var ms = new MemoryStream();
+      _formatter.WriteToStream(null, poco, ms);
+      ms.Position = 0;
+      var newpoco = _formatter.ReadFromStream<SerializerPocoSerializable>(ms);
+      Helper.ComparePoco(poco, newpoco);
+    }
+
+#if !TEST40
+    [Fact]
+    public async Task SerializeWithoutTypeAsyncTest()
+    {
+      var poco = SerializerPocoSerializable.Create();
+      var ms = new MemoryStream();
+      await _formatter.WriteToStreamAsync(null, poco, ms, null);
+      ms.Position = 0;
+      var newpoco = await _formatter.ReadFromStreamAsync<SerializerPocoSerializable>(ms, null);
+      Helper.ComparePoco(poco, newpoco);
+    }
+#endif
+
+    [Fact]
+    public void EmptyTypeAndPocoTest()
+    {
+      var ms = new MemoryStream();
+      _formatter.WriteToStream(null, default(SerializerPocoSerializable), ms);
+      ms.Position = 0;
+      var obj = _formatter.ReadFromStream(null, ms);
+      Assert.Null(obj);
+    }
+
+#if !TEST40
+    [Fact]
+    public async Task EmptyTypeAndPocoTestAsync()
+    {
+      var ms = new MemoryStream();
+      await _formatter.WriteToStreamAsync(null, default(SerializerPocoSerializable), ms, null);
+      ms.Position = 0;
+      var obj = await _formatter.ReadFromStreamAsync(null, ms, null);
+      Assert.Null(obj);
+    }
+#endif
+
+    [Fact]
     public void EmptyStreamTest()
+    {
+      InternalEmptyStreamTest();
+    }
+
+    protected virtual void InternalEmptyStreamTest()
     {
       var ms = new MemoryStream();
       _formatter.WriteToStream(typeof(SerializerPocoSerializable), default(SerializerPocoSerializable), ms);
       ms.Position = 0;
       var obj = _formatter.ReadFromStream(typeof(SerializerPocoSerializable), ms);
       Assert.Null(obj);
+
+      var emptyBytes = _formatter.SerializeToBytes(default(SerializerPocoSerializable));
+      Assert.Empty(emptyBytes);
+
+      var emptySegment = _formatter.SerializeToByteArraySegment(default(SerializerPocoSerializable));
+      Assert.True(0 == emptySegment.Count);
+      Assert.Empty(emptySegment.Array);
     }
+
+#if !TEST40
+    [Fact]
+    public Task EmptyStreamAsyncTest()
+    {
+      return InternalEmptyStreamAsyncTest();
+    }
+
+    public virtual async Task InternalEmptyStreamAsyncTest()
+    {
+      var ms = new MemoryStream();
+      await _formatter.WriteToStreamAsync(typeof(SerializerPocoSerializable), default(SerializerPocoSerializable), ms, null);
+      ms.Position = 0;
+      var obj = await _formatter.ReadFromStreamAsync(typeof(SerializerPocoSerializable), ms, null);
+      Assert.Null(obj);
+
+      var emptyBytes = await _formatter.SerializeToBytesAsync(default(SerializerPocoSerializable));
+      Assert.Empty(emptyBytes);
+
+      var emptySegment = await _formatter.SerializeToByteArraySegmentAsync(default(SerializerPocoSerializable));
+      Assert.True(0 == emptySegment.Count);
+      Assert.Empty(emptySegment.Array);
+    }
+#endif
 
     [Fact]
     public void SerializeToBytesTest()
@@ -75,6 +157,26 @@ namespace CuteAnt.Extensions.Serialization.Tests
   public class JsonMessageFormatterTest : SerializeTestBase
   {
     public JsonMessageFormatterTest() : base(JsonMessageFormatter.DefaultInstance) { }
+
+    protected override void InternalEmptyStreamTest()
+    {
+      var ms = new MemoryStream();
+      _formatter.WriteToStream(typeof(SerializerPocoSerializable), default(SerializerPocoSerializable), ms);
+      ms.Position = 0;
+      var obj = _formatter.ReadFromStream(typeof(SerializerPocoSerializable), ms);
+      Assert.Null(obj);
+    }
+
+#if !TEST40
+    public override async Task InternalEmptyStreamAsyncTest()
+    {
+      var ms = new MemoryStream();
+      await _formatter.WriteToStreamAsync(typeof(SerializerPocoSerializable), default(SerializerPocoSerializable), ms, null);
+      ms.Position = 0;
+      var obj = await _formatter.ReadFromStreamAsync(typeof(SerializerPocoSerializable), ms, null);
+      Assert.Null(obj);
+    }
+#endif
   }
 
   public class ProtoBufMessageFormatterTest : SerializeTestBase

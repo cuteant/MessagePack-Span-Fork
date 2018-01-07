@@ -263,7 +263,6 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public override Object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
-      if (type == null) { throw new ArgumentNullException(nameof(type)); }
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
       // 不是 Stream 都会实现 Position、Length 这两个属性
@@ -272,10 +271,10 @@ namespace CuteAnt.Extensions.Serialization
 
       if (effectiveEncoding == null) { effectiveEncoding = Encoding.UTF8; }
 
-      object serializer = GetDeserializer(type);
-
       try
       {
+        object serializer = GetDeserializer(type);
+
         using (XmlReader reader = CreateXmlReader(readStream, effectiveEncoding))
         {
           var xmlSerializer = serializer as XmlSerializer;
@@ -363,10 +362,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public override void WriteToStream(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
     {
-      if (type == null) { throw new ArgumentNullException(nameof(type)); }
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
-
       if (null == value) { return; }
+
+      if (type == null) { type = value.GetType(); }
+      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
       var isRemapped = false;
       if (UseXmlSerializer)
@@ -508,7 +507,8 @@ namespace CuteAnt.Extensions.Serialization
     [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Since we use an extensible factory method we cannot control the exceptions being thrown")]
     private Object CreateDefaultSerializer(Type type, Boolean throwOnError)
     {
-      Contract.Assert(type != null, "type cannot be null.");
+      //Contract.Assert(type != null, "type cannot be null.");
+      if (null == type) { throw new ArgumentNullException(nameof(type)); }
 
       Exception exception = null;
       Object serializer = null;
@@ -601,7 +601,8 @@ namespace CuteAnt.Extensions.Serialization
     private Object GetSerializerForType(Type type)
     {
       // Performance-sensitive
-      Contract.Assert(type != null, "Type cannot be null");
+      //Contract.Assert(type != null, "Type cannot be null");
+      if (null == type) { throw new ArgumentNullException(nameof(type)); }
 
       var serializer = GetCachedSerializer(type, throwOnError: true);
 

@@ -17,6 +17,7 @@ namespace CuteAnt.Extensions.Serialization
   {
     private const int c_initialBufferSize = 1024 * 64;
     private const int c_zeroSize = 0;
+    private static readonly ArraySegment<byte> s_emptySegment = new ArraySegment<byte>(EmptyArray<byte>.Instance);
 
     #region -- SerializeToBytes --
 
@@ -27,15 +28,13 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns></returns>
     public static byte[] SerializeToBytes(this IMessageFormatter formatter, object item, int initialBufferSize = c_initialBufferSize)
     {
-      if (item == null) { throw new ArgumentNullException(nameof(item)); }
-
 #if NET40
       using (var pooledStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledStream.Object;
         outputStream.Reinitialize(initialBufferSize, BufferManager.GlobalManager);
 
-        formatter.WriteToStream(item.GetType(), item, outputStream);
+        formatter.WriteToStream(item?.GetType(), item, outputStream);
         return outputStream.ToByteArray();
       }
 #else
@@ -43,7 +42,7 @@ namespace CuteAnt.Extensions.Serialization
       {
         var pipe = pooledPipe.Object;
         var outputStream = new PipelineStream(pipe, initialBufferSize);
-        formatter.WriteToStream(item.GetType(), item, outputStream);
+        formatter.WriteToStream(item?.GetType(), item, outputStream);
         pipe.Flush();
         var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
         var length = (int)readBuffer.Length;
@@ -72,7 +71,7 @@ namespace CuteAnt.Extensions.Serialization
       {
         var pipe = pooledPipe.Object;
         var outputStream = new PipelineStream(pipe, initialBufferSize);
-        formatter.WriteToStream(item.GetType(), item, outputStream);
+        formatter.WriteToStream(item?.GetType(), item, outputStream);
         await pipe.FlushAsync();
         var readBuffer = (await pipe.Reader.ReadAsync()).Buffer;
         var length = (int)readBuffer.Length;
@@ -94,16 +93,19 @@ namespace CuteAnt.Extensions.Serialization
     public static ArraySegment<byte> SerializeToByteArraySegment(this IMessageFormatter formatter, object item,
       int initialBufferSize = c_initialBufferSize)
     {
-      if (item == null) { throw new ArgumentNullException(nameof(item)); }
-
 #if NET40
       using (var pooledStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledStream.Object;
         outputStream.Reinitialize(initialBufferSize, BufferManager.GlobalManager);
 
-        formatter.WriteToStream(item.GetType(), item, outputStream);
+        formatter.WriteToStream(item?.GetType(), item, outputStream);
         var bytes = outputStream.ToArray(out var count);
+        if (c_zeroSize == count)
+        {
+          BufferManager.GlobalManager.ReturnBuffer(bytes);
+          return s_emptySegment;
+        }
         return new ArraySegment<byte>(bytes, 0, count);
       }
 #else
@@ -111,11 +113,11 @@ namespace CuteAnt.Extensions.Serialization
       {
         var pipe = pooledPipe.Object;
         var outputStream = new PipelineStream(pipe, initialBufferSize);
-        formatter.WriteToStream(item.GetType(), item, outputStream);
+        formatter.WriteToStream(item?.GetType(), item, outputStream);
         pipe.Flush();
         var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
         var length = (int)readBuffer.Length;
-        if (c_zeroSize == length) { return default; }
+        if (c_zeroSize == length) { return s_emptySegment; }
         var buffer = BufferManager.Shared.Rent(length);
         readBuffer.CopyTo(buffer);
         return new ArraySegment<byte>(buffer, 0, length);
@@ -143,11 +145,11 @@ namespace CuteAnt.Extensions.Serialization
       {
         var pipe = pooledPipe.Object;
         var outputStream = new PipelineStream(pipe, initialBufferSize);
-        formatter.WriteToStream(item.GetType(), item, outputStream);
+        formatter.WriteToStream(item?.GetType(), item, outputStream);
         await pipe.FlushAsync();
         var readBuffer = (await pipe.Reader.ReadAsync()).Buffer;
         var length = (int)readBuffer.Length;
-        if (c_zeroSize == length) { return default; }
+        if (c_zeroSize == length) { return s_emptySegment; }
         var buffer = BufferManager.Shared.Rent(length);
         readBuffer.CopyTo(buffer);
         return new ArraySegment<byte>(buffer, 0, length);

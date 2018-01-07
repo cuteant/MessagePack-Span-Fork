@@ -244,11 +244,8 @@ namespace CuteAnt.Extensions.Serialization
     [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
     public override async Task<Object> ReadFromStreamAsync(Type type, Stream readStream, Encoding effectiveEncoding)
     {
-      if (IsStrictMode && type == null) { throw new ArgumentNullException(nameof(type)); }
-      if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
-
       await TaskConstants.Completed;
-      return ReadFromStream(type, readStream, effectiveEncoding);
+      return ReadFromStream(type, readStream, effectiveEncoding, null);
     }
 #endif
 
@@ -421,10 +418,7 @@ namespace CuteAnt.Extensions.Serialization
     [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
     public override async Task WriteToStreamAsync(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
     {
-      if (IsStrictMode && type == null) { throw new ArgumentNullException(nameof(type)); }
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
-
-      WriteToStream(type, value, writeStream, effectiveEncoding);
+      WriteToStream(type, value, writeStream, effectiveEncoding, null);
       await TaskConstants.Completed;
     }
 #endif

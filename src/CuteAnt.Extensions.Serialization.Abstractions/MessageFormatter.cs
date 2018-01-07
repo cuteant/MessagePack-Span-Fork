@@ -157,9 +157,6 @@ namespace CuteAnt.Extensions.Serialization
     /// <seealso cref="CanReadType(Type)"/>
     public virtual async Task<Object> ReadFromStreamAsync(Type type, Stream readStream, Encoding effectiveEncoding)
     {
-      if (type == null) { throw Error.ArgumentNull(nameof(type)); }
-      if (readStream == null) { throw Error.ArgumentNull(nameof(readStream)); }
-
 #if NET451
       await TaskAsyncHelper.Completed;
 #else
@@ -329,9 +326,6 @@ namespace CuteAnt.Extensions.Serialization
     /// <seealso cref="CanWriteType(Type)"/>
     public virtual async Task WriteToStreamAsync(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
     {
-      if (type == null) { throw Error.ArgumentNull(nameof(type)); }
-      if (writeStream == null) { throw Error.ArgumentNull(nameof(writeStream)); }
-
 #if NET451
       await TaskAsyncHelper.Completed;
 #else

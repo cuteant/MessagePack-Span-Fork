@@ -17,6 +17,7 @@ namespace CuteAnt.Extensions.Serialization
   [EditorBrowsable(EditorBrowsableState.Never)]
   public static partial class JsonMessageFormatterExtensions
   {
+    private static readonly ArraySegment<byte> s_emptySegment = new ArraySegment<byte>(EmptyArray<byte>.Instance);
     internal const int c_initialBufferSize = 1024 * 64;
     private const int c_zeroSize = 0;
 
@@ -44,15 +45,13 @@ namespace CuteAnt.Extensions.Serialization
     public static byte[] SerializeToBytes(this IJsonMessageFormatter formatter, object item,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null, int initialBufferSize = c_initialBufferSize)
     {
-      if (item == null) { throw new ArgumentNullException(nameof(item)); }
-
 #if NET40
       using (var pooledStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledStream.Object;
         outputStream.Reinitialize(initialBufferSize, BufferManager.GlobalManager);
 
-        formatter.WriteToStream(item.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
+        formatter.WriteToStream(item?.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
         return outputStream.ToByteArray();
       }
 #else
@@ -60,7 +59,7 @@ namespace CuteAnt.Extensions.Serialization
       {
         var pipe = pooledPipe.Object;
         var outputStream = new PipelineStream(pipe, initialBufferSize);
-        formatter.WriteToStream(item.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
+        formatter.WriteToStream(item?.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
         pipe.Flush();
         var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
         var length = (int)readBuffer.Length;
@@ -96,16 +95,19 @@ namespace CuteAnt.Extensions.Serialization
     public static ArraySegment<byte> SerializeToByteArraySegment(this IJsonMessageFormatter formatter, object item,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null, int initialBufferSize = c_initialBufferSize)
     {
-      if (item == null) { throw new ArgumentNullException(nameof(item)); }
-
 #if NET40
       using (var pooledStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledStream.Object;
         outputStream.Reinitialize(initialBufferSize, BufferManager.GlobalManager);
 
-        formatter.WriteToStream(item.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
+        formatter.WriteToStream(item?.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
         var bytes = outputStream.ToArray(out var count);
+        if (c_zeroSize == count)
+        {
+          BufferManager.GlobalManager.ReturnBuffer(bytes);
+          return s_emptySegment;
+        }
         return new ArraySegment<byte>(bytes, 0, count);
       }
 #else
@@ -113,11 +115,11 @@ namespace CuteAnt.Extensions.Serialization
       {
         var pipe = pooledPipe.Object;
         var outputStream = new PipelineStream(pipe, initialBufferSize);
-        formatter.WriteToStream(item.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
+        formatter.WriteToStream(item?.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
         pipe.Flush();
         var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
         var length = (int)readBuffer.Length;
-        if (c_zeroSize == length) { return default; }
+        if (c_zeroSize == length) { return s_emptySegment; }
         var buffer = BufferManager.Shared.Rent(length);
         readBuffer.CopyTo(buffer);
         return new ArraySegment<byte>(buffer, 0, length);
@@ -163,7 +165,7 @@ namespace CuteAnt.Extensions.Serialization
       {
         var pipe = pooledPipe.Object;
         var outputStream = new PipelineStream(pipe, initialBufferSize);
-        formatter.WriteToStream(item.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
+        formatter.WriteToStream(item?.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
         await pipe.FlushAsync();
         var readBuffer = (await pipe.Reader.ReadAsync()).Buffer;
         var length = (int)readBuffer.Length;
@@ -211,11 +213,11 @@ namespace CuteAnt.Extensions.Serialization
       {
         var pipe = pooledPipe.Object;
         var outputStream = new PipelineStream(pipe, initialBufferSize);
-        formatter.WriteToStream(item.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
+        formatter.WriteToStream(item?.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
         await pipe.FlushAsync();
         var readBuffer = (await pipe.Reader.ReadAsync()).Buffer;
         var length = (int)readBuffer.Length;
-        if (c_zeroSize == length) { return default; }
+        if (c_zeroSize == length) { return s_emptySegment; }
         var buffer = BufferManager.Shared.Rent(length);
         readBuffer.CopyTo(buffer);
         return new ArraySegment<byte>(buffer, 0, length);

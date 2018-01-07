@@ -112,9 +112,9 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
     {
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
-
       if (null == value) { return; }
+
+      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
       _serializer.Serialize(value, writeStream);
     }

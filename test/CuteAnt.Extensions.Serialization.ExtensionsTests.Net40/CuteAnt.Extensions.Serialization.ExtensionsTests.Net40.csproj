@@ -5,6 +5,7 @@
     <RootNamespace>CuteAnt.Extensions.Serialization.Tests</RootNamespace>
     <AssemblyName>CuteAnt.Extensions.Serialization.ExtensionsTests</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);TEST40</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
