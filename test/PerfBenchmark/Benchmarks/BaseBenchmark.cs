@@ -9,7 +9,7 @@ namespace PerfBenchmark
 {
   public abstract class BaseBenchmark<T>
   {
-    private const int OperationsPerInvoke = 100;
+    private const int OperationsPerInvoke = 50000;
 
     private static readonly JsonSerializerSettings _jsonSerializerSettings;
     private static readonly JsonMessageFormatter _jsonFormatter;
