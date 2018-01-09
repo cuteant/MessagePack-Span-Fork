@@ -4,9 +4,6 @@ using System.Text;
 using CuteAnt.IO;
 using Microsoft.Extensions.Logging;
 using ServiceStack.Text;
-#if NET40
-using System.Reflection;
-#endif
 
 namespace CuteAnt.Extensions.Serialization
 {
@@ -32,6 +29,7 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- DeepCopy --
 
+    /// <inheritdoc />
     public override object DeepCopy(object source)
     {
       if (source == null) { return null; }
@@ -83,7 +81,7 @@ namespace CuteAnt.Extensions.Serialization
       catch (Exception ex)
       {
         s_logger.LogError(ex.ToString());
-        return default(T);
+        return default;
       }
     }
 
@@ -92,13 +90,22 @@ namespace CuteAnt.Extensions.Serialization
     #region -- WriteToStream --
 
     /// <inheritdoc />
+    public override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
+    {
+      if (null == value) { return; }
+
+      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+
+      CsvSerializer.SerializeToStream(value, writeStream);
+    }
+
+    /// <inheritdoc />
     public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (null == value) { return; }
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      if (null == type) { type = value.GetType(); }
       CsvSerializer.SerializeToStream(value, writeStream);
     }
 

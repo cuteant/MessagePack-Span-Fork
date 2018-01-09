@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MessagePack;
 using ProtoBuf;
 using Xunit;
 
@@ -21,21 +22,27 @@ namespace CuteAnt.Extensions.Serialization.Tests
 
   [Serializable]
   [ProtoContract]
+  [MessagePackObject]
   public class SerializerPocoSerializable
   {
     [ProtoMember(1)]
+    [Key(0)]
     public string StringProperty { get; set; }
 
     [ProtoMember(2)]
+    [Key(1)]
     public int IntProperty { get; set; }
 
     [ProtoMember(3)]
+    [Key(2)]
     public string[] StringArrayProperty { get; set; }
 
     [ProtoMember(4)]
+    [Key(3)]
     public List<string> StringListProperty { get; set; }
 
     [ProtoMember(5)]
+    [Key(4)]
     public Dictionary<string, ChildPocco> ChildDictionaryProperty { get; set; }
 
     public static SerializerPocoSerializable Create()
@@ -56,9 +63,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
 
   [Serializable]
   [ProtoContract]
+  [MessagePackObject]
   public class ChildPocco
   {
     [ProtoMember(1)]
+    [Key(0)]
     public string StringProperty { get; set; }
   }
 }

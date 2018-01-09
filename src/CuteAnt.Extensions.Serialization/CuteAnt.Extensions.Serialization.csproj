@@ -15,9 +15,9 @@
 
   <PropertyGroup Label="NuGet">
     <PackageId>CuteAnt.Extensions.Serialization</PackageId>
-    <Title>CuteAnt.Extensions.Serialization</Title>
-    <Description>CuteAnt.Extensions.Serialization</Description>
-    <PackageTags>Serializer</PackageTags>
+    <Title>CuteAnt.Extensions.Serialization.Json</Title>
+    <Description>CuteAnt.Extensions.Serialization.Json</Description>
+    <PackageTags>serializer json</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net40' ">
@@ -39,8 +39,7 @@
     <PackageReference Include="System.Numerics.Vectors" Version="$(SystemNumericsVectorsPackageVersion)" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\CuteAnt.Extensions.Serialization.Abstractions\CuteAnt.Extensions.Serialization.Abstractions.csproj" />
+    <ProjectReference Include="..\CuteAnt.Extensions.Serialization.Core\CuteAnt.Extensions.Serialization.Core.csproj" />
   </ItemGroup>
 </Project>

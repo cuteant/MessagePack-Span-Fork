@@ -14,9 +14,6 @@ namespace CuteAnt.Extensions.Serialization
   /// </summary>
   public interface IMessageFormatter
   {
-    /// <summary>Gets or sets the <see cref="IRequiredMemberSelector"/> used to determine required members.</summary>
-    IRequiredMemberSelector RequiredMemberSelector { get; set; }
-
     /// <summary>Determines whether this <see cref="IMessageFormatter"/> can deserialize an object of the specified type.</summary>
     /// <remarks>Derived classes must implement this method and indicate if a type can or cannot be deserialized.</remarks>
     /// <param name="type">The type of object that will be deserialized.</param>
@@ -38,6 +35,11 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="source">The item to create a copy of</param>
     /// <returns>The copy</returns>
     object DeepCopy(object source);
+
+    /// <summary>Tries to create a copy of source.</summary>
+    /// <param name="source">The item to create a copy of</param>
+    /// <returns>The copy</returns>
+    T DeepCopy<T>(T source);
 
     #region -- Read --
 
@@ -104,6 +106,32 @@ namespace CuteAnt.Extensions.Serialization
     /// </remarks>
     /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="readStream">The <see cref="Stream"/> to read.</param>
+    /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
+    /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
+    /// <seealso cref="CanReadType(Type)"/>
+    Task<Object> ReadFromStreamAsync(Type type, Stream readStream);
+
+    /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given <paramref name="type"/> from the given <paramref name="readStream"/></summary>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
+    /// <seealso cref="CanReadType(Type)"/>
+    Task<Object> ReadFromStreamAsync(Type type, Stream readStream, CancellationToken cancellationToken);
+
+    /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given <paramref name="type"/> from the given <paramref name="readStream"/></summary>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
     /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
     /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
@@ -123,6 +151,35 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
     /// <seealso cref="CanReadType(Type)"/>
     Task<object> ReadFromStreamAsync(Type type, Stream readStream, Encoding effectiveEncoding, CancellationToken cancellationToken);
+
+
+
+
+    /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given type from the given <paramref name="readStream"/></summary>
+    /// <typeparam name="T">Target type.</typeparam>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
+    /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
+    /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
+    /// <seealso cref="CanReadType(Type)"/>
+    Task<T> ReadFromStreamAsync<T>(Stream readStream);
+
+    /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given type from the given <paramref name="readStream"/></summary>
+    /// <typeparam name="T">Target type.</typeparam>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
+    /// <seealso cref="CanReadType(Type)"/>
+    Task<T> ReadFromStreamAsync<T>(Stream readStream, CancellationToken cancellationToken);
 
     /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given type from the given <paramref name="readStream"/></summary>
     /// <typeparam name="T">The type of the object to deserialize.</typeparam>
@@ -157,6 +214,36 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- Write --
 
+    /// <summary>Tries to serializes the given <paramref name="value"/> 
+    /// to the given <paramref name="writeStream"/>.</summary>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+    /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
+    /// <seealso cref="CanWriteType(Type)"/>
+    void WriteToStream(Object value, Stream writeStream);
+
+    /// <summary>Tries to serializes the given <paramref name="value"/> 
+    /// to the given <paramref name="writeStream"/>.</summary>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+    /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
+    /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
+    /// <seealso cref="CanWriteType(Type)"/>
+    void WriteToStream(Object value, Stream writeStream, Encoding effectiveEncoding);
+
+
+
+
     /// <summary>Tries to serializes the given <paramref name="value"/> of the given <paramref name="type"/>
     /// to the given <paramref name="writeStream"/>.</summary>
     /// <remarks>
@@ -185,6 +272,9 @@ namespace CuteAnt.Extensions.Serialization
     /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
     /// <seealso cref="CanWriteType(Type)"/>
     void WriteToStream(Type type, Object value, Stream writeStream, Encoding effectiveEncoding);
+
+
+
 
     /// <summary>Tries to serializes the given <paramref name="value"/> of the given type
     /// to the given <paramref name="writeStream"/>.</summary>
@@ -216,6 +306,97 @@ namespace CuteAnt.Extensions.Serialization
     void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding);
 
 #if !NET40
+    /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> 
+    /// to the given <paramref name="writeStream"/>.</summary>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+    /// <returns>A <see cref="Task"/> that will perform the write.</returns>
+    /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
+    /// <seealso cref="CanWriteType(Type)"/>
+    Task WriteToStreamAsync(Object value, Stream writeStream);
+
+    /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> 
+    /// to the given <paramref name="writeStream"/>.</summary>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A <see cref="Task"/> that will perform the write.</returns>
+    /// <seealso cref="CanWriteType(Type)"/>
+    Task WriteToStreamAsync(Object value, Stream writeStream, CancellationToken cancellationToken);
+
+    /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> 
+    /// to the given <paramref name="writeStream"/>.</summary>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+    /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
+    /// <returns>A <see cref="Task"/> that will perform the write.</returns>
+    /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
+    /// <seealso cref="CanWriteType(Type)"/>
+    Task WriteToStreamAsync(Object value, Stream writeStream, Encoding effectiveEncoding);
+
+    /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> 
+    /// to the given <paramref name="writeStream"/>.</summary>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+    /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A <see cref="Task"/> that will perform the write.</returns>
+    /// <seealso cref="CanWriteType(Type)"/>
+    Task WriteToStreamAsync(Object value, Stream writeStream, Encoding effectiveEncoding, CancellationToken cancellationToken);
+
+
+
+
+    /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> of the given <paramref name="type"/>
+    /// to the given <paramref name="writeStream"/>.</summary>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="type">The type of the object to write.</param>
+    /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+    /// <returns>A <see cref="Task"/> that will perform the write.</returns>
+    /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
+    /// <seealso cref="CanWriteType(Type)"/>
+    Task WriteToStreamAsync(Type type, Object value, Stream writeStream);
+
+    /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> of the given <paramref name="type"/>
+    /// to the given <paramref name="writeStream"/>.</summary>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="type">The type of the object to write.</param>
+    /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A <see cref="Task"/> that will perform the write.</returns>
+    /// <seealso cref="CanWriteType(Type)"/>
+    Task WriteToStreamAsync(Type type, Object value, Stream writeStream, CancellationToken cancellationToken);
+
     /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> of the given <paramref name="type"/>
     /// to the given <paramref name="writeStream"/>.</summary>
     /// <remarks>
@@ -247,6 +428,39 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns>A <see cref="Task"/> that will perform the write.</returns>
     /// <seealso cref="CanWriteType(Type)"/>
     Task WriteToStreamAsync(Type type, Object value, Stream writeStream, Encoding effectiveEncoding, CancellationToken cancellationToken);
+
+
+
+
+    /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> of the given type
+    /// to the given <paramref name="writeStream"/>.</summary>
+    /// <typeparam name="T">Target type.</typeparam>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+    /// <returns>A <see cref="Task"/> that will perform the write.</returns>
+    /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
+    /// <seealso cref="CanWriteType(Type)"/>
+    Task WriteToStreamAsync<T>(T value, Stream writeStream);
+
+    /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> of the given type
+    /// to the given <paramref name="writeStream"/>.</summary>
+    /// <typeparam name="T">Target type.</typeparam>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="writeStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="value">The object value to write.  It may be <c>null</c>.</param>
+    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A <see cref="Task"/> that will perform the write.</returns>
+    /// <seealso cref="CanWriteType(Type)"/>
+    Task WriteToStreamAsync<T>(T value, Stream writeStream, CancellationToken cancellationToken);
 
     /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> of the given type
     /// to the given <paramref name="writeStream"/>.</summary>

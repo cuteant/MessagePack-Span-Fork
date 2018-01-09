@@ -1080,7 +1080,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
       Assert.AreEqual(null, v4["Second"]);
       Assert.AreEqual(3, v4["Third"]);
 
-      CuteAnt.Buffers.BufferManager.GlobalManager.ReturnBuffer(segment);
+      CuteAnt.Buffers.BufferManager.Shared.Return(segment.Array);
     }
 
 #if !(NET35 || NET20 || PORTABLE || PORTABLE40) || NETSTANDARD2_0

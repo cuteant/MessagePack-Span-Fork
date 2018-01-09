@@ -15,9 +15,9 @@ using CuteAnt.Pool;
 using CuteAnt.Reflection;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-#if !NET40
-using CuteAnt.IO.Pipelines;
-#endif
+//#if !NET40
+//using CuteAnt.IO.Pipelines;
+//#endif
 
 namespace Newtonsoft.Json
 {
@@ -543,7 +543,7 @@ namespace Newtonsoft.Json
 
     private static byte[] SerializeToByteArrayInternal(object value, Type type, JsonSerializer jsonSerializer, int initialBufferSize = c_initialBufferSize)
     {
-#if NET40
+//#if NET40
       using (var pooledOutputStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledOutputStream.Object;
@@ -559,26 +559,26 @@ namespace Newtonsoft.Json
         }
         return outputStream.ToByteArray();
       }
-#else
-      using (var pooledPipe = PipelineManager.Create())
-      {
-        var pipe = pooledPipe.Object;
-        var outputStream = new PipelineStream(pipe, initialBufferSize);
-        using (JsonTextWriter jsonWriter = new JsonTextWriter(new StreamWriterX(outputStream)))
-        {
-          jsonWriter.ArrayPool = GlobalCharacterArrayPool;
-          //jsonWriter.CloseOutput = false;
-          jsonWriter.Formatting = jsonSerializer.Formatting;
+//#else
+//      using (var pooledPipe = PipelineManager.Create())
+//      {
+//        var pipe = pooledPipe.Object;
+//        var outputStream = new PipelineStream(pipe, initialBufferSize);
+//        using (JsonTextWriter jsonWriter = new JsonTextWriter(new StreamWriterX(outputStream)))
+//        {
+//          jsonWriter.ArrayPool = GlobalCharacterArrayPool;
+//          //jsonWriter.CloseOutput = false;
+//          jsonWriter.Formatting = jsonSerializer.Formatting;
 
-          jsonSerializer.Serialize(jsonWriter, value, type);
-          jsonWriter.Flush();
-        }
-        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
-        var length = (int)readBuffer.Length;
-        if (c_zeroSize == length) { return EmptyArray<byte>.Instance; }
-        return readBuffer.ToArray();
-      }
-#endif
+//          jsonSerializer.Serialize(jsonWriter, value, type);
+//          jsonWriter.Flush();
+//        }
+//        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
+//        var length = (int)readBuffer.Length;
+//        if (c_zeroSize == length) { return EmptyArray<byte>.Instance; }
+//        return readBuffer.ToArray();
+//      }
+//#endif
     }
 
     #endregion
@@ -716,7 +716,7 @@ namespace Newtonsoft.Json
 
     private static ArraySegment<Byte> SerializeToArraySegmentInternal(object value, Type type, JsonSerializer jsonSerializer, int initialBufferSize = c_initialBufferSize)
     {
-#if NET40
+      //#if NET40
       using (var pooledOutputStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledOutputStream.Object;
@@ -732,28 +732,28 @@ namespace Newtonsoft.Json
         }
         return outputStream.ToArraySegment();
       }
-#else
-      using (var pooledPipe = PipelineManager.Create())
-      {
-        var pipe = pooledPipe.Object;
-        var outputStream = new PipelineStream(pipe, initialBufferSize);
-        using (JsonTextWriter jsonWriter = new JsonTextWriter(new StreamWriterX(outputStream)))
-        {
-          jsonWriter.ArrayPool = GlobalCharacterArrayPool;
-          //jsonWriter.CloseOutput = false;
-          jsonWriter.Formatting = jsonSerializer.Formatting;
+      //#else
+      //      using (var pooledPipe = PipelineManager.Create())
+      //      {
+      //        var pipe = pooledPipe.Object;
+      //        var outputStream = new PipelineStream(pipe, initialBufferSize);
+      //        using (JsonTextWriter jsonWriter = new JsonTextWriter(new StreamWriterX(outputStream)))
+      //        {
+      //          jsonWriter.ArrayPool = GlobalCharacterArrayPool;
+      //          //jsonWriter.CloseOutput = false;
+      //          jsonWriter.Formatting = jsonSerializer.Formatting;
 
-          jsonSerializer.Serialize(jsonWriter, value, type);
-          jsonWriter.Flush();
-        }
-        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
-        var length = (int)readBuffer.Length;
-        if (c_zeroSize == length) { return default; }
-        var buffer = BufferManager.Shared.Rent(length);
-        readBuffer.CopyTo(buffer);
-        return new ArraySegment<byte>(buffer, 0, length);
-      }
-#endif
+      //          jsonSerializer.Serialize(jsonWriter, value, type);
+      //          jsonWriter.Flush();
+      //        }
+      //        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
+      //        var length = (int)readBuffer.Length;
+      //        if (c_zeroSize == length) { return default; }
+      //        var buffer = BufferManager.Shared.Rent(length);
+      //        readBuffer.CopyTo(buffer);
+      //        return new ArraySegment<byte>(buffer, 0, length);
+      //      }
+      //#endif
     }
 
     #endregion

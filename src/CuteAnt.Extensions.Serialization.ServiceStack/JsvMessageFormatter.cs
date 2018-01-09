@@ -4,9 +4,6 @@ using System.Text;
 using CuteAnt.IO;
 using Microsoft.Extensions.Logging;
 using ServiceStack.Text;
-#if NET40
-using System.Reflection;
-#endif
 
 namespace CuteAnt.Extensions.Serialization
 {
@@ -90,6 +87,15 @@ namespace CuteAnt.Extensions.Serialization
     #endregion
 
     #region -- WriteToStream --
+
+    public override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
+    {
+      if (null == value) { return; }
+
+      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+
+      TypeSerializer.SerializeToStream(value, value.GetType(), writeStream);
+    }
 
     /// <inheritdoc />
     public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)

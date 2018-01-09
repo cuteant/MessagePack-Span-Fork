@@ -26,8 +26,6 @@ namespace CuteAnt.Extensions.Serialization
     /// constructor runs, so any override should be very careful about using derived class state.</remarks>
     Int32 MaxDepth { get; set; }
 
-    bool IsStrictMode { get; set; }
-
     /// <summary>Creates a <see cref="JsonSerializerSettings"/> instance with the default settings used by the <see cref="BaseJsonMessageFormatter"/>.</summary>
     JsonSerializerSettings CreateDefaultSerializerSettings();
 

@@ -80,6 +80,18 @@ namespace CuteAnt.Extensions.Serialization
     #region -- WriteToStream --
 
     /// <inheritdoc />
+    public override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
+    {
+      if (null == value) { return; }
+
+      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+
+      var formatter = new BinaryFormatter();
+      formatter.Serialize(writeStream, value);
+      writeStream.Flush();
+    }
+
+    /// <inheritdoc />
     public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (null == value) { return; }

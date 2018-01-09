@@ -19,7 +19,7 @@ namespace ServiceStack.Text
     {
         public static void WriteCsv<T>(this Stream outputStream, IEnumerable<T> records)
         {
-            using (var textWriter = new StreamWriter(outputStream))
+            using (var textWriter = new StreamWriterX(outputStream))
             {
                 textWriter.WriteCsv(records);
             }

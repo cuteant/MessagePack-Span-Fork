@@ -19,7 +19,9 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public void DeepCopyTest()
     {
       var poco = SerializerPocoSerializable.Create();
-      var newPoco = (SerializerPocoSerializable)_formatter.DeepCopy(poco);
+      var newPoco = _formatter.DeepCopy(poco);
+      Helper.ComparePoco(poco, newPoco);
+      newPoco = (SerializerPocoSerializable)_formatter.DeepCopy((object)poco);
       Helper.ComparePoco(poco, newPoco);
     }
 
@@ -30,7 +32,38 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var ms = new MemoryStream();
       _formatter.WriteToStream(null, poco, ms);
       ms.Position = 0;
-      var newpoco = _formatter.ReadFromStream<SerializerPocoSerializable>(ms);
+      var newpoco = (SerializerPocoSerializable)_formatter.ReadFromStream(typeof(SerializerPocoSerializable), ms);
+      Helper.ComparePoco(poco, newpoco);
+      ms.Position = 0;
+      newpoco = _formatter.ReadFromStream<SerializerPocoSerializable>(ms);
+      Helper.ComparePoco(poco, newpoco);
+    }
+
+    [Fact]
+    public void SerializeWithoutTypeTest1()
+    {
+      var poco = SerializerPocoSerializable.Create();
+      var ms = new MemoryStream();
+      _formatter.WriteToStream((object)poco, ms);
+      ms.Position = 0;
+      var newpoco = (SerializerPocoSerializable)_formatter.ReadFromStream(typeof(SerializerPocoSerializable), ms);
+      Helper.ComparePoco(poco, newpoco);
+      ms.Position = 0;
+      newpoco = _formatter.ReadFromStream<SerializerPocoSerializable>(ms);
+      Helper.ComparePoco(poco, newpoco);
+    }
+
+    [Fact]
+    public void SerializeWithoutTypeTest2()
+    {
+      var poco = SerializerPocoSerializable.Create();
+      var ms = new MemoryStream();
+      _formatter.WriteToStream(poco, ms);
+      ms.Position = 0;
+      var newpoco = (SerializerPocoSerializable)_formatter.ReadFromStream(typeof(SerializerPocoSerializable), ms);
+      Helper.ComparePoco(poco, newpoco);
+      ms.Position = 0;
+      newpoco = _formatter.ReadFromStream<SerializerPocoSerializable>(ms);
       Helper.ComparePoco(poco, newpoco);
     }
 
@@ -179,6 +212,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
 #endif
   }
 
+  public class MessagePackMessageFormatterTest : SerializeTestBase
+  {
+    public MessagePackMessageFormatterTest() : base(MessagePackMessageFormatter.DefaultInstance) { }
+  }
+
   public class ProtoBufMessageFormatterTest : SerializeTestBase
   {
     public ProtoBufMessageFormatterTest() : base(ProtoBufMessageFormatter.DefaultInstance) { }
@@ -202,11 +240,6 @@ namespace CuteAnt.Extensions.Serialization.Tests
   public class JsvMessageFormatterTest : SerializeTestBase
   {
     public JsvMessageFormatterTest() : base(JsvMessageFormatter.DefaultInstance) { }
-  }
-
-  public class XmlMessageFormatterTest : SerializeTestBase
-  {
-    public XmlMessageFormatterTest() : base(XmlMessageFormatter.DefaultInstance) { }
   }
 
   public class BinaryMessageFormatterTest : SerializeTestBase

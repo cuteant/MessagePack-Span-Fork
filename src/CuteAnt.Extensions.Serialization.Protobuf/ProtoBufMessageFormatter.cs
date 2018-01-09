@@ -85,6 +85,22 @@ namespace CuteAnt.Extensions.Serialization
     #region -- ReadFromStream --
 
     /// <inheritdoc />
+    public override T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
+    {
+      if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
+
+      try
+      {
+        return (T)s_model.DeserializeWithLengthPrefix(readStream, null, s_model.MapType(typeof(T)), PrefixStyle.Fixed32BigEndian, 0);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
+      }
+    }
+
+    /// <inheritdoc />
     public override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
@@ -108,6 +124,28 @@ namespace CuteAnt.Extensions.Serialization
     #endregion
 
     #region -- WriteToStream --
+
+    /// <inheritdoc />
+    public override void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding)
+    {
+      if (null == value) { return; }
+
+      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+
+      //s_model.Serialize(writeStream, value, null);
+      s_model.SerializeWithLengthPrefix(writeStream, value, typeof(T), PrefixStyle.Fixed32BigEndian, 0);
+    }
+
+    /// <inheritdoc />
+    public override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
+    {
+      if (null == value) { return; }
+
+      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+
+      //s_model.Serialize(writeStream, value, null);
+      s_model.SerializeWithLengthPrefix(writeStream, value, s_model.MapType(value.GetType()), PrefixStyle.Fixed32BigEndian, 0);
+    }
 
     /// <inheritdoc />
     public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)

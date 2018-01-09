@@ -2,21 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
-using CuteAnt.AsyncEx;
 using CuteAnt.IO;
 using Hyperion;
 using Hyperion.SerializerFactories;
 using Microsoft.Extensions.Logging;
-#if NET40
-using System.Reflection;
-#endif
 
 namespace CuteAnt.Extensions.Serialization
 {
   /// <summary><see cref="MessageFormatter"/> class to handle wire.</summary>
   public class HyperionMessageFormatter : MessageFormatter
   {
+    #region @@ Fields @@
+
     protected static readonly ILogger s_logger = TraceLogger.GetLogger(typeof(HyperionMessageFormatter));
 
     /// <summary>The default singlegton instance</summary>
@@ -24,6 +21,17 @@ namespace CuteAnt.Extensions.Serialization
 
     internal protected readonly Hyperion.Serializer _serializer;
     internal protected readonly Hyperion.Serializer _copier;
+
+    #endregion
+
+    #region @@ Properties @@
+
+    /// <summary>SerializerOptions</summary>
+    public SerializerOptions SerializerOptions => _serializer.Options;
+
+    #endregion
+
+    #region @@ Constructos @@
 
     /// <summary>Constructor</summary>
     public HyperionMessageFormatter()
@@ -56,8 +64,7 @@ namespace CuteAnt.Extensions.Serialization
       _copier = new Hyperion.Serializer(options);
     }
 
-    /// <summary>SerializerOptions</summary>
-    public SerializerOptions SerializerOptions => _serializer.Options;
+    #endregion
 
     #region -- IsSupportedType --
 
@@ -66,6 +73,9 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
+    #region -- DeepCopy --
+
+    /// <inheritdoc />
     public override object DeepCopy(object source)
     {
       if (source == null) { return null; }
@@ -76,6 +86,29 @@ namespace CuteAnt.Extensions.Serialization
         _copier.Serialize(source, ms);
         ms.Seek(0, System.IO.SeekOrigin.Begin);
         return _copier.Deserialize(ms);
+      }
+    }
+
+    #endregion
+
+    #region -- ReadFromStream --
+
+    /// <inheritdoc />
+    public override T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
+    {
+      if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
+
+      // 不是 Stream 都会实现 Position、Length 这两个属性
+      //if (readStream.Position == readStream.Length) { return GetDefaultValueForType(type); }
+
+      try
+      {
+        return (T)_serializer.Deserialize(readStream);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
       }
     }
 
@@ -98,16 +131,29 @@ namespace CuteAnt.Extensions.Serialization
       }
     }
 
-#if !NET40
-    /// <inheritdoc />
-    public override async Task<Object> ReadFromStreamAsync(Type type, Stream readStream, Encoding effectiveEncoding)
-    {
-      if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
+    #endregion
 
-      await TaskConstants.Completed;
-      return ReadFromStream(type, readStream, effectiveEncoding);
+    #region -- WriteToStream --
+
+    /// <inheritdoc />
+    public override void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding)
+    {
+      if (null == value) { return; }
+
+      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+
+      _serializer.Serialize(value, writeStream);
     }
-#endif
+
+    /// <inheritdoc />
+    public override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
+    {
+      if (null == value) { return; }
+
+      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+
+      _serializer.Serialize(value, writeStream);
+    }
 
     /// <inheritdoc />
     public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
@@ -119,15 +165,6 @@ namespace CuteAnt.Extensions.Serialization
       _serializer.Serialize(value, writeStream);
     }
 
-#if !NET40
-    /// <inheritdoc />
-    public override async Task WriteToStreamAsync(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
-    {
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
-
-      WriteToStream(type, value, writeStream, effectiveEncoding);
-      await TaskConstants.Completed;
-    }
-#endif
+    #endregion
   }
 }
