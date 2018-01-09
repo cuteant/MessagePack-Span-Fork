@@ -116,24 +116,28 @@ namespace ServiceStack.Text
         public static void SerializeToStream<T>(T value, Stream stream)
         {
             if (value == null) return;
-            var writer = new StreamWriter(stream, UseEncoding);
-            CsvSerializer<T>.WriteObject(writer, value);
-            writer.Flush();
+            using (var writer = new StreamWriterX(stream, UseEncoding))
+            {
+                CsvSerializer<T>.WriteObject(writer, value);
+                writer.Flush();
+            }
         }
 
         public static void SerializeToStream(object obj, Stream stream)
         {
             if (obj == null) return;
-            var writer = new StreamWriter(stream, UseEncoding);
-            var writeFn = GetWriteFn(obj.GetType());
-            writeFn(writer, obj);
-            writer.Flush();
+            using (var writer = new StreamWriterX(stream, UseEncoding))
+            {
+                var writeFn = GetWriteFn(obj.GetType());
+                writeFn(writer, obj);
+                writer.Flush();
+            }
         }
 
         public static T DeserializeFromStream<T>(Stream stream)
         {
             if (stream == null) return default(T);
-            using (var reader = new StreamReader(stream, UseEncoding))
+            using (var reader = new StreamReaderX(stream, UseEncoding))
             {
                 return DeserializeFromString<T>(reader.ReadToEnd());
             }
@@ -142,7 +146,7 @@ namespace ServiceStack.Text
         public static object DeserializeFromStream(Type type, Stream stream)
         {
             if (stream == null) return null;
-            using (var reader = new StreamReader(stream, UseEncoding))
+            using (var reader = new StreamReaderX(stream, UseEncoding))
             {
                 return DeserializeFromString(type, reader.ReadToEnd());
             }

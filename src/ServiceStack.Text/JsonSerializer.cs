@@ -148,22 +148,26 @@ namespace ServiceStack.Text
             }
             else
             {
-                var writer = new StreamWriter(stream, UTF8Encoding);
-                JsonWriter<T>.WriteRootObject(writer, value);
-                writer.Flush();
+                using (var writer = new StreamWriterX(stream, UTF8Encoding))
+                {
+                    JsonWriter<T>.WriteRootObject(writer, value);
+                    writer.Flush();
+                }
             }
         }
 
         public static void SerializeToStream(object value, Type type, Stream stream)
         {
-            var writer = new StreamWriter(stream, UTF8Encoding);
-            JsonWriter.GetWriteFn(type)(writer, value);
-            writer.Flush();
+            using (var writer = new StreamWriterX(stream, UTF8Encoding))
+            {
+                JsonWriter.GetWriteFn(type)(writer, value);
+                writer.Flush();
+            }
         }
 
         public static T DeserializeFromStream<T>(Stream stream)
         {
-            using (var reader = new StreamReader(stream, UTF8Encoding))
+            using (var reader = new StreamReaderX(stream, UTF8Encoding))
             {
                 return DeserializeFromString<T>(reader.ReadToEnd());
             }
@@ -171,7 +175,7 @@ namespace ServiceStack.Text
 
         public static object DeserializeFromStream(Type type, Stream stream)
         {
-            using (var reader = new StreamReader(stream, UTF8Encoding))
+            using (var reader = new StreamReaderX(stream, UTF8Encoding))
             {
                 return DeserializeFromString(reader.ReadToEnd(), type);
             }
