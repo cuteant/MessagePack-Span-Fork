@@ -56,6 +56,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MessagePack.Abstractions\MessagePack.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Formatters\ForceSizePrimitiveFormatter.tt">
       <LastGenOutput>ForceSizePrimitiveFormatter.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>

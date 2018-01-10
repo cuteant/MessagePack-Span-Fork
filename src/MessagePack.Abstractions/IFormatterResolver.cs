@@ -42,7 +42,13 @@ namespace MessagePack
 
         public static object GetFormatterDynamic(this IFormatterResolver resolver, Type type)
         {
-            var methodInfo = typeof(IFormatterResolver).GetRuntimeMethod("GetFormatter", Type.EmptyTypes);
+            var methodInfo = typeof(IFormatterResolver)
+#if NET40
+                .GetMethod
+#else
+                .GetRuntimeMethod
+#endif
+                ("GetFormatter", Type.EmptyTypes);
 
             var formatter = methodInfo.MakeGenericMethod(type).Invoke(resolver, null);
             return formatter;
