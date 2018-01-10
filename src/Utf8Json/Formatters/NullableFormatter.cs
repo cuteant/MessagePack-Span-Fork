@@ -1,5 +1,6 @@
 ﻿
 using System;
+using CuteAnt.Reflection;
 
 namespace Utf8Json.Formatters
 {
@@ -45,7 +46,7 @@ namespace Utf8Json.Formatters
         {
             try
             {
-                underlyingFormatter = (IJsonFormatter<T>)Activator.CreateInstance(formatterType, formatterArguments);
+                underlyingFormatter = (IJsonFormatter<T>)ActivatorUtils.CreateInstance(formatterType, formatterArguments);
             }
             catch (Exception ex)
             {

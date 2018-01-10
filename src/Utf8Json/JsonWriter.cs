@@ -2,7 +2,7 @@
 using System.Text;
 using Utf8Json.Internal;
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 using System.Runtime.CompilerServices;
 #endif
 
@@ -15,11 +15,11 @@ namespace Utf8Json
         static readonly byte[] emptyBytes = new byte[0];
 
         // write direct from UnsafeMemory
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
         internal
 #endif
         byte[] buffer;
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
         internal
 #endif
         int offset;
@@ -94,16 +94,16 @@ namespace Utf8Json
             return Encoding.UTF8.GetString(buffer, 0, offset);
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void EnsureCapacity(int appendLength)
         {
             BinaryUtil.EnsureCapacity(ref buffer, offset, appendLength);
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteRaw(byte rawValue)
         {
@@ -111,12 +111,12 @@ namespace Utf8Json
             buffer[offset++] = rawValue;
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteRaw(byte[] rawValue)
         {
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
             UnsafeMemory.WriteRaw(ref this, rawValue);
 #else
             BinaryUtil.EnsureCapacity(ref buffer, offset, rawValue.Length);
@@ -125,16 +125,16 @@ namespace Utf8Json
 #endif
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteRawUnsafe(byte rawValue)
         {
             buffer[offset++] = rawValue;
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteBeginArray()
         {
@@ -142,8 +142,8 @@ namespace Utf8Json
             buffer[offset++] = (byte)'[';
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteEndArray()
         {
@@ -151,8 +151,8 @@ namespace Utf8Json
             buffer[offset++] = (byte)']';
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteBeginObject()
         {
@@ -160,8 +160,8 @@ namespace Utf8Json
             buffer[offset++] = (byte)'{';
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteEndObject()
         {
@@ -169,8 +169,8 @@ namespace Utf8Json
             buffer[offset++] = (byte)'}';
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteValueSeparator()
         {
@@ -179,8 +179,8 @@ namespace Utf8Json
         }
 
         /// <summary>:</summary>
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteNameSeparator()
         {
@@ -189,8 +189,8 @@ namespace Utf8Json
         }
 
         /// <summary>WriteString + WriteNameSeparator</summary>
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WritePropertyName(string propertyName)
         {
@@ -198,8 +198,8 @@ namespace Utf8Json
             WriteNameSeparator();
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteQuotation()
         {
@@ -207,8 +207,8 @@ namespace Utf8Json
             buffer[offset++] = (byte)'\"';
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteNull()
         {
@@ -220,8 +220,8 @@ namespace Utf8Json
             offset += 4;
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteBoolean(bool value)
         {
@@ -246,8 +246,8 @@ namespace Utf8Json
             }
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteTrue()
         {
@@ -259,8 +259,8 @@ namespace Utf8Json
             offset += 4;
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteFalse()
         {
@@ -273,40 +273,40 @@ namespace Utf8Json
             offset += 5;
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteSingle(Single value)
         {
             offset += Utf8Json.Internal.DoubleConversion.DoubleToStringConverter.GetBytes(ref buffer, offset, value);
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteDouble(double value)
         {
             offset += Utf8Json.Internal.DoubleConversion.DoubleToStringConverter.GetBytes(ref buffer, offset, value);
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteByte(byte value)
         {
             WriteUInt64((ulong)value);
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteUInt16(ushort value)
         {
             WriteUInt64((ulong)value);
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteUInt32(uint value)
         {
@@ -318,24 +318,24 @@ namespace Utf8Json
             offset += NumberConverter.WriteUInt64(ref buffer, offset, value);
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteSByte(sbyte value)
         {
             WriteInt64((long)value);
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteInt16(short value)
         {
             WriteInt64((long)value);
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void WriteInt32(int value)
         {

@@ -16,7 +16,7 @@ namespace Utf8Json.Tests
             return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value));
         }
 
-        public static object[] primitiveFormatterTestData = new object[]
+        public static IEnumerable<object[]> primitiveFormatterTestData = new []
         {
             new object[] { Int16.MinValue, Int16.MaxValue },
             new object[] { (Int16?)100, null },
@@ -55,7 +55,7 @@ namespace Utf8Json.Tests
             Convert(y).Is(y);
         }
 
-        public static object[] enumFormatterTestData = new object[]
+        public static IEnumerable<object[]> enumFormatterTestData = new []
         {
             new object[] { ByteEnum.A, ByteEnum.B },
             new object[] { (ByteEnum?)ByteEnum.C, null },
@@ -85,7 +85,7 @@ namespace Utf8Json.Tests
         }
 
 
-        public static object[] standardStructFormatterTestData = new object[]
+        public static IEnumerable<object[]> standardStructFormatterTestData = new []
         {
             new object[] { decimal.MaxValue, decimal.MinValue, null },
             //new object[] { TimeSpan.MaxValue, TimeSpan.MinValue, null },
@@ -116,7 +116,7 @@ namespace Utf8Json.Tests
             Convert(z).Is(z);
         }
 
-        public static object[] standardClassFormatterTestData = new object[]
+        public static IEnumerable<object[]> standardClassFormatterTestData = new []
         {
             new object[] { new byte[] { 1, 10, 100 }, new byte[0] { }, null },
             new object[] { "aaa", "", null },
@@ -183,8 +183,10 @@ namespace Utf8Json.Tests
         [Fact]
         public void DecimalLang()
         {
+#if NET_4_5_GREATER
             var estonian = CultureInfo.GetCultureInfo("et-EE");
             CultureInfo.CurrentCulture = estonian;
+#endif
 
             var b = JsonSerializer.Serialize(12345.6789M);
             var d = JsonSerializer.Deserialize<decimal>(b);

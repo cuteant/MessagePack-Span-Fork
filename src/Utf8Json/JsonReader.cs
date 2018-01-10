@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Utf8Json.Internal;
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 using System.Runtime.CompilerServices;
 #endif
 
@@ -250,8 +250,8 @@ namespace Utf8Json
             }
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         public void SkipWhiteSpace()
         {
@@ -689,16 +689,16 @@ namespace Utf8Json
             }
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         static int GetCodePoint(char a, char b, char c, char d)
         {
             return (((((ToNumber(a) * 16) + ToNumber(b)) * 16) + ToNumber(c)) * 16) + ToNumber(d);
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         static int ToNumber(char x)
         {
@@ -968,8 +968,8 @@ namespace Utf8Json
             ReadNextCore(token);
         }
 
-#if NETSTANDARD
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [MethodImpl(InlineMethod.Value)]
 #endif
         void ReadNextCore(JsonToken token)
         {
@@ -1230,7 +1230,8 @@ namespace Utf8Json
             {
                 if (buffer == null)
                 {
-                    buffer = new byte[65535];
+                    const int _bufferSize = 65535;// 1024 * 64;
+                    buffer = new byte[_bufferSize];
                 }
                 return buffer;
             }
@@ -1239,7 +1240,8 @@ namespace Utf8Json
             {
                 if (codePointStringBuffer == null)
                 {
-                    codePointStringBuffer = new char[65535];
+                    const int _bufferSize = 65535;// 1024 * 64;
+                    codePointStringBuffer = new char[_bufferSize];
                 }
                 return codePointStringBuffer;
             }

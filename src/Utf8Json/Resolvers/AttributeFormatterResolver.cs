@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
+using CuteAnt.Reflection;
 using Utf8Json.Internal;
 
 namespace Utf8Json.Resolvers
@@ -32,7 +33,7 @@ namespace Utf8Json.Resolvers
 #if (UNITY_METRO || UNITY_WSA) && !NETFX_CORE
                 var attr = (JsonFormatterAttribute)typeof(T).GetCustomAttributes(typeof(JsonFormatterAttribute), true).FirstOrDefault();
 #else
-                var attr = typeof(T).GetTypeInfo().GetCustomAttribute<JsonFormatterAttribute>();
+                var attr = typeof(T).GetCustomAttributeX<JsonFormatterAttribute>();
 #endif
                 if (attr == null)
                 {
@@ -43,12 +44,12 @@ namespace Utf8Json.Resolvers
                 {
                     if (attr.FormatterType.IsGenericType && !attr.FormatterType.GetTypeInfo().IsConstructedGenericType())
                     {
-                        var t = attr.FormatterType.MakeGenericType(typeof(T)); // use T self
-                        formatter = (IJsonFormatter<T>)Activator.CreateInstance(t, attr.Arguments);
+                        var t = attr.FormatterType.GetCachedGenericType(typeof(T)); // use T self
+                        formatter = (IJsonFormatter<T>)ActivatorUtils.CreateInstance(t, attr.Arguments);
                     }
                     else
                     {
-                        formatter = (IJsonFormatter<T>)Activator.CreateInstance(attr.FormatterType, attr.Arguments);
+                        formatter = (IJsonFormatter<T>)ActivatorUtils.CreateInstance(attr.FormatterType, attr.Arguments);
                     }
                 }
                 catch (Exception ex)

@@ -1,6 +1,7 @@
-using Newtonsoft.Json;
-using System;
+﻿using System;
+using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Utf8Json.Tests

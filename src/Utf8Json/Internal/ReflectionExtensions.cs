@@ -20,27 +20,39 @@ namespace Utf8Json.Internal
 
         public static bool IsAnonymous(this System.Reflection.TypeInfo type)
         {
-            return type.GetCustomAttribute<CompilerGeneratedAttribute>() != null
+            return type.AsType().GetCustomAttributeX<CompilerGeneratedAttribute>() != null
                 && type.Name.Contains("AnonymousType")
-                && (type.Name.StartsWith("<>") || type.Name.StartsWith("VB$"))
+                && (type.Name.StartsWith("<>", StringComparison.Ordinal) || type.Name.StartsWith("VB$", StringComparison.Ordinal))
                 && (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
         }
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
         public static bool IsConstructedGenericType(this System.Reflection.TypeInfo type)
         {
+#if NET40
+            return type.AsType().IsConstructedGenericType();
+#else
             return type.AsType().IsConstructedGenericType;
+#endif
         }
 
         public static MethodInfo GetGetMethod(this PropertyInfo propInfo)
         {
+#if NET40
+            return propInfo.GetGetMethod(true);
+#else
             return propInfo.GetMethod;
+#endif
         }
 
         public static MethodInfo GetSetMethod(this PropertyInfo propInfo)
         {
+#if NET40
+            return propInfo.GetSetMethod(true);
+#else
             return propInfo.SetMethod;
+#endif
         }
 
 #endif

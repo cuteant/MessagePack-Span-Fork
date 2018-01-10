@@ -1,4 +1,4 @@
-﻿#if NETSTANDARD
+﻿#if NETSTANDARD || DESKTOPCLR
 
 using System;
 using Utf8Json.Internal;
@@ -181,7 +181,7 @@ namespace Utf8Json.Formatters
             {
                 var keyString = reader.ReadPropertyNameSegmentRaw();
                 int key;
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
                 dictionary.TryGetValue(keyString, out key);
 #else
                 dictionary.TryGetValueSafe(keyString, out key);
@@ -232,7 +232,7 @@ namespace Utf8Json.Formatters
             {
                 var keyString = reader.ReadPropertyNameSegmentRaw();
                 int key;
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
                 dictionary.TryGetValue(keyString, out key);
 #else
                 dictionary.TryGetValueSafe(keyString, out key);
@@ -289,7 +289,7 @@ namespace Utf8Json.Formatters
             {
                 var keyString = reader.ReadPropertyNameSegmentRaw();
                 int key;
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
                 dictionary.TryGetValue(keyString, out key);
 #else
                 dictionary.TryGetValueSafe(keyString, out key);
@@ -352,7 +352,7 @@ namespace Utf8Json.Formatters
             {
                 var keyString = reader.ReadPropertyNameSegmentRaw();
                 int key;
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
                 dictionary.TryGetValue(keyString, out key);
 #else
                 dictionary.TryGetValueSafe(keyString, out key);
@@ -421,7 +421,7 @@ namespace Utf8Json.Formatters
             {
                 var keyString = reader.ReadPropertyNameSegmentRaw();
                 int key;
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
                 dictionary.TryGetValue(keyString, out key);
 #else
                 dictionary.TryGetValueSafe(keyString, out key);
@@ -496,7 +496,7 @@ namespace Utf8Json.Formatters
             {
                 var keyString = reader.ReadPropertyNameSegmentRaw();
                 int key;
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
                 dictionary.TryGetValue(keyString, out key);
 #else
                 dictionary.TryGetValueSafe(keyString, out key);
@@ -577,7 +577,7 @@ namespace Utf8Json.Formatters
             {
                 var keyString = reader.ReadPropertyNameSegmentRaw();
                 int key;
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
                 dictionary.TryGetValue(keyString, out key);
 #else
                 dictionary.TryGetValueSafe(keyString, out key);
@@ -664,7 +664,7 @@ namespace Utf8Json.Formatters
             {
                 var keyString = reader.ReadPropertyNameSegmentRaw();
                 int key;
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
                 dictionary.TryGetValue(keyString, out key);
 #else
                 dictionary.TryGetValueSafe(keyString, out key);

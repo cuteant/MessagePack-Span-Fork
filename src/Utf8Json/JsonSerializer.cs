@@ -103,8 +103,9 @@ namespace Utf8Json
             stream.Write(buffer.Array, buffer.Offset, buffer.Count);
         }
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
+#if !NET40
         /// <summary>
         /// Serialize to stream(write async).
         /// </summary>
@@ -134,6 +135,7 @@ namespace Utf8Json
                 BufferPool.Default.Return(buf);
             }
         }
+#endif
 
 #endif
 
@@ -235,7 +237,7 @@ namespace Utf8Json
         {
             if (resolver == null) resolver = DefaultResolver;
 
-#if NETSTANDARD && !NET45
+#if NETSTANDARD || NET_4_5_GREATER
             var ms = stream as MemoryStream;
             if (ms != null)
             {
@@ -270,8 +272,9 @@ namespace Utf8Json
             }
         }
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
+#if !NET40
         public static System.Threading.Tasks.Task<T> DeserializeAsync<T>(Stream stream)
         {
             return DeserializeAsync<T>(stream, defaultResolver);
@@ -310,6 +313,7 @@ namespace Utf8Json
                 BufferPool.Default.Return(buffer);
             }
         }
+#endif
 
 #endif
 
@@ -460,7 +464,8 @@ namespace Utf8Json
             {
                 if (buffer == null)
                 {
-                    buffer = new byte[65536];
+                    const int _bufferSize = 1024 * 64;
+                    buffer = new byte[_bufferSize];
                 }
                 return buffer;
             }

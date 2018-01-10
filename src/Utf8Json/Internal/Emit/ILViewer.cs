@@ -63,7 +63,7 @@ namespace Utf8Json.Internal
         }
     }
 
-#if DEBUG && NETSTANDARD
+#if DEBUG && (NETSTANDARD || DESKTOPCLR)
 
     // not yet completed so only for debug.
     public static class ILViewer

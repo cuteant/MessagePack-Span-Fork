@@ -65,7 +65,7 @@ namespace Utf8Json.Tests
 
     public class EnumAsStringTest
     {
-        public static object enumData = new object[]
+        public static IEnumerable<object[]> enumData = new []
         {
             // simple
             new object[] { AsString.Foo, null, "Foo", "null" },

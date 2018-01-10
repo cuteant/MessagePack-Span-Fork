@@ -1,4 +1,4 @@
-﻿#if NETSTANDARD
+﻿#if NETSTANDARD || DESKTOPCLR
 
 using System;
 using System.Runtime.CompilerServices;
@@ -56,7 +56,7 @@ namespace Utf8Json.Internal
         public static unsafe void MemoryCopy(ref JsonWriter writer, byte[] src)
         {
             BinaryUtil.EnsureCapacity(ref writer.buffer, writer.offset, src.Length);
-#if !NET45
+#if NET_4_5_GREATER
             fixed (void* dstP = &writer.buffer[writer.offset])
             fixed (void* srcP = &src[0])
             {
@@ -71,7 +71,7 @@ namespace Utf8Json.Internal
 
     public static partial class UnsafeMemory32
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(InlineMethod.Value)]
         public static unsafe void WriteRaw1(ref JsonWriter writer, byte[] src)
         {
             BinaryUtil.EnsureCapacity(ref writer.buffer, writer.offset, src.Length);
@@ -85,7 +85,7 @@ namespace Utf8Json.Internal
             writer.offset += src.Length;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(InlineMethod.Value)]
         public static unsafe void WriteRaw2(ref JsonWriter writer, byte[] src)
         {
             BinaryUtil.EnsureCapacity(ref writer.buffer, writer.offset, src.Length);
@@ -99,7 +99,7 @@ namespace Utf8Json.Internal
             writer.offset += src.Length;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(InlineMethod.Value)]
         public static unsafe void WriteRaw3(ref JsonWriter writer, byte[] src)
         {
             BinaryUtil.EnsureCapacity(ref writer.buffer, writer.offset, src.Length);
@@ -117,7 +117,7 @@ namespace Utf8Json.Internal
 
     public static partial class UnsafeMemory64
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(InlineMethod.Value)]
         public static unsafe void WriteRaw1(ref JsonWriter writer, byte[] src)
         {
             BinaryUtil.EnsureCapacity(ref writer.buffer, writer.offset, src.Length);
@@ -131,7 +131,7 @@ namespace Utf8Json.Internal
             writer.offset += src.Length;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(InlineMethod.Value)]
         public static unsafe void WriteRaw2(ref JsonWriter writer, byte[] src)
         {
             BinaryUtil.EnsureCapacity(ref writer.buffer, writer.offset, src.Length);
@@ -145,7 +145,7 @@ namespace Utf8Json.Internal
             writer.offset += src.Length;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(InlineMethod.Value)]
         public static unsafe void WriteRaw3(ref JsonWriter writer, byte[] src)
         {
             BinaryUtil.EnsureCapacity(ref writer.buffer, writer.offset, src.Length);
@@ -160,7 +160,7 @@ namespace Utf8Json.Internal
             writer.offset += src.Length;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(InlineMethod.Value)]
         public static unsafe void WriteRaw4(ref JsonWriter writer, byte[] src)
         {
             BinaryUtil.EnsureCapacity(ref writer.buffer, writer.offset, src.Length);
@@ -174,7 +174,7 @@ namespace Utf8Json.Internal
             writer.offset += src.Length;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(InlineMethod.Value)]
         public static unsafe void WriteRaw5(ref JsonWriter writer, byte[] src)
         {
             BinaryUtil.EnsureCapacity(ref writer.buffer, writer.offset, src.Length);
@@ -189,7 +189,7 @@ namespace Utf8Json.Internal
             writer.offset += src.Length;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(InlineMethod.Value)]
         public static unsafe void WriteRaw6(ref JsonWriter writer, byte[] src)
         {
             BinaryUtil.EnsureCapacity(ref writer.buffer, writer.offset, src.Length);
@@ -204,7 +204,7 @@ namespace Utf8Json.Internal
             writer.offset += src.Length;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(InlineMethod.Value)]
         public static unsafe void WriteRaw7(ref JsonWriter writer, byte[] src)
         {
             BinaryUtil.EnsureCapacity(ref writer.buffer, writer.offset, src.Length);

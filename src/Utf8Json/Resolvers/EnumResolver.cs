@@ -4,6 +4,7 @@ using Utf8Json.Internal;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
+using CuteAnt.Reflection;
 using Utf8Json.Formatters;
 using Utf8Json.Resolvers.Internal;
 
@@ -55,7 +56,7 @@ namespace Utf8Json.Resolvers.Internal
                     {
                         return;
                     }
-                    formatter = (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).MakeGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IJsonFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
                     return;
                 }
                 else if (typeof(T).IsEnum)
@@ -101,7 +102,7 @@ namespace Utf8Json.Resolvers.Internal
                     {
                         return;
                     }
-                    formatter = (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).MakeGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IJsonFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
                     return;
                 }
                 else if (typeof(T).IsEnum)

@@ -20,7 +20,7 @@ namespace Utf8Json.Internal
             root = new AutomataNode(0);
         }
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
         public unsafe void Add(string str, int value)
         {
             Add(JsonWriter.GetEncodedPropertyNameWithoutQuotation(str), value);

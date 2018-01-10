@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 using System.Collections.Concurrent;
 #endif
 
@@ -236,8 +236,9 @@ namespace Utf8Json.Formatters
         }
     }
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
+#if !NET40
     public sealed class ReadOnlyDictionaryFormatter<TKey, TValue> : DictionaryFormatterBase<TKey, TValue, Dictionary<TKey, TValue>, ReadOnlyDictionary<TKey, TValue>>
     {
         protected override void Add(ref Dictionary<TKey, TValue> collection, int index, TKey key, TValue value)
@@ -273,6 +274,7 @@ namespace Utf8Json.Formatters
             return new Dictionary<TKey, TValue>();
         }
     }
+#endif
 
     public sealed class ConcurrentDictionaryFormatter<TKey, TValue> : DictionaryFormatterBase<TKey, TValue, System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue>>
     {

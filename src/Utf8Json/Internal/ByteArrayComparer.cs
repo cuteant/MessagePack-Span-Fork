@@ -6,13 +6,13 @@ namespace Utf8Json.Internal
 {
     public static class ByteArrayComparer
     {
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
         static readonly bool Is32Bit = (IntPtr.Size == 4);
 
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
         public static int GetHashCode(byte[] bytes, int offset, int count)
         {
             if (Is32Bit)
@@ -27,16 +27,16 @@ namespace Utf8Json.Internal
 
 #endif
 
-#if NETSTANDARD
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static unsafe bool Equals(byte[] xs, int xsOffset, int xsCount, byte[] ys)
         {
             return Equals(xs, xsOffset, xsCount, ys, 0, ys.Length);
         }
 
-#if NETSTANDARD
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static unsafe bool Equals(byte[] xs, int xsOffset, int xsCount, byte[] ys, int ysOffset, int ysCount)
         {
@@ -98,8 +98,8 @@ namespace Utf8Json.Internal
         }
 
 #else
-#if NETSTANDARD
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static bool Equals(byte[] xs, int xsOffset, int xsCount, byte[] ys)
         {
@@ -116,8 +116,8 @@ namespace Utf8Json.Internal
             return true;
         }
 
-#if NETSTANDARD
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public static bool Equals(byte[] xs, int xsOffset, int xsCount, byte[] ys, int ysOffset, int ysCount)
         {

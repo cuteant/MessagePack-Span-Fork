@@ -6,7 +6,7 @@ namespace Utf8Json.Internal.Emit
 {
     internal class DynamicAssembly
     {
-#if NET45 || NET47
+#if DESKTOPCLR
         readonly string moduleName;
 #endif
         readonly AssemblyBuilder assemblyBuilder;
@@ -45,12 +45,12 @@ namespace Utf8Json.Internal.Emit
 
         public DynamicAssembly(string moduleName)
         {
-#if NET45 || NET47
+#if DESKTOPCLR
             this.moduleName = moduleName;
             this.assemblyBuilder = System.AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(moduleName), AssemblyBuilderAccess.RunAndSave);
             this.moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName, moduleName + ".dll");
 #else
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
             this.assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(moduleName), AssemblyBuilderAccess.Run);
 #else
             this.assemblyBuilder = System.AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(moduleName), AssemblyBuilderAccess.Run);
@@ -60,7 +60,7 @@ namespace Utf8Json.Internal.Emit
 #endif
         }
 
-#if NET45 || NET47
+#if DESKTOPCLR
 
         public AssemblyBuilder Save()
         {

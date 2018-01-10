@@ -71,11 +71,11 @@ namespace Utf8Json.Internal.Emit
         {
             if (IsProperty)
             {
-                return PropertyInfo.GetCustomAttribute<T>(inherit);
+                return PropertyInfo.GetCustomAttributeX<T>(inherit);
             }
             else
             {
-                return FieldInfo.GetCustomAttribute<T>(inherit);
+                return FieldInfo.GetCustomAttributeX<T>(inherit);
             }
         }
 

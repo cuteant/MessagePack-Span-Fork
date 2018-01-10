@@ -7,7 +7,7 @@ using Utf8Json.Formatters.Internal;
 using Utf8Json.Internal;
 using System.Text.RegularExpressions;
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 using System.Dynamic;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -403,7 +403,7 @@ namespace Utf8Json.Formatters
             {
                 var keyString = reader.ReadPropertyNameSegmentRaw();
                 int key;
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
                 StandardClassLibraryFormatterHelper.keyValuePairAutomata.TryGetValue(keyString, out key);
 #else
                 StandardClassLibraryFormatterHelper.keyValuePairAutomata.TryGetValueSafe(keyString, out key);
@@ -480,7 +480,7 @@ namespace Utf8Json.Formatters
     {
         public static readonly TypeFormatter Default = new TypeFormatter();
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
         static readonly Regex SubtractFullNameRegex = new Regex(@", Version=\d+.\d+.\d+.\d+, Culture=\w+, PublicKeyToken=\w+", RegexOptions.Compiled);
 #else
         static readonly Regex SubtractFullNameRegex = new Regex(@", Version=\d+.\d+.\d+.\d+, Culture=\w+, PublicKeyToken=\w+");
@@ -531,7 +531,7 @@ namespace Utf8Json.Formatters
     }
 
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
     public sealed class BigIntegerFormatter : IJsonFormatter<BigInteger>
     {
@@ -617,7 +617,7 @@ namespace Utf8Json.Formatters
 
             // deserialize immediately(no delay, because capture byte[] causes memory leak)
             var v = formatterResolver.GetFormatterWithVerify<T>().Deserialize(ref reader, formatterResolver);
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
             return new Lazy<T>(v.AsFunc());
 #else
             return new Lazy<T>(() => v);
@@ -625,10 +625,15 @@ namespace Utf8Json.Formatters
         }
     }
 
+#if !NET40
     public sealed class TaskUnitFormatter : IJsonFormatter<Task>
     {
         public static readonly IJsonFormatter<Task> Default = new TaskUnitFormatter();
+#if NET451
         static readonly Task CompletedTask = Task.FromResult<object>(null);
+#else
+        static readonly Task CompletedTask = Task.CompletedTask;
+#endif
 
         public void Serialize(ref JsonWriter writer, Task value, IJsonFormatterResolver formatterResolver)
         {
@@ -679,6 +684,7 @@ namespace Utf8Json.Formatters
             return new ValueTask<T>(v);
         }
     }
+#endif
 
 #endif
 }

@@ -97,8 +97,9 @@ namespace Utf8Json
                 GetOrAdd(type).serialize2.Invoke(stream, value, resolver);
             }
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
+#if !NET40
             /// <summary>
             /// Serialize to stream.
             /// </summary>
@@ -132,6 +133,7 @@ namespace Utf8Json
             {
                 return GetOrAdd(type).serializeAsync.Invoke(stream, value, resolver);
             }
+#endif
 
 #endif
 
@@ -263,7 +265,7 @@ namespace Utf8Json
                 return GetOrAdd(type).deserialize4.Invoke(ref reader, resolver);
             }
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
             public static System.Threading.Tasks.Task<object> DeserializeAsync(Type type, Stream stream)
             {
@@ -289,7 +291,7 @@ namespace Utf8Json
                 public readonly Func<Stream, IJsonFormatterResolver, object> deserialize3;
                 public readonly DeserializeJsonReader deserialize4;
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
                 public readonly Func<Stream, object, IJsonFormatterResolver, System.Threading.Tasks.Task> serializeAsync;
                 public readonly Func<Stream, IJsonFormatterResolver, System.Threading.Tasks.Task<object>> deserializeAsync;
 #endif
@@ -408,7 +410,7 @@ namespace Utf8Json
                         deserialize4 = CreateDelegate<DeserializeJsonReader>(dm);
                     }
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
                     {
                         var dm = new DynamicMethod("SerializeAsync", typeof(System.Threading.Tasks.Task), new[] { typeof(Stream), typeof(object), typeof(IJsonFormatterResolver) }, type.Module, true);
@@ -439,13 +441,15 @@ namespace Utf8Json
 #endif
                 }
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
+#if !NET40
                 static async System.Threading.Tasks.Task<object> TaskCast<T>(System.Threading.Tasks.Task<T> task)
                 {
                     var t = await task.ConfigureAwait(false);
                     return (object)t;
                 }
+#endif
 
 #endif
 

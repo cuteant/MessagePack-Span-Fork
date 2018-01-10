@@ -105,16 +105,16 @@ namespace Utf8Json.Internal
             return false;
         }
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
         static readonly bool Is32Bit = (IntPtr.Size == 4);
 #endif
 
-#if NETSTANDARD
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+#if NETSTANDARD || DESKTOPCLR
+        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         static ulong ByteArrayGetHashCode(byte[] x, int offset, int count)
         {
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
             // FarmHash https://github.com/google/farmhash
             if (x == null || x.Length == 0 || count == 0) return 0;
 

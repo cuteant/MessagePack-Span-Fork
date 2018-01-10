@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using CuteAnt.Reflection;
 using Utf8Json.Internal;
 using System.Runtime.Serialization;
 
@@ -14,7 +15,7 @@ namespace Utf8Json.Formatters
         {
             var underlyingType = Enum.GetUnderlyingType(type);
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
             isBoxed = false;
             var dynamicMethod = new DynamicMethod("EnumSerializeByUnderlyingValue", null, new[] { typeof(JsonWriter).MakeByRefType(), type, typeof(IJsonFormatterResolver) }, type.Module, true);
             var il = dynamicMethod.GetILGenerator();
@@ -22,7 +23,7 @@ namespace Utf8Json.Formatters
             il.Emit(OpCodes.Ldarg_1); // value
             il.Emit(OpCodes.Call, typeof(JsonWriter).GetRuntimeMethod("Write" + underlyingType.Name, new[] { underlyingType }));
             il.Emit(OpCodes.Ret);
-            return dynamicMethod.CreateDelegate(typeof(JsonSerializeAction<>).MakeGenericType(type));
+            return dynamicMethod.CreateDelegate(typeof(JsonSerializeAction<>).GetCachedGenericType(type));
 #else
             // Boxed
             isBoxed = true;
@@ -71,14 +72,14 @@ namespace Utf8Json.Formatters
         {
             var underlyingType = Enum.GetUnderlyingType(type);
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
             isBoxed = false;
             var dynamicMethod = new DynamicMethod("EnumDeserializeByUnderlyingValue", type, new[] { typeof(JsonReader).MakeByRefType(), typeof(IJsonFormatterResolver) }, type.Module, true);
             var il = dynamicMethod.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0); // reader
             il.Emit(OpCodes.Call, typeof(JsonReader).GetRuntimeMethod("Read" + underlyingType.Name, Type.EmptyTypes));
             il.Emit(OpCodes.Ret);
-            return dynamicMethod.CreateDelegate(typeof(JsonDeserializeFunc<>).MakeGenericType(type));
+            return dynamicMethod.CreateDelegate(typeof(JsonDeserializeFunc<>).GetCachedGenericType(type));
 #else
             // Boxed
             isBoxed = true;
@@ -146,12 +147,15 @@ namespace Utf8Json.Formatters
             {
                 var value = item.GetValue(null);
                 var name = Enum.GetName(type, value);
-                var dataMember = item.GetCustomAttributes(typeof(DataMemberAttribute), true)
-                  .OfType<DataMemberAttribute>()
-                  .FirstOrDefault();
-                var enumMember = item.GetCustomAttributes(typeof(EnumMemberAttribute), true)
-                   .OfType<EnumMemberAttribute>()
-                   .FirstOrDefault();
+                // ## 苦竹 修改 ##
+                //var dataMember = item.GetCustomAttributes(typeof(DataMemberAttribute), true)
+                //  .OfType<DataMemberAttribute>()
+                //  .FirstOrDefault();
+                //var enumMember = item.GetCustomAttributes(typeof(EnumMemberAttribute), true)
+                //   .OfType<EnumMemberAttribute>()
+                //   .FirstOrDefault();
+                var dataMember = item.GetCustomAttributeX<DataMemberAttribute>(true);
+                var enumMember = item.GetCustomAttributeX<EnumMemberAttribute>(true);
 
                 values.Add(value);
                 names.Add(

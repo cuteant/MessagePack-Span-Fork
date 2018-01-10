@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
+using CuteAnt.Reflection;
 using Utf8Json.Internal.Emit;
 using Utf8Json.Internal;
 using Utf8Json.Formatters;
@@ -47,7 +48,7 @@ namespace Utf8Json.Resolvers
 
 namespace Utf8Json.Resolvers.Internal
 {
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
     public interface ISave
     {
         AssemblyBuilder Save();
@@ -57,7 +58,7 @@ namespace Utf8Json.Resolvers.Internal
     #region DynamicAssembly
 
     internal sealed class DynamicObjectResolverAllowPrivateFalseExcludeNullFalseNameMutateOriginal : IJsonFormatterResolver
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
             , ISave
 #endif
     {
@@ -78,7 +79,7 @@ namespace Utf8Json.Resolvers.Internal
         {
         }
 
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
         public AssemblyBuilder Save()
         {
             return assembly.Save();
@@ -102,7 +103,7 @@ namespace Utf8Json.Resolvers.Internal
     }
 
     internal sealed class DynamicObjectResolverAllowPrivateFalseExcludeNullFalseNameMutateCamelCase : IJsonFormatterResolver
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
             , ISave
 #endif
     {
@@ -123,7 +124,7 @@ namespace Utf8Json.Resolvers.Internal
         {
         }
 
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
         public AssemblyBuilder Save()
         {
             return assembly.Save();
@@ -147,7 +148,7 @@ namespace Utf8Json.Resolvers.Internal
     }
 
     internal sealed class DynamicObjectResolverAllowPrivateFalseExcludeNullFalseNameMutateSnakeCase : IJsonFormatterResolver
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
             , ISave
 #endif
     {
@@ -168,7 +169,7 @@ namespace Utf8Json.Resolvers.Internal
         {
         }
 
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
         public AssemblyBuilder Save()
         {
             return assembly.Save();
@@ -192,7 +193,7 @@ namespace Utf8Json.Resolvers.Internal
     }
 
     internal sealed class DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateOriginal : IJsonFormatterResolver
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
             , ISave
 #endif
     {
@@ -213,7 +214,7 @@ namespace Utf8Json.Resolvers.Internal
         {
         }
 
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
         public AssemblyBuilder Save()
         {
             return assembly.Save();
@@ -237,7 +238,7 @@ namespace Utf8Json.Resolvers.Internal
     }
 
     internal sealed class DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateCamelCase : IJsonFormatterResolver
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
             , ISave
 #endif
     {
@@ -258,7 +259,7 @@ namespace Utf8Json.Resolvers.Internal
         {
         }
 
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
         public AssemblyBuilder Save()
         {
             return assembly.Save();
@@ -282,7 +283,7 @@ namespace Utf8Json.Resolvers.Internal
     }
 
     internal sealed class DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateSnakeCase : IJsonFormatterResolver
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
             , ISave
 #endif
     {
@@ -303,7 +304,7 @@ namespace Utf8Json.Resolvers.Internal
         {
         }
 
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
         public AssemblyBuilder Save()
         {
             return assembly.Save();
@@ -472,7 +473,7 @@ namespace Utf8Json.Resolvers.Internal
 
     internal static class DynamicObjectTypeBuilder
     {
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
         static readonly Regex SubtractFullNameRegex = new Regex(@", Version=\d+.\d+.\d+.\d+, Culture=\w+, PublicKeyToken=\w+", RegexOptions.Compiled);
 #else
         static readonly Regex SubtractFullNameRegex = new Regex(@", Version=\d+.\d+.\d+.\d+, Culture=\w+, PublicKeyToken=\w+");
@@ -533,7 +534,7 @@ namespace Utf8Json.Resolvers.Internal
                 {
                     return null;
                 }
-                return (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).MakeGenericType(ti.AsType()), new object[] { innerFormatter });
+                return (IJsonFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
             }
 
             Type elementType;
@@ -545,7 +546,7 @@ namespace Utf8Json.Resolvers.Internal
             var formatterTypeInfo = DynamicObjectTypeBuilder.BuildType(assembly, typeof(T), nameMutator, excludeNull);
             if (formatterTypeInfo == null) return null;
 
-            return (IJsonFormatter<T>)Activator.CreateInstance(formatterTypeInfo.AsType());
+            return (IJsonFormatter<T>)ActivatorUtils.FastCreateInstance(formatterTypeInfo.AsType());
         }
 
         public static object BuildFormatterToDynamicMethod<T>(IJsonFormatterResolver selfResolver, Func<string, string> nameMutator, bool excludeNull, bool allowPrivate)
@@ -561,7 +562,7 @@ namespace Utf8Json.Resolvers.Internal
                 {
                     return null;
                 }
-                return (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).MakeGenericType(ti.AsType()), new object[] { innerFormatter });
+                return (IJsonFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
             }
 
             return DynamicObjectTypeBuilder.BuildAnonymousFormatter(typeof(T), nameMutator, excludeNull, allowPrivate);
@@ -574,7 +575,7 @@ namespace Utf8Json.Resolvers.Internal
             var serializationInfo = new MetaType(type, nameMutator, false); // allowPrivate:false
             var hasShouldSerialize = serializationInfo.Members.Any(x => x.ShouldSerializeMethodInfo != null);
 
-            var formatterType = typeof(IJsonFormatter<>).MakeGenericType(type);
+            var formatterType = typeof(IJsonFormatter<>).GetCachedGenericType(type);
             var typeBuilder = assembly.DefineType("Utf8Json.Formatters." + SubtractFullNameRegex.Replace(type.FullName, "").Replace(".", "_") + "Formatter" + Interlocked.Increment(ref nameSequence), TypeAttributes.Public | TypeAttributes.Sealed, null, new[] { formatterType });
 
             FieldBuilder stringByteKeysField;
@@ -627,7 +628,11 @@ namespace Utf8Json.Resolvers.Internal
                 }, false, 1); // firstArgIndex:0 is this.
             }
 
+#if NET40
+            return typeBuilder.CreateType().GetTypeInfo();
+#else
             return typeBuilder.CreateTypeInfo();
+#endif
         }
 
         public static object BuildAnonymousFormatter(Type type, Func<string, string> nameMutator, bool excludeNull, bool allowPrivate)
@@ -667,7 +672,7 @@ namespace Utf8Json.Resolvers.Internal
                 var attr = item.GetCustomAttribute<JsonFormatterAttribute>(true);
                 if (attr != null)
                 {
-                    var formatter = Activator.CreateInstance(attr.FormatterType, attr.Arguments);
+                    var formatter = ActivatorUtils.CreateInstance(attr.FormatterType, attr.Arguments);
                     serializeCustomFormatters.Add(formatter);
                 }
                 else
@@ -680,7 +685,7 @@ namespace Utf8Json.Resolvers.Internal
                 var attr = item.GetCustomAttribute<JsonFormatterAttribute>(true);
                 if (attr != null)
                 {
-                    var formatter = Activator.CreateInstance(attr.FormatterType, attr.Arguments);
+                    var formatter = ActivatorUtils.CreateInstance(attr.FormatterType, attr.Arguments);
                     deserializeCustomFormatters.Add(formatter);
                 }
                 else
@@ -724,10 +729,10 @@ namespace Utf8Json.Resolvers.Internal
                 }, true, 1);
             }
 
-            object serializeDelegate = serialize.CreateDelegate(typeof(AnonymousJsonSerializeAction<>).MakeGenericType(type));
-            object deserializeDelegate = deserialize.CreateDelegate(typeof(AnonymousJsonDeserializeFunc<>).MakeGenericType(type));
+            object serializeDelegate = serialize.CreateDelegate(typeof(AnonymousJsonSerializeAction<>).GetCachedGenericType(type));
+            object deserializeDelegate = deserialize.CreateDelegate(typeof(AnonymousJsonDeserializeFunc<>).GetCachedGenericType(type));
 
-            return Activator.CreateInstance(typeof(DynamicMethodAnonymousFormatter<>).MakeGenericType(type),
+            return ActivatorUtils.CreateInstance(typeof(DynamicMethodAnonymousFormatter<>).GetCachedGenericType(type),
                 new[] { stringByteKeysField.ToArray(), serializeCustomFormatters.ToArray(), deserializeCustomFormatters.ToArray(), serializeDelegate, deserializeDelegate });
         }
 
@@ -783,7 +788,7 @@ namespace Utf8Json.Resolvers.Internal
                 if (attr != null)
                 {
                     // var attr = typeof(Foo).Get .GetCustomAttribute<T>(true);
-                    // this.f = Activator.CreateInstance(attr.FormatterType, attr.Arguments);
+                    // this.f = ActivatorUtils.FastCreateInstance(attr.FormatterType, attr.Arguments);
 
                     var f = builder.DefineField(item.Name + "_formatter", attr.FormatterType, FieldAttributes.Private | FieldAttributes.InitOnly);
 
@@ -840,7 +845,7 @@ namespace Utf8Json.Resolvers.Internal
                 Type elementType;
                 if (TryGetInterfaceEnumerableElementType(type, out elementType))
                 {
-                    var t = typeof(IEnumerable<>).MakeGenericType(elementType);
+                    var t = typeof(IEnumerable<>).GetCachedGenericType(elementType);
 
                     argResolver.EmitLoad();
                     il.EmitCall(EmitInfo.GetFormatterWithVerify.MakeGenericMethod(t));
@@ -939,7 +944,7 @@ namespace Utf8Json.Resolvers.Internal
                 emitStringByteKeys();
                 il.EmitLdc_I4(index);
                 il.Emit(OpCodes.Ldelem_Ref);
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
                 byte[] rawField = (index == 0) ? JsonWriter.GetEncodedPropertyNameWithBeginObject(item.Name) : JsonWriter.GetEncodedPropertyNameWithPrefixValueSeparator(item.Name);
                 if (rawField.Length < 32)
                 {
@@ -1400,7 +1405,7 @@ namespace Utf8Json.Resolvers.Internal
             public static readonly ConstructorInfo ObjectCtor = typeof(object).GetTypeInfo().DeclaredConstructors.First(x => x.GetParameters().Length == 0);
 
             public static readonly MethodInfo GetFormatterWithVerify = typeof(JsonFormatterResolverExtensions).GetRuntimeMethod("GetFormatterWithVerify", new[] { typeof(IJsonFormatterResolver) });
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
             public static readonly MethodInfo UnsafeMemory_MemoryCopy = ExpressionUtility.GetMethodInfo((Utf8Json.JsonWriter writer, byte[] src) => UnsafeMemory.MemoryCopy(ref writer, src));
 #endif
             public static readonly ConstructorInfo InvalidOperationExceptionConstructor = typeof(System.InvalidOperationException).GetTypeInfo().DeclaredConstructors.First(x => { var p = x.GetParameters(); return p.Length == 1 && p[0].ParameterType == typeof(string); });
@@ -1409,24 +1414,24 @@ namespace Utf8Json.Resolvers.Internal
             public static readonly MethodInfo TypeGetProperty = ExpressionUtility.GetMethodInfo((Type t) => t.GetProperty(default(string), default(BindingFlags)));
             public static readonly MethodInfo TypeGetField = ExpressionUtility.GetMethodInfo((Type t) => t.GetField(default(string), default(BindingFlags)));
 
-            public static readonly MethodInfo GetCustomAttributeJsonFormatterAttribute = ExpressionUtility.GetMethodInfo(() => CustomAttributeExtensions.GetCustomAttribute<JsonFormatterAttribute>(default(MemberInfo), default(bool)));
+            public static readonly MethodInfo GetCustomAttributeJsonFormatterAttribute = ExpressionUtility.GetMethodInfo(() => AttributeX.GetCustomAttributeX<JsonFormatterAttribute>(default(MemberInfo), default(bool)));
 
-            public static readonly MethodInfo ActivatorCreateInstance = ExpressionUtility.GetMethodInfo(() => Activator.CreateInstance(default(Type), default(object[])));
+            public static readonly MethodInfo ActivatorCreateInstance = ExpressionUtility.GetMethodInfo(() => Activator.CreateInstance(default(Type), default(object[]))); // 注意：这儿不能使用 ActivatorUtils.CreateInstance
             public static readonly MethodInfo GetUninitializedObject = ExpressionUtility.GetMethodInfo(() => System.Runtime.Serialization.FormatterServices.GetUninitializedObject(default(Type)));
 
             public static MethodInfo Serialize(Type type)
             {
-                return typeof(IJsonFormatter<>).MakeGenericType(type).GetRuntimeMethod("Serialize", new[] { typeof(Utf8Json.JsonWriter).MakeByRefType(), type, typeof(IJsonFormatterResolver) });
+                return typeof(IJsonFormatter<>).GetCachedGenericType(type).GetRuntimeMethod("Serialize", new[] { typeof(Utf8Json.JsonWriter).MakeByRefType(), type, typeof(IJsonFormatterResolver) });
             }
 
             public static MethodInfo Deserialize(Type type)
             {
-                return typeof(IJsonFormatter<>).MakeGenericType(type).GetRuntimeMethod("Deserialize", new[] { typeof(Utf8Json.JsonReader).MakeByRefType(), typeof(IJsonFormatterResolver) });
+                return typeof(IJsonFormatter<>).GetCachedGenericType(type).GetRuntimeMethod("Deserialize", new[] { typeof(Utf8Json.JsonReader).MakeByRefType(), typeof(IJsonFormatterResolver) });
             }
 
             public static MethodInfo GetNullableHasValue(Type type)
             {
-                return typeof(Nullable<>).MakeGenericType(type).GetRuntimeProperty("HasValue").GetGetMethod();
+                return typeof(Nullable<>).GetCachedGenericType(type).GetRuntimeProperty("HasValue").GetGetMethod();
             }
 
             internal static class JsonWriter

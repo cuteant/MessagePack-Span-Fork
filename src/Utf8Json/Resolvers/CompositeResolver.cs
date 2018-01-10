@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using CuteAnt.Reflection;
 using Utf8Json.Internal.Emit;
 
 namespace Utf8Json.Resolvers
@@ -132,7 +133,7 @@ namespace Utf8Json.Resolvers
             assembly = new DynamicAssembly(ModuleName);
         }
 
-#if DEBUG && (NET45 || NET47)
+#if DEBUG && (DESKTOPCLR)
         public static AssemblyBuilder Save()
         {
             return assembly.Save();
@@ -148,7 +149,7 @@ namespace Utf8Json.Resolvers
 
             var resolverInstanceField = resolverType.DefineField("instance", resolverType, FieldAttributes.Public | FieldAttributes.Static);
 
-            var f = cacheType.DefineField("formatter", typeof(IJsonFormatter<>).MakeGenericType(genericP), FieldAttributes.Static | FieldAttributes.Public);
+            var f = cacheType.DefineField("formatter", typeof(IJsonFormatter<>).GetCachedGenericType(genericP), FieldAttributes.Static | FieldAttributes.Public);
             {
                 var cctor = cacheType.DefineConstructor(MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
                 var il = cctor.GetILGenerator();
@@ -157,7 +158,11 @@ namespace Utf8Json.Resolvers
                 il.Emit(OpCodes.Stsfld, f);
                 il.Emit(OpCodes.Ret);
             }
+#if NET40
+            var cacheTypeT = cacheType.CreateType();
+#else
             var cacheTypeT = cacheType.CreateTypeInfo().AsType();
+#endif
 
             {
                 var ctor = resolverType.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new[] { typeof(IJsonFormatter[]), typeof(IJsonFormatterResolver[]) });
@@ -172,16 +177,20 @@ namespace Utf8Json.Resolvers
                 var m = resolverType.DefineMethod("GetFormatter", MethodAttributes.Public | MethodAttributes.Virtual);
 
                 var gpp = m.DefineGenericParameters("T")[0];
-                m.SetReturnType(typeof(IJsonFormatter<>).MakeGenericType(gpp));
+                m.SetReturnType(typeof(IJsonFormatter<>).GetCachedGenericType(gpp));
 
                 var il = m.GetILGenerator();
-                var formatterField = TypeBuilder.GetField(cacheTypeT.MakeGenericType(gpp), cacheTypeT.GetField("formatter", BindingFlags.Public | BindingFlags.Static | BindingFlags.GetField));
+                var formatterField = TypeBuilder.GetField(cacheTypeT.GetCachedGenericType(gpp), cacheTypeT.GetField("formatter", BindingFlags.Public | BindingFlags.Static | BindingFlags.GetField));
                 il.EmitLdsfld(formatterField);
                 il.Emit(OpCodes.Ret);
             }
 
+#if NET40
+            var resolverT = resolverType.CreateType();
+#else
             var resolverT = resolverType.CreateTypeInfo().AsType();
-            var instance = Activator.CreateInstance(resolverT, new object[] { formatters, resolvers });
+#endif
+            var instance = ActivatorUtils.CreateInstance(resolverT, new object[] { formatters, resolvers });
             var finfo = instance.GetType().GetField("instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
             finfo.SetValue(null, instance);
 

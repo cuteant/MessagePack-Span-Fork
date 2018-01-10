@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using CuteAnt.Reflection;
 using Utf8Json.Internal;
 using Utf8Json.Internal.Emit;
 
@@ -60,7 +61,7 @@ namespace Utf8Json.Formatters
                             // delegate void SerializeMethod(object dynamicFormatter, ref JsonWriter writer, object value, IJsonFormatterResolver formatterResolver);
 
                             il.EmitLdarg(0);
-                            il.Emit(OpCodes.Castclass, typeof(IJsonFormatter<>).MakeGenericType(t));
+                            il.Emit(OpCodes.Castclass, typeof(IJsonFormatter<>).GetCachedGenericType(t));
                             il.EmitLdarg(1);
                             il.EmitLdarg(2);
                             il.EmitUnboxOrCast(t);

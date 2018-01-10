@@ -6,7 +6,7 @@ using System.Linq;
 using Utf8Json.Formatters.Internal;
 using Utf8Json.Internal;
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 using System.Collections.Concurrent;
 #endif
 
@@ -484,7 +484,7 @@ namespace Utf8Json.Formatters
                 {
                     var keyString = reader.ReadPropertyNameSegmentRaw();
                     int key;
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
                     CollectionFormatterHelper.groupingAutomata.TryGetValue(keyString, out key);
 #else
                     CollectionFormatterHelper.groupingAutomata.TryGetValueSafe(keyString, out key);
@@ -812,7 +812,7 @@ namespace Utf8Json.Formatters
     }
 
 
-#if NETSTANDARD
+#if NETSTANDARD || DESKTOPCLR
 
     public sealed class ObservableCollectionFormatter<T> : CollectionFormatterBase<T, ObservableCollection<T>>
     {
@@ -845,6 +845,7 @@ namespace Utf8Json.Formatters
         }
     }
 
+#if !NET40
     public sealed class InterfaceReadOnlyListFormatter<T> : CollectionFormatterBase<T, ArrayBuffer<T>, IReadOnlyList<T>>
     {
         protected override void Add(ref ArrayBuffer<T> collection, int index, T value)
@@ -880,6 +881,7 @@ namespace Utf8Json.Formatters
             return intermediateCollection.ToArray();
         }
     }
+#endif
 
     public sealed class InterfaceSetFormatter<T> : CollectionFormatterBase<T, HashSet<T>, ISet<T>>
     {
