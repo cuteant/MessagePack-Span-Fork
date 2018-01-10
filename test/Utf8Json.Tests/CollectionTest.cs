@@ -41,36 +41,44 @@ namespace Utf8Json.Tests
             var a = (IList<int>)new int[] { 1, 10, 100 };
             var b = (ICollection<int>)new int[] { 1, 10, 100 };
             var c = (Enumerable.Range(1, 100).AsEnumerable());
+#if !TEST40
             var d = (IReadOnlyList<int>)new int[] { 1, 10, 100 };
             var e = (IReadOnlyCollection<int>)new int[] { 1, 10, 100 };
             var f = (ISet<int>)new HashSet<int>(new[] { 1, 10, 100 });
             var g = (ILookup<bool, int>)Enumerable.Range(1, 100).ToLookup(x => x % 2 == 0);
+#endif
 
             Convert(a).Is(a);
             Convert(b).Is(b);
             Convert(c).Is(c);
+#if !TEST40
             Convert(d).Is(d);
             Convert(e).Is(e);
             Convert(f).Is(f);
 
             var check = Utf8Json.JsonSerializer.ToJsonString(g);
             Convert(g).Is(g);
+#endif
 
             a = null;
             b = null;
             c = null;
+#if !TEST40
             d = null;
             e = null;
             f = null;
             g = null;
+#endif
 
             Convert(a).Is(a);
             Convert(b).Is(b);
             Convert(c).IsNull();
+#if !TEST40
             Convert(d).Is(d);
             Convert(e).Is(e);
             Convert(f).Is(f);
             Convert(g).Is(g);
+#endif
         }
 
         [Fact]

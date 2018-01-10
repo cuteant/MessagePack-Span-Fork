@@ -20,7 +20,9 @@ namespace Utf8Json.Tests
         public static IEnumerable<object[]> dictionaryTestData = new []
         {
             new object[]{ new Dictionary<int, int>() { { 1, 100 } }, null },
+#if !TEST40
             new object[]{ new ReadOnlyDictionary<int,int>(new Dictionary<int, int>() { { 1, 100 } }), null },
+#endif
             new object[]{ new SortedList<int, int>() { { 1, 100 } }, null },
             new object[]{ new SortedDictionary<int, int>() { { 1, 100 } }, null },
         };
@@ -37,16 +39,24 @@ namespace Utf8Json.Tests
         public void InterfaceDictionaryTest()
         {
             var a = (IDictionary<int, int>)new Dictionary<int, int>() { { 1, 100 } };
+#if !TEST40
             var b = (IReadOnlyDictionary<int, int>)new Dictionary<int, int>() { { 1, 100 } };
+#endif
             var c = (IDictionary<int, int>)null;
+#if !TEST40
             var d = (IReadOnlyDictionary<int, int>)null;
+#endif
 
             var huga = JsonSerializer.ToJsonString(a);
 
             Convert(a).IsStructuralEqual(a);
+#if !TEST40
             Convert(b).IsStructuralEqual(b);
+#endif
             Convert(c).IsStructuralEqual(c);
+#if !TEST40
             Convert(d).IsStructuralEqual(d);
+#endif
         }
 
         [Fact]

@@ -267,6 +267,7 @@ namespace Utf8Json
 
 #if NETSTANDARD || DESKTOPCLR
 
+#if !NET40
             public static System.Threading.Tasks.Task<object> DeserializeAsync(Type type, Stream stream)
             {
                 return DeserializeAsync(type, stream, defaultResolver);
@@ -276,6 +277,7 @@ namespace Utf8Json
             {
                 return GetOrAdd(type).deserializeAsync.Invoke(stream, resolver);
             }
+#endif
 
 #endif
 
@@ -292,8 +294,10 @@ namespace Utf8Json
                 public readonly DeserializeJsonReader deserialize4;
 
 #if NETSTANDARD || DESKTOPCLR
+#if !NET40
                 public readonly Func<Stream, object, IJsonFormatterResolver, System.Threading.Tasks.Task> serializeAsync;
                 public readonly Func<Stream, IJsonFormatterResolver, System.Threading.Tasks.Task<object>> deserializeAsync;
+#endif
 #endif
 
                 public CompiledMethods(Type type)
@@ -412,6 +416,7 @@ namespace Utf8Json
 
 #if NETSTANDARD || DESKTOPCLR
 
+#if !NET40
                     {
                         var dm = new DynamicMethod("SerializeAsync", typeof(System.Threading.Tasks.Task), new[] { typeof(Stream), typeof(object), typeof(IJsonFormatterResolver) }, type.Module, true);
                         var il = dm.GetILGenerator();
@@ -438,6 +443,7 @@ namespace Utf8Json
 
                         deserializeAsync = CreateDelegate<Func<Stream, IJsonFormatterResolver, System.Threading.Tasks.Task<object>>>(dm);
                     }
+#endif
 #endif
                 }
 

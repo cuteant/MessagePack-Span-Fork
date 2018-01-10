@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !TEST40
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -30,3 +31,4 @@ namespace Utf8Json.Tests
         }
     }
 }
+#endif
