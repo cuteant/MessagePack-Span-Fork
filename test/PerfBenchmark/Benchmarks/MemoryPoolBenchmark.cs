@@ -14,7 +14,7 @@ using PerfBenchmark.Types;
 namespace PerfBenchmark
 {
   [Config(typeof(CoreConfig))]
-  public class BufferManagerBenchmark
+  public class MemoryPoolBenchmark
   {
     private const int OperationsPerInvoke = 50000;
 
