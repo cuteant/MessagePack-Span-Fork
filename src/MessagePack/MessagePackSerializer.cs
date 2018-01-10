@@ -12,6 +12,7 @@ namespace MessagePack
     /// </summary>
     public static partial class MessagePackSerializer
     {
+        private const int c_zeroSize = 0;
         private const int c_defaultCopyBufferSize = 1024 * 64;
 #if !NET40
         private static readonly ArrayPool<byte> s_bufferPool = ArrayPool<byte>.Shared;
@@ -184,6 +185,8 @@ namespace MessagePack
 
         public static T Deserialize<T>(ArraySegment<byte> bytes, IFormatterResolver resolver)
         {
+            if (c_zeroSize == bytes.Count) { return default; }
+
             if (resolver == null) resolver = DefaultResolver;
             var formatter = resolver.GetFormatterWithVerify<T>();
 
@@ -219,6 +222,7 @@ namespace MessagePack
                     // optimize for MemoryStream
                     if (ms.TryGetBuffer(out ArraySegment<byte> buffer))
                     {
+                        if (c_zeroSize == buffer.Count) { return default; }
                         return formatter.Deserialize(buffer.Array, buffer.Offset, resolver, out int readSize);
                     }
                 }
@@ -228,14 +232,16 @@ namespace MessagePack
                 {
                     var buffer = InternalMemoryPool.GetBuffer();
 
-                    FillFromStream(stream, ref buffer);
+                    var inputLength = FillFromStream(stream, ref buffer);
 
+                    if (c_zeroSize == inputLength) { return default; }
                     return formatter.Deserialize(buffer, 0, resolver, out int readSize);
                 }
             }
             else
             {
-                var bytes = MessagePackBinary.ReadMessageBlockFromStreamUnsafe(stream, false, out var _);
+                var bytes = MessagePackBinary.ReadMessageBlockFromStreamUnsafe(stream, false, out var inputLength);
+                if (c_zeroSize == inputLength) { return default; }
                 return formatter.Deserialize(bytes, 0, resolver, out int readSize);
             }
         }
@@ -307,7 +313,8 @@ namespace MessagePack.Internal
         {
             if (buffer == null)
             {
-                buffer = new byte[65536];
+                const int _bufferSize = 1024 * 64;
+                buffer = new byte[_bufferSize];
             }
             return buffer;
         }

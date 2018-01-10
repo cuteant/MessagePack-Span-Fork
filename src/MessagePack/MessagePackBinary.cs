@@ -2296,7 +2296,8 @@ namespace MessagePack
             {
                 if (buffer == null)
                 {
-                    buffer = new byte[65536];
+                    const int _bufferSize = 1024 * 64;
+                    buffer = new byte[_bufferSize];
                 }
                 return buffer;
             }
