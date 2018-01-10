@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\version.pack.props" />
+  <Import Project="..\nuget.pack.props" />
+  
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net471;net451;net40</TargetFrameworks>
+    <RootNamespace>Utf8Json.ImmutableCollection</RootNamespace>
+    <AssemblyName>Utf8Json.ImmutableCollection</AssemblyName>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);1701;1702;1705</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet">
+    <PackageId>Utf8Json.ImmutableCollection.Unofficial</PackageId>
+    <Title>Utf8Json Extension Resolver for ImmutableCollection (Unofficial).</Title>
+    <Description>This package includes a mostly complete port of the Utf8Json.ImmutableCollection(for more info see: https://github.com/neuecc/Utf8Json) assembly to support .NET 4.0 and newer.</Description>
+    <PackageTags>Json, Serialization, Formatter, Serializer, Unity, Xamarin</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net40' ">
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutablePackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
+    <PackageReference Include="Net40.Collections.Immutable" Version="$(SystemCollectionsImmutableNet40PackageVersion)" />
+  </ItemGroup>
+
+  <ImportGroup Condition=" '$(TargetFramework)' == 'net40' ">
+    <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems" Label="Shared" />
+  </ImportGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Utf8Json\Utf8Json.csproj" />
+  </ItemGroup>
+
+</Project>

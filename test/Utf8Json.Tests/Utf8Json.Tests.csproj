@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp2.0;net452</TargetFrameworks>
+    <RootNamespace>Utf8Json.Tests</RootNamespace>
+    <AssemblyName>Utf8Json.Tests</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkPackageVersion)" />
+    <PackageReference Include="xunit" Version="$(xUnitPackageVersion)" />
+    <PackageReference Include="xunit.analyzers" Version="$(xUnitAnalyzersPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitRunnerVsPackageVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Utf8Json.ImmutableCollection\Utf8Json.ImmutableCollection.csproj" />
+    <ProjectReference Include="..\..\src\Utf8Json\Utf8Json.csproj" />
+  </ItemGroup>
+
+</Project>

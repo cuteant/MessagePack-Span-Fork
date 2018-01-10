@@ -1,43 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\version.pack.props" />
-  <Import Project="..\nuget.pack.props" />
+  <Import Project="..\version.json.props" />
+  <Import Project="..\nuget.json.props" />
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net471;net451;net40</TargetFrameworks>
-    <RootNamespace>MessagePack</RootNamespace>
-    <AssemblyName>MessagePack</AssemblyName>
+    <RootNamespace>Utf8Json</RootNamespace>
+    <AssemblyName>Utf8Json</AssemblyName>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-    <DefineConstants>$(DefineConstants);ENABLE_UNSAFE_MSGPACK;</DefineConstants>
-    <NoWarn>$(NoWarn);1701;1702;1705</NoWarn>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <PackageId>MessagePack.Unofficial</PackageId>
-    <Title>MessagePack for C# (Unofficial).</Title>
-    <Description>This package includes a mostly complete port of the MessagePack(for more info see: https://github.com/neuecc/MessagePack-CSharp/) assembly to support .NET 4.0 and newer.</Description>
-    <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer, Unity, Xamarin</PackageTags>
+    <PackageId>Utf8Json.Unofficial</PackageId>
+    <Title>Utf8Json (Unofficial).</Title>
+    <Description>This package includes a mostly complete port of the Utf8Json(for more info see: https://github.com/neuecc/Utf8Json) assembly to support .NET 4.0 and newer.</Description>
+    <PackageTags>Json, Serialization, Formatter, Serializer, Unity, Xamarin</PackageTags>
   </PropertyGroup>
-
-  <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CuteAnt.Core" Version="$(CuteAntCorePackageVersion)" />
     <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'net40' ">
-    <PackageReference Include="System.Buffers" Version="$(SystemBuffersPackageVersion)" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
-    <PackageReference Include="lz4net" Version="$(Lz4netPackageVersion)" />
-  </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="lz4net.netcore.signed" Version="$(Lz4netNETCoreSignedPackageVersion)" />
     <PackageReference Include="System.Reflection.Emit" Version="$(SystemReflectionEmitPackageVersion)" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="$(SystemReflectionEmitLightweightPackageVersion)" />
   </ItemGroup>
@@ -54,29 +41,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MessagePack.Abstractions\MessagePack.Abstractions.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Formatters\ForceSizePrimitiveFormatter.tt">
-      <LastGenOutput>ForceSizePrimitiveFormatter.cs</LastGenOutput>
-      <Generator>TextTemplatingFileGenerator</Generator>
-    </None>
     <None Update="Formatters\PrimitiveFormatter.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PrimitiveFormatter.cs</LastGenOutput>
+    </None>
+    <None Update="Formatters\ValueTupleFormatter.tt">
+      <LastGenOutput>ValueTupleFormatter.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
     </None>
     <None Update="Formatters\TupleFormatter.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TupleFormatter.cs</LastGenOutput>
     </None>
-    <None Update="Formatters\ValueTupleFormatter.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ValueTupleFormatter.cs</LastGenOutput>
-    </None>
     <None Update="Internal\UnsafeMemory.tt">
-      <LastGenOutput>UnsafeMemory.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>UnsafeMemory.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
@@ -85,11 +64,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Formatters\ForceSizePrimitiveFormatter.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ForceSizePrimitiveFormatter.tt</DependentUpon>
-    </Compile>
     <Compile Update="Formatters\PrimitiveFormatter.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -106,9 +80,10 @@
       <DependentUpon>ValueTupleFormatter.tt</DependentUpon>
     </Compile>
     <Compile Update="Internal\UnsafeMemory.cs">
-      <DependentUpon>UnsafeMemory.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
+      <DependentUpon>UnsafeMemory.tt</DependentUpon>
     </Compile>
   </ItemGroup>
+
 </Project>

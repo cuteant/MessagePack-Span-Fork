@@ -1,12 +1,10 @@
-﻿#if !UNITY_WSA
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace MessagePack.Internal
+namespace Utf8Json.Internal
 {
     internal static class ReflectionExtensions
     {
@@ -22,48 +20,29 @@ namespace MessagePack.Internal
 
         public static bool IsAnonymous(this System.Reflection.TypeInfo type)
         {
-            return type.AsType().GetCustomAttributeX<CompilerGeneratedAttribute>() != null
-                && type.IsGenericType && type.Name.Contains("AnonymousType")
-                && (type.Name.StartsWith("<>", StringComparison.Ordinal) || type.Name.StartsWith("VB$", StringComparison.Ordinal))
+            return type.GetCustomAttribute<CompilerGeneratedAttribute>() != null
+                && type.Name.Contains("AnonymousType")
+                && (type.Name.StartsWith("<>") || type.Name.StartsWith("VB$"))
                 && (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
         }
 
-        public static bool IsIndexer(this System.Reflection.PropertyInfo propertyInfo)
-        {
-            return propertyInfo.GetIndexParameters().Length > 0;
-        }
-
-#if NETSTANDARD || DESKTOPCLR
+#if NETSTANDARD
 
         public static bool IsConstructedGenericType(this System.Reflection.TypeInfo type)
         {
-#if NET40
-            return type.AsType().IsConstructedGenericType();
-#else
             return type.AsType().IsConstructedGenericType;
-#endif
         }
 
         public static MethodInfo GetGetMethod(this PropertyInfo propInfo)
         {
-#if NET40
-            return propInfo.GetGetMethod(true);
-#else
             return propInfo.GetMethod;
-#endif
         }
 
         public static MethodInfo GetSetMethod(this PropertyInfo propInfo)
         {
-#if NET40
-            return propInfo.GetSetMethod(true);
-#else
             return propInfo.SetMethod;
-#endif
         }
 
 #endif
     }
 }
-
-#endif

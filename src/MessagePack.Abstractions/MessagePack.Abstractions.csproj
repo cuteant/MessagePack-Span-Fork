@@ -6,7 +6,7 @@
     <TargetFrameworks>netstandard2.0;net471;net451;net40</TargetFrameworks>
     <RootNamespace>MessagePack</RootNamespace>
     <AssemblyName>MessagePack.Abstractions</AssemblyName>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   
   <PropertyGroup Label="NuGet">
