@@ -1,32 +1,29 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using MessagePack;
-using MessagePack.Formatters;
-using MessagePack.Resolvers;
+using Utf8Json;
+using Utf8Json.Resolvers;
 using Microsoft.Extensions.Logging;
 
 namespace CuteAnt.Extensions.Serialization
 {
   /// <summary><see cref="MessageFormatter"/> class to handle wire.</summary>
-  public class MessagePackMessageFormatter : MessageFormatter
+  public class Utf8JsonMessageFormatter : MessageFormatter
   {
-    protected static readonly ILogger s_logger = TraceLogger.GetLogger(typeof(MessagePackMessageFormatter));
+    protected static readonly ILogger s_logger = TraceLogger.GetLogger(typeof(Utf8JsonMessageFormatter));
 
     /// <summary>The default singlegton instance</summary>
-    public static readonly MessagePackMessageFormatter DefaultInstance = new MessagePackMessageFormatter();
+    public static readonly Utf8JsonMessageFormatter DefaultInstance = new Utf8JsonMessageFormatter();
 
-    private static IFormatterResolver s_defaultResolver = StandardResolver.Instance;
-    protected static IFormatterResolver DefaultResolver => s_defaultResolver;
-    private static IFormatterResolver s_typelessResolver = TypelessContractlessStandardResolver.Instance;
-    protected static IFormatterResolver TypelessResolver => s_typelessResolver;
+    private static IJsonFormatterResolver s_defaultResolver = StandardResolver.Default;
+    protected static IJsonFormatterResolver DefaultResolver => s_defaultResolver;
 
     /// <summary>Constructor</summary>
-    public MessagePackMessageFormatter() { }
+    public Utf8JsonMessageFormatter() { }
 
     #region -- Register --
 
-    public static void Register(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
+    public static void Register(IJsonFormatter[] formatters, IJsonFormatterResolver[] resolvers)
     {
       if ((null == formatters || formatters.Length == 0) && (null == resolvers || resolvers.Length == 0)) { return; }
 
@@ -34,18 +31,7 @@ namespace CuteAnt.Extensions.Serialization
       if (resolvers != null && resolvers.Length > 0) { CompositeResolver.Register(resolvers); }
 
       s_defaultResolver = CompositeResolver.Instance;
-      MessagePackSerializer.SetDefaultResolver(s_defaultResolver);
-    }
-
-    public static void RegisterTypeless(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
-    {
-      if ((null == formatters || formatters.Length == 0) && (null == resolvers || resolvers.Length == 0)) { return; }
-
-      if (formatters != null && formatters.Length > 0) { TypelessCompositeResolver.Register(formatters); }
-      if (resolvers != null && resolvers.Length > 0) { TypelessCompositeResolver.Register(resolvers); }
-
-      s_typelessResolver = TypelessCompositeResolver.Instance;
-      MessagePackSerializer.Typeless.RegisterDefaultResolver(s_typelessResolver);
+      JsonSerializer.SetDefaultResolver(s_defaultResolver);
     }
 
     #endregion
@@ -64,8 +50,9 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (source == null) { return null; }
 
-      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(source, s_typelessResolver);
-      return MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
+      var type = source.GetType();
+      var serializedObject = JsonSerializer.NonGeneric.SerializeUnsafe(type, source, s_defaultResolver);
+      return JsonSerializer.NonGeneric.Deserialize(type, serializedObject.Array, serializedObject.Offset, s_defaultResolver);
     }
 
     /// <inheritdoc />
@@ -73,8 +60,8 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (source == null) { return default; }
 
-      var serializedObject = MessagePackSerializer.SerializeUnsafe<T>(source, s_defaultResolver);
-      return MessagePackSerializer.Deserialize<T>(serializedObject, s_defaultResolver);
+      var serializedObject = JsonSerializer.SerializeUnsafe<T>(source, s_defaultResolver);
+      return JsonSerializer.Deserialize<T>(serializedObject.Array, serializedObject.Offset, s_defaultResolver);
     }
 
     #endregion
@@ -83,14 +70,12 @@ namespace CuteAnt.Extensions.Serialization
 
     public override byte[] Serialize(object item)
     {
-      if (null == item) { return EmptyArray<byte>.Instance; }
-      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+      return JsonSerializer.NonGeneric.Serialize(item, s_defaultResolver);
     }
 
     public override byte[] Serialize(object item, int initialBufferSize)
     {
-      if (null == item) { return EmptyArray<byte>.Instance; }
-      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+      return JsonSerializer.NonGeneric.Serialize(item, s_defaultResolver);
     }
 
     #endregion
@@ -104,7 +89,7 @@ namespace CuteAnt.Extensions.Serialization
 
       try
       {
-        return (T)MessagePackSerializer.Deserialize<object>(readStream, s_typelessResolver);
+        return JsonSerializer.Deserialize<T>(readStream, s_defaultResolver);
       }
       catch (Exception ex)
       {
@@ -123,7 +108,7 @@ namespace CuteAnt.Extensions.Serialization
 
       try
       {
-        return MessagePackSerializer.Deserialize<object>(readStream, s_typelessResolver);
+        return JsonSerializer.NonGeneric.Deserialize(type, readStream, s_defaultResolver);
       }
       catch (Exception ex)
       {
@@ -143,7 +128,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      MessagePackSerializer.Serialize<object>(writeStream, value, s_typelessResolver);
+      JsonSerializer.Serialize(writeStream, value, s_defaultResolver);
     }
 
     /// <inheritdoc />
@@ -153,7 +138,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      MessagePackSerializer.Serialize(writeStream, value, s_typelessResolver);
+      JsonSerializer.NonGeneric.Serialize(value.GetType(), writeStream, value, s_defaultResolver);
     }
 
     /// <inheritdoc />
@@ -163,7 +148,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      MessagePackSerializer.Serialize(writeStream, value, s_typelessResolver);
+      JsonSerializer.NonGeneric.Serialize(type ?? value.GetType(), writeStream, value, s_defaultResolver);
     }
 
     #endregion

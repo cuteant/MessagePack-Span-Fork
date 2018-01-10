@@ -7,7 +7,6 @@
     <RootNamespace>MessagePack.ImmutableCollection</RootNamespace>
     <AssemblyName>MessagePack.ImmutableCollection</AssemblyName>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <NoWarn>$(NoWarn);1701;1702;1705</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">

@@ -9,7 +9,6 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
     <DefineConstants>$(DefineConstants);ENABLE_UNSAFE_MSGPACK;</DefineConstants>
-    <NoWarn>$(NoWarn);1701;1702;1705</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">

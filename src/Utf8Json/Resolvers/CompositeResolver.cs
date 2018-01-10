@@ -190,7 +190,7 @@ namespace Utf8Json.Resolvers
 #else
             var resolverT = resolverType.CreateTypeInfo().AsType();
 #endif
-            var instance = ActivatorUtils.CreateInstance(resolverT, new object[] { formatters, resolvers });
+            var instance = Activator.CreateInstance(resolverT, new object[] { formatters, resolvers });
             var finfo = instance.GetType().GetField("instance", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
             finfo.SetValue(null, instance);
 

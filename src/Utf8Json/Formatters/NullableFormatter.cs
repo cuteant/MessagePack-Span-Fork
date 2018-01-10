@@ -46,7 +46,7 @@ namespace Utf8Json.Formatters
         {
             try
             {
-                underlyingFormatter = (IJsonFormatter<T>)ActivatorUtils.CreateInstance(formatterType, formatterArguments);
+                underlyingFormatter = (IJsonFormatter<T>)ActivatorUtil.CreateInstance(formatterType, formatterArguments);
             }
             catch (Exception ex)
             {

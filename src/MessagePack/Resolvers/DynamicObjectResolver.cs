@@ -424,7 +424,7 @@ namespace MessagePack.Internal
                 var attr = item.GetMessagePackFormatterAttribtue();
                 if (attr != null)
                 {
-                    var formatter = ActivatorUtils.CreateInstance(attr.FormatterType, attr.Arguments);
+                    var formatter = ActivatorUtil.CreateInstance(attr.FormatterType, attr.Arguments);
                     serializeCustomFormatters.Add(formatter);
                 }
                 else
@@ -437,7 +437,7 @@ namespace MessagePack.Internal
                 var attr = item.GetMessagePackFormatterAttribtue();
                 if (attr != null)
                 {
-                    var formatter = ActivatorUtils.CreateInstance(attr.FormatterType, attr.Arguments);
+                    var formatter = ActivatorUtil.CreateInstance(attr.FormatterType, attr.Arguments);
                     deserializeCustomFormatters.Add(formatter);
                 }
                 else
@@ -1253,7 +1253,7 @@ typeof(int), typeof(int) });
 #endif
             public static readonly MethodInfo TypeGetField = ExpressionUtility.GetMethodInfo((Type t) => t.GetTypeInfo().GetField(default(string), default(BindingFlags)));
             public static readonly MethodInfo GetCustomAttributeMessagePackFormatterAttribute = ExpressionUtility.GetMethodInfo(() => AttributeX.GetCustomAttributeX<MessagePackFormatterAttribute>(default(MemberInfo), default(bool)));
-            public static readonly MethodInfo ActivatorCreateInstance = ExpressionUtility.GetMethodInfo(() => Activator.CreateInstance(default(Type), default(object[]))); // 注意：这儿不能使用 ActivatorUtils.CreateInstance
+            public static readonly MethodInfo ActivatorCreateInstance = ExpressionUtility.GetMethodInfo(() => Activator.CreateInstance(default(Type), default(object[]))); // 注意：这儿不能使用 Activator.CreateInstance
 
             internal static class MessagePackFormatterAttr
             {

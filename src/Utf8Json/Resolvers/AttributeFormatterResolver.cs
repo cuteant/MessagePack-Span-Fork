@@ -45,11 +45,11 @@ namespace Utf8Json.Resolvers
                     if (attr.FormatterType.IsGenericType && !attr.FormatterType.GetTypeInfo().IsConstructedGenericType())
                     {
                         var t = attr.FormatterType.GetCachedGenericType(typeof(T)); // use T self
-                        formatter = (IJsonFormatter<T>)ActivatorUtils.CreateInstance(t, attr.Arguments);
+                        formatter = (IJsonFormatter<T>)ActivatorUtil.CreateInstance(t, attr.Arguments);
                     }
                     else
                     {
-                        formatter = (IJsonFormatter<T>)ActivatorUtils.CreateInstance(attr.FormatterType, attr.Arguments);
+                        formatter = (IJsonFormatter<T>)ActivatorUtil.CreateInstance(attr.FormatterType, attr.Arguments);
                     }
                 }
                 catch (Exception ex)

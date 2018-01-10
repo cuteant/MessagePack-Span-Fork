@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\version.pack.props" />
-  <Import Project="..\nuget.pack.props" />
+  <Import Project="..\version.json.props" />
+  <Import Project="..\nuget.json.props" />
   
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net471;net451;net40</TargetFrameworks>
     <RootNamespace>Utf8Json.ImmutableCollection</RootNamespace>
     <AssemblyName>Utf8Json.ImmutableCollection</AssemblyName>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <NoWarn>$(NoWarn);1701;1702;1705</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">

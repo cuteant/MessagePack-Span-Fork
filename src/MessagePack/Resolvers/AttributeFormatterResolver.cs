@@ -45,7 +45,7 @@ namespace MessagePack.Resolvers
                 }
                 else
                 {
-                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(attr.FormatterType, attr.Arguments);
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtil.CreateInstance(attr.FormatterType, attr.Arguments);
                 }
             }
         }

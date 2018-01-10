@@ -534,7 +534,7 @@ namespace Utf8Json.Resolvers.Internal
                 {
                     return null;
                 }
-                return (IJsonFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
+                return (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
             }
 
             Type elementType;
@@ -562,7 +562,7 @@ namespace Utf8Json.Resolvers.Internal
                 {
                     return null;
                 }
-                return (IJsonFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
+                return (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
             }
 
             return DynamicObjectTypeBuilder.BuildAnonymousFormatter(typeof(T), nameMutator, excludeNull, allowPrivate);
@@ -672,7 +672,7 @@ namespace Utf8Json.Resolvers.Internal
                 var attr = item.GetCustomAttribute<JsonFormatterAttribute>(true);
                 if (attr != null)
                 {
-                    var formatter = ActivatorUtils.CreateInstance(attr.FormatterType, attr.Arguments);
+                    var formatter = ActivatorUtil.CreateInstance(attr.FormatterType, attr.Arguments);
                     serializeCustomFormatters.Add(formatter);
                 }
                 else
@@ -685,7 +685,7 @@ namespace Utf8Json.Resolvers.Internal
                 var attr = item.GetCustomAttribute<JsonFormatterAttribute>(true);
                 if (attr != null)
                 {
-                    var formatter = ActivatorUtils.CreateInstance(attr.FormatterType, attr.Arguments);
+                    var formatter = ActivatorUtil.CreateInstance(attr.FormatterType, attr.Arguments);
                     deserializeCustomFormatters.Add(formatter);
                 }
                 else
@@ -732,7 +732,7 @@ namespace Utf8Json.Resolvers.Internal
             object serializeDelegate = serialize.CreateDelegate(typeof(AnonymousJsonSerializeAction<>).GetCachedGenericType(type));
             object deserializeDelegate = deserialize.CreateDelegate(typeof(AnonymousJsonDeserializeFunc<>).GetCachedGenericType(type));
 
-            return ActivatorUtils.CreateInstance(typeof(DynamicMethodAnonymousFormatter<>).GetCachedGenericType(type),
+            return Activator.CreateInstance(typeof(DynamicMethodAnonymousFormatter<>).GetCachedGenericType(type),
                 new[] { stringByteKeysField.ToArray(), serializeCustomFormatters.ToArray(), deserializeCustomFormatters.ToArray(), serializeDelegate, deserializeDelegate });
         }
 
@@ -1420,7 +1420,7 @@ namespace Utf8Json.Resolvers.Internal
             public static readonly MethodInfo GetCustomAttributeJsonFormatterAttribute = ExpressionUtility.GetMethodInfo(() => CustomAttributeExtensions.GetCustomAttribute<JsonFormatterAttribute>(default(MemberInfo), default(bool)));
 #endif
 
-            public static readonly MethodInfo ActivatorCreateInstance = ExpressionUtility.GetMethodInfo(() => Activator.CreateInstance(default(Type), default(object[]))); // 注意：这儿不能使用 ActivatorUtils.CreateInstance
+            public static readonly MethodInfo ActivatorCreateInstance = ExpressionUtility.GetMethodInfo(() => Activator.CreateInstance(default(Type), default(object[]))); // 注意：这儿不能使用 Activator.CreateInstance
             public static readonly MethodInfo GetUninitializedObject = ExpressionUtility.GetMethodInfo(() => System.Runtime.Serialization.FormatterServices.GetUninitializedObject(default(Type)));
 
             public static MethodInfo Serialize(Type type)

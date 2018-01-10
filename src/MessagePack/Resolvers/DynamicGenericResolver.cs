@@ -314,7 +314,7 @@ namespace MessagePack.Internal
 
         static object CreateInstance(Type genericType, Type[] genericTypeArguments, params object[] arguments)
         {
-            return ActivatorUtils.CreateInstance(genericType.GetCachedGenericType(genericTypeArguments), arguments);
+            return ActivatorUtil.CreateInstance(genericType.GetCachedGenericType(genericTypeArguments), arguments);
         }
     }
 }

@@ -113,7 +113,9 @@ namespace Utf8Json.Tests
             var xss = xs.Select(x => x);
 
             JsonSerializer.NonGeneric.ToJsonString(xss, StandardResolver.Default).Is("[100,200]");
+#if !DESKTOPCLR
             JsonSerializer.NonGeneric.ToJsonString(xss, StandardResolver.AllowPrivate).Is("[100,200]");
+#endif
 
             JsonSerializer.NonGeneric.ToJsonString(new Wrap { Seq = xss }).Is("{\"Seq\":[100,200]}");
         }

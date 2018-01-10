@@ -2,19 +2,18 @@
   <Import Project="..\version.props" />
   <Import Project="..\nuget.props" />
   <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Logging.Sources\CuteAnt.Extensions.Logging.Sources.projitems" Label="Shared" />
-  <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems" Label="Shared" />
   
   <PropertyGroup>
     <TargetFrameworks>net471;net451;net40;netstandard2.0</TargetFrameworks>
     <RootNamespace>CuteAnt.Extensions.Serialization</RootNamespace>
-    <AssemblyName>CuteAnt.Extensions.Serialization.MessagePack</AssemblyName>
+    <AssemblyName>CuteAnt.Extensions.Serialization.Utf8Json</AssemblyName>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
-    <PackageId>CuteAnt.Extensions.Serialization.MessagePack</PackageId>
-    <Title>CuteAnt.Extensions.Serialization.MessagePack</Title>
-    <Description>CuteAnt.Extensions.Serialization.MessagePack</Description>
+    <PackageId>CuteAnt.Extensions.Serialization.Utf8Json</PackageId>
+    <Title>CuteAnt.Extensions.Serialization.Utf8Json</Title>
+    <Description>CuteAnt.Extensions.Serialization.Utf8Json</Description>
     <PackageTags>Serializer</PackageTags>
   </PropertyGroup>
 
@@ -24,8 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CuteAnt.Extensions.Serialization.Core\CuteAnt.Extensions.Serialization.Core.csproj" />
-    <ProjectReference Include="..\MessagePack.LZ4\MessagePack.LZ4.csproj" />
-    <ProjectReference Include="..\MessagePack\MessagePack.csproj" />
+    <ProjectReference Include="..\Utf8Json\Utf8Json.csproj" />
   </ItemGroup>
 
 </Project>

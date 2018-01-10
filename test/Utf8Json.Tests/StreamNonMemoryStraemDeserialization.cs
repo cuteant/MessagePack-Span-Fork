@@ -28,6 +28,7 @@ namespace Utf8Json.Tests
                 ms.Position = 0;
                 ms.SetLength(1);
                 JsonSerializer.Serialize(ms, 1);
+                ms.Position = 0;
                 var d2 = JsonSerializer.Deserialize<int>(ms);
                 d2.Is(1);
             }
