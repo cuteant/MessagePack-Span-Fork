@@ -116,10 +116,10 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var obj = _formatter.ReadFromStream(typeof(SerializerPocoSerializable), ms);
       Assert.Null(obj);
 
-      var emptyBytes = _formatter.SerializeToBytes(default(SerializerPocoSerializable));
+      var emptyBytes = _formatter.Serialize(default(SerializerPocoSerializable));
       Assert.Empty(emptyBytes);
 
-      var emptySegment = _formatter.SerializeToByteArraySegment(default(SerializerPocoSerializable));
+      var emptySegment = _formatter.WriteToMemoryPool(default(SerializerPocoSerializable));
       Assert.True(0 == emptySegment.Count);
       Assert.Empty(emptySegment.Array);
     }
@@ -139,10 +139,10 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var obj = await _formatter.ReadFromStreamAsync(typeof(SerializerPocoSerializable), ms, null);
       Assert.Null(obj);
 
-      var emptyBytes = await _formatter.SerializeToBytesAsync(default(SerializerPocoSerializable));
+      var emptyBytes = await _formatter.SerializeAsync(default(SerializerPocoSerializable));
       Assert.Empty(emptyBytes);
 
-      var emptySegment = await _formatter.SerializeToByteArraySegmentAsync(default(SerializerPocoSerializable));
+      var emptySegment = await _formatter.WriteToMemoryPoolAsync(default(SerializerPocoSerializable));
       Assert.True(0 == emptySegment.Count);
       Assert.Empty(emptySegment.Array);
     }
@@ -152,8 +152,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public void SerializeToBytesTest()
     {
       var poco = SerializerPocoSerializable.Create();
-      var serializedObject = _formatter.SerializeToBytes(poco);
-      var newPoco = _formatter.DeserializeFromBytes<SerializerPocoSerializable>(serializedObject);
+      var serializedObject = _formatter.Serialize(poco);
+      var newPoco = _formatter.Deserialize<SerializerPocoSerializable>(serializedObject);
       Helper.ComparePoco(poco, newPoco);
     }
 
@@ -161,8 +161,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public async Task SerializeToBytesAsyncTest()
     {
       var poco = SerializerPocoSerializable.Create();
-      var serializedObject = await _formatter.SerializeToBytesAsync(poco);
-      var newPoco = await _formatter.DeserializeFromBytesAsync<SerializerPocoSerializable>(serializedObject);
+      var serializedObject = await _formatter.SerializeAsync(poco);
+      var newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(serializedObject);
       Helper.ComparePoco(poco, newPoco);
     }
 
@@ -170,8 +170,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public void SerializeToByteArraySegmentTest()
     {
       var poco = SerializerPocoSerializable.Create();
-      var serializedObject = _formatter.SerializeToByteArraySegment(poco);
-      var newPoco = _formatter.DeserializeFromBytes<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count);
+      var serializedObject = _formatter.WriteToMemoryPool(poco);
+      var newPoco = _formatter.Deserialize<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count);
       Helper.ComparePoco(poco, newPoco);
       BufferManager.Shared.Return(serializedObject.Array);
     }
@@ -180,8 +180,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public async Task SerializeToByteArraySegmentAsyncTest()
     {
       var poco = SerializerPocoSerializable.Create();
-      var serializedObject = await _formatter.SerializeToByteArraySegmentAsync(poco);
-      var newPoco = await _formatter.DeserializeFromBytesAsync<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count);
+      var serializedObject = await _formatter.WriteToMemoryPoolAsync(poco);
+      var newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count);
       Helper.ComparePoco(poco, newPoco);
       BufferManager.Shared.Return(serializedObject.Array);
     }

@@ -41,6 +41,9 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns>The copy</returns>
     T DeepCopy<T>(T source);
 
+    byte[] Serialize(object item);
+    byte[] Serialize(object item, int initialBufferSize);
+
     #region -- Read --
 
     /// <summary>Returns an object of the given <paramref name="type"/> from the given <paramref name="readStream"/></summary>

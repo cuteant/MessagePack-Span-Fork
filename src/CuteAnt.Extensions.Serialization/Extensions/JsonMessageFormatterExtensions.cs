@@ -19,7 +19,7 @@ namespace CuteAnt.Extensions.Serialization
     internal const int c_initialBufferSize = 1024 * 64;
     private const int c_zeroSize = 0;
 
-    #region -- SerializeToBytes --
+    #region -- Serialize --
 
     /// <summary>Serializes the specified item.</summary>
     /// <param name="formatter">The formatter.</param>
@@ -27,10 +27,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns></returns>
-    public static byte[] SerializeToBytes(this IJsonMessageFormatter formatter, object item,
+    public static byte[] Serialize(this IJsonMessageFormatter formatter, object item,
       Encoding effectiveEncoding, int initialBufferSize = c_initialBufferSize)
     {
-      return SerializeToBytes(formatter, item, null, effectiveEncoding, initialBufferSize);
+      return Serialize(formatter, item, null, effectiveEncoding, initialBufferSize);
     }
 
     /// <summary>Serializes the specified item.</summary>
@@ -40,7 +40,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns></returns>
-    public static byte[] SerializeToBytes(this IJsonMessageFormatter formatter, object item,
+    public static byte[] Serialize(this IJsonMessageFormatter formatter, object item,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null, int initialBufferSize = c_initialBufferSize)
     {
 //#if NET40
@@ -69,7 +69,7 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
-    #region -- SerializeToByteArraySegment --
+    #region -- WriteToMemoryPool --
 
     /// <summary>Serializes the specified item.</summary>
     /// <param name="formatter">The formatter.</param>
@@ -77,10 +77,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns></returns>
-    public static ArraySegment<byte> SerializeToByteArraySegment(this IJsonMessageFormatter formatter, object item,
+    public static ArraySegment<byte> WriteToMemoryPool(this IJsonMessageFormatter formatter, object item,
       Encoding effectiveEncoding, int initialBufferSize = c_initialBufferSize)
     {
-      return SerializeToByteArraySegment(formatter, item, null, effectiveEncoding, initialBufferSize);
+      return WriteToMemoryPool(formatter, item, null, effectiveEncoding, initialBufferSize);
     }
 
     /// <summary>Serializes the specified item.</summary>
@@ -90,7 +90,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns></returns>
-    public static ArraySegment<byte> SerializeToByteArraySegment(this IJsonMessageFormatter formatter, object item,
+    public static ArraySegment<byte> WriteToMemoryPool(this IJsonMessageFormatter formatter, object item,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null, int initialBufferSize = c_initialBufferSize)
     {
 //#if NET40
@@ -121,7 +121,7 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
-    #region -- SerializeToBytesAsync --
+    #region -- SerializeAsync --
 
     /// <summary>Serializes the asynchronous.</summary>
     /// <param name="formatter">The formatter.</param>
@@ -129,7 +129,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns></returns>
-    public static Task<byte[]> SerializeToBytesAsync(this IJsonMessageFormatter formatter, object item,
+    public static Task<byte[]> SerializeAsync(this IJsonMessageFormatter formatter, object item,
       Encoding effectiveEncoding, int initialBufferSize = c_initialBufferSize)
     {
       return
@@ -138,7 +138,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(SerializeToBytes(formatter, item, null, effectiveEncoding, initialBufferSize));
+        .FromResult(Serialize(formatter, item, null, effectiveEncoding, initialBufferSize));
       //#if NET40
       //      return TaskEx.FromResult(SerializeToBytes(formatter, item, null, effectiveEncoding, initialBufferSize));
       //#else
@@ -153,7 +153,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns></returns>
-    public static Task<byte[]> SerializeToBytesAsync(this IJsonMessageFormatter formatter, object item,
+    public static Task<byte[]> SerializeAsync(this IJsonMessageFormatter formatter, object item,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null, int initialBufferSize = c_initialBufferSize)
     {
       return
@@ -162,7 +162,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(SerializeToBytes(formatter, item, serializerSettings, effectiveEncoding, initialBufferSize));
+        .FromResult(Serialize(formatter, item, serializerSettings, effectiveEncoding, initialBufferSize));
       //#if NET40
       //      await TaskConstants.Completed;
       //      return SerializeToBytes(formatter, item, serializerSettings, effectiveEncoding, initialBufferSize);
@@ -183,7 +183,7 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
-    #region -- SerializeToByteArraySegmentAsync --
+    #region -- WriteToMemoryPoolAsync --
 
     /// <summary>Serializes the asynchronous.</summary>
     /// <param name="formatter">The formatter.</param>
@@ -191,7 +191,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns></returns>
-    public static Task<ArraySegment<byte>> SerializeToByteArraySegmentAsync(this IJsonMessageFormatter formatter, object item,
+    public static Task<ArraySegment<byte>> WriteToMemoryPoolAsync(this IJsonMessageFormatter formatter, object item,
       Encoding effectiveEncoding, int initialBufferSize = c_initialBufferSize)
     {
       return
@@ -200,7 +200,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(SerializeToByteArraySegment(formatter, item, null, effectiveEncoding, initialBufferSize));
+        .FromResult(WriteToMemoryPool(formatter, item, null, effectiveEncoding, initialBufferSize));
       //#if NET40
       //      return TaskEx.FromResult(SerializeToByteArraySegment(formatter, item, null, effectiveEncoding, initialBufferSize));
       //#else
@@ -215,7 +215,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns></returns>
-    public static Task<ArraySegment<byte>> SerializeToByteArraySegmentAsync(this IJsonMessageFormatter formatter, object item,
+    public static Task<ArraySegment<byte>> WriteToMemoryPoolAsync(this IJsonMessageFormatter formatter, object item,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null, int initialBufferSize = c_initialBufferSize)
     {
       return
@@ -224,7 +224,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(SerializeToByteArraySegment(formatter, item, serializerSettings, effectiveEncoding, initialBufferSize));
+        .FromResult(WriteToMemoryPool(formatter, item, serializerSettings, effectiveEncoding, initialBufferSize));
       //#if NET40
       //      await TaskConstants.Completed;
       //      return SerializeToByteArraySegment(formatter, item, serializerSettings, effectiveEncoding, initialBufferSize);
@@ -255,10 +255,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializedObject">The serialized object.</param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static object DeserializeFromBytes(this IJsonMessageFormatter formatter, Type type,
+    public static object Deserialize(this IJsonMessageFormatter formatter, Type type,
       byte[] serializedObject, Encoding effectiveEncoding)
     {
-      return DeserializeFromBytes(formatter, type, serializedObject, null, effectiveEncoding);
+      return Deserialize(formatter, type, serializedObject, null, effectiveEncoding);
     }
 
     /// <summary>Deserializes the specified serialized object.</summary>
@@ -268,7 +268,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializerSettings">The <see cref="JsonSerializerSettings"/> used to configure the <see cref="JsonSerializer"/>.</param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static object DeserializeFromBytes(this IJsonMessageFormatter formatter, Type type, byte[] serializedObject,
+    public static object Deserialize(this IJsonMessageFormatter formatter, Type type, byte[] serializedObject,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null)
     {
       if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
@@ -287,10 +287,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="count"></param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static object DeserializeFromBytes(this IJsonMessageFormatter formatter, Type type, byte[] serializedObject,
+    public static object Deserialize(this IJsonMessageFormatter formatter, Type type, byte[] serializedObject,
       int offset, int count, Encoding effectiveEncoding)
     {
-      return DeserializeFromBytes(formatter, type, serializedObject, offset, count, null, effectiveEncoding);
+      return Deserialize(formatter, type, serializedObject, offset, count, null, effectiveEncoding);
     }
 
     /// <summary>Deserializes the specified serialized object.</summary>
@@ -302,7 +302,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializerSettings">The <see cref="JsonSerializerSettings"/> used to configure the <see cref="JsonSerializer"/>.</param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static object DeserializeFromBytes(this IJsonMessageFormatter formatter, Type type, byte[] serializedObject,
+    public static object Deserialize(this IJsonMessageFormatter formatter, Type type, byte[] serializedObject,
       int offset, int count, JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null)
     {
       if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
@@ -319,7 +319,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializedObject">The serialized object.</param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static Task<object> DeserializeFromBytesAsync(this IJsonMessageFormatter formatter, Type type,
+    public static Task<object> DeserializeAsync(this IJsonMessageFormatter formatter, Type type,
       byte[] serializedObject, Encoding effectiveEncoding)
     {
       return
@@ -328,7 +328,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(DeserializeFromBytes(formatter, type, serializedObject, null, effectiveEncoding));
+        .FromResult(Deserialize(formatter, type, serializedObject, null, effectiveEncoding));
     }
 
     /// <summary>Deserializes the asynchronous.</summary>
@@ -338,7 +338,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializerSettings">The <see cref="JsonSerializerSettings"/> used to configure the <see cref="JsonSerializer"/>.</param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static Task<object> DeserializeFromBytesAsync(this IJsonMessageFormatter formatter, Type type, byte[] serializedObject,
+    public static Task<object> DeserializeAsync(this IJsonMessageFormatter formatter, Type type, byte[] serializedObject,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null)
     {
       return
@@ -347,7 +347,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(DeserializeFromBytes(formatter, type, serializedObject, serializerSettings, effectiveEncoding));
+        .FromResult(Deserialize(formatter, type, serializedObject, serializerSettings, effectiveEncoding));
     }
 
     /// <summary>Deserializes the asynchronous.</summary>
@@ -358,7 +358,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="count"></param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static Task<object> DeserializeFromBytesAsync(this IJsonMessageFormatter formatter, Type type,
+    public static Task<object> DeserializeAsync(this IJsonMessageFormatter formatter, Type type,
       byte[] serializedObject, int offset, int count, Encoding effectiveEncoding)
     {
       return
@@ -367,7 +367,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(DeserializeFromBytes(formatter, type, serializedObject, offset, count, null, effectiveEncoding));
+        .FromResult(Deserialize(formatter, type, serializedObject, offset, count, null, effectiveEncoding));
     }
 
     /// <summary>Deserializes the asynchronous.</summary>
@@ -379,7 +379,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializerSettings">The <see cref="JsonSerializerSettings"/> used to configure the <see cref="JsonSerializer"/>.</param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static Task<object> DeserializeFromBytesAsync(this IJsonMessageFormatter formatter, Type type, byte[] serializedObject,
+    public static Task<object> DeserializeAsync(this IJsonMessageFormatter formatter, Type type, byte[] serializedObject,
       int offset, int count, JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null)
     {
       return
@@ -388,7 +388,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(DeserializeFromBytes(formatter, type, serializedObject, offset, count, serializerSettings, effectiveEncoding));
+        .FromResult(Deserialize(formatter, type, serializedObject, offset, count, serializerSettings, effectiveEncoding));
     }
 
     /// <summary>Deserializes the specified serialized object.</summary>
@@ -397,9 +397,9 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializedObject">The serialized object.</param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static T DeserializeFromBytes<T>(this IJsonMessageFormatter formatter, byte[] serializedObject, Encoding effectiveEncoding)
+    public static T Deserialize<T>(this IJsonMessageFormatter formatter, byte[] serializedObject, Encoding effectiveEncoding)
     {
-      return (T)DeserializeFromBytes(formatter, typeof(T), serializedObject, null, effectiveEncoding);
+      return (T)Deserialize(formatter, typeof(T), serializedObject, null, effectiveEncoding);
     }
 
     /// <summary>Deserializes the specified serialized object.</summary>
@@ -409,10 +409,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializerSettings">The <see cref="JsonSerializerSettings"/> used to configure the <see cref="JsonSerializer"/>.</param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static T DeserializeFromBytes<T>(this IJsonMessageFormatter formatter, byte[] serializedObject,
+    public static T Deserialize<T>(this IJsonMessageFormatter formatter, byte[] serializedObject,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null)
     {
-      return (T)DeserializeFromBytes(formatter, typeof(T), serializedObject, serializerSettings, effectiveEncoding);
+      return (T)Deserialize(formatter, typeof(T), serializedObject, serializerSettings, effectiveEncoding);
     }
 
     /// <summary>Deserializes the specified serialized object.</summary>
@@ -423,10 +423,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="count"></param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static T DeserializeFromBytes<T>(this IJsonMessageFormatter formatter, byte[] serializedObject,
+    public static T Deserialize<T>(this IJsonMessageFormatter formatter, byte[] serializedObject,
       int offset, int count, Encoding effectiveEncoding)
     {
-      return (T)DeserializeFromBytes(formatter, typeof(T), serializedObject, offset, count, null, effectiveEncoding);
+      return (T)Deserialize(formatter, typeof(T), serializedObject, offset, count, null, effectiveEncoding);
     }
 
     /// <summary>Deserializes the specified serialized object.</summary>
@@ -438,10 +438,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializerSettings">The <see cref="JsonSerializerSettings"/> used to configure the <see cref="JsonSerializer"/>.</param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static T DeserializeFromBytes<T>(this IJsonMessageFormatter formatter, byte[] serializedObject, int offset, int count,
+    public static T Deserialize<T>(this IJsonMessageFormatter formatter, byte[] serializedObject, int offset, int count,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null)
     {
-      return (T)DeserializeFromBytes(formatter, typeof(T), serializedObject, offset, count, serializerSettings, effectiveEncoding);
+      return (T)Deserialize(formatter, typeof(T), serializedObject, offset, count, serializerSettings, effectiveEncoding);
     }
 
     /// <summary>Deserializes the asynchronous.</summary>
@@ -450,7 +450,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializedObject">The serialized object.</param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static Task<T> DeserializeFromBytesAsync<T>(this IJsonMessageFormatter formatter, byte[] serializedObject, Encoding effectiveEncoding)
+    public static Task<T> DeserializeAsync<T>(this IJsonMessageFormatter formatter, byte[] serializedObject, Encoding effectiveEncoding)
     {
       return
 #if NET40
@@ -458,7 +458,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(DeserializeFromBytes<T>(formatter, serializedObject, null, effectiveEncoding));
+        .FromResult(Deserialize<T>(formatter, serializedObject, null, effectiveEncoding));
     }
 
     /// <summary>Deserializes the asynchronous.</summary>
@@ -468,7 +468,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializerSettings">The <see cref="JsonSerializerSettings"/> used to configure the <see cref="JsonSerializer"/>.</param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static Task<T> DeserializeFromBytesAsync<T>(this IJsonMessageFormatter formatter, byte[] serializedObject,
+    public static Task<T> DeserializeAsync<T>(this IJsonMessageFormatter formatter, byte[] serializedObject,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null)
     {
       return
@@ -477,7 +477,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(DeserializeFromBytes<T>(formatter, serializedObject, serializerSettings, effectiveEncoding));
+        .FromResult(Deserialize<T>(formatter, serializedObject, serializerSettings, effectiveEncoding));
     }
 
     /// <summary>Deserializes the asynchronous.</summary>
@@ -488,7 +488,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="count"></param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static Task<T> DeserializeFromBytesAsync<T>(this IJsonMessageFormatter formatter, byte[] serializedObject,
+    public static Task<T> DeserializeAsync<T>(this IJsonMessageFormatter formatter, byte[] serializedObject,
       int offset, int count, Encoding effectiveEncoding)
     {
       return
@@ -497,7 +497,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(DeserializeFromBytes<T>(formatter, serializedObject, offset, count, null, effectiveEncoding));
+        .FromResult(Deserialize<T>(formatter, serializedObject, offset, count, null, effectiveEncoding));
     }
 
     /// <summary>Deserializes the asynchronous.</summary>
@@ -509,7 +509,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializerSettings">The <see cref="JsonSerializerSettings"/> used to configure the <see cref="JsonSerializer"/>.</param>
     /// <param name="effectiveEncoding">The encoding.</param>
     /// <returns></returns>
-    public static Task<T> DeserializeFromBytesAsync<T>(this IJsonMessageFormatter formatter, byte[] serializedObject, int offset, int count,
+    public static Task<T> DeserializeAsync<T>(this IJsonMessageFormatter formatter, byte[] serializedObject, int offset, int count,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null)
     {
       return
@@ -518,7 +518,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(DeserializeFromBytes<T>(formatter, serializedObject, offset, count, serializerSettings, effectiveEncoding));
+        .FromResult(Deserialize<T>(formatter, serializedObject, offset, count, serializerSettings, effectiveEncoding));
     }
 
     #endregion

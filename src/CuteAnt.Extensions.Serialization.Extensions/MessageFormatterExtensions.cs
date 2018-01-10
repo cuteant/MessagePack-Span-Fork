@@ -17,49 +17,14 @@ namespace CuteAnt.Extensions.Serialization
     private const int c_initialBufferSize = 1024 * 64;
     private const int c_zeroSize = 0;
 
-    #region -- SerializeToBytes --
-
-    /// <summary>Serializes the specified item.</summary>
-    /// <param name="formatter">The formatter.</param>
-    /// <param name="item">The item.</param>
-    /// <param name="initialBufferSize">The initial buffer size.</param>
-    /// <returns></returns>
-    public static byte[] SerializeToBytes(this IMessageFormatter formatter, object item, int initialBufferSize = c_initialBufferSize)
-    {
-//#if NET40
-      using (var pooledStream = BufferManagerOutputStreamManager.Create())
-      {
-        var outputStream = pooledStream.Object;
-        outputStream.Reinitialize(initialBufferSize);
-
-        formatter.WriteToStream(item, outputStream);
-        return outputStream.ToByteArray();
-      }
-//#else
-//      using (var pooledPipe = PipelineManager.Create())
-//      {
-//        var pipe = pooledPipe.Object;
-//        var outputStream = new PipelineStream(pipe, initialBufferSize);
-//        formatter.WriteToStream(item, outputStream);
-//        pipe.Flush();
-//        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
-//        var length = (int)readBuffer.Length;
-//        if (c_zeroSize == length) { return EmptyArray<byte>.Instance; }
-//        return readBuffer.ToArray();
-//      }
-//#endif
-    }
-
-    #endregion
-
-    #region -- SerializeToBytesAsync --
+    #region -- SerializeAsync --
 
     /// <summary>Serializes the asynchronous.</summary>
     /// <param name="formatter">The formatter.</param>
     /// <param name="item">The item.</param>
     /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns></returns>
-    public static Task<byte[]> SerializeToBytesAsync(this IMessageFormatter formatter, object item, int initialBufferSize = c_initialBufferSize)
+    public static Task<byte[]> SerializeAsync(this IMessageFormatter formatter, object item, int initialBufferSize = c_initialBufferSize)
     {
       return
 #if NET40
@@ -67,10 +32,10 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(SerializeToBytes(formatter, item, initialBufferSize));
+        .FromResult(formatter.Serialize(item, initialBufferSize));
       //#if NET40
       //      await TaskConstants.Completed;
-      //      return SerializeToBytes(formatter, item, initialBufferSize);
+      //      return Serialize(formatter, item, initialBufferSize);
       //#else
       //      using (var pooledPipe = PipelineManager.Create())
       //      {
@@ -88,14 +53,14 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
-    #region -- SerializeToByteArraySegment --
+    #region -- WriteToMemoryPool --
 
     /// <summary>Serializes the specified item.</summary>
     /// <param name="formatter">The formatter.</param>
     /// <param name="item">The item.</param>
     /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns></returns>
-    public static ArraySegment<byte> SerializeToByteArraySegment(this IMessageFormatter formatter, object item,
+    public static ArraySegment<byte> WriteToMemoryPool(this IMessageFormatter formatter, object item,
       int initialBufferSize = c_initialBufferSize)
     {
       //#if NET40
@@ -126,14 +91,14 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
-    #region -- SerializeToByteArraySegmentAsync --
+    #region -- WriteToMemoryPoolAsync --
 
     /// <summary>Serializes the asynchronous.</summary>
     /// <param name="formatter">The formatter.</param>
     /// <param name="item">The item.</param>
     /// <param name="initialBufferSize">The initial buffer size.</param>
     /// <returns></returns>
-    public static Task<ArraySegment<byte>> SerializeToByteArraySegmentAsync(this IMessageFormatter formatter, object item,
+    public static Task<ArraySegment<byte>> WriteToMemoryPoolAsync(this IMessageFormatter formatter, object item,
       int initialBufferSize = c_initialBufferSize)
     {
       return
@@ -142,7 +107,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(SerializeToByteArraySegment(formatter, item, initialBufferSize));
+        .FromResult(WriteToMemoryPool(formatter, item, initialBufferSize));
       //#if NET40
       //      await TaskConstants.Completed;
       //      return SerializeToByteArraySegment(formatter, item, initialBufferSize);
@@ -172,7 +137,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    public static object DeserializeFromBytes(this IMessageFormatter formatter, Type type, byte[] serializedObject)
+    public static object Deserialize(this IMessageFormatter formatter, Type type, byte[] serializedObject)
     {
       if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
 
@@ -189,7 +154,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="offset"></param>
     /// <param name="count"></param>
     /// <returns></returns>
-    public static object DeserializeFromBytes(this IMessageFormatter formatter, Type type, byte[] serializedObject, int offset, int count)
+    public static object Deserialize(this IMessageFormatter formatter, Type type, byte[] serializedObject, int offset, int count)
     {
       if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
 
@@ -199,48 +164,14 @@ namespace CuteAnt.Extensions.Serialization
       }
     }
 
-    /// <summary>Deserializes the asynchronous.</summary>
-    /// <param name="formatter">The formatter.</param>
-    /// <param name="type">The type of the object to deserialize.</param>
-    /// <param name="serializedObject">The serialized object.</param>
-    /// <returns></returns>
-    public static Task<object> DeserializeFromBytesAsync(this IMessageFormatter formatter, Type type, byte[] serializedObject)
-    {
-      return
-#if NET40
-        TaskEx
-#else
-        Task
-#endif
-        .FromResult(DeserializeFromBytes(formatter, type, serializedObject));
-    }
-
-    /// <summary>Deserializes the asynchronous.</summary>
-    /// <param name="formatter">The formatter.</param>
-    /// <param name="type">The type of the object to deserialize.</param>
-    /// <param name="serializedObject">The serialized object.</param>
-    /// <param name="offset"></param>
-    /// <param name="count"></param>
-    /// <returns></returns>
-    public static Task<object> DeserializeFromBytesAsync(this IMessageFormatter formatter, Type type, byte[] serializedObject, int offset, int count)
-    {
-      return
-#if NET40
-        TaskEx
-#else
-        Task
-#endif
-        .FromResult(DeserializeFromBytes(formatter, type, serializedObject, offset, count));
-    }
-
     /// <summary>Deserializes the specified serialized object.</summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="formatter">The formatter.</param>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    public static T DeserializeFromBytes<T>(this IMessageFormatter formatter, byte[] serializedObject)
+    public static T Deserialize<T>(this IMessageFormatter formatter, byte[] serializedObject)
     {
-      return (T)DeserializeFromBytes(formatter, typeof(T), serializedObject);
+      return (T)Deserialize(formatter, typeof(T), serializedObject);
     }
 
     /// <summary>Deserializes the specified serialized object.</summary>
@@ -250,17 +181,17 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="offset"></param>
     /// <param name="count"></param>
     /// <returns></returns>
-    public static T DeserializeFromBytes<T>(this IMessageFormatter formatter, byte[] serializedObject, int offset, int count)
+    public static T Deserialize<T>(this IMessageFormatter formatter, byte[] serializedObject, int offset, int count)
     {
-      return (T)DeserializeFromBytes(formatter, typeof(T), serializedObject, offset, count);
+      return (T)Deserialize(formatter, typeof(T), serializedObject, offset, count);
     }
 
     /// <summary>Deserializes the asynchronous.</summary>
-    /// <typeparam name="T"></typeparam>
     /// <param name="formatter">The formatter.</param>
+    /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    public static Task<T> DeserializeFromBytesAsync<T>(this IMessageFormatter formatter, byte[] serializedObject)
+    public static Task<object> DeserializeAsync(this IMessageFormatter formatter, Type type, byte[] serializedObject)
     {
       return
 #if NET40
@@ -268,7 +199,41 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(DeserializeFromBytes<T>(formatter, serializedObject));
+        .FromResult(Deserialize(formatter, type, serializedObject));
+    }
+
+    /// <summary>Deserializes the asynchronous.</summary>
+    /// <param name="formatter">The formatter.</param>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <param name="offset"></param>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    public static Task<object> DeserializeAsync(this IMessageFormatter formatter, Type type, byte[] serializedObject, int offset, int count)
+    {
+      return
+#if NET40
+        TaskEx
+#else
+        Task
+#endif
+        .FromResult(Deserialize(formatter, type, serializedObject, offset, count));
+    }
+
+    /// <summary>Deserializes the asynchronous.</summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="formatter">The formatter.</param>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    public static Task<T> DeserializeAsync<T>(this IMessageFormatter formatter, byte[] serializedObject)
+    {
+      return
+#if NET40
+        TaskEx
+#else
+        Task
+#endif
+        .FromResult(Deserialize<T>(formatter, serializedObject));
     }
 
     /// <summary>Deserializes the asynchronous.</summary>
@@ -278,7 +243,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="offset"></param>
     /// <param name="count"></param>
     /// <returns></returns>
-    public static Task<T> DeserializeFromBytesAsync<T>(this IMessageFormatter formatter, byte[] serializedObject, int offset, int count)
+    public static Task<T> DeserializeAsync<T>(this IMessageFormatter formatter, byte[] serializedObject, int offset, int count)
     {
       return
 #if NET40
@@ -286,7 +251,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(DeserializeFromBytes<T>(formatter, serializedObject, offset, count));
+        .FromResult(Deserialize<T>(formatter, serializedObject, offset, count));
     }
 
     #endregion

@@ -19,11 +19,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public void SerializeToBytesTest()
     {
       var poco = SerializerPocoSerializable.Create();
-      var serializedObject = _formatter.SerializeToBytes(poco, Encoding.UTF8);
-      var newPoco = _formatter.DeserializeFromBytes<SerializerPocoSerializable>(serializedObject, Encoding.UTF8);
+      var serializedObject = _formatter.Serialize(poco, Encoding.UTF8);
+      var newPoco = _formatter.Deserialize<SerializerPocoSerializable>(serializedObject, Encoding.UTF8);
       Helper.ComparePoco(poco, newPoco);
-      serializedObject = _formatter.SerializeToBytes(poco, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
-      newPoco = _formatter.DeserializeFromBytes<SerializerPocoSerializable>(serializedObject, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
+      serializedObject = _formatter.Serialize(poco, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
+      newPoco = _formatter.Deserialize<SerializerPocoSerializable>(serializedObject, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
       Helper.ComparePoco(poco, newPoco);
     }
 
@@ -31,11 +31,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public async Task SerializeToBytesAsyncTest()
     {
       var poco = SerializerPocoSerializable.Create();
-      var serializedObject = await _formatter.SerializeToBytesAsync(poco, Encoding.UTF8);
-      var newPoco = await _formatter.DeserializeFromBytesAsync<SerializerPocoSerializable>(serializedObject, Encoding.UTF8);
+      var serializedObject = await _formatter.SerializeAsync(poco, Encoding.UTF8);
+      var newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(serializedObject, Encoding.UTF8);
       Helper.ComparePoco(poco, newPoco);
-      serializedObject = await _formatter.SerializeToBytesAsync(poco, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
-      newPoco = await _formatter.DeserializeFromBytesAsync<SerializerPocoSerializable>(serializedObject, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
+      serializedObject = await _formatter.SerializeAsync(poco, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
+      newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(serializedObject, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
       Helper.ComparePoco(poco, newPoco);
     }
 
@@ -43,12 +43,12 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public void SerializeToByteArraySegmentTest()
     {
       var poco = SerializerPocoSerializable.Create();
-      var serializedObject = _formatter.SerializeToByteArraySegment(poco, Encoding.UTF8);
-      var newPoco = _formatter.DeserializeFromBytes<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count, Encoding.UTF8);
+      var serializedObject = _formatter.WriteToMemoryPool(poco, Encoding.UTF8);
+      var newPoco = _formatter.Deserialize<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count, Encoding.UTF8);
       Helper.ComparePoco(poco, newPoco);
       BufferManager.Shared.Return(serializedObject.Array);
-      serializedObject = _formatter.SerializeToByteArraySegment(poco, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
-      newPoco = _formatter.DeserializeFromBytes<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
+      serializedObject = _formatter.WriteToMemoryPool(poco, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
+      newPoco = _formatter.Deserialize<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
       Helper.ComparePoco(poco, newPoco);
       BufferManager.Shared.Return(serializedObject.Array);
     }
@@ -57,12 +57,12 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public async Task SerializeToByteArraySegmentAsyncTest()
     {
       var poco = SerializerPocoSerializable.Create();
-      var serializedObject = await _formatter.SerializeToByteArraySegmentAsync(poco, Encoding.UTF8);
-      var newPoco = await _formatter.DeserializeFromBytesAsync<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count, Encoding.UTF8);
+      var serializedObject = await _formatter.WriteToMemoryPoolAsync(poco, Encoding.UTF8);
+      var newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count, Encoding.UTF8);
       Helper.ComparePoco(poco, newPoco);
       BufferManager.Shared.Return(serializedObject.Array);
-      serializedObject = await _formatter.SerializeToByteArraySegmentAsync(poco, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
-      newPoco = await _formatter.DeserializeFromBytesAsync<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
+      serializedObject = await _formatter.WriteToMemoryPoolAsync(poco, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
+      newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count, JsonConvertX.IncludeTypeNameSettings, Encoding.UTF8);
       Helper.ComparePoco(poco, newPoco);
       BufferManager.Shared.Return(serializedObject.Array);
     }

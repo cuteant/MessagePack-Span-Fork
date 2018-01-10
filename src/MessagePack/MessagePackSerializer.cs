@@ -1,9 +1,10 @@
-﻿using MessagePack.Internal;
-using System;
+﻿using System;
+using System.ComponentModel;
 using System.IO;
 #if !NET40
 using System.Buffers;
 #endif
+using MessagePack.Internal;
 
 namespace MessagePack
 {
@@ -172,18 +173,39 @@ namespace MessagePack
 
         public static T Deserialize<T>(byte[] bytes, IFormatterResolver resolver)
         {
+            if (null == bytes || c_zeroSize == bytes.Length) { return default; }
+
             if (resolver == null) resolver = DefaultResolver;
             var formatter = resolver.GetFormatterWithVerify<T>();
 
             return formatter.Deserialize(bytes, 0, resolver, out int readSize);
         }
 
-        public static T Deserialize<T>(ArraySegment<byte> bytes)
+        // 只提供给 NonGeneric 使用
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static T DeserializeInternal<T>(ArraySegment<byte> bytes)
+        {
+            return DeserializeInternal<T>(bytes, defaultResolver);
+        }
+
+        // 只提供给 NonGeneric 使用
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static T DeserializeInternal<T>(ArraySegment<byte> bytes, IFormatterResolver resolver)
+        {
+            if (c_zeroSize == bytes.Count) { return default; }
+
+            if (resolver == null) resolver = DefaultResolver;
+            var formatter = resolver.GetFormatterWithVerify<T>();
+
+            return formatter.Deserialize(bytes.Array, bytes.Offset, resolver, out int readSize);
+        }
+
+        public static T Deserialize<T>(in ArraySegment<byte> bytes)
         {
             return Deserialize<T>(bytes, defaultResolver);
         }
 
-        public static T Deserialize<T>(ArraySegment<byte> bytes, IFormatterResolver resolver)
+        public static T Deserialize<T>(in ArraySegment<byte> bytes, IFormatterResolver resolver)
         {
             if (c_zeroSize == bytes.Count) { return default; }
 

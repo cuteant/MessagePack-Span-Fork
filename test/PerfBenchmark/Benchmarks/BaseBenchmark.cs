@@ -70,7 +70,7 @@ namespace PerfBenchmark
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public byte[] SerializeMessagePackFormatter()
     {
-      return _messagePackFormatter.SerializeToBytes(GetValue());
+      return _messagePackFormatter.Serialize(GetValue());
     }
     private byte[] _messagePackData1;
     [GlobalSetup(Target = nameof(DeserializeMessagePackFormatter))]
@@ -81,7 +81,7 @@ namespace PerfBenchmark
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeMessagePackFormatter()
     {
-      return _messagePackFormatter.DeserializeFromBytes<T>(_messagePackData1);
+      return _messagePackFormatter.Deserialize<T>(_messagePackData1);
     }
 
     #endregion
@@ -133,18 +133,18 @@ namespace PerfBenchmark
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public byte[] SerializeJsonFormatter()
     {
-      return _jsonFormatter.SerializeToBytes(GetValue());
+      return _jsonFormatter.Serialize(GetValue());
     }
     private byte[] _jsonData2;
     [GlobalSetup(Target = nameof(DeserializeJsonFormatter))]
     public void SetupDeserializeJsonFormatter()
     {
-      _jsonData2 = _jsonFormatter.SerializeToBytes(GetValue());
+      _jsonData2 = _jsonFormatter.Serialize(GetValue());
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeJsonFormatter()
     {
-      return _jsonFormatter.DeserializeFromBytes<T>(_jsonData2);
+      return _jsonFormatter.Deserialize<T>(_jsonData2);
     }
 
     #endregion
@@ -179,7 +179,7 @@ namespace PerfBenchmark
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public byte[] SerializeProtoBufFormatter()
     {
-      return _protobufFormatter.SerializeToBytes(GetValue());
+      return _protobufFormatter.Serialize(GetValue());
     }
     private byte[] _protoBufData1;
     [GlobalSetup(Target = nameof(DeserializeProtoBufFormatter))]
@@ -190,7 +190,7 @@ namespace PerfBenchmark
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeProtoBufFormatter()
     {
-      return _protobufFormatter.DeserializeFromBytes<T>(_protoBufData1);
+      return _protobufFormatter.Deserialize<T>(_protoBufData1);
     }
 
     #endregion
@@ -245,7 +245,7 @@ namespace PerfBenchmark
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public byte[] SerializeHyperionFormatter()
     {
-      return _hyperionFormatter.SerializeToBytes(GetValue());
+      return _hyperionFormatter.Serialize(GetValue());
     }
     private byte[] _hyperionData1;
     [GlobalSetup(Target = nameof(DeserializeHyperionFormatter))]
@@ -256,7 +256,7 @@ namespace PerfBenchmark
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeHyperionFormatter()
     {
-      return _hyperionFormatter.DeserializeFromBytes<T>(_hyperionData1);
+      return _hyperionFormatter.Deserialize<T>(_hyperionData1);
     }
 
     #endregion

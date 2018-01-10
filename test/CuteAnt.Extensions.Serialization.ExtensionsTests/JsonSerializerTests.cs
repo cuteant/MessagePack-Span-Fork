@@ -61,11 +61,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
       byte[] data = new byte[1];
       data[0] = 0;
 
-      byte[] serializedData = jsonFormatter.SerializeToBytes(data);
+      byte[] serializedData = jsonFormatter.Serialize(data);
       var json = System.Text.Encoding.UTF8.GetString(serializedData);
       Assert.NotNull(serializedData);
 
-      byte[] deserializedData = (byte[])jsonFormatter.DeserializeFromBytes(null, serializedData);
+      byte[] deserializedData = (byte[])jsonFormatter.Deserialize(null, serializedData);
       Assert.NotNull(deserializedData);
       Assert.Equal(deserializedData.Length, data.Length);
       Assert.Equal(data[0], deserializedData[0]);
@@ -78,9 +78,9 @@ namespace CuteAnt.Extensions.Serialization.Tests
       jsonFormatter.DefaultSerializerSettings = JsonConvertX.IncludeTypeNameSettings;
 
       byte[] data = new byte[0];
-      byte[] serializedData = jsonFormatter.SerializeToBytes(data);
+      byte[] serializedData = jsonFormatter.Serialize(data);
       Assert.NotNull(serializedData);
-      byte[] deserializedData = jsonFormatter.DeserializeFromBytes<byte[]>(serializedData);
+      byte[] deserializedData = jsonFormatter.Deserialize<byte[]>(serializedData);
       Assert.NotNull(deserializedData);
       Assert.Equal(deserializedData.Length, data.Length);
     }

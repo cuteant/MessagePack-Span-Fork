@@ -75,7 +75,7 @@ namespace MessagePack.Internal
             return true;
         }
 
-        public bool TryGetValue(ArraySegment<byte> key, out int value)
+        public bool TryGetValue(in ArraySegment<byte> key, out int value)
         {
             var table = buckets;
             var hash = ByteArrayGetHashCode(key.Array, key.Offset, key.Count);

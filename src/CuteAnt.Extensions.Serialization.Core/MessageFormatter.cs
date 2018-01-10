@@ -1,14 +1,23 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using CuteAnt.Buffers;
 using CuteAnt.IO;
+//#if !NET40
+//using CuteAnt.IO.Pipelines;
+//#endif
 
 namespace CuteAnt.Extensions.Serialization
 {
   /// <summary>Base class to handle serializing and deserializing strongly-typed objects.</summary>
   public abstract partial class MessageFormatter : IMessageFormatter
   {
+    private const int c_initialBufferSize = 1024 * 64;
+    private const int c_zeroSize = 0;
+    private static readonly ArrayPool<byte> s_defaultMemoryPool = BufferManager.Shared;
+
     #region @@ Constructors @@
 
     /// <summary>Initializes a new instance of the <see cref="MessageFormatter"/> class.</summary>
@@ -46,6 +55,48 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="source">The item to create a copy of</param>
     /// <returns>The copy</returns>
     public virtual T DeepCopy<T>(T source) => (T)DeepCopy((object)source);
+
+    #endregion
+
+    #region -- Serialize --
+
+    public virtual byte[] Serialize(object item)
+    {
+      using (var pooledStream = BufferManagerOutputStreamManager.Create())
+      {
+        var outputStream = pooledStream.Object;
+        outputStream.Reinitialize(c_initialBufferSize);
+
+        WriteToStream(item, outputStream);
+        return outputStream.ToByteArray();
+      }
+    }
+
+    public virtual byte[] Serialize(object item, int initialBufferSize)
+    {
+      //#if NET40
+      using (var pooledStream = BufferManagerOutputStreamManager.Create())
+      {
+        var outputStream = pooledStream.Object;
+        outputStream.Reinitialize(initialBufferSize);
+
+        WriteToStream(item, outputStream);
+        return outputStream.ToByteArray();
+      }
+      //#else
+      //      using (var pooledPipe = PipelineManager.Create())
+      //      {
+      //        var pipe = pooledPipe.Object;
+      //        var outputStream = new PipelineStream(pipe, initialBufferSize);
+      //        WriteToStream(item, outputStream);
+      //        pipe.Flush();
+      //        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
+      //        var length = (int)readBuffer.Length;
+      //        if (c_zeroSize == length) { return EmptyArray<byte>.Instance; }
+      //        return readBuffer.ToArray();
+      //      }
+      //#endif
+    }
 
     #endregion
 

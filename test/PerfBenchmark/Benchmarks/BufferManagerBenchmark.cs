@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Text;
 using CuteAnt;
@@ -49,13 +50,25 @@ namespace PerfBenchmark
       using (var pooledStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledStream.Object;
-        outputStream.Reinitialize(c_initialBufferSize);
+        outputStream.Reinitialize(c_initialBufferSize, BufferManager.Shared);
 
         _formatter.WriteToStream(_persionData, outputStream);
         return outputStream.ToByteArray();
       }
     }
 
+    [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
+    public byte[] SystemBufferArrayPool()
+    {
+      using (var pooledStream = BufferManagerOutputStreamManager.Create())
+      {
+        var outputStream = pooledStream.Object;
+        outputStream.Reinitialize(c_initialBufferSize, ArrayPool<byte>.Shared);
+
+        _formatter.WriteToStream(_persionData, outputStream);
+        return outputStream.ToByteArray();
+      }
+    }
 
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public byte[] RecyclableMemoryStream()

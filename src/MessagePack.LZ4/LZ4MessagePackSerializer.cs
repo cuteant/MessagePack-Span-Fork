@@ -1,7 +1,8 @@
-﻿using MessagePack.Internal;
-using System;
+﻿using System;
+using System.ComponentModel;
 using System.IO;
 using LZ4;
+using MessagePack.Internal;
 
 namespace MessagePack
 {
@@ -88,7 +89,7 @@ namespace MessagePack
             }
         }
 
-        public static byte[] ToLZ4Binary(ArraySegment<byte> messagePackBinary)
+        public static byte[] ToLZ4Binary(in ArraySegment<byte> messagePackBinary)
         {
             var buffer = ToLZ4BinaryCore(messagePackBinary);
             return MessagePackBinary.FastCloneWithResize(buffer.Array, buffer.Count);
@@ -100,7 +101,7 @@ namespace MessagePack
             return ToLZ4BinaryCore(serializedData);
         }
 
-        static ArraySegment<byte> ToLZ4BinaryCore(ArraySegment<byte> serializedData)
+        static ArraySegment<byte> ToLZ4BinaryCore(in ArraySegment<byte> serializedData)
         {
             if (serializedData.Count < NotCompressionSize)
             {
@@ -143,12 +144,26 @@ namespace MessagePack
             return DeserializeCore<T>(new ArraySegment<byte>(bytes, 0, bytes.Length), resolver);
         }
 
-        public static T Deserialize<T>(ArraySegment<byte> bytes)
+        // 只提供给 NonGeneric 使用
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static T DeserializeInternal<T>(ArraySegment<byte> bytes)
         {
             return DeserializeCore<T>(bytes, null);
         }
 
-        public static T Deserialize<T>(ArraySegment<byte> bytes, IFormatterResolver resolver)
+        // 只提供给 NonGeneric 使用
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static T DeserializeInternal<T>(ArraySegment<byte> bytes, IFormatterResolver resolver)
+        {
+            return DeserializeCore<T>(bytes, resolver);
+        }
+
+        public static T Deserialize<T>(in ArraySegment<byte> bytes)
+        {
+            return DeserializeCore<T>(bytes, null);
+        }
+
+        public static T Deserialize<T>(in ArraySegment<byte> bytes, IFormatterResolver resolver)
         {
             return DeserializeCore<T>(bytes, resolver);
         }
@@ -203,7 +218,7 @@ namespace MessagePack
             return Decode(new ArraySegment<byte>(bytes, 0, bytes.Length));
         }
 
-        public static byte[] Decode(ArraySegment<byte> bytes)
+        public static byte[] Decode(in ArraySegment<byte> bytes)
         {
             if (MessagePackBinary.GetMessagePackType(bytes.Array, bytes.Offset) == MessagePackType.Extension)
             {
@@ -250,7 +265,7 @@ namespace MessagePack
         /// <summary>
         /// Get the war memory pool byte[]. The result can not share across thread and can not hold and can not call LZ4Deserialize before use it.
         /// </summary>
-        public static byte[] DecodeUnsafe(ArraySegment<byte> bytes)
+        public static byte[] DecodeUnsafe(in ArraySegment<byte> bytes)
         {
             if (MessagePackBinary.GetMessagePackType(bytes.Array, bytes.Offset) == MessagePackType.Extension)
             {
@@ -289,7 +304,7 @@ namespace MessagePack
             }
         }
 
-        static T DeserializeCore<T>(ArraySegment<byte> bytes, IFormatterResolver resolver)
+        static T DeserializeCore<T>(in ArraySegment<byte> bytes, IFormatterResolver resolver)
         {
             if (resolver == null) resolver = MessagePackSerializer.DefaultResolver;
             var formatter = resolver.GetFormatterWithVerify<T>();

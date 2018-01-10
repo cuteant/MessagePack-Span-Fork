@@ -71,12 +71,12 @@ namespace MessagePack
                 return GetOrAdd(type).deserialize6.Invoke(stream, resolver, readStrict);
             }
 
-            public static object Deserialize(Type type, ArraySegment<byte> bytes)
+            public static object Deserialize(Type type, in ArraySegment<byte> bytes)
             {
                 return GetOrAdd(type).deserialize7.Invoke(bytes);
             }
 
-            public static object Deserialize(Type type, ArraySegment<byte> bytes, IFormatterResolver resolver)
+            public static object Deserialize(Type type, in ArraySegment<byte> bytes, IFormatterResolver resolver)
             {
                 return GetOrAdd(type).deserialize8.Invoke(bytes, resolver);
             }
@@ -230,7 +230,7 @@ namespace MessagePack
 
                     {
                         // public static T Deserialize<T>(ArraySegment<byte> bytes)
-                        var deserialize = GetMethod(type, new Type[] { typeof(ArraySegment<byte>) });
+                        var deserialize = GetMethodInternal(type, new Type[] { typeof(ArraySegment<byte>) });
 
                         var param1 = Expression.Parameter(typeof(ArraySegment<byte>), "bytes");
                         var body = Expression.Convert(Expression.Call(deserialize, param1), typeof(object));
@@ -240,7 +240,7 @@ namespace MessagePack
                     }
                     {
                         // public static T Deserialize<T>(ArraySegment<byte> bytes, IFormatterResolver resolver)
-                        var deserialize = GetMethod(type, new Type[] { typeof(ArraySegment<byte>), typeof(IFormatterResolver) });
+                        var deserialize = GetMethodInternal(type, new Type[] { typeof(ArraySegment<byte>), typeof(IFormatterResolver) });
 
                         var param1 = Expression.Parameter(typeof(ArraySegment<byte>), "bytes");
                         var param2 = Expression.Parameter(typeof(IFormatterResolver), "resolver");
@@ -257,6 +257,25 @@ namespace MessagePack
                     return typeof(MessagePackSerializer).GetRuntimeMethods().Where(x =>
                     {
                         if (!(x.Name == "Serialize" || x.Name == "Deserialize")) return false;
+                        var ps = x.GetParameters();
+                        if (ps.Length != parameters.Length) return false;
+                        for (int i = 0; i < ps.Length; i++)
+                        {
+                            if (parameters[i] == null && ps[i].ParameterType.IsGenericParameter) continue;
+                            if (ps[i].ParameterType != parameters[i]) return false;
+                        }
+                        return true;
+                    })
+                    .Single()
+                    .MakeGenericMethod(type);
+                }
+
+                // null is generic type marker.
+                static MethodInfo GetMethodInternal(Type type, Type[] parameters)
+                {
+                    return typeof(MessagePackSerializer).GetRuntimeMethods().Where(x =>
+                    {
+                        if (!(x.Name == "Serialize" || x.Name == "DeserializeInternal")) return false;
                         var ps = x.GetParameters();
                         if (ps.Length != parameters.Length) return false;
                         for (int i = 0; i < ps.Length; i++)

@@ -79,6 +79,22 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
+    #region -- Serialize --
+
+    public override byte[] Serialize(object item)
+    {
+      if (null == item) { return EmptyArray<byte>.Instance; }
+      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+    }
+
+    public override byte[] Serialize(object item, int initialBufferSize)
+    {
+      if (null == item) { return EmptyArray<byte>.Instance; }
+      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+    }
+
+    #endregion
+
     #region -- ReadFromStream --
 
     /// <inheritdoc />
