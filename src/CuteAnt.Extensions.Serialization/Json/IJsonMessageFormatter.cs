@@ -26,15 +26,15 @@ namespace CuteAnt.Extensions.Serialization
     /// constructor runs, so any override should be very careful about using derived class state.</remarks>
     Int32 MaxDepth { get; set; }
 
-    /// <summary>Creates a <see cref="JsonSerializerSettings"/> instance with the default settings used by the <see cref="BaseJsonMessageFormatter"/>.</summary>
+    /// <summary>Creates a <see cref="JsonSerializerSettings"/> instance with the default settings used by the <see cref="IJsonMessageFormatter"/>.</summary>
     JsonSerializerSettings CreateDefaultSerializerSettings();
 
-    /// <summary>Creates a <see cref="JsonSerializerSettings"/> instance with the limit properties settings used by the <see cref="BaseJsonMessageFormatter"/>.</summary>
+    /// <summary>Creates a <see cref="JsonSerializerSettings"/> instance with the limit properties settings used by the <see cref="IJsonMessageFormatter"/>.</summary>
     /// <param name="limitProps"></param>
     /// <returns></returns>
     JsonSerializerSettings CreateLimitPropsSerializerSettings(ICollection<String> limitProps);
 
-    /// <summary>Creates a <see cref="JsonSerializerSettings"/> instance with the property mappings settings used by the <see cref="BaseJsonMessageFormatter"/>.</summary>
+    /// <summary>Creates a <see cref="JsonSerializerSettings"/> instance with the property mappings settings used by the <see cref="IJsonMessageFormatter"/>.</summary>
     /// <param name="propertyMappings"></param>
     /// <param name="limitProps"></param>
     /// <returns></returns>
@@ -49,15 +49,6 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns>The <see cref="object"/> instance that has been read.</returns>
     Object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding, JsonSerializerSettings serializerSettings);
 
-    /// <summary>Called during deserialization to get the <see cref="JsonReader"/>.</summary>
-    /// <remarks>Public for delegating wrappers of this class.</remarks>
-    /// <param name="type">The <see cref="Type"/> of object to read.</param>
-    /// <param name="readStream">The <see cref="Stream"/> from which to read.</param>
-    /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
-    /// <param name="charPool">The reader's character buffer pool.</param>
-    /// <returns>The <see cref="JsonWriter"/> used during deserialization.</returns>
-    JsonReader CreateJsonReader(Type type, Stream readStream, Encoding effectiveEncoding, IArrayPool<char> charPool);
-
     /// <summary>Called during serialization to write an object of the specified <paramref name="type"/>
     /// to the specified <paramref name="writeStream"/>.</summary>
     /// <param name="type">The <see cref="Type"/> of object to write.</param>
@@ -66,14 +57,5 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
     /// <param name="serializerSettings">The <see cref="JsonSerializerSettings"/> used to configure the <see cref="JsonSerializer"/>.</param>
     void WriteToStream(Type type, Object value, Stream writeStream, Encoding effectiveEncoding, JsonSerializerSettings serializerSettings);
-
-    /// <summary>Called during serialization to get the <see cref="JsonWriter"/>.</summary>
-    /// <remarks>Public for delegating wrappers of this class.  Expected to be called only from</remarks>
-    /// <param name="type">The <see cref="Type"/> of object to write.</param>
-    /// <param name="writeStream">The <see cref="Stream"/> to which to write.</param>
-    /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when writing.</param>
-    /// <param name="charPool">The writer's character array pool.</param>
-    /// <returns>The <see cref="JsonWriter"/> used during serialization.</returns>
-    JsonWriter CreateJsonWriter(Type type, Stream writeStream, Encoding effectiveEncoding, IArrayPool<char> charPool);
   }
 }

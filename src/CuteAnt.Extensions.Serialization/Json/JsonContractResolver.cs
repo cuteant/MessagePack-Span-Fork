@@ -13,7 +13,7 @@ namespace CuteAnt.Extensions.Serialization
 {
   #region -- class JsonContractResolver --
 
-  /// <summary>Represents the default <see cref="IContractResolver"/> used by <see cref="BaseJsonMessageFormatter"/>.</summary>
+  /// <summary>Represents the default <see cref="IContractResolver"/> used by <see cref="JsonMessageFormatter"/>.</summary>
   public class JsonContractResolver : DefaultContractResolver
   {
     public JsonContractResolver() : base() { }
@@ -63,7 +63,7 @@ namespace CuteAnt.Extensions.Serialization
 
   #region -- class JsonLimitPropsContractResolver --
 
-  /// <summary>Represents the default <see cref="IContractResolver"/> used by <see cref="BaseJsonMessageFormatter"/>.</summary>
+  /// <summary>Represents the default <see cref="IContractResolver"/> used by <see cref="JsonMessageFormatter"/>.</summary>
   public class JsonLimitPropsContractResolver : JsonContractResolver
   {
     private HashSet<string> _props = null;
@@ -117,7 +117,7 @@ namespace CuteAnt.Extensions.Serialization
 
   #region -- class JsonCamelCasePropertyNamesLimitPropsContractResolver --
 
-  /// <summary>Represents the default <see cref="IContractResolver"/> used by <see cref="BaseJsonMessageFormatter"/>.</summary>
+  /// <summary>Represents the default <see cref="IContractResolver"/> used by <see cref="JsonMessageFormatter"/>.</summary>
   public class JsonCamelCasePropertyNamesLimitPropsContractResolver : JsonCamelCasePropertyNamesContractResolver
   {
     private HashSet<string> _props = null;
@@ -147,7 +147,7 @@ namespace CuteAnt.Extensions.Serialization
 
   #region -- class JsonPropertyMappingContractResolver --
 
-  /// <summary>Represents the default <see cref="IContractResolver"/> used by <see cref="BaseJsonMessageFormatter"/>.</summary>
+  /// <summary>Represents the default <see cref="IContractResolver"/> used by <see cref="JsonMessageFormatter"/>.</summary>
   public class JsonPropertyMappingContractResolver : JsonContractResolver
   {
     private bool m_limitProps;
