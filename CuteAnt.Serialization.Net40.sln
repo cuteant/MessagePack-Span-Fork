@@ -60,6 +60,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CuteAnt.Extensions.Serializ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CuteAnt.Extensions.Serialization.ExtensionsTests.Net40", "test\CuteAnt.Extensions.Serialization.ExtensionsTests.Net40\CuteAnt.Extensions.Serialization.ExtensionsTests.Net40.csproj", "{2B631011-EE2F-4018-8D87-0DF9B9F7F671}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CuteAnt.Extensions.Serialization.Core", "src\CuteAnt.Extensions.Serialization.Core\CuteAnt.Extensions.Serialization.Core.csproj", "{5B670087-5EF6-4847-B357-926FD627E004}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CuteAnt.Extensions.Serialization.MessagePack", "src\CuteAnt.Extensions.Serialization.MessagePack\CuteAnt.Extensions.Serialization.MessagePack.csproj", "{AF0CAE80-10F6-4212-B548-BF75A01B78B8}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems*{c7f8dbe6-77b7-494d-af00-018f7579548c}*SharedItemsImports = 13
@@ -145,6 +149,14 @@ Global
 		{2B631011-EE2F-4018-8D87-0DF9B9F7F671}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B631011-EE2F-4018-8D87-0DF9B9F7F671}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B631011-EE2F-4018-8D87-0DF9B9F7F671}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B670087-5EF6-4847-B357-926FD627E004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B670087-5EF6-4847-B357-926FD627E004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B670087-5EF6-4847-B357-926FD627E004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B670087-5EF6-4847-B357-926FD627E004}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF0CAE80-10F6-4212-B548-BF75A01B78B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF0CAE80-10F6-4212-B548-BF75A01B78B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF0CAE80-10F6-4212-B548-BF75A01B78B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF0CAE80-10F6-4212-B548-BF75A01B78B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -170,6 +182,8 @@ Global
 		{57ECB6AA-DDDA-4A10-9861-AA8F3F317B83} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{1BEF9C2F-2D6E-47C1-870D-231AF554676F} = {ABC72801-895A-4C64-B795-B8CD5B56CEA8}
 		{2B631011-EE2F-4018-8D87-0DF9B9F7F671} = {ABC72801-895A-4C64-B795-B8CD5B56CEA8}
+		{5B670087-5EF6-4847-B357-926FD627E004} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
+		{AF0CAE80-10F6-4212-B548-BF75A01B78B8} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93230366-D5C3-4397-83D3-ED46E43B8121}
