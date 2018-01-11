@@ -68,13 +68,17 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- WriteToMemoryPool --
 
+    ArraySegment<byte> WriteToMemoryPool<T>(T item);
+    ArraySegment<byte> WriteToMemoryPool<T>(T item, int initialBufferSize);
+
     ArraySegment<byte> WriteToMemoryPool(object item);
     ArraySegment<byte> WriteToMemoryPool(object item, int initialBufferSize);
 
-#if !NET40
+    Task<ArraySegment<byte>> WriteToMemoryPoolAsync<T>(T item);
+    Task<ArraySegment<byte>> WriteToMemoryPoolAsync<T>(T item, int initialBufferSize);
+
     Task<ArraySegment<byte>> WriteToMemoryPoolAsync(object item);
     Task<ArraySegment<byte>> WriteToMemoryPoolAsync(object item, int initialBufferSize);
-#endif
 
     #endregion
 

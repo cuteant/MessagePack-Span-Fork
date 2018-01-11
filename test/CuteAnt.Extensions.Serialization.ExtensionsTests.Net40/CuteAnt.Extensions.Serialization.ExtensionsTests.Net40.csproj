@@ -23,6 +23,7 @@
     <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization.MessagePack\CuteAnt.Extensions.Serialization.MessagePack.csproj" />
     <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization.Protobuf\CuteAnt.Extensions.Serialization.Protobuf.csproj" />
     <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization.ServiceStack\CuteAnt.Extensions.Serialization.ServiceStack.csproj" />
+    <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization.Utf8Json\CuteAnt.Extensions.Serialization.Utf8Json.csproj" />
     <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization\CuteAnt.Extensions.Serialization.csproj" />
     <ProjectReference Include="..\CuteAnt.Extensions.Serialization.Tests.Net40\CuteAnt.Extensions.Serialization.Tests.Net40.csproj" />
   </ItemGroup>

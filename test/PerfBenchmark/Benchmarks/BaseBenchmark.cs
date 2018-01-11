@@ -86,6 +86,49 @@ namespace PerfBenchmark
 
     #endregion
 
+    #region -- Utf5Json --
+
+    [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
+    public byte[] SerializeUtf8Json()
+    {
+      return Utf8Json.JsonSerializer.Serialize(GetValue());
+    }
+    private byte[] _utf8JsonData;
+    [GlobalSetup(Target = nameof(DeserializeUtf8Json))]
+    public void SetupDeserializeUtf8Json()
+    {
+      _utf8JsonData = Utf8Json.JsonSerializer.Serialize(GetValue());
+    }
+    [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
+    public T DeserializeUtf8Json()
+    {
+      return Utf8Json.JsonSerializer.Deserialize<T>(_utf8JsonData);
+    }
+
+    #endregion
+
+    #region -- Utf5JsonFormatter --
+
+    private static readonly Utf8JsonMessageFormatter _utf8JsonFormatter = Utf8JsonMessageFormatter.DefaultInstance;
+    [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
+    public byte[] SerializeUtf8JsonFormatter()
+    {
+      return _utf8JsonFormatter.SerializeObject(GetValue());
+    }
+    private byte[] _utf8JsonData1;
+    [GlobalSetup(Target = nameof(DeserializeUtf8JsonFormatter))]
+    public void SetupDeserializeUtf8JsonFormatter()
+    {
+      _utf8JsonData1 = SerializeUtf8JsonFormatter();
+    }
+    [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
+    public T DeserializeUtf8JsonFormatter()
+    {
+      return _utf8JsonFormatter.Deserialize<T>(_utf8JsonData1);
+    }
+
+    #endregion
+
     #region -- JsonConvert --
 
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]

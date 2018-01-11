@@ -86,7 +86,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return MessagePackSerializer.Deserialize<T>(serializedObject, s_typelessResolver);
+        return (T)MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
       }
       catch (Exception ex)
       {
@@ -99,7 +99,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return MessagePackSerializer.Deserialize<T>(serializedObject, offset, count, s_typelessResolver);
+        return (T)MessagePackSerializer.Deserialize<object>(serializedObject, offset, count, s_typelessResolver);
       }
       catch (Exception ex)
       {
@@ -145,7 +145,7 @@ namespace CuteAnt.Extensions.Serialization
 
       try
       {
-        return (T)MessagePackSerializer.Deserialize<object>(readStream, s_typelessResolver);
+        return (T)MessagePackSerializer.Deserialize<object>(readStream, s_typelessResolver, false);
       }
       catch (Exception ex)
       {
@@ -164,7 +164,7 @@ namespace CuteAnt.Extensions.Serialization
 
       try
       {
-        return MessagePackSerializer.Deserialize<object>(readStream, s_typelessResolver);
+        return MessagePackSerializer.Deserialize<object>(readStream, s_typelessResolver, false);
       }
       catch (Exception ex)
       {

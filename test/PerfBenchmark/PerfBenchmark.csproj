@@ -10,7 +10,6 @@
     <PackageReference Include="BenchmarkDotNet" Version="$(BenchmarkDotNetPackageVersion)" />
     <PackageReference Include="CuteAnt.IO.Pipelines" Version="$(CuteAntIOPipelinesPackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
-    <PackageReference Include="Utf8Json" Version="1.3.4" />
     <PackageReference Include="MessagePackAnalyzer" Version="$(MessagePackAnalyzerPackageVersion)" />
   </ItemGroup>
 
@@ -18,11 +17,8 @@
     <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization.Hyperion\CuteAnt.Extensions.Serialization.Hyperion.csproj" />
     <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization.MessagePack\CuteAnt.Extensions.Serialization.MessagePack.csproj" />
     <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization.Protobuf\CuteAnt.Extensions.Serialization.Protobuf.csproj" />
+    <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization.Utf8Json\CuteAnt.Extensions.Serialization.Utf8Json.csproj" />
     <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization\CuteAnt.Extensions.Serialization.csproj" />
-    <ProjectReference Include="..\..\src\Hyperion\Hyperion.csproj" />
-    <ProjectReference Include="..\..\src\MessagePack\MessagePack.csproj" />
-    <ProjectReference Include="..\..\src\protobuf-net\protobuf-net.csproj" />
-    <ProjectReference Include="..\..\src\ServiceStack.Text\ServiceStack.Text.csproj" />
   </ItemGroup>
 
   <Import Project="..\..\..\CuteAnt.Extensions.Common\src\System.IO.Pipelines.Extensions\System.IO.Pipelines.Extensions.projitems" Label="Shared" />

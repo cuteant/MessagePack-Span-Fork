@@ -1,12 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Text;
-using CuteAnt.Buffers;
-using System.Threading;
 using System.Threading.Tasks;
-#if !NET40
-//using CuteAnt.IO.Pipelines;
-#endif
 
 namespace CuteAnt.Extensions.Serialization
 {
@@ -48,7 +42,12 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns></returns>
     public virtual T Deserialize<T>(byte[] serializedObject)
     {
-      return (T)Deserialize(typeof(T), serializedObject);
+      if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
+
+      using (var ms = new MemoryStream(serializedObject))
+      {
+        return ReadFromStream<T>(ms);
+      }
     }
 
     /// <summary>Deserializes the specified serialized object.</summary>
@@ -59,7 +58,12 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns></returns>
     public virtual T Deserialize<T>(byte[] serializedObject, int offset, int count)
     {
-      return (T)Deserialize(typeof(T), serializedObject, offset, count);
+      if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
+
+      using (var ms = new MemoryStream(serializedObject, offset, count))
+      {
+        return ReadFromStream<T>(ms);
+      }
     }
 
     /// <summary>Deserializes the asynchronous.</summary>

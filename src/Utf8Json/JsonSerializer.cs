@@ -12,6 +12,8 @@ namespace Utf8Json
     /// </summary>
     public static partial class JsonSerializer
     {
+        private const int c_zeroSize = 0;
+
         static IJsonFormatterResolver defaultResolver;
 
         /// <summary>
@@ -238,12 +240,12 @@ namespace Utf8Json
             if (resolver == null) resolver = DefaultResolver;
 
 #if NETSTANDARD || NET_4_5_GREATER
-            var ms = stream as MemoryStream;
-            if (ms != null)
+            if (stream is MemoryStream ms)
             {
-                ArraySegment<byte> buf2;
-                if (ms.TryGetBuffer(out buf2))
+                if (ms.TryGetBuffer(out ArraySegment<byte> buf2))
                 {
+                    if (c_zeroSize == buf2.Count) { return default; }
+
                     // when token is number, can not use from pool(can not find end line).
                     var token = new JsonReader(buf2.Array, buf2.Offset).GetCurrentJsonToken();
                     if (token == JsonToken.Number)
@@ -260,6 +262,8 @@ namespace Utf8Json
             {
                 var buf = MemoryPool.GetBuffer();
                 var len = FillFromStream(stream, ref buf);
+
+                if (c_zeroSize == len) { return default; }
 
                 // when token is number, can not use from pool(can not find end line).
                 var token = new JsonReader(buf).GetCurrentJsonToken();

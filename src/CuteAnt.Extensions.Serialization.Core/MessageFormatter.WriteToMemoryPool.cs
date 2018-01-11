@@ -12,6 +12,34 @@ namespace CuteAnt.Extensions.Serialization
 {
   partial class MessageFormatter
   {
+    public ArraySegment<byte> WriteToMemoryPool<T>(T item)
+    {
+      using (var pooledStream = BufferManagerOutputStreamManager.Create())
+      {
+        var outputStream = pooledStream.Object;
+        outputStream.Reinitialize(c_initialBufferSize, BufferManager.Shared);
+
+        WriteToStream<T>(item, outputStream);
+        return outputStream.ToArraySegment();
+      }
+    }
+
+    /// <summary>Serializes the specified item.</summary>
+    /// <param name="item">The item.</param>
+    /// <param name="initialBufferSize">The initial buffer size.</param>
+    /// <returns></returns>
+    public ArraySegment<byte> WriteToMemoryPool<T>(T item, int initialBufferSize)
+    {
+      using (var pooledStream = BufferManagerOutputStreamManager.Create())
+      {
+        var outputStream = pooledStream.Object;
+        outputStream.Reinitialize(initialBufferSize, BufferManager.Shared);
+
+        WriteToStream<T>(item, outputStream);
+        return outputStream.ToArraySegment();
+      }
+    }
+
     public ArraySegment<byte> WriteToMemoryPool(object item)
     {
       using (var pooledStream = BufferManagerOutputStreamManager.Create())
@@ -54,6 +82,27 @@ namespace CuteAnt.Extensions.Serialization
       //        return new ArraySegment<byte>(buffer, 0, length);
       //      }
       //#endif
+    }
+
+    public Task<ArraySegment<byte>> WriteToMemoryPoolAsync<T>(T item)
+    {
+      return
+#if NET40
+        TaskEx
+#else
+        Task
+#endif
+        .FromResult(WriteToMemoryPool<T>(item));
+    }
+    public Task<ArraySegment<byte>> WriteToMemoryPoolAsync<T>(T item, int initialBufferSize)
+    {
+      return
+#if NET40
+        TaskEx
+#else
+        Task
+#endif
+        .FromResult(WriteToMemoryPool<T>(item, initialBufferSize));
     }
 
     public Task<ArraySegment<byte>> WriteToMemoryPoolAsync(object item)

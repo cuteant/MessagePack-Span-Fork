@@ -16,12 +16,26 @@ namespace CuteAnt.Extensions.Serialization
 
     public virtual byte[] Serialize<T>(T item)
     {
-      return SerializeObject(item);
+      using (var pooledStream = BufferManagerOutputStreamManager.Create())
+      {
+        var outputStream = pooledStream.Object;
+        outputStream.Reinitialize(c_initialBufferSize);
+
+        WriteToStream<T>(item, outputStream);
+        return outputStream.ToByteArray();
+      }
     }
 
     public virtual byte[] Serialize<T>(T item, int initialBufferSize)
     {
-      return SerializeObject(item, initialBufferSize);
+      using (var pooledStream = BufferManagerOutputStreamManager.Create())
+      {
+        var outputStream = pooledStream.Object;
+        outputStream.Reinitialize(initialBufferSize);
+
+        WriteToStream<T>(item, outputStream);
+        return outputStream.ToByteArray();
+      }
     }
 
     public Task<byte[]> SerializeAsync<T>(T item)
