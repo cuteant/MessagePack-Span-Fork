@@ -7,6 +7,12 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Include="..\NLog.config" Link="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkPackageVersion)" />
@@ -14,6 +20,7 @@
     <PackageReference Include="xunit.analyzers" Version="$(xUnitAnalyzersPackageVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitRunnerVsPackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageReference Include="NLog.Extensions.Logging.Unofficial" Version="$(NLogExtensionsLoggingUnofficialPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
@@ -29,5 +36,7 @@
     <ProjectReference Include="..\..\src\Utf8Json.ImmutableCollection\Utf8Json.ImmutableCollection.csproj" />
     <ProjectReference Include="..\..\src\Utf8Json\Utf8Json.csproj" />
   </ItemGroup>
+
+  <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Logging.Sources\CuteAnt.Extensions.Logging.Sources.projitems" Label="Shared" />
 
 </Project>

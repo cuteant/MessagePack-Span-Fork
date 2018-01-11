@@ -2,14 +2,25 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 using Xunit;
 
 namespace Utf8Json.Tests
 {
     public class ObjectResolverTest
     {
+        private static readonly ILogger s_logger;
+        static ObjectResolverTest()
+        {
+            var logFactory = new LoggerFactory();
+            logFactory.AddNLog();
+            TraceLogger.Initialize(logFactory);
+            s_logger = TraceLogger.GetLogger<ObjectResolverTest>();
+        }
         T Convert<T>(T value)
         {
+            s_logger.LogInformation(JsonSerializer.ToJsonString(value));
             return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value));
         }
 
@@ -204,7 +215,7 @@ namespace Utf8Json.Tests
             v0_.MyProperty1.MyProperty1.Is(v1.MyProperty1.MyProperty1);
             v0_.After.Is(9999);
         }
-        
+
 
         [Fact]
         public void GenericClassTest()
@@ -245,7 +256,7 @@ namespace Utf8Json.Tests
             JsonSerializer.ToJsonString(ne2).Is(@"{""MyProperty"":0}");
         }
 
-   
+
 
         [Fact]
         public void FindingConstructor()

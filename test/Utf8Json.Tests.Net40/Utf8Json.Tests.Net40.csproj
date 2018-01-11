@@ -22,6 +22,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.1.0" />
     <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
+    <PackageReference Include="NLog.Extensions.Logging.Unofficial" Version="$(NLogExtensionsLoggingUnofficialPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,8 +30,11 @@
     <ProjectReference Include="..\..\src\Utf8Json\Utf8Json.csproj" />
   </ItemGroup>
 
+  <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Logging.Sources\CuteAnt.Extensions.Logging.Sources.projitems" Label="Shared" />
+
+  
   <ItemGroup>
-    <None Update="xunit.runner.json">
+    <None Include="..\NLog.config" Link="NLog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -21,6 +21,21 @@
     <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization\CuteAnt.Extensions.Serialization.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Infos\msg16k.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Infos\msg32k.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Infos\msg4k.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Infos\msg64k.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <Import Project="..\..\..\CuteAnt.Extensions.Common\src\System.IO.Pipelines.Extensions\System.IO.Pipelines.Extensions.projitems" Label="Shared" />
 
 </Project>
