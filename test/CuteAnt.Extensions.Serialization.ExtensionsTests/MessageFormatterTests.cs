@@ -21,7 +21,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var poco = SerializerPocoSerializable.Create();
       var newPoco = _formatter.DeepCopy(poco);
       Helper.ComparePoco(poco, newPoco);
-      newPoco = (SerializerPocoSerializable)_formatter.DeepCopy((object)poco);
+      newPoco = (SerializerPocoSerializable)_formatter.DeepCopyObject((object)poco);
       Helper.ComparePoco(poco, newPoco);
     }
 
@@ -116,7 +116,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var obj = _formatter.ReadFromStream(typeof(SerializerPocoSerializable), ms);
       Assert.Null(obj);
 
-      var emptyBytes = _formatter.Serialize(default(SerializerPocoSerializable));
+      var emptyBytes = _formatter.SerializeObject(default(SerializerPocoSerializable));
       Assert.Empty(emptyBytes);
 
       var emptySegment = _formatter.WriteToMemoryPool(default(SerializerPocoSerializable));
@@ -139,7 +139,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var obj = await _formatter.ReadFromStreamAsync(typeof(SerializerPocoSerializable), ms, null);
       Assert.Null(obj);
 
-      var emptyBytes = await _formatter.SerializeAsync(default(SerializerPocoSerializable));
+      var emptyBytes = await _formatter.SerializeObjectAsync(default(SerializerPocoSerializable));
       Assert.Empty(emptyBytes);
 
       var emptySegment = await _formatter.WriteToMemoryPoolAsync(default(SerializerPocoSerializable));
@@ -152,7 +152,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public void SerializeToBytesTest()
     {
       var poco = SerializerPocoSerializable.Create();
-      var serializedObject = _formatter.Serialize(poco);
+      var serializedObject = _formatter.SerializeObject(poco);
       var newPoco = _formatter.Deserialize<SerializerPocoSerializable>(serializedObject);
       Helper.ComparePoco(poco, newPoco);
     }
@@ -161,7 +161,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public async Task SerializeToBytesAsyncTest()
     {
       var poco = SerializerPocoSerializable.Create();
-      var serializedObject = await _formatter.SerializeAsync(poco);
+      var serializedObject = await _formatter.SerializeObjectAsync(poco);
       var newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(serializedObject);
       Helper.ComparePoco(poco, newPoco);
     }

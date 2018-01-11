@@ -31,20 +31,114 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns>A value indicating whether the item can be serialized.</returns>
     bool IsSupportedType(Type type);
 
+    #region -- DeepCopy --
+
     /// <summary>Tries to create a copy of source.</summary>
     /// <param name="source">The item to create a copy of</param>
     /// <returns>The copy</returns>
-    object DeepCopy(object source);
+    object DeepCopyObject(object source);
 
     /// <summary>Tries to create a copy of source.</summary>
     /// <param name="source">The item to create a copy of</param>
     /// <returns>The copy</returns>
     T DeepCopy<T>(T source);
 
-    byte[] Serialize(object item);
-    byte[] Serialize(object item, int initialBufferSize);
+    #endregion
 
-    #region -- Read --
+    #region -- Serialize --
+
+    byte[] Serialize<T>(T item);
+
+    byte[] Serialize<T>(T item, int initialBufferSize);
+
+    Task<byte[]> SerializeAsync<T>(T item);
+    Task<byte[]> SerializeAsync<T>(T item, int initialBufferSize);
+
+    #endregion
+
+    #region -- SerializeObject --
+
+    byte[] SerializeObject(object item);
+    byte[] SerializeObject(object item, int initialBufferSize);
+
+    Task<byte[]> SerializeObjectAsync(object item);
+    Task<byte[]> SerializeObjectAsync(object item, int initialBufferSize);
+
+    #endregion
+
+    #region -- WriteToMemoryPool --
+
+    ArraySegment<byte> WriteToMemoryPool(object item);
+    ArraySegment<byte> WriteToMemoryPool(object item, int initialBufferSize);
+
+#if !NET40
+    Task<ArraySegment<byte>> WriteToMemoryPoolAsync(object item);
+    Task<ArraySegment<byte>> WriteToMemoryPoolAsync(object item, int initialBufferSize);
+#endif
+
+    #endregion
+
+    #region -- Deserialize --
+
+    /// <summary>Deserializes the specified serialized object.</summary>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    object Deserialize(Type type, byte[] serializedObject);
+
+    /// <summary>Deserializes the specified serialized object.</summary>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <param name="offset"></param>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    object Deserialize(Type type, byte[] serializedObject, int offset, int count);
+
+    /// <summary>Deserializes the specified serialized object.</summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    T Deserialize<T>(byte[] serializedObject);
+
+    /// <summary>Deserializes the specified serialized object.</summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <param name="offset"></param>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    T Deserialize<T>(byte[] serializedObject, int offset, int count);
+
+    /// <summary>Deserializes the asynchronous.</summary>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    Task<object> DeserializeAsync(Type type, byte[] serializedObject);
+
+    /// <summary>Deserializes the asynchronous.</summary>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <param name="offset"></param>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    Task<object> DeserializeAsync(Type type, byte[] serializedObject, int offset, int count);
+
+    /// <summary>Deserializes the asynchronous.</summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    Task<T> DeserializeAsync<T>(byte[] serializedObject);
+
+    /// <summary>Deserializes the asynchronous.</summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <param name="offset"></param>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    Task<T> DeserializeAsync<T>(byte[] serializedObject, int offset, int count);
+
+    #endregion
+
+    #region -- ReadFromStream --
 
     /// <summary>Returns an object of the given <paramref name="type"/> from the given <paramref name="readStream"/></summary>
     /// <remarks>
@@ -215,7 +309,7 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
-    #region -- Write --
+    #region -- WriteToStream --
 
     /// <summary>Tries to serializes the given <paramref name="value"/> 
     /// to the given <paramref name="writeStream"/>.</summary>
@@ -307,6 +401,9 @@ namespace CuteAnt.Extensions.Serialization
     /// <exception cref="NotSupportedException">Derived types need to support writing.</exception>
     /// <seealso cref="CanWriteType(Type)"/>
     void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding);
+
+
+
 
 #if !NET40
     /// <summary>Returns a <see cref="Task"/> that serializes the given <paramref name="value"/> 

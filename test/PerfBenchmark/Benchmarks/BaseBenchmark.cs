@@ -70,7 +70,7 @@ namespace PerfBenchmark
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public byte[] SerializeMessagePackFormatter()
     {
-      return _messagePackFormatter.Serialize(GetValue());
+      return _messagePackFormatter.SerializeObject(GetValue());
     }
     private byte[] _messagePackData1;
     [GlobalSetup(Target = nameof(DeserializeMessagePackFormatter))]
@@ -133,13 +133,13 @@ namespace PerfBenchmark
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public byte[] SerializeJsonFormatter()
     {
-      return _jsonFormatter.Serialize(GetValue());
+      return _jsonFormatter.SerializeObject(GetValue());
     }
     private byte[] _jsonData2;
     [GlobalSetup(Target = nameof(DeserializeJsonFormatter))]
     public void SetupDeserializeJsonFormatter()
     {
-      _jsonData2 = _jsonFormatter.Serialize(GetValue());
+      _jsonData2 = _jsonFormatter.SerializeObject(GetValue());
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeJsonFormatter()
@@ -179,7 +179,7 @@ namespace PerfBenchmark
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public byte[] SerializeProtoBufFormatter()
     {
-      return _protobufFormatter.Serialize(GetValue());
+      return _protobufFormatter.SerializeObject(GetValue());
     }
     private byte[] _protoBufData1;
     [GlobalSetup(Target = nameof(DeserializeProtoBufFormatter))]
@@ -245,7 +245,7 @@ namespace PerfBenchmark
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public byte[] SerializeHyperionFormatter()
     {
-      return _hyperionFormatter.Serialize(GetValue());
+      return _hyperionFormatter.SerializeObject(GetValue());
     }
     private byte[] _hyperionData1;
     [GlobalSetup(Target = nameof(DeserializeHyperionFormatter))]

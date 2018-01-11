@@ -37,7 +37,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- DeepCopy --
 
     /// <inheritdoc />
-    public override object DeepCopy(object source)
+    public override object DeepCopyObject(object source)
     {
       if (null == source) { return null; }
 

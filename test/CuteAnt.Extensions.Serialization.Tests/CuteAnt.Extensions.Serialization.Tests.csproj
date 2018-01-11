@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization.Extensions\CuteAnt.Extensions.Serialization.Extensions.csproj" />
     <ProjectReference Include="..\..\src\CuteAnt.Extensions.Serialization\CuteAnt.Extensions.Serialization.csproj" />
   </ItemGroup>
 

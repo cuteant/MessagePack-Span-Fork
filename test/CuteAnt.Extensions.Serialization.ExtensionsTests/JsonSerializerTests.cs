@@ -61,7 +61,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       byte[] data = new byte[1];
       data[0] = 0;
 
-      byte[] serializedData = jsonFormatter.Serialize(data);
+      byte[] serializedData = jsonFormatter.SerializeObject(data);
       var json = System.Text.Encoding.UTF8.GetString(serializedData);
       Assert.NotNull(serializedData);
 
@@ -78,7 +78,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       jsonFormatter.DefaultSerializerSettings = JsonConvertX.IncludeTypeNameSettings;
 
       byte[] data = new byte[0];
-      byte[] serializedData = jsonFormatter.Serialize(data);
+      byte[] serializedData = jsonFormatter.SerializeObject(data);
       Assert.NotNull(serializedData);
       byte[] deserializedData = jsonFormatter.Deserialize<byte[]>(serializedData);
       Assert.NotNull(deserializedData);

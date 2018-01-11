@@ -78,7 +78,7 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- DeepCopy --
 
-    public override object DeepCopy(object source) => s_model.DeepClone(source);
+    public override object DeepCopyObject(object source) => s_model.DeepClone(source);
 
     #endregion
 

@@ -46,7 +46,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- DeepCopy --
 
     /// <inheritdoc />
-    public override object DeepCopy(object source)
+    public override object DeepCopyObject(object source)
     {
       if (source == null) { return null; }
 
@@ -66,16 +66,59 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
-    #region -- Serialize --
+    #region -- Deserialize --
 
-    public override byte[] Serialize(object item)
+    /// <inheritdoc />
+    public override T Deserialize<T>(byte[] serializedObject)
     {
-      return JsonSerializer.NonGeneric.Serialize(item, s_defaultResolver);
+      try
+      {
+        return JsonSerializer.Deserialize<T>(serializedObject, 0, s_defaultResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
+      }
     }
-
-    public override byte[] Serialize(object item, int initialBufferSize)
+    /// <inheritdoc />
+    public override T Deserialize<T>(byte[] serializedObject, int offset, int count)
     {
-      return JsonSerializer.NonGeneric.Serialize(item, s_defaultResolver);
+      try
+      {
+        return JsonSerializer.Deserialize<T>(serializedObject, offset, s_defaultResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
+      }
+    }
+    /// <inheritdoc />
+    public override object Deserialize(Type type, byte[] serializedObject)
+    {
+      try
+      {
+        return JsonSerializer.NonGeneric.Deserialize(type, serializedObject, 0, s_defaultResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
+      }
+    }
+    /// <inheritdoc />
+    public override object Deserialize(Type type, byte[] serializedObject, int offset, int count)
+    {
+      try
+      {
+        return JsonSerializer.NonGeneric.Deserialize(type, serializedObject, offset, s_defaultResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
+      }
     }
 
     #endregion
@@ -115,6 +158,36 @@ namespace CuteAnt.Extensions.Serialization
         s_logger.LogError(ex.ToString());
         return GetDefaultValueForType(type);
       }
+    }
+
+    #endregion
+
+    #region -- Serialize --
+
+    public override byte[] Serialize<T>(T item)
+    {
+      return JsonSerializer.Serialize(item, s_defaultResolver);
+    }
+
+    public override byte[] Serialize<T>(T item, int initialBufferSize)
+    {
+      return JsonSerializer.Serialize(item, s_defaultResolver);
+    }
+
+    #endregion
+
+    #region -- SerializeObject --
+
+    /// <inheritdoc />
+    public override byte[] SerializeObject(object item)
+    {
+      return JsonSerializer.NonGeneric.Serialize(item, s_defaultResolver);
+    }
+
+    /// <inheritdoc />
+    public override byte[] SerializeObject(object item, int initialBufferSize)
+    {
+      return JsonSerializer.NonGeneric.Serialize(item, s_defaultResolver);
     }
 
     #endregion

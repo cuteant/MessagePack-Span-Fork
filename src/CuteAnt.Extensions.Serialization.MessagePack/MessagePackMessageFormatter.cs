@@ -60,7 +60,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- DeepCopy --
 
     /// <inheritdoc />
-    public override object DeepCopy(object source)
+    public override object DeepCopyObject(object source)
     {
       if (source == null) { return null; }
 
@@ -79,18 +79,59 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
-    #region -- Serialize --
+    #region -- Deserialize --
 
-    public override byte[] Serialize(object item)
+    /// <inheritdoc />
+    public override T Deserialize<T>(byte[] serializedObject)
     {
-      if (null == item) { return EmptyArray<byte>.Instance; }
-      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+      try
+      {
+        return MessagePackSerializer.Deserialize<T>(serializedObject, s_typelessResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
+      }
     }
-
-    public override byte[] Serialize(object item, int initialBufferSize)
+    /// <inheritdoc />
+    public override T Deserialize<T>(byte[] serializedObject, int offset, int count)
     {
-      if (null == item) { return EmptyArray<byte>.Instance; }
-      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+      try
+      {
+        return MessagePackSerializer.Deserialize<T>(serializedObject, offset, count, s_typelessResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
+      }
+    }
+    /// <inheritdoc />
+    public override object Deserialize(Type type, byte[] serializedObject)
+    {
+      try
+      {
+        return MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
+      }
+    }
+    /// <inheritdoc />
+    public override object Deserialize(Type type, byte[] serializedObject, int offset, int count)
+    {
+      try
+      {
+        return MessagePackSerializer.Deserialize<object>(serializedObject, offset, count, s_typelessResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
+      }
     }
 
     #endregion
@@ -130,6 +171,42 @@ namespace CuteAnt.Extensions.Serialization
         s_logger.LogError(ex.ToString());
         return GetDefaultValueForType(type);
       }
+    }
+
+    #endregion
+
+    #region -- Serialize --
+
+    /// <inheritdoc />
+    public override byte[] Serialize<T>(T item)
+    {
+      if (null == item) { return EmptyArray<byte>.Instance; }
+      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+    }
+
+    /// <inheritdoc />
+    public override byte[] Serialize<T>(T item, int initialBufferSize)
+    {
+      if (null == item) { return EmptyArray<byte>.Instance; }
+      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+    }
+
+    #endregion
+
+    #region -- SerializeObject --
+
+    /// <inheritdoc />
+    public override byte[] SerializeObject(object item)
+    {
+      if (null == item) { return EmptyArray<byte>.Instance; }
+      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+    }
+
+    /// <inheritdoc />
+    public override byte[] SerializeObject(object item, int initialBufferSize)
+    {
+      if (null == item) { return EmptyArray<byte>.Instance; }
+      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
     }
 
     #endregion
