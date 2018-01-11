@@ -500,6 +500,7 @@ namespace Utf8Json.Resolvers.Internal
             {typeof(char)},
             {typeof(string)},
             {typeof(System.Guid)},
+            {typeof(CuteAnt.CombGuid)},
             {typeof(System.TimeSpan)},
             {typeof(System.DateTime)},
             {typeof(System.DateTimeOffset)},

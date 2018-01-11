@@ -1025,6 +1025,8 @@ namespace ServiceStack.Text
             PlatformExtensions.ClearRuntimeAttributes();
             ReflectionExtensions.Reset();
             JsState.Reset();
+
+            JsConfigHelper.RegisterCombGuidSerializer();
         }
 
         static void Reset(Type cachesForType)

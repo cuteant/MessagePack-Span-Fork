@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using CuteAnt;
 
 namespace MessagePack.Resolvers
 {
@@ -82,6 +83,8 @@ namespace MessagePack.Internal
             {typeof(DateTimeOffset?), new StaticNullableFormatter<DateTimeOffset>(DateTimeOffsetFormatter.Instance)},
             {typeof(Guid), GuidFormatter.Instance},
             {typeof(Guid?), new StaticNullableFormatter<Guid>(GuidFormatter.Instance)},
+            {typeof(CombGuid), CombGuidFormatter.Instance},
+            {typeof(CombGuid?), new StaticNullableFormatter<CombGuid>(CombGuidFormatter.Instance)},
             {typeof(Uri), UriFormatter.Instance},
             {typeof(Version), VersionFormatter.Instance},
             {typeof(StringBuilder), StringBuilderFormatter.Instance},

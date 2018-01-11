@@ -16,6 +16,24 @@ namespace CuteAnt.Extensions.Serialization.Tests
     }
 
     [Fact]
+    public void CombGuidTest()
+    {
+      var comb = CombGuid.NewComb();
+      var newComb = _formatter.DeepCopy(comb);
+      Assert.Equal(comb, newComb);
+
+      newComb = _formatter.DeepCopy(comb);
+      Assert.Equal(comb, newComb);
+
+      CombGuid? comb1 = CombGuid.NewComb();
+      CombGuid? newComb1 = _formatter.DeepCopy(comb1);
+      Assert.Equal(comb1, newComb1);
+
+      newComb1 = _formatter.DeepCopy(comb1);
+      Assert.Equal(comb1, newComb1);
+    }
+
+    [Fact]
     public void DeepCopyTest()
     {
       var poco = SerializerPocoSerializable.Create();

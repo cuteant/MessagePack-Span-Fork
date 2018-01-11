@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using CuteAnt;
 using Utf8Json.Formatters;
 
 namespace Utf8Json.Resolvers
@@ -80,6 +81,8 @@ namespace Utf8Json.Resolvers
                 {typeof(decimal?), new StaticNullableFormatter<decimal>(DecimalFormatter.Default)},
                 {typeof(Guid), GuidFormatter.Default},
                 {typeof(Guid?), new StaticNullableFormatter<Guid>(GuidFormatter.Default)},
+                {typeof(CombGuid), CombGuidFormatter.Default},
+                {typeof(CombGuid?), new StaticNullableFormatter<CombGuid>(CombGuidFormatter.Default)},
                 {typeof(Uri), UriFormatter.Default},
                 {typeof(Version), VersionFormatter.Default},
                 {typeof(StringBuilder), StringBuilderFormatter.Default},

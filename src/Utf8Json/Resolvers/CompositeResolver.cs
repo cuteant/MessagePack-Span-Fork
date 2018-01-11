@@ -142,7 +142,7 @@ namespace Utf8Json.Resolvers
 
         public static IJsonFormatterResolver Create(IJsonFormatter[] formatters, IJsonFormatterResolver[] resolvers)
         {
-            var id = Guid.NewGuid().ToString().Replace("-", "");
+            var id = Guid.NewGuid().ToString("N"); // ## 苦竹 修改 Guid.NewGuid().ToString().Replace("-", ""); ##
             var resolverType = assembly.DefineType("DynamicCompositeResolver_" + id, TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed, typeof(DynamicCompositeResolver));
             var cacheType = assembly.DefineType("DynamicCompositeResolverCache_" + id, TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed, null);
             var genericP = cacheType.DefineGenericParameters("T")[0];
