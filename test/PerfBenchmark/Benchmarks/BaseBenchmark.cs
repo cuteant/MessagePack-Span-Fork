@@ -40,7 +40,7 @@ namespace PerfBenchmark
     [GlobalSetup(Target = nameof(DeserializeMessagePack))]
     public void SetupDeserializeMessagePack()
     {
-      _messagePackData = MessagePackSerializer.Serialize(_value);
+      _messagePackData = MessagePackSerializer.Serialize(GetValue());
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeMessagePack()
@@ -61,7 +61,7 @@ namespace PerfBenchmark
     [GlobalSetup(Target = nameof(DeserializeMessagePackTypeless))]
     public void SetupDeserializeMessagePackTypeless()
     {
-      _messagePackTypelessData = MessagePackSerializer.Typeless.Serialize(_value);
+      _messagePackTypelessData = MessagePackSerializer.Typeless.Serialize(GetValue());
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeMessagePackTypeless()
@@ -82,7 +82,7 @@ namespace PerfBenchmark
     [GlobalSetup(Target = nameof(DeserializeLz4MessagePackTypeless))]
     public void SetupDeserializeLz4MessagePackTypeless()
     {
-      _messagePackTypelessData2 = LZ4MessagePackSerializer.Typeless.Serialize(_value);
+      _messagePackTypelessData2 = LZ4MessagePackSerializer.Typeless.Serialize(GetValue());
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeLz4MessagePackTypeless()
@@ -104,7 +104,7 @@ namespace PerfBenchmark
     [GlobalSetup(Target = nameof(DeserializeMessagePackFormatter))]
     public void SetupDeserializeMessagePackFormatter()
     {
-      _messagePackData1 = SerializeMessagePackFormatter();
+      _messagePackData1 = _messagePackFormatter.SerializeObject(GetValue());
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeMessagePackFormatter()
@@ -125,7 +125,7 @@ namespace PerfBenchmark
     [GlobalSetup(Target = nameof(DeserializeUtf8Json))]
     public void SetupDeserializeUtf8Json()
     {
-      _utf8JsonData = Utf8Json.JsonSerializer.Serialize(_value);
+      _utf8JsonData = Utf8Json.JsonSerializer.Serialize(GetValue());
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeUtf8Json()
@@ -147,7 +147,7 @@ namespace PerfBenchmark
     [GlobalSetup(Target = nameof(DeserializeUtf8JsonFormatter))]
     public void SetupDeserializeUtf8JsonFormatter()
     {
-      _utf8JsonData1 = SerializeUtf8JsonFormatter();
+      _utf8JsonData1 = _utf8JsonFormatter.SerializeObject(GetValue());
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeUtf8JsonFormatter()
@@ -168,7 +168,7 @@ namespace PerfBenchmark
     [GlobalSetup(Target = nameof(DeserializeJsonNet))]
     public void SetupDeserializeJsonNet()
     {
-      _jsonData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_value, _jsonSerializerSettings));
+      _jsonData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetValue(), _jsonSerializerSettings));
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeJsonNet()
@@ -189,7 +189,7 @@ namespace PerfBenchmark
     [GlobalSetup(Target = nameof(DeserializeJsonNetX))]
     public void SetupDeserializeJsonNetX()
     {
-      _jsonData1 = JsonConvertX.SerializeToByteArray(_value, _jsonSerializerSettings);
+      _jsonData1 = JsonConvertX.SerializeToByteArray(GetValue(), _jsonSerializerSettings);
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeJsonNetX()
@@ -210,7 +210,7 @@ namespace PerfBenchmark
     [GlobalSetup(Target = nameof(DeserializeJsonFormatter))]
     public void SetupDeserializeJsonFormatter()
     {
-      _jsonData2 = _jsonFormatter.SerializeObject(_value);
+      _jsonData2 = _jsonFormatter.SerializeObject(GetValue());
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeJsonFormatter()
@@ -233,7 +233,9 @@ namespace PerfBenchmark
     [GlobalSetup(Target = nameof(DeserializeProtoBufNet))]
     public void SetupDeserializeProtoBufNet()
     {
-      _protoBufData = SerializeProtoBufNet();
+      var s = new MemoryStream();
+      ProtoBuf.Serializer.Serialize(s, GetValue());
+      _protoBufData = s.ToArray();
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeProtoBufNet()
@@ -256,7 +258,7 @@ namespace PerfBenchmark
     [GlobalSetup(Target = nameof(DeserializeProtoBufFormatter))]
     public void SetupDeserializeProtoBufFormatter()
     {
-      _protoBufData1 = SerializeProtoBufFormatter();
+      _protoBufData1 = _protobufFormatter.SerializeObject(GetValue());
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeProtoBufFormatter()
@@ -276,6 +278,7 @@ namespace PerfBenchmark
           versionTolerance: true,
           preserveObjectReferences: true
       );
+      _value = GetValue();
       _serializer = new Hyperion.Serializer(options);
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
@@ -298,7 +301,7 @@ namespace PerfBenchmark
       );
       _serializer1 = new Hyperion.Serializer(options);
       var s = new MemoryStream();
-      _serializer1.Serialize(_value, s);
+      _serializer1.Serialize(GetValue(), s);
       _hyperionData = s.ToArray();
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
@@ -322,7 +325,7 @@ namespace PerfBenchmark
     [GlobalSetup(Target = nameof(DeserializeHyperionFormatter))]
     public void SetupDeserializeHyperionFormatter()
     {
-      _hyperionData1 = SerializeProtoBufFormatter();
+      _hyperionData1 = _hyperionFormatter.SerializeObject(GetValue());
     }
     [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
     public T DeserializeHyperionFormatter()
