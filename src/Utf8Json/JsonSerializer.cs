@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using CuteAnt.Extensions.Internal;
 using Utf8Json.Internal;
 using Utf8Json.Resolvers;
 
@@ -251,7 +252,7 @@ namespace Utf8Json
                     if (token == JsonToken.Number)
                     {
                         var buf3 = new byte[buf2.Count];
-                        Buffer.BlockCopy(buf2.Array, buf2.Offset, buf3, 0, buf3.Length);
+                        PlatformDependent.CopyMemory(buf2.Array, buf2.Offset, buf3, 0, buf3.Length);
                         return Deserialize<T>(buf3, 0, resolver);
                     }
 

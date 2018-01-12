@@ -104,7 +104,7 @@ namespace CuteAnt.Extensions.Serialization
       catch (Exception ex)
       {
         s_logger.LogError(ex.ToString());
-        return default;
+        return GetDefaultValueForType(type);
       }
     }
     /// <inheritdoc />
@@ -117,7 +117,7 @@ namespace CuteAnt.Extensions.Serialization
       catch (Exception ex)
       {
         s_logger.LogError(ex.ToString());
-        return default;
+        return GetDefaultValueForType(type);
       }
     }
 

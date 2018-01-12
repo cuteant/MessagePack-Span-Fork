@@ -253,6 +253,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public MessagePackMessageFormatterTest() : base(MessagePackMessageFormatter.DefaultInstance) { }
   }
 
+  public class LZ4MessagePackMessageFormatterTest : SerializeTestBase
+  {
+    public LZ4MessagePackMessageFormatterTest() : base(LZ4MessagePackMessageFormatter.DefaultInstance) { }
+  }
+
   public class Utf8JsonMessageFormatterTest : SerializeTestBase
   {
     public Utf8JsonMessageFormatterTest() : base(Utf8JsonMessageFormatter.DefaultInstance) { }

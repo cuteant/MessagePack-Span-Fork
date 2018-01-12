@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\version.json.props" />
   <Import Project="..\nuget.json.props" />
+  <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.PlatformDependent.Sources\CuteAnt.Extensions.PlatformDependent.Sources.projitems" Label="Shared" />
+  <ImportGroup Condition=" '$(TargetFramework)' == 'net40' ">
+    <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems" Label="Shared" />
+  </ImportGroup>
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net471;net451;net40</TargetFrameworks>
@@ -22,6 +26,7 @@
     <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'net40' ">
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
@@ -29,19 +34,15 @@
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="$(SystemReflectionEmitLightweightPackageVersion)" />
   </ItemGroup>
 
-  <ImportGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems" Label="Shared" />
-  </ImportGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Utf8Json.Abstractions\Utf8Json.Abstractions.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="*.meta" />
     <None Remove="Resolvers\*.meta" />
     <None Remove="Internal\*.meta" />
     <None Remove="Formatters\*.meta" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Utf8Json.Abstractions\Utf8Json.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -13,7 +13,6 @@ namespace CuteAnt.Extensions.Serialization
   {
     private const int c_initialBufferSize = 1024 * 64;
     private const int c_zeroSize = 0;
-    private static readonly ArrayPool<byte> s_defaultMemoryPool = BufferManager.Shared;
 
     #region @@ Constructors @@
 

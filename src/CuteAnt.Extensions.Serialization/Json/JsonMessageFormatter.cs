@@ -184,7 +184,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- IsSupportedType --
 
     /// <inheritdoc />
-    public override bool IsSupportedType(Type type) => true;
+    public sealed override bool IsSupportedType(Type type) => true;
 
     ///// <summary>Determines whether this <see cref="JsonMessageFormatter"/> can read objects
     ///// of the specified <paramref name="type"/>.</summary>
@@ -212,7 +212,7 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- DeepCopy --
 
-    public override object DeepCopyObject(object source)
+    public sealed override object DeepCopyObject(object source)
     {
       if (source == null) { return null; }
 
@@ -228,14 +228,14 @@ namespace CuteAnt.Extensions.Serialization
 
 #if !NET40
     /// <inheritdoc />
-    public override async Task<T> ReadFromStreamAsync<T>(Stream readStream, Encoding effectiveEncoding)
+    public sealed override async Task<T> ReadFromStreamAsync<T>(Stream readStream, Encoding effectiveEncoding)
     {
       await TaskConstants.Completed;
       return (T)ReadFromStream(typeof(T), readStream, effectiveEncoding, null);
     }
 
     /// <inheritdoc />
-    public override async Task<Object> ReadFromStreamAsync(Type type, Stream readStream, Encoding effectiveEncoding)
+    public sealed override async Task<Object> ReadFromStreamAsync(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       await TaskConstants.Completed;
       return ReadFromStream(type, readStream, effectiveEncoding, null);
@@ -246,13 +246,13 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- ReadFromStream --
 
-    public override T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
+    public sealed override T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
     {
       return (T)ReadFromStream(typeof(T), readStream, effectiveEncoding, null);
     }
 
     /// <inheritdoc />
-    public override Object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
+    public sealed override Object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       return ReadFromStream(type, readStream, effectiveEncoding, null);
     }
@@ -319,21 +319,21 @@ namespace CuteAnt.Extensions.Serialization
 
 #if !NET40
     /// <inheritdoc />
-    public override Task WriteToStreamAsync<T>(T value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override Task WriteToStreamAsync<T>(T value, Stream writeStream, Encoding effectiveEncoding)
     {
       WriteToStream(typeof(T), value, writeStream, effectiveEncoding, null);
       return TaskConstants.Completed;
     }
 
     /// <inheritdoc />
-    public override Task WriteToStreamAsync(Object value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override Task WriteToStreamAsync(Object value, Stream writeStream, Encoding effectiveEncoding)
     {
       WriteToStream(null, value, writeStream, effectiveEncoding, null);
       return TaskConstants.Completed;
     }
 
     /// <inheritdoc />
-    public override Task WriteToStreamAsync(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override Task WriteToStreamAsync(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
     {
       WriteToStream(type, value, writeStream, effectiveEncoding, null);
       return TaskConstants.Completed;
@@ -345,19 +345,19 @@ namespace CuteAnt.Extensions.Serialization
     #region -- WriteToStream --
 
     /// <inheritdoc />
-    public override void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding)
     {
       WriteToStream(typeof(T), value, writeStream, effectiveEncoding, null);
     }
 
     /// <inheritdoc />
-    public override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
     {
       WriteToStream(null, value, writeStream, effectiveEncoding, null);
     }
 
     /// <inheritdoc />
-    public override void WriteToStream(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override void WriteToStream(Type type, Object value, Stream writeStream, Encoding effectiveEncoding)
     {
       WriteToStream(type, value, writeStream, effectiveEncoding, null);
     }

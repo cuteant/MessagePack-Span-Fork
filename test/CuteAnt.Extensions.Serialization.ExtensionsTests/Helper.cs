@@ -52,7 +52,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
         StringProperty = "a",
         IntProperty = 2018,
         StringArrayProperty = new string[] { "foo", "bar" },
-        StringListProperty = new List<string>(new string[] { "hello", "world" }),
+        StringListProperty = new List<string>(new string[] { "风雨送春归", "飞雪迎春到", "已是悬崖百丈冰", "犹有花枝俏", "俏也不争春", "只把春来报", "待到山花烂漫时", "她在丛中笑" }),
         ChildDictionaryProperty = new Dictionary<string, ChildPocco>()
         {
           { "king", new ChildPocco() { StringProperty = "good" } },

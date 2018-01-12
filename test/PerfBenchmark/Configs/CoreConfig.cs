@@ -27,6 +27,7 @@ namespace PerfBenchmark
 #if DESKTOPCLR
       Add(Job.Clr
           .With(BenchmarkDotNet.Environments.Runtime.Clr)
+          .With(BenchmarkDotNet.Environments.Platform.X64)
           .WithRemoveOutliers(false)
           .With(new GcMode { Server = true })
           .With(RunStrategy.Throughput)
@@ -41,6 +42,7 @@ namespace PerfBenchmark
           .With(CsProjCoreToolchain.From(NetCoreAppSettings.NetCoreApp21))
 #endif
           .With(BenchmarkDotNet.Environments.Runtime.Core)
+          .With(BenchmarkDotNet.Environments.Platform.X64)
           .WithRemoveOutliers(false)
           .With(new GcMode { Server = true })
           .With(RunStrategy.Throughput)

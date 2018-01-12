@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-
+using CuteAnt.Extensions.Internal;
 #if NETSTANDARD || DESKTOPCLR
 using System.Collections.Concurrent;
 #endif
@@ -287,7 +287,7 @@ namespace MessagePack.Formatters
                             else offset += 2; // 5
 
                             MessagePackBinary.EnsureCapacity(ref bytes, offset, headerLength);
-                            Buffer.BlockCopy(bytes, writeStarOffset + 3, bytes, writeStarOffset + headerLength, moveCount);
+                            PlatformDependent.CopyMemory(bytes, writeStarOffset + 3, bytes, writeStarOffset + headerLength, moveCount);
                         }
                         MessagePackBinary.WriteArrayHeader(ref bytes, writeStarOffset, count);
 

@@ -224,6 +224,33 @@ namespace MessagePack.Tests
             MessagePackBinary.ReadString(bytesD, 0, out readSize).Is(d);
         }
 
+        [Fact]
+        public void StringTest_Part()
+        {
+            var a = "身无彩凤双飞翼，心有灵犀一点通。";
+            var b = new String('笑', 20);
+            var c = new String('风', 130);
+            var d = new String('电', 40000);
+
+            byte[] bytesA = null;
+            MessagePackBinary.WriteString(ref bytesA, 0, a).Is(Encoding.UTF8.GetByteCount(a) + 2);
+
+            byte[] bytesB = null;
+            MessagePackBinary.WriteString(ref bytesB, 0, b).Is(Encoding.UTF8.GetByteCount(b) + 2);
+
+            byte[] bytesC = null;
+            MessagePackBinary.WriteString(ref bytesC, 0, c).Is(Encoding.UTF8.GetByteCount(c) + 3);
+
+            byte[] bytesD = null;
+            MessagePackBinary.WriteString(ref bytesD, 0, d).Is(Encoding.UTF8.GetByteCount(d) + 5);
+
+            int readSize = 0;
+            MessagePackBinary.ReadString(bytesA, 0, out readSize).Is(a);
+            MessagePackBinary.ReadString(bytesB, 0, out readSize).Is(b);
+            MessagePackBinary.ReadString(bytesC, 0, out readSize).Is(c);
+            MessagePackBinary.ReadString(bytesD, 0, out readSize).Is(d);
+        }
+
         // https://github.com/neuecc/MessagePack-CSharp/issues/22
         [Fact]
         public void DecimalLang()

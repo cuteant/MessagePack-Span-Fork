@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using CuteAnt.Extensions.Internal;
 using LZ4;
 using MessagePack.Internal;
 
@@ -11,6 +12,7 @@ namespace MessagePack
     /// </summary>
     public static partial class LZ4MessagePackSerializer
     {
+        private const int c_zeroSize = 0;
         private const int c_lz4PackageHeaderSize = 6 + 5; // (ext header size + fixed length size)
 
         public const sbyte ExtensionTypeCode = 99;
@@ -63,7 +65,7 @@ namespace MessagePack
             {
                 // can't write direct, shoganai...
                 MessagePackBinary.EnsureCapacity(ref bytes, offset, serializedData.Count);
-                Buffer.BlockCopy(serializedData.Array, serializedData.Offset, bytes, offset, serializedData.Count);
+                PlatformDependent.CopyMemory(serializedData.Array, serializedData.Offset, bytes, offset, serializedData.Count);
                 return serializedData.Count;
             }
             else
@@ -248,7 +250,7 @@ namespace MessagePack
             else
             {
                 var result = new byte[bytes.Count];
-                Buffer.BlockCopy(bytes.Array, bytes.Offset, result, 0, result.Length);
+                PlatformDependent.CopyMemory(bytes.Array, bytes.Offset, result, 0, result.Length);
                 return result;
             }
         }
@@ -299,13 +301,15 @@ namespace MessagePack
             else
             {
                 var result = new byte[bytes.Count];
-                Buffer.BlockCopy(bytes.Array, bytes.Offset, result, 0, result.Length);
+                PlatformDependent.CopyMemory(bytes.Array, bytes.Offset, result, 0, result.Length);
                 return result;
             }
         }
 
         static T DeserializeCore<T>(in ArraySegment<byte> bytes, IFormatterResolver resolver)
         {
+            if (c_zeroSize == bytes.Count) { return default; }
+
             if (resolver == null) resolver = MessagePackSerializer.DefaultResolver;
             var formatter = resolver.GetFormatterWithVerify<T>();
 

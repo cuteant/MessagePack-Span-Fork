@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using CuteAnt.Extensions.Internal;
 using Utf8Json.Internal;
 
 #if NETSTANDARD || DESKTOPCLR
@@ -66,7 +67,7 @@ namespace Utf8Json
             writer.WriteString(propertyName); // "propname"
             var buf = writer.GetBuffer();
             var result = new byte[buf.Count - 2];
-            Buffer.BlockCopy(buf.Array, buf.Offset + 1, result, 0, result.Length); // without quotation
+            PlatformDependent.CopyMemory(buf.Array, buf.Offset + 1, result, 0, result.Length); // without quotation
             return result;
         }
 
@@ -120,7 +121,7 @@ namespace Utf8Json
             UnsafeMemory.WriteRaw(ref this, rawValue);
 #else
             BinaryUtil.EnsureCapacity(ref buffer, offset, rawValue.Length);
-            Buffer.BlockCopy(rawValue, 0, buffer, offset, rawValue.Length);
+            PlatformDependent.CopyMemory(rawValue, 0, buffer, offset, rawValue.Length);
             offset += rawValue.Length;
 #endif
         }

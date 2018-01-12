@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\version.pack.props" />
   <Import Project="..\nuget.pack.props" />
+  <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.PlatformDependent.Sources\CuteAnt.Extensions.PlatformDependent.Sources.projitems" Label="Shared" />
+  <ImportGroup Condition=" '$(TargetFramework)' == 'net40' ">
+    <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems" Label="Shared" />
+  </ImportGroup>
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net471;net451;net40</TargetFrameworks>
@@ -30,6 +34,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'net40' ">
     <PackageReference Include="System.Buffers" Version="$(SystemBuffersPackageVersion)" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
   </ItemGroup>
   <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
@@ -41,19 +46,15 @@
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="$(SystemReflectionEmitLightweightPackageVersion)" />
   </ItemGroup>
 
-  <ImportGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems" Label="Shared" />
-  </ImportGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MessagePack.Abstractions\MessagePack.Abstractions.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="*.meta" />
     <None Remove="Resolvers\*.meta" />
     <None Remove="Internal\*.meta" />
     <None Remove="Formatters\*.meta" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\MessagePack.Abstractions\MessagePack.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

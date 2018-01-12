@@ -5,7 +5,7 @@ using System.Text;
 using BenchmarkDotNet.Attributes;
 using CuteAnt.Buffers;
 
-namespace PerfBenchmark.Benchmarks
+namespace PerfBenchmark
 {
   [Config(typeof(CoreConfig))]
   public class Utf8GetStringBenchmark

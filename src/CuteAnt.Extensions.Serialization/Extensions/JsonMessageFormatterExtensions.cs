@@ -43,7 +43,7 @@ namespace CuteAnt.Extensions.Serialization
     public static byte[] Serialize(this IJsonMessageFormatter formatter, object item,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null, int initialBufferSize = c_initialBufferSize)
     {
-//#if NET40
+      //#if NET40
       using (var pooledStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledStream.Object;
@@ -52,19 +52,19 @@ namespace CuteAnt.Extensions.Serialization
         formatter.WriteToStream(item?.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
         return outputStream.ToByteArray();
       }
-//#else
-//      using (var pooledPipe = PipelineManager.Create())
-//      {
-//        var pipe = pooledPipe.Object;
-//        var outputStream = new PipelineStream(pipe, initialBufferSize);
-//        formatter.WriteToStream(item?.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
-//        pipe.Flush();
-//        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
-//        var length = (int)readBuffer.Length;
-//        if (c_zeroSize == length) { return EmptyArray<byte>.Instance; }
-//        return readBuffer.ToArray();
-//      }
-//#endif
+      //#else
+      //      using (var pooledPipe = PipelineManager.Create())
+      //      {
+      //        var pipe = pooledPipe.Object;
+      //        var outputStream = new PipelineStream(pipe, initialBufferSize);
+      //        formatter.WriteToStream(item?.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
+      //        pipe.Flush();
+      //        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
+      //        var length = (int)readBuffer.Length;
+      //        if (c_zeroSize == length) { return EmptyArray<byte>.Instance; }
+      //        return readBuffer.ToArray();
+      //      }
+      //#endif
     }
 
     #endregion
@@ -93,7 +93,7 @@ namespace CuteAnt.Extensions.Serialization
     public static ArraySegment<byte> WriteToMemoryPool(this IJsonMessageFormatter formatter, object item,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null, int initialBufferSize = c_initialBufferSize)
     {
-//#if NET40
+      //#if NET40
       using (var pooledStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledStream.Object;
@@ -102,21 +102,21 @@ namespace CuteAnt.Extensions.Serialization
         formatter.WriteToStream(item?.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
         return outputStream.ToArraySegment();
       }
-//#else
-//      using (var pooledPipe = PipelineManager.Create())
-//      {
-//        var pipe = pooledPipe.Object;
-//        var outputStream = new PipelineStream(pipe, initialBufferSize);
-//        formatter.WriteToStream(item?.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
-//        pipe.Flush();
-//        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
-//        var length = (int)readBuffer.Length;
-//        if (c_zeroSize == length) { return s_emptySegment; }
-//        var buffer = BufferManager.Shared.Rent(length);
-//        readBuffer.CopyTo(buffer);
-//        return new ArraySegment<byte>(buffer, 0, length);
-//      }
-//#endif
+      //#else
+      //      using (var pooledPipe = PipelineManager.Create())
+      //      {
+      //        var pipe = pooledPipe.Object;
+      //        var outputStream = new PipelineStream(pipe, initialBufferSize);
+      //        formatter.WriteToStream(item?.GetType(), item, outputStream, effectiveEncoding, serializerSettings);
+      //        pipe.Flush();
+      //        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
+      //        var length = (int)readBuffer.Length;
+      //        if (c_zeroSize == length) { return s_emptySegment; }
+      //        var buffer = BufferManager.Shared.Rent(length);
+      //        readBuffer.CopyTo(buffer);
+      //        return new ArraySegment<byte>(buffer, 0, length);
+      //      }
+      //#endif
     }
 
     #endregion
