@@ -298,7 +298,7 @@ namespace MessagePack
             }
         }
 
-        // PlatformDependent.CopyMemory version of Array.Resize
+        // Buffer.BlockCopy version of Array.Resize
 #if NETSTANDARD || DESKTOPCLR
         [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
@@ -471,6 +471,7 @@ namespace MessagePack
             {
                 switch (rawMessagePackBlock.Length)
                 {
+                    case 0: break;
                     case 1:
                         UnsafeMemory32.WriteRaw1(ref bytes, offset, rawMessagePackBlock);
                         break;
@@ -573,6 +574,7 @@ namespace MessagePack
             {
                 switch (rawMessagePackBlock.Length)
                 {
+                    case 0: break;
                     case 1:
                         UnsafeMemory64.WriteRaw1(ref bytes, offset, rawMessagePackBlock);
                         break;
@@ -672,7 +674,7 @@ namespace MessagePack
                 }
             }
 #else
-            PlatformDependent.CopyMemory(rawMessagePackBlock, 0, bytes, offset, rawMessagePackBlock.Length);
+            Buffer.BlockCopy(rawMessagePackBlock, 0, bytes, offset, rawMessagePackBlock.Length);
 #endif
             return rawMessagePackBlock.Length;
         }
@@ -1014,7 +1016,7 @@ namespace MessagePack
                 dest[dstOffset] = MessagePackCode.Bin8;
                 dest[dstOffset + 1] = (byte)count;
 
-                PlatformDependent.CopyMemory(src, srcOffset, dest, dstOffset + 2, count);
+                if (count > 0) { PlatformDependent.CopyMemory(src, srcOffset, dest, dstOffset + 2, count); }
                 return size;
             }
             else if (count <= UInt16.MaxValue)
@@ -1781,7 +1783,7 @@ namespace MessagePack
             {
                 EnsureCapacity(ref bytes, offset, byteCount + 1);
                 bytes[offset] = (byte)(MessagePackCode.MinFixStr | byteCount);
-                PlatformDependent.CopyMemory(utf8stringBytes, 0, bytes, offset + 1, byteCount);
+                if (byteCount > 0) { PlatformDependent.CopyMemory(utf8stringBytes, 0, bytes, offset + 1, byteCount); }
                 return byteCount + 1;
             }
             else if (byteCount <= byte.MaxValue)
@@ -2061,6 +2063,7 @@ namespace MessagePack
             var length = data.Length;
             switch (length)
             {
+                case 0: return 0;
                 case 1:
                     EnsureCapacity(ref bytes, offset, 3);
                     bytes[offset] = MessagePackCode.FixExt1;
@@ -2120,7 +2123,7 @@ namespace MessagePack
                 default:
                     unchecked
                     {
-                        if (data.Length <= byte.MaxValue)
+                        if (length <= byte.MaxValue)
                         {
                             EnsureCapacity(ref bytes, offset, length + 3);
                             bytes[offset] = MessagePackCode.Ext8;
@@ -2129,7 +2132,7 @@ namespace MessagePack
                             PlatformDependent.CopyMemory(data, 0, bytes, offset + 3, length);
                             return length + 3;
                         }
-                        else if (data.Length <= UInt16.MaxValue)
+                        else if (length <= UInt16.MaxValue)
                         {
                             EnsureCapacity(ref bytes, offset, length + 4);
                             bytes[offset] = MessagePackCode.Ext16;
@@ -3700,11 +3703,17 @@ namespace MessagePack.Decoders
         public byte[] Read(byte[] bytes, int offset, out int readSize)
         {
             var length = bytes[offset + 1];
-            var newBytes = new byte[length];
-            PlatformDependent.CopyMemory(bytes, offset + 2, newBytes, 0, length);
-
             readSize = length + 2;
-            return newBytes;
+            if (length > 0)
+            {
+                var newBytes = new byte[length];
+                PlatformDependent.CopyMemory(bytes, offset + 2, newBytes, 0, length);
+                return newBytes;
+            }
+            else
+            {
+                return CuteAnt.EmptyArray<byte>.Instance;
+            }
         }
     }
 
@@ -5402,10 +5411,17 @@ namespace MessagePack.Decoders
                 var length = bytes[offset + 1];
                 var typeCode = unchecked((sbyte)bytes[offset + 2]);
 
-                var body = new byte[length];
                 readSize = (int)length + 3;
-                PlatformDependent.CopyMemory(bytes, offset + 3, body, 0, (int)length);
-                return new ExtensionResult(typeCode, body);
+                if (length > 0)
+                {
+                    var body = new byte[length];
+                    PlatformDependent.CopyMemory(bytes, offset + 3, body, 0, (int)length);
+                    return new ExtensionResult(typeCode, body);
+                }
+                else
+                {
+                    return new ExtensionResult(typeCode, CuteAnt.EmptyArray<byte>.Instance);
+                }
             }
         }
     }

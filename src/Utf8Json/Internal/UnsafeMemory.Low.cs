@@ -56,11 +56,15 @@ namespace Utf8Json.Internal
         public static unsafe void MemoryCopy(ref JsonWriter writer, byte[] src)
         {
             BinaryUtil.EnsureCapacity(ref writer.buffer, writer.offset, src.Length);
-#if !NET40
+#if !(NET40 || NET451)
             fixed (void* dstP = &writer.buffer[writer.offset])
             fixed (void* srcP = &src[0])
             {
+#if DESKTOPCLR
+                Buffer.MemoryCopy(srcP, dstP, writer.buffer.Length - writer.offset, src.Length);
+#else
                 Unsafe.CopyBlock(dstP, srcP, unchecked((uint)src.Length));
+#endif
             }
 
 #else

@@ -2,13 +2,14 @@
   <Import Project="..\version.props" />
   <Import Project="..\nuget.props" />
   <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Logging.Sources\CuteAnt.Extensions.Logging.Sources.projitems" Label="Shared" />
+  <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.PlatformDependent.Sources\CuteAnt.Extensions.PlatformDependent.Sources.projitems" Label="Shared" />
   <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems" Label="Shared" />
   
   <PropertyGroup>
     <TargetFrameworks>net471;net451;net40;netstandard2.0</TargetFrameworks>
     <RootNamespace>CuteAnt.Extensions.Serialization</RootNamespace>
     <AssemblyName>CuteAnt.Extensions.Serialization.MessagePack</AssemblyName>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">

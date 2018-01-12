@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using CuteAnt.Buffers;
+using CuteAnt.Extensions.Internal;
 using MessagePack;
 using Microsoft.Extensions.Logging;
 
@@ -143,6 +145,50 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (null == item) { return EmptyArray<byte>.Instance; }
       return LZ4MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+    }
+
+    #endregion
+
+    #region -- WriteToMemoryPool --
+
+    public override ArraySegment<byte> WriteToMemoryPool<T>(T item)
+    {
+      if (null == item) { return BufferManager.Empty; }
+      var serializedObject = LZ4MessagePackSerializer.SerializeCore<object>(item, s_typelessResolver);
+      var length = serializedObject.Count;
+      var buffer = BufferManager.Shared.Rent(length);
+      PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
+      return new ArraySegment<byte>(buffer, 0, length);
+    }
+
+    public override ArraySegment<byte> WriteToMemoryPool<T>(T item, int initialBufferSize)
+    {
+      if (null == item) { return BufferManager.Empty; }
+      var serializedObject = LZ4MessagePackSerializer.SerializeCore<object>(item, s_typelessResolver);
+      var length = serializedObject.Count;
+      var buffer = BufferManager.Shared.Rent(length);
+      PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
+      return new ArraySegment<byte>(buffer, 0, length);
+    }
+
+    public override ArraySegment<byte> WriteToMemoryPool(object item)
+    {
+      if (null == item) { return BufferManager.Empty; }
+      var serializedObject = LZ4MessagePackSerializer.SerializeCore<object>(item, s_typelessResolver);
+      var length = serializedObject.Count;
+      var buffer = BufferManager.Shared.Rent(length);
+      PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
+      return new ArraySegment<byte>(buffer, 0, length);
+    }
+
+    public override ArraySegment<byte> WriteToMemoryPool(object item, int initialBufferSize)
+    {
+      if (null == item) { return BufferManager.Empty; }
+      var serializedObject = LZ4MessagePackSerializer.SerializeCore<object>(item, s_typelessResolver);
+      var length = serializedObject.Count;
+      var buffer = BufferManager.Shared.Rent(length);
+      PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
+      return new ArraySegment<byte>(buffer, 0, length);
     }
 
     #endregion

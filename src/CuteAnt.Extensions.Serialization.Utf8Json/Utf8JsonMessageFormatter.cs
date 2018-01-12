@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using CuteAnt.Buffers;
+using CuteAnt.Extensions.Internal;
 using Utf8Json;
 using Utf8Json.Resolvers;
 using Microsoft.Extensions.Logging;
@@ -188,6 +190,46 @@ namespace CuteAnt.Extensions.Serialization
     public override byte[] SerializeObject(object item, int initialBufferSize)
     {
       return JsonSerializer.NonGeneric.Serialize(item, s_defaultResolver);
+    }
+
+    #endregion
+
+    #region -- WriteToMemoryPool --
+
+    public override ArraySegment<byte> WriteToMemoryPool<T>(T item)
+    {
+      var serializedObject = JsonSerializer.SerializeUnsafe(item, s_defaultResolver);
+      var length = serializedObject.Count;
+      var buffer = BufferManager.Shared.Rent(length);
+      PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
+      return new ArraySegment<byte>(buffer, 0, length);
+    }
+
+    public override ArraySegment<byte> WriteToMemoryPool<T>(T item, int initialBufferSize)
+    {
+      var serializedObject = JsonSerializer.SerializeUnsafe(item, s_defaultResolver);
+      var length = serializedObject.Count;
+      var buffer = BufferManager.Shared.Rent(length);
+      PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
+      return new ArraySegment<byte>(buffer, 0, length);
+    }
+
+    public override ArraySegment<byte> WriteToMemoryPool(object item)
+    {
+      var serializedObject = JsonSerializer.NonGeneric.SerializeUnsafe(item, s_defaultResolver);
+      var length = serializedObject.Count;
+      var buffer = BufferManager.Shared.Rent(length);
+      PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
+      return new ArraySegment<byte>(buffer, 0, length);
+    }
+
+    public override ArraySegment<byte> WriteToMemoryPool(object item, int initialBufferSize)
+    {
+      var serializedObject = JsonSerializer.NonGeneric.SerializeUnsafe(item, s_defaultResolver);
+      var length = serializedObject.Count;
+      var buffer = BufferManager.Shared.Rent(length);
+      PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
+      return new ArraySegment<byte>(buffer, 0, length);
     }
 
     #endregion

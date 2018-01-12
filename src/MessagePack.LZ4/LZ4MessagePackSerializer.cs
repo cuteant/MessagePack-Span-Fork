@@ -97,7 +97,7 @@ namespace MessagePack
             return MessagePackBinary.FastCloneWithResize(buffer.Array, buffer.Count);
         }
 
-        static ArraySegment<byte> SerializeCore<T>(T obj, IFormatterResolver resolver)
+        internal static ArraySegment<byte> SerializeCore<T>(T obj, IFormatterResolver resolver)
         {
             var serializedData = MessagePackSerializer.SerializeUnsafe(obj, resolver);
             return ToLZ4BinaryCore(serializedData);

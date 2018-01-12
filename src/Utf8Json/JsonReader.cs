@@ -600,7 +600,7 @@ namespace Utf8Json
                                     if (builder == null) builder = StringBuilderCache.GetBuffer();
 
                                     var copyCount = i - from;
-                                    PlatformDependent.CopyMemory(bytes, from, builder, builderOffset, copyCount);
+                                    if (copyCount > 0) { PlatformDependent.CopyMemory(bytes, from, builder, builderOffset, copyCount); }
                                     builderOffset += copyCount;
                                 }
 
@@ -648,7 +648,7 @@ namespace Utf8Json
                     }
 
                     var copyCount = i - from;
-                    PlatformDependent.CopyMemory(bytes, from, builder, builderOffset, copyCount);
+                    if (copyCount > 0) { PlatformDependent.CopyMemory(bytes, from, builder, builderOffset, copyCount); }
                     builderOffset += copyCount;
                     builder[builderOffset++] = escapeCharacter;
                     i += 1;
@@ -680,8 +680,11 @@ namespace Utf8Json
                 }
 
                 var copyCount = offset - from - 1;
-                BinaryUtil.EnsureCapacity(ref builder, builderOffset, copyCount);
-                PlatformDependent.CopyMemory(bytes, from, builder, builderOffset, copyCount);
+                if (copyCount > 0)
+                {
+                    BinaryUtil.EnsureCapacity(ref builder, builderOffset, copyCount);
+                    PlatformDependent.CopyMemory(bytes, from, builder, builderOffset, copyCount);
+                }
                 builderOffset += copyCount;
 
                 resultBytes = builder;

@@ -287,7 +287,7 @@ namespace MessagePack.Formatters
                             else offset += 2; // 5
 
                             MessagePackBinary.EnsureCapacity(ref bytes, offset, headerLength);
-                            PlatformDependent.CopyMemory(bytes, writeStarOffset + 3, bytes, writeStarOffset + headerLength, moveCount);
+                            if (moveCount > 0) { PlatformDependent.CopyMemory(bytes, writeStarOffset + 3, bytes, writeStarOffset + headerLength, moveCount); }
                         }
                         MessagePackBinary.WriteArrayHeader(ref bytes, writeStarOffset, count);
 

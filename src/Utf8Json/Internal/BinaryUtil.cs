@@ -78,7 +78,8 @@ namespace Utf8Json.Internal
             if (array2.Length != newSize)
             {
                 byte[] array3 = new byte[newSize];
-                PlatformDependent.CopyMemory(array2, 0, array3, 0, (array2.Length > newSize) ? newSize : array2.Length);
+                var len = (array2.Length > newSize) ? newSize : array2.Length;
+                PlatformDependent.CopyMemory(array2, 0, array3, 0, len);
                 array = array3;
             }
         }

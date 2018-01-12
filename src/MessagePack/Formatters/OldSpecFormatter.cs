@@ -176,7 +176,7 @@ namespace MessagePack.Formatters
                 MessagePackBinary.EnsureCapacity(ref bytes, offset, byteCount + 1);
 
                 bytes[offset] = (byte)(MessagePackCode.MinFixStr | byteCount);
-                PlatformDependent.CopyMemory(value, 0, bytes, offset + 1, byteCount);
+                if (byteCount > 0) { PlatformDependent.CopyMemory(value, 0, bytes, offset + 1, byteCount); }
                 return byteCount + 1;
             }
             else if (byteCount <= ushort.MaxValue)
@@ -225,7 +225,7 @@ namespace MessagePack.Formatters
                         var length = bytes[offset] & 0x1F;
                         readSize = length + 1;
                         var result = new byte[length];
-                        PlatformDependent.CopyMemory(bytes, offset + 1, result, 0, result.Length);
+                        if (length > 0) { PlatformDependent.CopyMemory(bytes, offset + 1, result, 0, result.Length); }
                         return result;
                     }
                     else if (code == MessagePackCode.Str8)
@@ -233,7 +233,7 @@ namespace MessagePack.Formatters
                         var length = (int)bytes[offset + 1];
                         readSize = length + 2;
                         var result = new byte[length];
-                        PlatformDependent.CopyMemory(bytes, offset + 2, result, 0, result.Length);
+                        if (length > 0) { PlatformDependent.CopyMemory(bytes, offset + 2, result, 0, result.Length); }
                         return result;
                     }
                     else if (code == MessagePackCode.Str16)

@@ -66,9 +66,17 @@ namespace Utf8Json
             var writer = new JsonWriter();
             writer.WriteString(propertyName); // "propname"
             var buf = writer.GetBuffer();
-            var result = new byte[buf.Count - 2];
-            PlatformDependent.CopyMemory(buf.Array, buf.Offset + 1, result, 0, result.Length); // without quotation
-            return result;
+            var length = buf.Count - 2;
+            if (length == 0)
+            {
+                return CuteAnt.EmptyArray<byte>.Instance;
+            }
+            else
+            {
+                var result = new byte[buf.Count - 2];
+                PlatformDependent.CopyMemory(buf.Array, buf.Offset + 1, result, 0, result.Length); // without quotation
+                return result;
+            }
         }
 
         public JsonWriter(byte[] initialBuffer)
@@ -121,7 +129,7 @@ namespace Utf8Json
             UnsafeMemory.WriteRaw(ref this, rawValue);
 #else
             BinaryUtil.EnsureCapacity(ref buffer, offset, rawValue.Length);
-            PlatformDependent.CopyMemory(rawValue, 0, buffer, offset, rawValue.Length);
+            Buffer.BlockCopy(rawValue, 0, buffer, offset, rawValue.Length);
             offset += rawValue.Length;
 #endif
         }
