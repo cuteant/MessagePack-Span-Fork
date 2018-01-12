@@ -16,14 +16,7 @@ namespace CuteAnt.Extensions.Serialization
 
     public virtual byte[] Serialize<T>(T item)
     {
-      using (var pooledStream = BufferManagerOutputStreamManager.Create())
-      {
-        var outputStream = pooledStream.Object;
-        outputStream.Reinitialize(c_initialBufferSize);
-
-        WriteToStream<T>(item, outputStream);
-        return outputStream.ToByteArray();
-      }
+      return Serialize<T>(item, c_initialBufferSize);
     }
 
     public virtual byte[] Serialize<T>(T item, int initialBufferSize)
@@ -46,7 +39,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(Serialize(item));
+        .FromResult(Serialize(item, c_initialBufferSize));
     }
 
     public Task<byte[]> SerializeAsync<T>(T item, int initialBufferSize)
@@ -66,14 +59,7 @@ namespace CuteAnt.Extensions.Serialization
 
     public virtual byte[] SerializeObject(object item)
     {
-      using (var pooledStream = BufferManagerOutputStreamManager.Create())
-      {
-        var outputStream = pooledStream.Object;
-        outputStream.Reinitialize(c_initialBufferSize);
-
-        WriteToStream(item, outputStream);
-        return outputStream.ToByteArray();
-      }
+      return SerializeObject(item, c_initialBufferSize);
     }
 
     public virtual byte[] SerializeObject(object item, int initialBufferSize)
@@ -110,7 +96,7 @@ namespace CuteAnt.Extensions.Serialization
 #else
         Task
 #endif
-        .FromResult(SerializeObject(item));
+        .FromResult(SerializeObject(item, c_initialBufferSize));
     }
 
     public Task<byte[]> SerializeObjectAsync(object item, int initialBufferSize)

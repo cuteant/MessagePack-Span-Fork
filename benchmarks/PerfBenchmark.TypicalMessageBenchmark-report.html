@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>TypicalMessageBenchmark</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.10.11, OS=Windows 10 Redstone 3 [1709, Fall Creators Update] (10.0.16299.125)
+Processor=Intel Xeon CPU E3-1230 V2 3.30GHz, ProcessorCount=8
+Frequency=3222681 Hz, Resolution=310.3006 ns, Timer=TSC
+.NET Core SDK=2.2.0-preview1-007870
+  [Host]     : .NET Core 2.0.5 (Framework 4.6.26020.03), 64bit RyuJIT
+  Job-HHQCRL : .NET Core 2.0.5 (Framework 4.6.26020.03), 64bit RyuJIT
+</code></pre>
+<pre><code>RemoveOutliers=False  Platform=X64  Runtime=Core  
+Server=True  Toolchain=.NET Core 2.0  LaunchCount=3  
+RunStrategy=Throughput  TargetCount=10  WarmupCount=5  
+</code></pre>
+
+<table>
+<thead><tr><th>                     Method</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Median</th><th>         Op/s</th><th>Scaled</th><th>ScaledSD</th><th>Gen 0</th><th>Allocated</th>
+</tr>
+</thead><tbody><tr><td>       SerializeMessagePack</td><td>0.0062 ns</td><td>0.0004 ns</td><td>0.0007 ns</td><td>0.0060 ns</td><td>162,570,979,237.3</td><td>1.00</td><td>0.00</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>     DeserializeMessagePack</td><td>0.0006 ns</td><td>0.0000 ns</td><td>0.0000 ns</td><td>0.0005 ns</td><td>1,808,890,741,726.7</td><td>0.09</td><td>0.01</td><td>-</td><td>0 B</td>
+</tr><tr><td>SerializeMessagePackTypeless</td><td>0.0080 ns</td><td>0.0003 ns</td><td>0.0004 ns</td><td>0.0079 ns</td><td>124,430,941,496.2</td><td>1.32</td><td>0.12</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>DeserializeMessagePackTypeless</td><td>0.0007 ns</td><td>0.0000 ns</td><td>0.0000 ns</td><td>0.0007 ns</td><td>1,440,234,408,053.8</td><td>0.11</td><td>0.01</td><td>-</td><td>0 B</td>
+</tr><tr><td>SerializeLz4MessagePackTypeless</td><td>0.0479 ns</td><td>0.0026 ns</td><td>0.0038 ns</td><td>0.0476 ns</td><td>20,874,434,805.8</td><td>7.85</td><td>0.88</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>DeserializeLz4MessagePackTypeless</td><td>0.0008 ns</td><td>0.0000 ns</td><td>0.0000 ns</td><td>0.0008 ns</td><td>1,222,092,968,534.2</td><td>0.13</td><td>0.01</td><td>-</td><td>0 B</td>
+</tr><tr><td>SerializeMessagePackFormatter</td><td>0.0083 ns</td><td>0.0002 ns</td><td>0.0003 ns</td><td>0.0082 ns</td><td>120,603,580,700.4</td><td>1.36</td><td>0.12</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>DeserializeMessagePackFormatter</td><td>0.0005 ns</td><td>0.0000 ns</td><td>0.0001 ns</td><td>0.0005 ns</td><td>2,107,078,687,309.4</td><td>0.08</td><td>0.01</td><td>-</td><td>0 B</td>
+</tr><tr><td>          SerializeUtf8Json</td><td>0.0136 ns</td><td>0.0001 ns</td><td>0.0001 ns</td><td>0.0136 ns</td><td>73,334,561,410.7</td><td>2.24</td><td>0.18</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>        DeserializeUtf8Json</td><td>0.0011 ns</td><td>0.0000 ns</td><td>0.0000 ns</td><td>0.0011 ns</td><td>896,354,764,354.5</td><td>0.18</td><td>0.01</td><td>-</td><td>0 B</td>
+</tr><tr><td> SerializeUtf8JsonFormatter</td><td>0.0143 ns</td><td>0.0001 ns</td><td>0.0001 ns</td><td>0.0143 ns</td><td>70,039,654,219.9</td><td>2.34</td><td>0.19</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>DeserializeUtf8JsonFormatter</td><td>0.0016 ns</td><td>0.0000 ns</td><td>0.0000 ns</td><td>0.0016 ns</td><td>636,591,374,802.4</td><td>0.26</td><td>0.02</td><td>-</td><td>0 B</td>
+</tr><tr><td>           SerializeJsonNet</td><td>0.0730 ns</td><td>0.0019 ns</td><td>0.0028 ns</td><td>0.0725 ns</td><td>13,699,254,401.7</td><td>11.97</td><td>1.05</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>         DeserializeJsonNet</td><td>0.1239 ns</td><td>0.0029 ns</td><td>0.0043 ns</td><td>0.1236 ns</td><td>8,070,617,848.5</td><td>20.32</td><td>1.75</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>          SerializeJsonNetX</td><td>0.0971 ns</td><td>0.0038 ns</td><td>0.0057 ns</td><td>0.0960 ns</td><td>10,303,057,172.9</td><td>15.91</td><td>1.56</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>        DeserializeJsonNetX</td><td>0.1490 ns</td><td>0.0064 ns</td><td>0.0096 ns</td><td>0.1466 ns</td><td>6,711,272,541.5</td><td>24.43</td><td>2.49</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>     SerializeJsonFormatter</td><td>0.0844 ns</td><td>0.0014 ns</td><td>0.0021 ns</td><td>0.0847 ns</td><td>11,853,754,492.6</td><td>13.83</td><td>1.15</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>   DeserializeJsonFormatter</td><td>0.0333 ns</td><td>0.0012 ns</td><td>0.0017 ns</td><td>0.0326 ns</td><td>30,034,249,781.4</td><td>5.46</td><td>0.52</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>       SerializeProtoBufNet</td><td>0.0110 ns</td><td>0.0001 ns</td><td>0.0002 ns</td><td>0.0110 ns</td><td>90,527,890,787.7</td><td>1.81</td><td>0.15</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>     DeserializeProtoBufNet</td><td>0.0091 ns</td><td>0.0005 ns</td><td>0.0008 ns</td><td>0.0092 ns</td><td>109,453,248,786.9</td><td>1.50</td><td>0.17</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td> SerializeProtoBufFormatter</td><td>0.0146 ns</td><td>0.0000 ns</td><td>0.0000 ns</td><td>0.0146 ns</td><td>68,439,072,728.7</td><td>2.40</td><td>0.19</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>DeserializeProtoBufFormatter</td><td>0.0014 ns</td><td>0.0000 ns</td><td>0.0000 ns</td><td>0.0013 ns</td><td>734,244,847,349.7</td><td>0.22</td><td>0.02</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>          SerializeHyperion</td><td>0.0246 ns</td><td>0.0006 ns</td><td>0.0009 ns</td><td>0.0248 ns</td><td>40,631,681,883.5</td><td>4.04</td><td>0.35</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>        DeserializeHyperion</td><td>0.0185 ns</td><td>0.0008 ns</td><td>0.0013 ns</td><td>0.0181 ns</td><td>53,975,873,523.3</td><td>3.04</td><td>0.31</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td> SerializeHyperionFormatter</td><td>0.0213 ns</td><td>0.0004 ns</td><td>0.0006 ns</td><td>0.0212 ns</td><td>46,887,912,944.1</td><td>3.50</td><td>0.30</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>DeserializeHyperionFormatter</td><td>10.1263 ns</td><td>0.1873 ns</td><td>0.2803 ns</td><td>10.0127 ns</td><td> 98,752,860.0</td><td>1,660.25</td><td>139.30</td><td>-</td><td>1 B</td>
+</tr></tbody></table>
+</body>
+</html>

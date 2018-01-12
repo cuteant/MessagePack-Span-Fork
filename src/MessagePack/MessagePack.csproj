@@ -37,11 +37,7 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
-    <PackageReference Include="lz4net" Version="$(Lz4netPackageVersion)" />
-  </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="lz4net.netcore.signed" Version="$(Lz4netNETCoreSignedPackageVersion)" />
     <PackageReference Include="System.Reflection.Emit" Version="$(SystemReflectionEmitPackageVersion)" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="$(SystemReflectionEmitLightweightPackageVersion)" />
   </ItemGroup>
