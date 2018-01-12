@@ -184,7 +184,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- IsSupportedType --
 
     /// <inheritdoc />
-    public sealed override bool IsSupportedType(Type type) => true;
+    public override bool IsSupportedType(Type type) => true;
 
     ///// <summary>Determines whether this <see cref="JsonMessageFormatter"/> can read objects
     ///// of the specified <paramref name="type"/>.</summary>

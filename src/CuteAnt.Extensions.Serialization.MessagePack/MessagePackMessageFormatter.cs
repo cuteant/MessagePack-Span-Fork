@@ -53,7 +53,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- IsSupportedType --
 
     /// <inheritdoc />
-    public sealed override bool IsSupportedType(Type type) => true;
+    public override bool IsSupportedType(Type type) => true;
 
     #endregion
 
