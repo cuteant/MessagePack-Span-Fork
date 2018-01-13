@@ -14,11 +14,11 @@
 <body>
 <pre><code>
 BenchmarkDotNet=v0.10.11, OS=Windows 10 Redstone 3 [1709, Fall Creators Update] (10.0.16299.125)
-Processor=Intel Core i5-3450 CPU 3.10GHz (Ivy Bridge), ProcessorCount=4
-Frequency=3027365 Hz, Resolution=330.3203 ns, Timer=TSC
+Processor=Intel Xeon CPU E3-1230 V2 3.30GHz, ProcessorCount=8
+Frequency=3222681 Hz, Resolution=310.3006 ns, Timer=TSC
 .NET Core SDK=2.2.0-preview1-007870
   [Host]     : .NET Core 2.0.5 (Framework 4.6.26020.03), 64bit RyuJIT
-  Job-ZTAHSG : .NET Core 2.0.5 (Framework 4.6.26020.03), 64bit RyuJIT
+  Job-IOQCRV : .NET Core 2.0.5 (Framework 4.6.26020.03), 64bit RyuJIT
 </code></pre>
 <pre><code>RemoveOutliers=False  Platform=X64  Runtime=Core  
 Server=True  Toolchain=.NET Core 2.0  LaunchCount=3  
@@ -26,34 +26,20 @@ RunStrategy=Throughput  TargetCount=10  WarmupCount=5
 </code></pre>
 
 <table>
-<thead><tr><th>                     Method</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Median</th><th>       Op/s</th><th>Scaled</th><th>ScaledSD</th><th>Gen 0</th><th>Allocated</th>
+<thead><tr><th>                     Method</th><th>Mean</th><th>Error</th><th>StdDev</th><th>       Op/s</th><th>Scaled</th><th>ScaledSD</th><th>Gen 0</th><th>Allocated</th>
 </tr>
-</thead><tbody><tr><td>       SerializeMessagePack</td><td>0.0060 ns</td><td>0.0001 ns</td><td>0.0001 ns</td><td>0.0060 ns</td><td>165,492,773,147.2</td><td>1.00</td><td>0.00</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>     DeserializeMessagePack</td><td>0.0068 ns</td><td>0.0001 ns</td><td>0.0002 ns</td><td>0.0069 ns</td><td>147,351,739,584.4</td><td>1.12</td><td>0.03</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>SerializeMessagePackTypeless</td><td>0.0087 ns</td><td>0.0001 ns</td><td>0.0002 ns</td><td>0.0087 ns</td><td>114,983,562,025.8</td><td>1.44</td><td>0.04</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>DeserializeMessagePackTypeless</td><td>0.0085 ns</td><td>0.0002 ns</td><td>0.0003 ns</td><td>0.0085 ns</td><td>118,112,905,655.3</td><td>1.40</td><td>0.05</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>SerializeLz4MessagePackTypeless</td><td>0.0383 ns</td><td>0.0005 ns</td><td>0.0007 ns</td><td>0.0380 ns</td><td>26,120,657,577.8</td><td>6.34</td><td>0.17</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>DeserializeLz4MessagePackTypeless</td><td>0.0099 ns</td><td>0.0001 ns</td><td>0.0001 ns</td><td>0.0099 ns</td><td>100,798,851,612.3</td><td>1.64</td><td>0.03</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>SerializeMessagePackFormatter</td><td>0.0088 ns</td><td>0.0001 ns</td><td>0.0001 ns</td><td>0.0088 ns</td><td>113,858,026,292.0</td><td>1.45</td><td>0.03</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>DeserializeMessagePackFormatter</td><td>0.0102 ns</td><td>0.0011 ns</td><td>0.0017 ns</td><td>0.0093 ns</td><td>98,451,119,577.8</td><td>1.68</td><td>0.28</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>          SerializeUtf8Json</td><td>0.0137 ns</td><td>0.0000 ns</td><td>0.0001 ns</td><td>0.0137 ns</td><td>72,882,774,150.5</td><td>2.27</td><td>0.04</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>        DeserializeUtf8Json</td><td>0.0185 ns</td><td>0.0001 ns</td><td>0.0002 ns</td><td>0.0184 ns</td><td>54,194,643,555.5</td><td>3.05</td><td>0.06</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td> SerializeUtf8JsonFormatter</td><td>0.0144 ns</td><td>0.0000 ns</td><td>0.0001 ns</td><td>0.0144 ns</td><td>69,348,270,982.8</td><td>2.39</td><td>0.05</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>DeserializeUtf8JsonFormatter</td><td>0.0192 ns</td><td>0.0001 ns</td><td>0.0002 ns</td><td>0.0192 ns</td><td>52,033,361,538.0</td><td>3.18</td><td>0.06</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>           SerializeJsonNet</td><td>0.0574 ns</td><td>0.0005 ns</td><td>0.0007 ns</td><td>0.0575 ns</td><td>17,428,112,395.2</td><td>9.50</td><td>0.21</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>         DeserializeJsonNet</td><td>0.1216 ns</td><td>0.0004 ns</td><td>0.0007 ns</td><td>0.1214 ns</td><td>8,226,099,586.4</td><td>20.13</td><td>0.39</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>          SerializeJsonNetX</td><td>0.0849 ns</td><td>0.0004 ns</td><td>0.0006 ns</td><td>0.0848 ns</td><td>11,772,505,792.9</td><td>14.06</td><td>0.28</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>        DeserializeJsonNetX</td><td>0.1427 ns</td><td>0.0014 ns</td><td>0.0021 ns</td><td>0.1424 ns</td><td>7,005,320,619.6</td><td>23.63</td><td>0.56</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>     SerializeJsonFormatter</td><td>0.0885 ns</td><td>0.0011 ns</td><td>0.0016 ns</td><td>0.0888 ns</td><td>11,296,611,441.2</td><td>14.66</td><td>0.38</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>   DeserializeJsonFormatter</td><td>0.1557 ns</td><td>0.0004 ns</td><td>0.0007 ns</td><td>0.1556 ns</td><td>6,423,753,825.0</td><td>25.77</td><td>0.50</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>       SerializeProtoBufNet</td><td>0.0116 ns</td><td>0.0001 ns</td><td>0.0001 ns</td><td>0.0116 ns</td><td>86,176,928,001.0</td><td>1.92</td><td>0.04</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>     DeserializeProtoBufNet</td><td>0.0227 ns</td><td>0.0002 ns</td><td>0.0003 ns</td><td>0.0226 ns</td><td>44,136,078,508.3</td><td>3.75</td><td>0.08</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td> SerializeProtoBufFormatter</td><td>0.0150 ns</td><td>0.0001 ns</td><td>0.0001 ns</td><td>0.0150 ns</td><td>66,765,055,895.6</td><td>2.48</td><td>0.05</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>DeserializeProtoBufFormatter</td><td>0.0232 ns</td><td>0.0001 ns</td><td>0.0002 ns</td><td>0.0231 ns</td><td>43,185,141,942.7</td><td>3.83</td><td>0.08</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>          SerializeHyperion</td><td>0.0170 ns</td><td>0.0001 ns</td><td>0.0002 ns</td><td>0.0170 ns</td><td>58,880,321,233.2</td><td>2.81</td><td>0.06</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>        DeserializeHyperion</td><td>0.0162 ns</td><td>0.0001 ns</td><td>0.0001 ns</td><td>0.0162 ns</td><td>61,839,826,113.4</td><td>2.68</td><td>0.05</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td> SerializeHyperionFormatter</td><td>0.0207 ns</td><td>0.0002 ns</td><td>0.0002 ns</td><td>0.0207 ns</td><td>48,377,608,145.6</td><td>3.42</td><td>0.08</td><td>0.0000</td><td>0 B</td>
-</tr><tr><td>DeserializeHyperionFormatter</td><td>0.0180 ns</td><td>0.0003 ns</td><td>0.0004 ns</td><td>0.0178 ns</td><td>55,472,028,043.6</td><td>2.98</td><td>0.09</td><td>0.0000</td><td>0 B</td>
+</thead><tbody><tr><td>       SerializeMessagePack</td><td>0.0050 ns</td><td>0.0004 ns</td><td>0.0006 ns</td><td>198,932,764,281.6</td><td>1.00</td><td>0.00</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>     DeserializeMessagePack</td><td>0.0062 ns</td><td>0.0002 ns</td><td>0.0002 ns</td><td>161,229,547,216.1</td><td>1.24</td><td>0.11</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>SerializeMessagePackTypeless</td><td>0.0066 ns</td><td>0.0001 ns</td><td>0.0001 ns</td><td>151,348,973,159.6</td><td>1.33</td><td>0.11</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>DeserializeMessagePackTypeless</td><td>0.0088 ns</td><td>0.0007 ns</td><td>0.0011 ns</td><td>113,633,726,715.6</td><td>1.77</td><td>0.26</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>SerializeLz4MessagePackTypeless</td><td>0.0486 ns</td><td>0.0031 ns</td><td>0.0047 ns</td><td>20,568,159,757.7</td><td>9.76</td><td>1.21</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>DeserializeLz4MessagePackTypeless</td><td>0.0098 ns</td><td>0.0003 ns</td><td>0.0004 ns</td><td>102,231,427,852.1</td><td>1.96</td><td>0.18</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>SerializeMessagePackFormatter</td><td>0.0074 ns</td><td>0.0002 ns</td><td>0.0003 ns</td><td>135,370,928,488.1</td><td>1.48</td><td>0.13</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>DeserializeMessagePackFormatter</td><td>0.0097 ns</td><td>0.0004 ns</td><td>0.0006 ns</td><td>103,270,232,076.6</td><td>1.94</td><td>0.20</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>          SerializeUtf8Json</td><td>0.0100 ns</td><td>0.0006 ns</td><td>0.0008 ns</td><td>99,728,013,712.3</td><td>2.01</td><td>0.23</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>        DeserializeUtf8Json</td><td>0.0178 ns</td><td>0.0017 ns</td><td>0.0025 ns</td><td>56,060,513,779.1</td><td>3.58</td><td>0.57</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td> SerializeUtf8JsonFormatter</td><td>0.0097 ns</td><td>0.0007 ns</td><td>0.0011 ns</td><td>102,679,433,176.1</td><td>1.95</td><td>0.27</td><td>0.0000</td><td>0 B</td>
+</tr><tr><td>DeserializeUtf8JsonFormatter</td><td>0.0170 ns</td><td>0.0003 ns</td><td>0.0005 ns</td><td>58,898,380,627.5</td><td>3.41</td><td>0.29</td><td>0.0000</td><td>0 B</td>
 </tr></tbody></table>
 </body>
 </html>

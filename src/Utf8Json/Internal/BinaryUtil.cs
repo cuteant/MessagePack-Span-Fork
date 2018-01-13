@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CuteAnt.Extensions.Internal;
 #if NETSTANDARD || DESKTOPCLR
 using System.Runtime.CompilerServices;
 #endif
@@ -79,7 +78,7 @@ namespace Utf8Json.Internal
             {
                 byte[] array3 = new byte[newSize];
                 var len = (array2.Length > newSize) ? newSize : array2.Length;
-                PlatformDependent.CopyMemory(array2, 0, array3, 0, len);
+                Buffer.BlockCopy(array2, 0, array3, 0, len);
                 array = array3;
             }
         }
@@ -88,9 +87,9 @@ namespace Utf8Json.Internal
         [MethodImpl(InlineMethod.Value)]
 #endif
         public static
-//#if NETSTANDARD || NET_4_5_GREATER
-//            unsafe
-//#endif
+#if NETSTANDARD || NET_4_5_GREATER
+            unsafe
+#endif
             byte[] FastCloneWithResize(byte[] src, int newSize)
         {
             if (newSize < 0) throw new ArgumentOutOfRangeException("newSize");
@@ -99,15 +98,15 @@ namespace Utf8Json.Internal
 
             byte[] dst = new byte[newSize];
 
-//#if NETSTANDARD || NET_4_5_GREATER
-//            fixed (byte* pSrc = &src[0])
-//            fixed (byte* pDst = &dst[0])
-//            {
-//                Buffer.MemoryCopy(pSrc, pDst, dst.Length, newSize);
-//            }
-//#else
-            PlatformDependent.CopyMemory(src, 0, dst, 0, newSize);
-//#endif
+#if NETSTANDARD || NET_4_5_GREATER
+            fixed (byte* pSrc = &src[0])
+            fixed (byte* pDst = &dst[0])
+            {
+              Buffer.MemoryCopy(pSrc, pDst, dst.Length, newSize);
+            }
+#else
+            Buffer.BlockCopy(src, 0, dst, 0, newSize);
+#endif
 
             return dst;
         }

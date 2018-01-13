@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using CuteAnt.Extensions.Internal;
 using CuteAnt.Reflection;
 
 namespace MessagePack.Formatters
@@ -261,7 +260,7 @@ namespace MessagePack.Formatters
             if (!typeCache.TryGetValue(typeName, out type))
             {
                 var buffer = new byte[typeName.Count];
-                PlatformDependent.CopyMemory(typeName.Array, typeName.Offset, buffer, 0, buffer.Length);
+                Buffer.BlockCopy(typeName.Array, typeName.Offset, buffer, 0, buffer.Length);
                 var str = StringEncoding.UTF8.GetString(buffer);
                 type = BindToType(str);
                 if (type == null)

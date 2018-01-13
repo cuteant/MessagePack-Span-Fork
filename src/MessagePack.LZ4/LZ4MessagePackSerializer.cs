@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
-using CuteAnt.Extensions.Internal;
 using LZ4;
 using MessagePack.Internal;
 
@@ -65,7 +64,7 @@ namespace MessagePack
             {
                 // can't write direct, shoganai...
                 MessagePackBinary.EnsureCapacity(ref bytes, offset, serializedData.Count);
-                PlatformDependent.CopyMemory(serializedData.Array, serializedData.Offset, bytes, offset, serializedData.Count);
+                Buffer.BlockCopy(serializedData.Array, serializedData.Offset, bytes, offset, serializedData.Count);
                 return serializedData.Count;
             }
             else
@@ -250,7 +249,7 @@ namespace MessagePack
             else
             {
                 var result = new byte[bytes.Count];
-                PlatformDependent.CopyMemory(bytes.Array, bytes.Offset, result, 0, result.Length);
+                Buffer.BlockCopy(bytes.Array, bytes.Offset, result, 0, result.Length);
                 return result;
             }
         }
@@ -301,7 +300,7 @@ namespace MessagePack
             else
             {
                 var result = new byte[bytes.Count];
-                PlatformDependent.CopyMemory(bytes.Array, bytes.Offset, result, 0, result.Length);
+                Buffer.BlockCopy(bytes.Array, bytes.Offset, result, 0, result.Length);
                 return result;
             }
         }

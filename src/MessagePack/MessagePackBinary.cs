@@ -3,7 +3,6 @@ using MessagePack.Internal;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using CuteAnt.Extensions.Internal;
 
 namespace MessagePack
 {
@@ -302,11 +301,7 @@ namespace MessagePack
 #if NETSTANDARD || DESKTOPCLR
         [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
-        public
-#if !NET40
-            unsafe
-#endif
-            static void FastResize(ref byte[] array, int newSize)
+        public static void FastResize(ref byte[] array, int newSize)
         {
             if (newSize < 0) throw new ArgumentOutOfRangeException("newSize");
 
@@ -320,16 +315,7 @@ namespace MessagePack
             if (array2.Length != newSize)
             {
                 byte[] array3 = new byte[newSize];
-#if !NET40
-                fixed (byte* pSrc = &array2[0])
-                fixed (byte* pDst = &array3[0])
-                {
-                    Unsafe.CopyBlock(pDst, pSrc, unchecked((uint)((array2.Length > newSize) ? newSize : array2.Length)));
-                    //Buffer.MemoryCopy(pSrc, pDst, array3.Length, (array2.Length > newSize) ? newSize : array2.Length);
-                }
-#else
                 Buffer.BlockCopy(array2, 0, array3, 0, (array2.Length > newSize) ? newSize : array2.Length);
-#endif
                 array = array3;
             }
         }
@@ -338,12 +324,13 @@ namespace MessagePack
         [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public
-#if !NET40
+#if !(NET40 || NET451)
             unsafe
 #endif
             static byte[] FastCloneWithResize(byte[] array, int newSize)
         {
             if (newSize < 0) throw new ArgumentOutOfRangeException("newSize");
+            if (newSize == 0) { return CuteAnt.EmptyArray<byte>.Instance; }
 
             byte[] array2 = array;
             if (array2 == null)
@@ -353,12 +340,15 @@ namespace MessagePack
             }
 
             byte[] array3 = new byte[newSize];
-#if !NET40
+#if !(NET40 || NET451)
             fixed (byte* pSrc = &array2[0])
             fixed (byte* pDst = &array3[0])
             {
+#if DESKTOPCLR
+                Buffer.MemoryCopy(pSrc, pDst, array3.Length, (array2.Length > newSize) ? newSize : array2.Length);
+#else
                 Unsafe.CopyBlock(pDst, pSrc, unchecked((uint)((array2.Length > newSize) ? newSize : array2.Length)));
-                //Buffer.MemoryCopy(pSrc, pDst, array3.Length, (array2.Length > newSize) ? newSize : array2.Length);
+#endif
             }
 #else
             Buffer.BlockCopy(array2, 0, array3, 0, (array2.Length > newSize) ? newSize : array2.Length);
@@ -566,7 +556,7 @@ namespace MessagePack
                         UnsafeMemory32.WriteRaw31(ref bytes, offset, rawMessagePackBlock);
                         break;
                     default:
-                        PlatformDependent.CopyMemory(rawMessagePackBlock, 0, bytes, offset, rawMessagePackBlock.Length);
+                        Buffer.BlockCopy(rawMessagePackBlock, 0, bytes, offset, rawMessagePackBlock.Length);
                         break;
                 }
             }
@@ -669,7 +659,7 @@ namespace MessagePack
                         UnsafeMemory64.WriteRaw31(ref bytes, offset, rawMessagePackBlock);
                         break;
                     default:
-                        PlatformDependent.CopyMemory(rawMessagePackBlock, 0, bytes, offset, rawMessagePackBlock.Length);
+                        Buffer.BlockCopy(rawMessagePackBlock, 0, bytes, offset, rawMessagePackBlock.Length);
                         break;
                 }
             }
@@ -1016,7 +1006,7 @@ namespace MessagePack
                 dest[dstOffset] = MessagePackCode.Bin8;
                 dest[dstOffset + 1] = (byte)count;
 
-                if (count > 0) { PlatformDependent.CopyMemory(src, srcOffset, dest, dstOffset + 2, count); }
+                Buffer.BlockCopy(src, srcOffset, dest, dstOffset + 2, count);
                 return size;
             }
             else if (count <= UInt16.MaxValue)
@@ -1031,7 +1021,7 @@ namespace MessagePack
                     dest[dstOffset + 2] = (byte)(count);
                 }
 
-                PlatformDependent.CopyMemory(src, srcOffset, dest, dstOffset + 3, count);
+                Buffer.BlockCopy(src, srcOffset, dest, dstOffset + 3, count);
                 return size;
             }
             else
@@ -1048,7 +1038,7 @@ namespace MessagePack
                     dest[dstOffset + 4] = (byte)(count);
                 }
 
-                PlatformDependent.CopyMemory(src, srcOffset, dest, dstOffset + 5, count);
+                Buffer.BlockCopy(src, srcOffset, dest, dstOffset + 5, count);
                 return size;
             }
         }
@@ -1783,7 +1773,7 @@ namespace MessagePack
             {
                 EnsureCapacity(ref bytes, offset, byteCount + 1);
                 bytes[offset] = (byte)(MessagePackCode.MinFixStr | byteCount);
-                if (byteCount > 0) { PlatformDependent.CopyMemory(utf8stringBytes, 0, bytes, offset + 1, byteCount); }
+                Buffer.BlockCopy(utf8stringBytes, 0, bytes, offset + 1, byteCount);
                 return byteCount + 1;
             }
             else if (byteCount <= byte.MaxValue)
@@ -1791,7 +1781,7 @@ namespace MessagePack
                 EnsureCapacity(ref bytes, offset, byteCount + 2);
                 bytes[offset] = MessagePackCode.Str8;
                 bytes[offset + 1] = unchecked((byte)byteCount);
-                PlatformDependent.CopyMemory(utf8stringBytes, 0, bytes, offset + 2, byteCount);
+                Buffer.BlockCopy(utf8stringBytes, 0, bytes, offset + 2, byteCount);
                 return byteCount + 2;
             }
             else if (byteCount <= ushort.MaxValue)
@@ -1800,7 +1790,7 @@ namespace MessagePack
                 bytes[offset] = MessagePackCode.Str16;
                 bytes[offset + 1] = unchecked((byte)(byteCount >> 8));
                 bytes[offset + 2] = unchecked((byte)byteCount);
-                PlatformDependent.CopyMemory(utf8stringBytes, 0, bytes, offset + 3, byteCount);
+                Buffer.BlockCopy(utf8stringBytes, 0, bytes, offset + 3, byteCount);
                 return byteCount + 3;
             }
             else
@@ -1811,7 +1801,7 @@ namespace MessagePack
                 bytes[offset + 2] = unchecked((byte)(byteCount >> 16));
                 bytes[offset + 3] = unchecked((byte)(byteCount >> 8));
                 bytes[offset + 4] = unchecked((byte)byteCount);
-                PlatformDependent.CopyMemory(utf8stringBytes, 0, bytes, offset + 5, byteCount);
+                Buffer.BlockCopy(utf8stringBytes, 0, bytes, offset + 5, byteCount);
                 return byteCount + 5;
             }
         }
@@ -1894,7 +1884,7 @@ namespace MessagePack
                 if (useOffset != 1)
                 {
 
-                    PlatformDependent.CopyMemory(bytes, writeBeginOffset, bytes, offset + 1, byteCount);
+                    Buffer.BlockCopy(bytes, writeBeginOffset, bytes, offset + 1, byteCount);
                 }
                 bytes[offset] = (byte)(MessagePackCode.MinFixStr | byteCount);
                 return byteCount + 1;
@@ -1903,7 +1893,7 @@ namespace MessagePack
             {
                 if (useOffset != 2)
                 {
-                    PlatformDependent.CopyMemory(bytes, writeBeginOffset, bytes, offset + 2, byteCount);
+                    Buffer.BlockCopy(bytes, writeBeginOffset, bytes, offset + 2, byteCount);
                 }
 
                 bytes[offset] = MessagePackCode.Str8;
@@ -1914,7 +1904,7 @@ namespace MessagePack
             {
                 if (useOffset != 3)
                 {
-                    PlatformDependent.CopyMemory(bytes, writeBeginOffset, bytes, offset + 3, byteCount);
+                    Buffer.BlockCopy(bytes, writeBeginOffset, bytes, offset + 3, byteCount);
                 }
 
                 bytes[offset] = MessagePackCode.Str16;
@@ -1926,7 +1916,7 @@ namespace MessagePack
             {
                 if (useOffset != 5)
                 {
-                    PlatformDependent.CopyMemory(bytes, writeBeginOffset, bytes, offset + 5, byteCount);
+                    Buffer.BlockCopy(bytes, writeBeginOffset, bytes, offset + 5, byteCount);
                 }
 
                 bytes[offset] = MessagePackCode.Str32;
@@ -2129,7 +2119,7 @@ namespace MessagePack
                             bytes[offset] = MessagePackCode.Ext8;
                             bytes[offset + 1] = unchecked((byte)(length));
                             bytes[offset + 2] = unchecked((byte)typeCode);
-                            PlatformDependent.CopyMemory(data, 0, bytes, offset + 3, length);
+                            Buffer.BlockCopy(data, 0, bytes, offset + 3, length);
                             return length + 3;
                         }
                         else if (length <= UInt16.MaxValue)
@@ -2139,7 +2129,7 @@ namespace MessagePack
                             bytes[offset + 1] = unchecked((byte)(length >> 8));
                             bytes[offset + 2] = unchecked((byte)(length));
                             bytes[offset + 3] = unchecked((byte)typeCode);
-                            PlatformDependent.CopyMemory(data, 0, bytes, offset + 4, length);
+                            Buffer.BlockCopy(data, 0, bytes, offset + 4, length);
                             return length + 4;
                         }
                         else
@@ -2151,7 +2141,7 @@ namespace MessagePack
                             bytes[offset + 3] = unchecked((byte)(length >> 8));
                             bytes[offset + 4] = unchecked((byte)length);
                             bytes[offset + 5] = unchecked((byte)typeCode);
-                            PlatformDependent.CopyMemory(data, 0, bytes, offset + 6, length);
+                            Buffer.BlockCopy(data, 0, bytes, offset + 6, length);
                             return length + 6;
                         }
                     }
@@ -3707,7 +3697,7 @@ namespace MessagePack.Decoders
             if (length > 0)
             {
                 var newBytes = new byte[length];
-                PlatformDependent.CopyMemory(bytes, offset + 2, newBytes, 0, length);
+                Buffer.BlockCopy(bytes, offset + 2, newBytes, 0, length);
                 return newBytes;
             }
             else
@@ -3730,7 +3720,7 @@ namespace MessagePack.Decoders
         {
             var length = (bytes[offset + 1] << 8) + (bytes[offset + 2]);
             var newBytes = new byte[length];
-            PlatformDependent.CopyMemory(bytes, offset + 3, newBytes, 0, length);
+            Buffer.BlockCopy(bytes, offset + 3, newBytes, 0, length);
 
             readSize = length + 3;
             return newBytes;
@@ -3750,7 +3740,7 @@ namespace MessagePack.Decoders
         {
             var length = (bytes[offset + 1] << 24) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 8) | (bytes[offset + 4]);
             var newBytes = new byte[length];
-            PlatformDependent.CopyMemory(bytes, offset + 5, newBytes, 0, length);
+            Buffer.BlockCopy(bytes, offset + 5, newBytes, 0, length);
 
             readSize = length + 5;
             return newBytes;
@@ -5415,7 +5405,7 @@ namespace MessagePack.Decoders
                 if (length > 0)
                 {
                     var body = new byte[length];
-                    PlatformDependent.CopyMemory(bytes, offset + 3, body, 0, (int)length);
+                    Buffer.BlockCopy(bytes, offset + 3, body, 0, (int)length);
                     return new ExtensionResult(typeCode, body);
                 }
                 else
@@ -5444,7 +5434,7 @@ namespace MessagePack.Decoders
 
                 var body = new byte[length];
                 readSize = length + 4;
-                PlatformDependent.CopyMemory(bytes, offset + 4, body, 0, (int)length);
+                Buffer.BlockCopy(bytes, offset + 4, body, 0, (int)length);
                 return new ExtensionResult(typeCode, body);
             }
         }
@@ -5470,7 +5460,7 @@ namespace MessagePack.Decoders
                 checked
                 {
                     readSize = (int)length + 6;
-                    PlatformDependent.CopyMemory(bytes, offset + 6, body, 0, (int)length);
+                    Buffer.BlockCopy(bytes, offset + 6, body, 0, (int)length);
                 }
                 return new ExtensionResult(typeCode, body);
             }

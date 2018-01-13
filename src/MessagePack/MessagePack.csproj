@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\version.pack.props" />
   <Import Project="..\nuget.pack.props" />
-  <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.PlatformDependent.Sources\CuteAnt.Extensions.PlatformDependent.Sources.projitems" Label="Shared" />
   <ImportGroup Condition=" '$(TargetFramework)' == 'net40' ">
     <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems" Label="Shared" />
   </ImportGroup>
@@ -34,12 +33,12 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'net40' ">
     <PackageReference Include="System.Buffers" Version="$(SystemBuffersPackageVersion)" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Reflection.Emit" Version="$(SystemReflectionEmitPackageVersion)" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="$(SystemReflectionEmitLightweightPackageVersion)" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

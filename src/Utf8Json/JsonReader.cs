@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using CuteAnt.Extensions.Internal;
 using Utf8Json.Internal;
 
 #if NETSTANDARD || DESKTOPCLR
@@ -600,7 +599,7 @@ namespace Utf8Json
                                     if (builder == null) builder = StringBuilderCache.GetBuffer();
 
                                     var copyCount = i - from;
-                                    if (copyCount > 0) { PlatformDependent.CopyMemory(bytes, from, builder, builderOffset, copyCount); }
+                                    Buffer.BlockCopy(bytes, from, builder, builderOffset, copyCount);
                                     builderOffset += copyCount;
                                 }
 
@@ -648,7 +647,7 @@ namespace Utf8Json
                     }
 
                     var copyCount = i - from;
-                    if (copyCount > 0) { PlatformDependent.CopyMemory(bytes, from, builder, builderOffset, copyCount); }
+                    Buffer.BlockCopy(bytes, from, builder, builderOffset, copyCount);
                     builderOffset += copyCount;
                     builder[builderOffset++] = escapeCharacter;
                     i += 1;
@@ -680,11 +679,8 @@ namespace Utf8Json
                 }
 
                 var copyCount = offset - from - 1;
-                if (copyCount > 0)
-                {
-                    BinaryUtil.EnsureCapacity(ref builder, builderOffset, copyCount);
-                    PlatformDependent.CopyMemory(bytes, from, builder, builderOffset, copyCount);
-                }
+                BinaryUtil.EnsureCapacity(ref builder, builderOffset, copyCount);
+                Buffer.BlockCopy(bytes, from, builder, builderOffset, copyCount);
                 builderOffset += copyCount;
 
                 resultBytes = builder;

@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using CuteAnt.Buffers;
 using Xunit;
@@ -16,20 +19,41 @@ namespace CuteAnt.Extensions.Serialization.Tests
     }
 
     [Fact]
+    public void CombGuidDictionaryest()
+    {
+      InternalCombGuidDictionaryest();
+    }
+
+    protected virtual void InternalCombGuidDictionaryest()
+    {
+      var dict = new Dictionary<CombGuid, string>();
+      dict.Add(CombGuid.NewComb(), "庄生晓梦迷蝴蝶");
+      dict.Add(CombGuid.NewComb(), "望帝春心托杜鹃");
+      dict.Add(CombGuid.NewComb(), "相见时难别亦难");
+      dict.Add(CombGuid.NewComb(), "东风无力百花残");
+
+      var newDict = _formatter.DeepCopy(dict);
+      Assert.Equal(dict.Count, newDict.Count);
+      Assert.Equal(dict.Keys.ToArray(), newDict.Keys.ToArray());
+
+      newDict = (Dictionary<CombGuid, string>)_formatter.DeepCopyObject(dict);
+      Assert.Equal(dict.Count, newDict.Count);
+      Assert.Equal(dict.Keys.ToArray(), newDict.Keys.ToArray());
+    }
+
+    [Fact]
     public void CombGuidTest()
     {
       var comb = CombGuid.NewComb();
       var newComb = _formatter.DeepCopy(comb);
       Assert.Equal(comb, newComb);
-
-      newComb = _formatter.DeepCopy(comb);
+      newComb = (CombGuid)_formatter.DeepCopyObject(comb);
       Assert.Equal(comb, newComb);
 
       CombGuid? comb1 = CombGuid.NewComb();
       CombGuid? newComb1 = _formatter.DeepCopy(comb1);
       Assert.Equal(comb1, newComb1);
-
-      newComb1 = _formatter.DeepCopy(comb1);
+      newComb1 = (CombGuid?)_formatter.DeepCopyObject(comb1);
       Assert.Equal(comb1, newComb1);
     }
 
@@ -296,11 +320,21 @@ namespace CuteAnt.Extensions.Serialization.Tests
   public class ServiceStackMessageFormatterTest : SerializeTestBase
   {
     public ServiceStackMessageFormatterTest() : base(ServiceStackMessageFormatter.DefaultInstance) { }
+    protected override void InternalCombGuidDictionaryest()
+    {
+      // TODO
+      Assert.True(true);
+    }
   }
 
   public class CsvMessageFormatterTest : SerializeTestBase
   {
     public CsvMessageFormatterTest() : base(CsvMessageFormatter.DefaultInstance, true) { }
+    protected override void InternalCombGuidDictionaryest()
+    {
+      // TODO
+      Assert.True(true);
+    }
   }
 
   public class JsvMessageFormatterTest : SerializeTestBase
@@ -311,5 +345,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
   public class BinaryMessageFormatterTest : SerializeTestBase
   {
     public BinaryMessageFormatterTest() : base(BinaryMessageFormatter.DefaultInstance) { }
+
+    protected override void InternalCombGuidDictionaryest()
+    {
+      // not support
+      Assert.True(true);
+    }
   }
 }
