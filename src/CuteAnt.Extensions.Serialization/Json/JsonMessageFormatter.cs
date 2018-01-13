@@ -39,7 +39,7 @@ namespace CuteAnt.Extensions.Serialization
     #region @@ Constructors @@
 
     /// <summary>Initializes a new instance of the <see cref="JsonMessageFormatter"/> class.</summary>
-    protected JsonMessageFormatter()
+    public JsonMessageFormatter()
     {
       // Initialize serializer settings
       _defaultSerializerSettings = CreateDefaultSerializerSettings();
@@ -54,7 +54,7 @@ namespace CuteAnt.Extensions.Serialization
     [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors",
         Justification = "MaxDepth is sealed in existing subclasses and its documentation carries warnings.")]
 #endif
-    protected JsonMessageFormatter(JsonMessageFormatter formatter)
+    public JsonMessageFormatter(JsonMessageFormatter formatter)
       : base(formatter)
     {
       Contract.Assert(formatter != null);
