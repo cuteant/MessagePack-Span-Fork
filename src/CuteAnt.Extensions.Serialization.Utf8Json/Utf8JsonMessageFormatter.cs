@@ -84,6 +84,19 @@ namespace CuteAnt.Extensions.Serialization
       }
     }
     /// <inheritdoc />
+    public override T Deserialize<T>(in ArraySegment<byte> serializedObject)
+    {
+      try
+      {
+        return JsonSerializer.Deserialize<T>(serializedObject.Array, serializedObject.Offset, s_defaultResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
+      }
+    }
+    /// <inheritdoc />
     public override T Deserialize<T>(byte[] serializedObject, int offset, int count)
     {
       try
@@ -102,6 +115,19 @@ namespace CuteAnt.Extensions.Serialization
       try
       {
         return JsonSerializer.NonGeneric.Deserialize(type, serializedObject, 0, s_defaultResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return GetDefaultValueForType(type);
+      }
+    }
+    /// <inheritdoc />
+    public override object Deserialize(Type type, in ArraySegment<byte> serializedObject)
+    {
+      try
+      {
+        return JsonSerializer.NonGeneric.Deserialize(type, serializedObject.Array, serializedObject.Offset, s_defaultResolver);
       }
       catch (Exception ex)
       {

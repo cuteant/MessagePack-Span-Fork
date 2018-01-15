@@ -93,6 +93,12 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>Deserializes the specified serialized object.</summary>
     /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    object Deserialize(Type type, in ArraySegment<byte> serializedObject);
+
+    /// <summary>Deserializes the specified serialized object.</summary>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
     /// <param name="offset"></param>
     /// <param name="count"></param>
     /// <returns></returns>
@@ -103,6 +109,11 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
     T Deserialize<T>(byte[] serializedObject);
+
+    /// <summary>Deserializes the specified serialized object.</summary>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    T Deserialize<T>(in ArraySegment<byte> serializedObject);
 
     /// <summary>Deserializes the specified serialized object.</summary>
     /// <typeparam name="T"></typeparam>
@@ -121,6 +132,12 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>Deserializes the asynchronous.</summary>
     /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    Task<object> DeserializeAsync(Type type, in ArraySegment<byte> serializedObject);
+
+    /// <summary>Deserializes the asynchronous.</summary>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
     /// <param name="offset"></param>
     /// <param name="count"></param>
     /// <returns></returns>
@@ -131,6 +148,12 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
     Task<T> DeserializeAsync<T>(byte[] serializedObject);
+
+    /// <summary>Deserializes the asynchronous.</summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    Task<T> DeserializeAsync<T>(in ArraySegment<byte> serializedObject);
 
     /// <summary>Deserializes the asynchronous.</summary>
     /// <typeparam name="T"></typeparam>

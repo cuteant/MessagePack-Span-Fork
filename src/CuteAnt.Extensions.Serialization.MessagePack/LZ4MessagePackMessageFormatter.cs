@@ -33,6 +33,19 @@ namespace CuteAnt.Extensions.Serialization
       }
     }
     /// <inheritdoc />
+    public override T Deserialize<T>(in ArraySegment<byte> serializedObject)
+    {
+      try
+      {
+        return (T)LZ4MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
+      }
+    }
+    /// <inheritdoc />
     public override T Deserialize<T>(byte[] serializedObject, int offset, int count)
     {
       try
@@ -51,6 +64,19 @@ namespace CuteAnt.Extensions.Serialization
       try
       {
         return LZ4MessagePackSerializer.Deserialize<object>(new ArraySegment<byte>(serializedObject, 0, serializedObject.Length), s_typelessResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return GetDefaultValueForType(type);
+      }
+    }
+    /// <inheritdoc />
+    public override object Deserialize(Type type, in ArraySegment<byte> serializedObject)
+    {
+      try
+      {
+        return LZ4MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
       }
       catch (Exception ex)
       {

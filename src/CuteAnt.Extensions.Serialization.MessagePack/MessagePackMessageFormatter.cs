@@ -95,6 +95,19 @@ namespace CuteAnt.Extensions.Serialization
       }
     }
     /// <inheritdoc />
+    public override T Deserialize<T>(in ArraySegment<byte> serializedObject)
+    {
+      try
+      {
+        return (T)MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return default;
+      }
+    }
+    /// <inheritdoc />
     public override T Deserialize<T>(byte[] serializedObject, int offset, int count)
     {
       try
@@ -109,6 +122,19 @@ namespace CuteAnt.Extensions.Serialization
     }
     /// <inheritdoc />
     public override object Deserialize(Type type, byte[] serializedObject)
+    {
+      try
+      {
+        return MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
+      }
+      catch (Exception ex)
+      {
+        s_logger.LogError(ex.ToString());
+        return GetDefaultValueForType(type);
+      }
+    }
+    /// <inheritdoc />
+    public override object Deserialize(Type type, in ArraySegment<byte> serializedObject)
     {
       try
       {
