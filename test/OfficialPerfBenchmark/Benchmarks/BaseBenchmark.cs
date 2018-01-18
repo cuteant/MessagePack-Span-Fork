@@ -36,6 +36,17 @@ namespace PerfBenchmark
     {
       return MessagePackSerializer.Deserialize<T>(_messagePackData);
     }
+    private byte[] _messagePackData1;
+    [GlobalSetup(Target = nameof(DeserializeMessagePackNonGeneric))]
+    public void SetupDeserializeMessagePackNonGeneric()
+    {
+      _messagePackData1 = MessagePackSerializer.Serialize(GetValue());
+    }
+    [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
+    public T DeserializeMessagePackNonGeneric()
+    {
+      return (T)MessagePackSerializer.NonGeneric.Deserialize(typeof(T), _messagePackData1);
+    }
 
     #endregion
 

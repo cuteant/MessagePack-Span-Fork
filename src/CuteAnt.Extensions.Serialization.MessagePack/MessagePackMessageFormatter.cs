@@ -28,6 +28,8 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- Register --
 
+    public static void Register(IMessagePackFormatter[] formatters) => Register(formatters, null);
+    public static void Register(IFormatterResolver[] resolvers) => Register(null, resolvers);
     public static void Register(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
     {
       if (formatters != null && formatters.Length > 0) { CompositeResolver.Register(formatters.Where(_ => _.GetType() != typeof(TypelessFormatter)).ToArray()); }
@@ -45,7 +47,6 @@ namespace CuteAnt.Extensions.Serialization
       }
 
       s_defaultResolver = CompositeResolver.Instance;
-      MessagePackSerializer.SetDefaultResolver(s_defaultResolver);
     }
 
     #endregion
