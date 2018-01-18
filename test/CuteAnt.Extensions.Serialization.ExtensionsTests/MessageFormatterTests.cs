@@ -197,9 +197,15 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var serializedObject = _formatter.SerializeObject(poco);
       var newPoco = _formatter.Deserialize<SerializerPocoSerializable>(serializedObject);
       Helper.ComparePoco(poco, newPoco);
+      serializedObject = _formatter.SerializeObject(poco, 2048);
+      newPoco = (SerializerPocoSerializable)_formatter.Deserialize(typeof(SerializerPocoSerializable), serializedObject);
+      Helper.ComparePoco(poco, newPoco);
 
       serializedObject = _formatter.Serialize(poco);
       newPoco = _formatter.Deserialize<SerializerPocoSerializable>(serializedObject);
+      Helper.ComparePoco(poco, newPoco);
+      serializedObject = _formatter.Serialize(poco, 2048);
+      newPoco = _formatter.Deserialize<SerializerPocoSerializable>(typeof(SerializerPocoSerializable), serializedObject);
       Helper.ComparePoco(poco, newPoco);
     }
 
@@ -210,14 +216,20 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var serializedObject = await _formatter.SerializeObjectAsync(poco);
       var newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(serializedObject);
       Helper.ComparePoco(poco, newPoco);
+      serializedObject = await _formatter.SerializeObjectAsync(poco, 2048);
+      newPoco = (SerializerPocoSerializable)(await _formatter.DeserializeAsync(typeof(SerializerPocoSerializable), serializedObject));
+      Helper.ComparePoco(poco, newPoco);
 
       serializedObject = await _formatter.SerializeAsync(poco);
       newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(serializedObject);
       Helper.ComparePoco(poco, newPoco);
+      serializedObject = await _formatter.SerializeAsync(poco, 2048);
+      newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(typeof(SerializerPocoSerializable), serializedObject);
+      Helper.ComparePoco(poco, newPoco);
     }
 
     [Fact]
-    public void SerializeToByteArraySegmentTest()
+    public void SerializeToMemoryPoolTest()
     {
       var poco = SerializerPocoSerializable.Create();
       var serializedObject = _formatter.WriteToMemoryPool((object)poco);
@@ -225,14 +237,28 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Helper.ComparePoco(poco, newPoco);
       BufferManager.Shared.Return(serializedObject.Array);
 
+      serializedObject = _formatter.WriteToMemoryPool((object)poco, 2048);
+      newPoco = _formatter.Deserialize<SerializerPocoSerializable>(serializedObject);
+      Helper.ComparePoco(poco, newPoco);
+      newPoco = _formatter.Deserialize<SerializerPocoSerializable>(typeof(SerializerPocoSerializable), serializedObject);
+      Helper.ComparePoco(poco, newPoco);
+      newPoco = _formatter.Deserialize<SerializerPocoSerializable>(typeof(SerializerPocoSerializable), serializedObject.Array, serializedObject.Offset, serializedObject.Count);
+      Helper.ComparePoco(poco, newPoco);
+      BufferManager.Shared.Return(serializedObject.Array);
+
       serializedObject = _formatter.WriteToMemoryPool(poco);
-      newPoco = _formatter.Deserialize<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count);
+      newPoco = (SerializerPocoSerializable)_formatter.Deserialize(typeof(SerializerPocoSerializable), serializedObject);
+      Helper.ComparePoco(poco, newPoco);
+      BufferManager.Shared.Return(serializedObject.Array);
+
+      serializedObject = _formatter.WriteToMemoryPool(poco, 2048);
+      newPoco = (SerializerPocoSerializable)_formatter.Deserialize(typeof(SerializerPocoSerializable), serializedObject.Array, serializedObject.Offset, serializedObject.Count);
       Helper.ComparePoco(poco, newPoco);
       BufferManager.Shared.Return(serializedObject.Array);
     }
 
     [Fact]
-    public async Task SerializeToByteArraySegmentAsyncTest()
+    public async Task SerializeToMemoryPoolAsyncTest()
     {
       var poco = SerializerPocoSerializable.Create();
       var serializedObject = await _formatter.WriteToMemoryPoolAsync((object)poco);
@@ -240,11 +266,73 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Helper.ComparePoco(poco, newPoco);
       BufferManager.Shared.Return(serializedObject.Array);
 
+      serializedObject = await _formatter.WriteToMemoryPoolAsync((object)poco, 2048);
+      newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(serializedObject);
+      Helper.ComparePoco(poco, newPoco);
+      newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(typeof(SerializerPocoSerializable), serializedObject);
+      Helper.ComparePoco(poco, newPoco);
+      newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(typeof(SerializerPocoSerializable), serializedObject.Array, serializedObject.Offset, serializedObject.Count);
+      Helper.ComparePoco(poco, newPoco);
+      BufferManager.Shared.Return(serializedObject.Array);
+
       serializedObject = await _formatter.WriteToMemoryPoolAsync(poco);
-      newPoco = await _formatter.DeserializeAsync<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count);
+      newPoco = (SerializerPocoSerializable)(await _formatter.DeserializeAsync(typeof(SerializerPocoSerializable), serializedObject.Array, serializedObject.Offset, serializedObject.Count));
+      Helper.ComparePoco(poco, newPoco);
+      BufferManager.Shared.Return(serializedObject.Array);
+
+      serializedObject = await _formatter.WriteToMemoryPoolAsync(poco, 2048);
+      newPoco = (SerializerPocoSerializable)(await _formatter.DeserializeAsync(typeof(SerializerPocoSerializable), serializedObject.Array, serializedObject.Offset, serializedObject.Count));
       Helper.ComparePoco(poco, newPoco);
       BufferManager.Shared.Return(serializedObject.Array);
     }
+
+    [Fact]
+    public void SerializeToStreamTest()
+    {
+      var poco = SerializerPocoSerializable.Create();
+      var ms = new MemoryStream();
+      _formatter.WriteToStream(poco, ms);
+      ms.Position = 0;
+      var newPoco = _formatter.ReadFromStream<SerializerPocoSerializable>(ms);
+      Helper.ComparePoco(poco, newPoco);
+
+      ms = new MemoryStream();
+      _formatter.WriteToStream(typeof(SerializerPocoSerializable), poco, ms);
+      ms.Position = 0;
+      newPoco = (SerializerPocoSerializable)_formatter.ReadFromStream(typeof(SerializerPocoSerializable), ms);
+      Helper.ComparePoco(poco, newPoco);
+
+      ms = new MemoryStream();
+      _formatter.WriteToStream((object)poco, ms);
+      ms.Position = 0;
+      newPoco = _formatter.ReadFromStream<SerializerPocoSerializable>(typeof(SerializerPocoSerializable), ms);
+      Helper.ComparePoco(poco, newPoco);
+    }
+
+#if !TEST40
+    [Fact]
+    public async Task SerializeToStreamAsyncTest()
+    {
+      var poco = SerializerPocoSerializable.Create();
+      var ms = new MemoryStream();
+      await _formatter.WriteToStreamAsync(poco, ms);
+      ms.Position = 0;
+      var newPoco = await _formatter.ReadFromStreamAsync<SerializerPocoSerializable>(ms);
+      Helper.ComparePoco(poco, newPoco);
+
+      ms = new MemoryStream();
+      await _formatter.WriteToStreamAsync(typeof(SerializerPocoSerializable), poco, ms);
+      ms.Position = 0;
+      newPoco = (SerializerPocoSerializable)(await _formatter.ReadFromStreamAsync(typeof(SerializerPocoSerializable), ms));
+      Helper.ComparePoco(poco, newPoco);
+
+      ms = new MemoryStream();
+      await _formatter.WriteToStreamAsync((object)poco, ms);
+      ms.Position = 0;
+      newPoco = await _formatter.ReadFromStreamAsync<SerializerPocoSerializable>(typeof(SerializerPocoSerializable), ms);
+      Helper.ComparePoco(poco, newPoco);
+    }
+#endif
   }
 
   public class JsonMessageFormatterTest : SerializeTestBase

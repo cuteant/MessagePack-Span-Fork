@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using CuteAnt.Buffers;
 using CuteAnt.Extensions.Internal;
@@ -27,23 +26,14 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- Register --
 
-    public static void Register(IMessagePackFormatter[] formatters) => Register(formatters, null);
-    public static void Register(IFormatterResolver[] resolvers) => Register(null, resolvers);
+    public static void Register(params IMessagePackFormatter[] formatters) => Register(formatters, null);
+    public static void Register(params IFormatterResolver[] resolvers) => Register(null, resolvers);
     public static void Register(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
     {
       if ((null == formatters || formatters.Length == 0) && (null == resolvers || resolvers.Length == 0)) { return; }
 
-      if (formatters != null && formatters.Length > 0) { TypelessCompositeResolver.Register(formatters); }
-      var defaultResolvers = new[]
-      {
-        TypelessDefaultResolver.Instance,
-      };
-      if (resolvers != null && resolvers.Length > 0)
-      {
-        TypelessCompositeResolver.Register(resolvers.Concat(defaultResolvers).ToArray());
-      }
-
-      s_typelessResolver = TypelessCompositeResolver.Instance;
+      if (formatters != null && formatters.Length > 0) { TypelessDefaultResolver.Register(formatters); }
+      if (resolvers != null && resolvers.Length > 0) { TypelessDefaultResolver.Register(resolvers); }
     }
 
     #endregion

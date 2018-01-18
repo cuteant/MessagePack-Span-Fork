@@ -25,6 +25,11 @@ namespace PerfBenchmark
     {
       return MessagePackSerializer.Serialize(_value);
     }
+    [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
+    public byte[] SerializeMessagePackNonGeneric()
+    {
+      return MessagePackSerializer.Serialize((object)_value);
+    }
     private byte[] _messagePackData;
     [GlobalSetup(Target = nameof(DeserializeMessagePack))]
     public void SetupDeserializeMessagePack()

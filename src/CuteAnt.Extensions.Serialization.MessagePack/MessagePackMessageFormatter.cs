@@ -28,25 +28,18 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- Register --
 
-    public static void Register(IMessagePackFormatter[] formatters) => Register(formatters, null);
-    public static void Register(IFormatterResolver[] resolvers) => Register(null, resolvers);
+    public static void Register(params IMessagePackFormatter[] formatters) => Register(formatters, null);
+    public static void Register(params IFormatterResolver[] resolvers) => Register(null, resolvers);
     public static void Register(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
     {
-      if (formatters != null && formatters.Length > 0) { CompositeResolver.Register(formatters.Where(_ => _.GetType() != typeof(TypelessFormatter)).ToArray()); }
-      var defaultResolvers = new[]
+      if (formatters != null && formatters.Length > 0)
       {
-        DefaultResolver.Instance,
-      };
+        DefaultResolverCore.Register(formatters.Where(_ => _.GetType() != typeof(TypelessFormatter)).ToArray());
+      }
       if (resolvers != null && resolvers.Length > 0)
       {
-        CompositeResolver.Register(resolvers.Where(_ => _.GetType() != typeof(TypelessObjectResolver) && _.GetType() != typeof(TypelessContractlessStandardResolver)).ToArray().Concat(defaultResolvers).ToArray());
+        DefaultResolverCore.Register(resolvers.Where(_ => _.GetType() != typeof(TypelessObjectResolver) && _.GetType() != typeof(TypelessContractlessStandardResolver)).ToArray());
       }
-      else
-      {
-        CompositeResolver.Register(defaultResolvers);
-      }
-
-      s_defaultResolver = CompositeResolver.Instance;
     }
 
     #endregion
@@ -203,20 +196,26 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
+    /*
+     * 这里序列化时需要忽略接口、基类，直接序列化类型本身
+     * 要不然会造成反序列化的紊乱
+     * 参考 CuteAnt.Extensions.Serialization.ExtensionsTests.MessagePackTests
+     */
+
     #region -- Serialize --
 
     /// <inheritdoc />
     public override byte[] Serialize<T>(T item)
     {
       if (null == item) { return EmptyArray<byte>.Instance; }
-      return MessagePackSerializer.Serialize(item, s_defaultResolver);
+      return MessagePackSerializer.Serialize<object>(item, s_defaultResolver);
     }
 
     /// <inheritdoc />
     public override byte[] Serialize<T>(T item, int initialBufferSize)
     {
       if (null == item) { return EmptyArray<byte>.Instance; }
-      return MessagePackSerializer.Serialize(item, s_defaultResolver);
+      return MessagePackSerializer.Serialize<object>(item, s_defaultResolver);
     }
 
     #endregion
@@ -244,7 +243,7 @@ namespace CuteAnt.Extensions.Serialization
     public override ArraySegment<byte> WriteToMemoryPool<T>(T item)
     {
       if (null == item) { return BufferManager.Empty; }
-      var serializedObject = MessagePackSerializer.SerializeUnsafe(item, s_defaultResolver);
+      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(item, s_defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -254,7 +253,7 @@ namespace CuteAnt.Extensions.Serialization
     public override ArraySegment<byte> WriteToMemoryPool<T>(T item, int initialBufferSize)
     {
       if (null == item) { return BufferManager.Empty; }
-      var serializedObject = MessagePackSerializer.SerializeUnsafe(item, s_defaultResolver);
+      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(item, s_defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -292,7 +291,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      MessagePackSerializer.Serialize(writeStream, value, s_defaultResolver);
+      MessagePackSerializer.Serialize<object>(writeStream, value, s_defaultResolver);
     }
 
     /// <inheritdoc />

@@ -36,6 +36,11 @@ namespace PerfBenchmark
     {
       return MessagePackSerializer.Serialize(_value);
     }
+    [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
+    public byte[] SerializeMessagePackNonGeneric()
+    {
+      return MessagePackSerializer.Serialize((object)_value);
+    }
     private byte[] _messagePackData;
     [GlobalSetup(Target = nameof(DeserializeMessagePack))]
     public void SetupDeserializeMessagePack()
@@ -46,6 +51,17 @@ namespace PerfBenchmark
     public T DeserializeMessagePack()
     {
       return MessagePackSerializer.Deserialize<T>(_messagePackData);
+    }
+    private byte[] _messagePackData_a;
+    [GlobalSetup(Target = nameof(DeserializeMessagePackNonGeneric))]
+    public void SetupDeserializeMessagePackNonGeneric()
+    {
+      _messagePackData_a = MessagePackSerializer.Serialize(GetValue());
+    }
+    [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
+    public T DeserializeMessagePackNonGeneric()
+    {
+      return (T)MessagePackSerializer.NonGeneric.Deserialize(typeof(T), _messagePackData_a);
     }
 
     #endregion

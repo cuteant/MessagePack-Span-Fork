@@ -190,16 +190,22 @@ namespace CuteAnt.Extensions.Serialization
 
     #endregion
 
+    /*
+     * 这里序列化时需要忽略接口、基类，直接序列化类型本身
+     * 要不然会造成反序列化的紊乱
+     * 参考 CuteAnt.Extensions.Serialization.ExtensionsTests.Utf8JsonTests
+     */
+
     #region -- Serialize --
 
     public override byte[] Serialize<T>(T item)
     {
-      return JsonSerializer.Serialize(item, s_defaultResolver);
+      return JsonSerializer.Serialize<object>(item, s_defaultResolver);
     }
 
     public override byte[] Serialize<T>(T item, int initialBufferSize)
     {
-      return JsonSerializer.Serialize(item, s_defaultResolver);
+      return JsonSerializer.Serialize<object>(item, s_defaultResolver);
     }
 
     #endregion
@@ -209,13 +215,13 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public override byte[] SerializeObject(object item)
     {
-      return JsonSerializer.NonGeneric.Serialize(item, s_defaultResolver);
+      return JsonSerializer.Serialize(item, s_defaultResolver);
     }
 
     /// <inheritdoc />
     public override byte[] SerializeObject(object item, int initialBufferSize)
     {
-      return JsonSerializer.NonGeneric.Serialize(item, s_defaultResolver);
+      return JsonSerializer.Serialize(item, s_defaultResolver);
     }
 
     #endregion
@@ -224,7 +230,7 @@ namespace CuteAnt.Extensions.Serialization
 
     public override ArraySegment<byte> WriteToMemoryPool<T>(T item)
     {
-      var serializedObject = JsonSerializer.SerializeUnsafe(item, s_defaultResolver);
+      var serializedObject = JsonSerializer.SerializeUnsafe<object>(item, s_defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -233,7 +239,7 @@ namespace CuteAnt.Extensions.Serialization
 
     public override ArraySegment<byte> WriteToMemoryPool<T>(T item, int initialBufferSize)
     {
-      var serializedObject = JsonSerializer.SerializeUnsafe(item, s_defaultResolver);
+      var serializedObject = JsonSerializer.SerializeUnsafe<object>(item, s_defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -242,7 +248,7 @@ namespace CuteAnt.Extensions.Serialization
 
     public override ArraySegment<byte> WriteToMemoryPool(object item)
     {
-      var serializedObject = JsonSerializer.NonGeneric.SerializeUnsafe(item, s_defaultResolver);
+      var serializedObject = JsonSerializer.SerializeUnsafe(item, s_defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -251,7 +257,7 @@ namespace CuteAnt.Extensions.Serialization
 
     public override ArraySegment<byte> WriteToMemoryPool(object item, int initialBufferSize)
     {
-      var serializedObject = JsonSerializer.NonGeneric.SerializeUnsafe(item, s_defaultResolver);
+      var serializedObject = JsonSerializer.SerializeUnsafe(item, s_defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -269,7 +275,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      JsonSerializer.Serialize(writeStream, value, s_defaultResolver);
+      JsonSerializer.Serialize<object>(writeStream, value, s_defaultResolver);
     }
 
     /// <inheritdoc />
@@ -279,7 +285,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      JsonSerializer.NonGeneric.Serialize(value.GetType(), writeStream, value, s_defaultResolver);
+      JsonSerializer.Serialize(writeStream, value, s_defaultResolver);
     }
 
     /// <inheritdoc />
@@ -289,7 +295,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      JsonSerializer.NonGeneric.Serialize(type ?? value.GetType(), writeStream, value, s_defaultResolver);
+      JsonSerializer.Serialize(writeStream, value, s_defaultResolver);
     }
 
     #endregion

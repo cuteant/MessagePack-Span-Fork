@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
+using System.Threading;
 using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
@@ -11,7 +10,7 @@ namespace CuteAnt.Extensions.Serialization.Internal
 {
   internal sealed class DefaultResolver : IFormatterResolver
   {
-    public static readonly IFormatterResolver Instance = new DefaultResolver();
+    public static readonly DefaultResolver Instance = new DefaultResolver();
 
     public static readonly IMessagePackFormatter<object> ObjectFallbackFormatter = new DynamicObjectTypeFallbackFormatter(DefaultResolverCore.Instance);
 
@@ -43,9 +42,11 @@ namespace CuteAnt.Extensions.Serialization.Internal
     }
   }
 
-  internal static class DefaultResolverHelper
+  internal sealed class DefaultResolverCore : IFormatterResolver
   {
-    public static readonly IFormatterResolver[] DefaultResolvers = new[]
+    public static readonly IFormatterResolver Instance = new DefaultResolverCore();
+
+    private static readonly IFormatterResolver[] s_defaultResolvers = new IFormatterResolver[]
     {
       UnsafeBinaryResolver.Instance,
       NativeDateTimeResolver.Instance, // Native c# DateTime format, preserving timezone
@@ -56,22 +57,50 @@ namespace CuteAnt.Extensions.Serialization.Internal
       DynamicEnumResolver.Instance, // Try Enum
       DynamicGenericResolver.Instance, // Try Array, Tuple, Collection
       DynamicUnionResolver.Instance, // Try Union(Interface)
-    };
-  }
 
-  internal sealed class DefaultResolverCore : IFormatterResolver
-  {
-    public static readonly IFormatterResolver Instance = new DefaultResolverCore();
-
-    static readonly IFormatterResolver[] resolvers = DefaultResolverHelper.DefaultResolvers.Concat(new IFormatterResolver[]
-    {
       DynamicObjectResolverAllowPrivate.Instance, // Try Object
       DynamicContractlessObjectResolverAllowPrivate.Instance, // Serializes keys as strings
-    }).ToArray();
+    };
 
+    private const int Locked = 1;
+    private const int Unlocked = 0;
+    private static int s_isFreezed = Unlocked;
+    private static IMessagePackFormatter[] s_formatters = new IMessagePackFormatter[0];
+    private static IFormatterResolver[] s_resolvers = s_defaultResolvers;
 
     DefaultResolverCore()
     {
+    }
+
+    public static void Register(params IFormatterResolver[] resolvers)
+    {
+      if (Locked == s_isFreezed)
+      {
+        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+      }
+
+      Interlocked.Exchange(ref s_resolvers, resolvers.Concat(s_defaultResolvers).ToArray());
+    }
+
+    public static void Register(params IMessagePackFormatter[] formatters)
+    {
+      if (Locked == s_isFreezed)
+      {
+        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+      }
+
+      Interlocked.Exchange(ref s_formatters, formatters);
+    }
+
+    public static void Register(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
+    {
+      if (Locked == s_isFreezed)
+      {
+        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+      }
+
+      Interlocked.Exchange(ref s_formatters, formatters);
+      Interlocked.Exchange(ref s_resolvers, resolvers.Concat(s_defaultResolvers).ToArray());
     }
 
     public IMessagePackFormatter<T> GetFormatter<T>()
@@ -85,7 +114,22 @@ namespace CuteAnt.Extensions.Serialization.Internal
 
       static FormatterCache()
       {
-        foreach (var item in resolvers)
+        Interlocked.CompareExchange(ref s_isFreezed, Locked, Unlocked);
+
+        foreach (var item in s_formatters)
+        {
+          foreach (var implInterface in item.GetType().GetTypeInfo().ImplementedInterfaces)
+          {
+            var ti = implInterface.GetTypeInfo();
+            if (ti.IsGenericType && ti.GenericTypeArguments[0] == typeof(T))
+            {
+              formatter = (IMessagePackFormatter<T>)item;
+              return;
+            }
+          }
+        }
+
+        foreach (var item in s_resolvers)
         {
           var f = item.GetFormatter<T>();
           if (f != null)

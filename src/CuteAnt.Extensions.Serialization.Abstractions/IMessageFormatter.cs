@@ -104,6 +104,9 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns></returns>
     object Deserialize(Type type, byte[] serializedObject, int offset, int count);
 
+
+
+
     /// <summary>Deserializes the specified serialized object.</summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="serializedObject">The serialized object.</param>
@@ -122,6 +125,34 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="count"></param>
     /// <returns></returns>
     T Deserialize<T>(byte[] serializedObject, int offset, int count);
+
+
+
+
+    /// <summary>Deserializes the specified serialized object.</summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    T Deserialize<T>(Type type, byte[] serializedObject);
+
+    /// <summary>Deserializes the specified serialized object.</summary>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    T Deserialize<T>(Type type, in ArraySegment<byte> serializedObject);
+
+    /// <summary>Deserializes the specified serialized object.</summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <param name="offset"></param>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    T Deserialize<T>(Type type, byte[] serializedObject, int offset, int count);
+
+
+
 
     /// <summary>Deserializes the asynchronous.</summary>
     /// <param name="type">The type of the object to deserialize.</param>
@@ -143,6 +174,9 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns></returns>
     Task<object> DeserializeAsync(Type type, byte[] serializedObject, int offset, int count);
 
+
+
+
     /// <summary>Deserializes the asynchronous.</summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="serializedObject">The serialized object.</param>
@@ -162,6 +196,32 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="count"></param>
     /// <returns></returns>
     Task<T> DeserializeAsync<T>(byte[] serializedObject, int offset, int count);
+
+
+
+
+    /// <summary>Deserializes the asynchronous.</summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    Task<T> DeserializeAsync<T>(Type type, byte[] serializedObject);
+
+    /// <summary>Deserializes the asynchronous.</summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <returns></returns>
+    Task<T> DeserializeAsync<T>(Type type, in ArraySegment<byte> serializedObject);
+
+    /// <summary>Deserializes the asynchronous.</summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="serializedObject">The serialized object.</param>
+    /// <param name="offset"></param>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    Task<T> DeserializeAsync<T>(Type type, byte[] serializedObject, int offset, int count);
 
     #endregion
 
@@ -194,6 +254,9 @@ namespace CuteAnt.Extensions.Serialization
     /// <seealso cref="CanReadType(Type)"/>
     object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding);
 
+
+
+
     /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given type from the given <paramref name="readStream"/></summary>
     /// <typeparam name="T">The type of the object to deserialize.</typeparam>
     /// <remarks>
@@ -220,6 +283,39 @@ namespace CuteAnt.Extensions.Serialization
     /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
     /// <seealso cref="CanReadType(Type)"/>
     T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding);
+
+
+
+
+    /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given type from the given <paramref name="readStream"/></summary>
+    /// <typeparam name="T">The type of the object to deserialize.</typeparam>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
+    /// <returns>An object of the given type.</returns>
+    /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
+    /// <seealso cref="CanReadType(Type)"/>
+    T ReadFromStream<T>(Type type, Stream readStream);
+
+    /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given type from the given <paramref name="readStream"/></summary>
+    /// <typeparam name="T">The type of the object to deserialize.</typeparam>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
+    /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
+    /// <returns>An object of the given type.</returns>
+    /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
+    /// <seealso cref="CanReadType(Type)"/>
+    T ReadFromStream<T>(Type type, Stream readStream, Encoding effectiveEncoding);
+
 
 #if !NET40
     /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given <paramref name="type"/> from the given <paramref name="readStream"/></summary>
@@ -332,6 +428,67 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
     /// <seealso cref="CanReadType(Type)"/>
     Task<T> ReadFromStreamAsync<T>(Stream readStream, Encoding effectiveEncoding, CancellationToken cancellationToken);
+
+
+
+
+    /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given type from the given <paramref name="readStream"/></summary>
+    /// <typeparam name="T">Target type.</typeparam>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
+    /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
+    /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
+    /// <seealso cref="CanReadType(Type)"/>
+    Task<T> ReadFromStreamAsync<T>(Type type, Stream readStream);
+
+    /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given type from the given <paramref name="readStream"/></summary>
+    /// <typeparam name="T">Target type.</typeparam>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
+    /// <seealso cref="CanReadType(Type)"/>
+    Task<T> ReadFromStreamAsync<T>(Type type, Stream readStream, CancellationToken cancellationToken);
+
+    /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given type from the given <paramref name="readStream"/></summary>
+    /// <typeparam name="T">The type of the object to deserialize.</typeparam>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
+    /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
+    /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
+    /// <exception cref="NotSupportedException">Derived types need to support reading.</exception>
+    /// <seealso cref="CanReadType(Type)"/>
+    Task<T> ReadFromStreamAsync<T>(Type type, Stream readStream, Encoding effectiveEncoding);
+
+    /// <summary>Returns a <see cref="Task"/> to deserialize an object of the given type from the given <paramref name="readStream"/></summary>
+    /// <typeparam name="T">The type of the object to deserialize.</typeparam>
+    /// <remarks>
+    /// <para>This implementation throws a <see cref="NotSupportedException"/>. Derived types should override this method if the formatter
+    /// supports reading.</para>
+    /// <para>An implementation of this method should NOT close <paramref name="readStream"/> upon completion.</para>
+    /// </remarks>
+    /// <param name="type">The type of the object to deserialize.</param>
+    /// <param name="readStream">The <see cref="Stream"/> to read.</param>
+    /// <param name="effectiveEncoding">The <see cref="Encoding"/> to use when reading.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A <see cref="Task"/> whose result will be an object of the given type.</returns>
+    /// <seealso cref="CanReadType(Type)"/>
+    Task<T> ReadFromStreamAsync<T>(Type type, Stream readStream, Encoding effectiveEncoding, CancellationToken cancellationToken);
 #endif
 
     #endregion

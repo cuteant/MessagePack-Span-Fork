@@ -70,4 +70,47 @@ namespace CuteAnt.Extensions.Serialization.Tests
     [Key(0)]
     public string StringProperty { get; set; }
   }
+
+  [MessagePack.Union(0, typeof(FooClass))]
+  [MessagePack.Union(1, typeof(BarClass))]
+  public interface IUnionSample
+  {
+  }
+
+  [MessagePackObject]
+  public class FooClass : IUnionSample
+  {
+    [Key(0)]
+    public int XYZ { get; set; }
+  }
+
+  [MessagePackObject]
+  public class BarClass : IUnionSample
+  {
+    [Key(0)]
+    public string OPQ { get; set; }
+  }
+
+  [Union(0, typeof(SubUnionType1))]
+  [Union(1, typeof(SubUnionType2))]
+  [MessagePackObject]
+  public abstract class ParentUnionType
+  {
+    [Key(0)]
+    public Guid MyProperty { get; set; }
+  }
+
+  [MessagePackObject]
+  public class SubUnionType1 : ParentUnionType
+  {
+    [Key(1)]
+    public int MyProperty1 { get; set; }
+  }
+
+  [MessagePackObject]
+  public class SubUnionType2 : ParentUnionType
+  {
+    [Key(1)]
+    public int MyProperty2 { get; set; }
+  }
 }
