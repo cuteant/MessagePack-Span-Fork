@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2020
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1F97D5A4-285F-4962-8F8C-BCEF8278143B}"
 EndProject
@@ -87,6 +87,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CuteAnt.Extensions.Serializ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OfficialPerfBenchmark", "test\OfficialPerfBenchmark\OfficialPerfBenchmark.csproj", "{16B163A4-2FD1-4381-9A98-1C2D4532192F}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CuteAnt.Extensions.PlatformDependent.Sources", "..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.PlatformDependent.Sources\CuteAnt.Extensions.PlatformDependent.Sources.shproj", "{E15F7A26-80F1-4B00-8FE0-1444AC212663}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.StreamReaderAndWriter.Sources\CuteAnt.Extensions.StreamReaderAndWriter.Sources.projitems*{1ab88764-60ed-44f3-9e98-08391b5f5cdb}*SharedItemsImports = 13
@@ -95,6 +97,7 @@ Global
 		..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Logging.Sources\CuteAnt.Extensions.Logging.Sources.projitems*{8dbb7dc8-2b90-4a8c-a60d-d41466174bde}*SharedItemsImports = 13
 		..\CuteAnt.Extensions.Common\src\Nito.AsyncEx.Tasks.Sources\Nito.AsyncEx.Tasks.Sources.projitems*{90bcc560-aa2b-4146-858a-9e524b696f75}*SharedItemsImports = 13
 		..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems*{c7f8dbe6-77b7-494d-af00-018f7579548c}*SharedItemsImports = 13
+		..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.PlatformDependent.Sources\CuteAnt.Extensions.PlatformDependent.Sources.projitems*{e15f7a26-80f1-4b00-8fe0-1444ac212663}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -257,6 +260,7 @@ Global
 		{95CAB253-11B2-4E46-8298-744BAE8C898A} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{FEAF2273-6CF6-4829-A759-B9C28DF864AF} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{16B163A4-2FD1-4381-9A98-1C2D4532192F} = {96E98A2F-3EBF-483C-A63E-4245C0D4F625}
+		{E15F7A26-80F1-4B00-8FE0-1444AC212663} = {4744CD6C-82C3-4D38-A708-3D301A74397F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93230366-D5C3-4397-83D3-ED46E43B8121}

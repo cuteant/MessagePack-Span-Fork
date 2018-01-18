@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using CuteAnt.Buffers;
 using CuteAnt.Extensions.Internal;
@@ -7,6 +8,7 @@ using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
 using Microsoft.Extensions.Logging;
+using CuteAnt.Extensions.Serialization.Internal;
 
 namespace CuteAnt.Extensions.Serialization
 {
@@ -18,8 +20,8 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>The default singlegton instance</summary>
     public static readonly MessagePackMessageFormatter DefaultInstance = new MessagePackMessageFormatter();
 
-    internal static IFormatterResolver s_defaultResolver = StandardResolver.Instance;
-    internal static IFormatterResolver s_typelessResolver = TypelessContractlessStandardResolver.Instance;
+    internal static IFormatterResolver s_defaultResolver = DefaultResolver.Instance;
+    public static IFormatterResolver CurrentResolver => s_defaultResolver;
 
     /// <summary>Constructor</summary>
     public MessagePackMessageFormatter() { }
@@ -28,24 +30,22 @@ namespace CuteAnt.Extensions.Serialization
 
     public static void Register(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
     {
-      if ((null == formatters || formatters.Length == 0) && (null == resolvers || resolvers.Length == 0)) { return; }
-
-      if (formatters != null && formatters.Length > 0) { CompositeResolver.Register(formatters); }
-      if (resolvers != null && resolvers.Length > 0) { CompositeResolver.Register(resolvers); }
+      if (formatters != null && formatters.Length > 0) { CompositeResolver.Register(formatters.Where(_ => _.GetType() != typeof(TypelessFormatter)).ToArray()); }
+      var defaultResolvers = new[]
+      {
+        DefaultResolver.Instance,
+      };
+      if (resolvers != null && resolvers.Length > 0)
+      {
+        CompositeResolver.Register(resolvers.Where(_ => _.GetType() != typeof(TypelessObjectResolver) && _.GetType() != typeof(TypelessContractlessStandardResolver)).ToArray().Concat(defaultResolvers).ToArray());
+      }
+      else
+      {
+        CompositeResolver.Register(defaultResolvers);
+      }
 
       s_defaultResolver = CompositeResolver.Instance;
       MessagePackSerializer.SetDefaultResolver(s_defaultResolver);
-    }
-
-    public static void RegisterTypeless(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
-    {
-      if ((null == formatters || formatters.Length == 0) && (null == resolvers || resolvers.Length == 0)) { return; }
-
-      if (formatters != null && formatters.Length > 0) { TypelessCompositeResolver.Register(formatters); }
-      if (resolvers != null && resolvers.Length > 0) { TypelessCompositeResolver.Register(resolvers); }
-
-      s_typelessResolver = TypelessCompositeResolver.Instance;
-      MessagePackSerializer.Typeless.RegisterDefaultResolver(s_typelessResolver);
     }
 
     #endregion
@@ -64,8 +64,9 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (source == null) { return null; }
 
-      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(source, s_typelessResolver);
-      return MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
+      var type = source.GetType();
+      var serializedObject = MessagePackSerializer.SerializeUnsafe(source, s_defaultResolver);
+      return MessagePackSerializer.NonGeneric.Deserialize(type, serializedObject, s_defaultResolver);
     }
 
     /// <inheritdoc />
@@ -73,7 +74,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (source == null) { return default; }
 
-      var serializedObject = MessagePackSerializer.SerializeUnsafe<T>(source, s_defaultResolver);
+      var serializedObject = MessagePackSerializer.SerializeUnsafe(source, s_defaultResolver);
       return MessagePackSerializer.Deserialize<T>(serializedObject, s_defaultResolver);
     }
 
@@ -86,7 +87,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return (T)MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
+        return MessagePackSerializer.Deserialize<T>(serializedObject, s_defaultResolver);
       }
       catch (Exception ex)
       {
@@ -99,7 +100,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return (T)MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
+        return MessagePackSerializer.Deserialize<T>(serializedObject, s_defaultResolver);
       }
       catch (Exception ex)
       {
@@ -112,7 +113,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return (T)MessagePackSerializer.Deserialize<object>(serializedObject, offset, count, s_typelessResolver);
+        return MessagePackSerializer.Deserialize<T>(serializedObject, offset, count, s_defaultResolver);
       }
       catch (Exception ex)
       {
@@ -125,7 +126,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
+        return MessagePackSerializer.NonGeneric.Deserialize(type, serializedObject, s_defaultResolver);
       }
       catch (Exception ex)
       {
@@ -138,7 +139,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
+        return MessagePackSerializer.NonGeneric.Deserialize(type, serializedObject, s_defaultResolver);
       }
       catch (Exception ex)
       {
@@ -151,7 +152,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return MessagePackSerializer.Deserialize<object>(serializedObject, offset, count, s_typelessResolver);
+        return MessagePackSerializer.NonGeneric.Deserialize(type, new ArraySegment<byte>(serializedObject, offset, count), s_defaultResolver);
       }
       catch (Exception ex)
       {
@@ -171,7 +172,7 @@ namespace CuteAnt.Extensions.Serialization
 
       try
       {
-        return (T)MessagePackSerializer.Deserialize<object>(readStream, s_typelessResolver, false);
+        return MessagePackSerializer.Deserialize<T>(readStream, s_defaultResolver, false);
       }
       catch (Exception ex)
       {
@@ -190,7 +191,7 @@ namespace CuteAnt.Extensions.Serialization
 
       try
       {
-        return MessagePackSerializer.Deserialize<object>(readStream, s_typelessResolver, false);
+        return MessagePackSerializer.NonGeneric.Deserialize(type, readStream, s_defaultResolver, false);
       }
       catch (Exception ex)
       {
@@ -207,14 +208,14 @@ namespace CuteAnt.Extensions.Serialization
     public override byte[] Serialize<T>(T item)
     {
       if (null == item) { return EmptyArray<byte>.Instance; }
-      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+      return MessagePackSerializer.Serialize(item, s_defaultResolver);
     }
 
     /// <inheritdoc />
     public override byte[] Serialize<T>(T item, int initialBufferSize)
     {
       if (null == item) { return EmptyArray<byte>.Instance; }
-      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+      return MessagePackSerializer.Serialize(item, s_defaultResolver);
     }
 
     #endregion
@@ -225,14 +226,14 @@ namespace CuteAnt.Extensions.Serialization
     public override byte[] SerializeObject(object item)
     {
       if (null == item) { return EmptyArray<byte>.Instance; }
-      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+      return MessagePackSerializer.Serialize(item, s_defaultResolver);
     }
 
     /// <inheritdoc />
     public override byte[] SerializeObject(object item, int initialBufferSize)
     {
       if (null == item) { return EmptyArray<byte>.Instance; }
-      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+      return MessagePackSerializer.Serialize(item, s_defaultResolver);
     }
 
     #endregion
@@ -242,7 +243,7 @@ namespace CuteAnt.Extensions.Serialization
     public override ArraySegment<byte> WriteToMemoryPool<T>(T item)
     {
       if (null == item) { return BufferManager.Empty; }
-      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(item, s_typelessResolver);
+      var serializedObject = MessagePackSerializer.SerializeUnsafe(item, s_defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -252,7 +253,7 @@ namespace CuteAnt.Extensions.Serialization
     public override ArraySegment<byte> WriteToMemoryPool<T>(T item, int initialBufferSize)
     {
       if (null == item) { return BufferManager.Empty; }
-      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(item, s_typelessResolver);
+      var serializedObject = MessagePackSerializer.SerializeUnsafe(item, s_defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -262,7 +263,7 @@ namespace CuteAnt.Extensions.Serialization
     public override ArraySegment<byte> WriteToMemoryPool(object item)
     {
       if (null == item) { return BufferManager.Empty; }
-      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(item, s_typelessResolver);
+      var serializedObject = MessagePackSerializer.SerializeUnsafe(item, s_defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -272,7 +273,7 @@ namespace CuteAnt.Extensions.Serialization
     public override ArraySegment<byte> WriteToMemoryPool(object item, int initialBufferSize)
     {
       if (null == item) { return BufferManager.Empty; }
-      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(item, s_typelessResolver);
+      var serializedObject = MessagePackSerializer.SerializeUnsafe(item, s_defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -290,7 +291,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      MessagePackSerializer.Serialize<object>(writeStream, value, s_typelessResolver);
+      MessagePackSerializer.Serialize(writeStream, value, s_defaultResolver);
     }
 
     /// <inheritdoc />
@@ -300,7 +301,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      MessagePackSerializer.Serialize(writeStream, value, s_typelessResolver);
+      MessagePackSerializer.Serialize(writeStream, value, s_defaultResolver);
     }
 
     /// <inheritdoc />
@@ -310,7 +311,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      MessagePackSerializer.Serialize(writeStream, value, s_typelessResolver);
+      MessagePackSerializer.Serialize(writeStream, value, s_defaultResolver);
     }
 
     #endregion

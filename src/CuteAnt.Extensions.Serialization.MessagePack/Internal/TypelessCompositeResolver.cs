@@ -3,7 +3,7 @@ using System.Reflection;
 using MessagePack;
 using MessagePack.Formatters;
 
-namespace CuteAnt.Extensions.Serialization
+namespace CuteAnt.Extensions.Serialization.Internal
 {
   internal sealed class TypelessCompositeResolver : IFormatterResolver
   {
