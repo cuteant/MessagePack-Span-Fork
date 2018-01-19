@@ -16,7 +16,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>The default singlegton instance</summary>
     public static readonly Utf8JsonMessageFormatter DefaultInstance = new Utf8JsonMessageFormatter();
 
-    private IJsonFormatterResolver _defaultResolver = Utf8JsonStandardResolver.Default;
+    private readonly IJsonFormatterResolver _defaultResolver = Utf8JsonStandardResolver.Default;
     public IJsonFormatterResolver DefaultResolver => _defaultResolver;
 
     /// <summary>Constructor</summary>

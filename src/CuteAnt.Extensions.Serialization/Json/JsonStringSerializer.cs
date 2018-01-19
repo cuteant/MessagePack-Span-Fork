@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 namespace CuteAnt.Extensions.Serialization
 {
   /// <summary>JsonStringSerializer</summary>
-  public class JsonStringSerializer : IStringSerializer
+  public sealed class JsonStringSerializer : IStringSerializer
   {
     private JsonSerializerSettings _serializerSettings;
     private JsonSerializerSettings _deserializerSettings;
@@ -28,6 +28,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public object DeserializeFromString(string serializedText, Type expectedType)
         => JsonConvertX.DeserializeObject(serializedText, expectedType, _deserializerSettings);
+
+    /// <inheritdoc />
+    public T DeserializeFromString<T>(string serializedText, Type expectedType)
+        => (T)JsonConvertX.DeserializeObject(serializedText, expectedType, _deserializerSettings);
 
     /// <inheritdoc />
     public string SerializeToString<T>(T item)

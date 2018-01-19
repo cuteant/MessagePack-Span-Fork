@@ -3,7 +3,7 @@ using ServiceStack.Text;
 
 namespace CuteAnt.Extensions.Serialization
 {
-  public class JsvStringSerializer : IStringSerializer
+  public sealed class JsvStringSerializer : IStringSerializer
   {
     public static readonly JsvStringSerializer Instance = new JsvStringSerializer();
 
@@ -17,6 +17,14 @@ namespace CuteAnt.Extensions.Serialization
       if (null == expectedType) { throw new ArgumentNullException(nameof(expectedType)); }
 
       return TypeSerializer.DeserializeFromString(serializedText, expectedType);
+    }
+
+    /// <inheritdoc />
+    public T DeserializeFromString<T>(string serializedText, Type expectedType)
+    {
+      if (null == expectedType) { throw new ArgumentNullException(nameof(expectedType)); }
+
+      return (T)TypeSerializer.DeserializeFromString(serializedText, expectedType);
     }
 
     /// <inheritdoc />
