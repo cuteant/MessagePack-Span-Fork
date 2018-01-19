@@ -85,7 +85,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
   }
 
   [MessagePackObject]
-  public class BarClass : IUnionSample
+  internal class BarClass : IUnionSample
   {
     [Key(0)]
     public string OPQ { get; set; }
@@ -108,7 +108,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
   }
 
   [MessagePackObject]
-  public class SubUnionType2 : ParentUnionType
+  internal class SubUnionType2 : ParentUnionType
   {
     [Key(1)]
     public int MyProperty2 { get; set; }

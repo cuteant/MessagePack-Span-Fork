@@ -12,6 +12,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
     static Utf8JsonTests()
     {
       CompositeResolver.RegisterAndSetAsDefault(ImmutableCollectionResolver.Instance, StandardResolver.AllowPrivate);
+      try
+      {
+        Utf8JsonStandardResolver.Register(ImmutableCollectionResolver.Instance);
+      }
+      catch { }
     }
 
     [Fact]
@@ -26,6 +31,18 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.IsType<FooClass>(newFoo);
       // 已出错，XYZ按正常逻辑应为9999
       Assert.Equal(0, newFoo.XYZ);
+
+      bytes = Utf8JsonMessageFormatter.DefaultInstance.Serialize(foo);
+      newFoo = Utf8JsonMessageFormatter.DefaultInstance.Deserialize<FooClass>(bytes);
+      Assert.Equal(9999, newFoo.XYZ);
+
+      bytes = Utf8JsonMessageFormatter.DefaultInstance.SerializeObject(foo);
+      newFoo = (FooClass)Utf8JsonMessageFormatter.DefaultInstance.Deserialize(typeof(FooClass), bytes);
+      Assert.Equal(9999, newFoo.XYZ);
+      newFoo = (FooClass)Utf8JsonMessageFormatter.DefaultInstance.Deserialize<IUnionSample>(typeof(FooClass), bytes);
+      Assert.Equal(9999, newFoo.XYZ);
+
+      Assert.Throws<InvalidOperationException>(()=> Utf8JsonStandardResolver.Register(ImmutableCollectionResolver.Instance));
     }
 
     [Fact]
@@ -36,11 +53,21 @@ namespace CuteAnt.Extensions.Serialization.Tests
       ParentUnionType subUnionType1 = new SubUnionType1 { MyProperty = guid, MyProperty1 = 20 };
       var bytes = JsonSerializer.Serialize(subUnionType1);
       Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<ParentUnionType>(bytes));
-      var newSubUnionType1 = JsonSerializer.Deserialize<SubUnionType1>(bytes);
-      Assert.NotNull(newSubUnionType1);
-      Assert.IsType<SubUnionType1>(newSubUnionType1);
-      Assert.Equal(guid, newSubUnionType1.MyProperty);
-      Assert.Equal(0, newSubUnionType1.MyProperty1); // 说明 MyProperty1 并没有序列化
+      var newSubUnionType = JsonSerializer.Deserialize<SubUnionType1>(bytes);
+      Assert.NotNull(newSubUnionType);
+      Assert.IsType<SubUnionType1>(newSubUnionType);
+      Assert.Equal(guid, newSubUnionType.MyProperty);
+      Assert.Equal(0, newSubUnionType.MyProperty1); // 说明 MyProperty1 并没有序列化
+
+      bytes = Utf8JsonMessageFormatter.DefaultInstance.Serialize(subUnionType1);
+      var newSubUnionType1 = Utf8JsonMessageFormatter.DefaultInstance.Deserialize<SubUnionType1>(bytes);
+      Assert.Equal(guid, newSubUnionType1.MyProperty); Assert.Equal(20, newSubUnionType1.MyProperty1);
+
+      bytes = Utf8JsonMessageFormatter.DefaultInstance.SerializeObject(subUnionType1);
+      newSubUnionType1 = (SubUnionType1)Utf8JsonMessageFormatter.DefaultInstance.Deserialize(typeof(SubUnionType1), bytes);
+      Assert.Equal(guid, newSubUnionType1.MyProperty); Assert.Equal(20, newSubUnionType1.MyProperty1);
+      newSubUnionType1 = (SubUnionType1)Utf8JsonMessageFormatter.DefaultInstance.Deserialize<ParentUnionType>(typeof(SubUnionType1), bytes);
+      Assert.Equal(guid, newSubUnionType1.MyProperty); Assert.Equal(20, newSubUnionType1.MyProperty1);
     }
 
     [Fact]
@@ -51,9 +78,16 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var newList = JsonSerializer.Deserialize<ImmutableList<int>>(bytes);
       Assert.Equal(imList, newList);
 
-      // 此时如果序列化 Object 对象，则无法正确序列化，说明官方的 CompositeResolver 还是有问题的
+      // 此时如果序列化 Object 对象，则无法正确序列化，说明官方的 CompositeResolver 所采用的策略还是有问题的
       Assert.Throws<System.Reflection.TargetInvocationException>(() => JsonSerializer.Serialize((object)imList));
-    }
 
+      bytes = Utf8JsonMessageFormatter.DefaultInstance.Serialize(imList);
+      newList = Utf8JsonMessageFormatter.DefaultInstance.Deserialize<ImmutableList<int>>(bytes);
+      Assert.Equal(imList, newList);
+
+      bytes = Utf8JsonMessageFormatter.DefaultInstance.SerializeObject(imList);
+      newList = Utf8JsonMessageFormatter.DefaultInstance.Deserialize<ImmutableList<int>>(bytes);
+      Assert.Equal(imList, newList);
+    }
   }
 }

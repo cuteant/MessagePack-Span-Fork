@@ -4,7 +4,6 @@ using System.Text;
 using CuteAnt.Buffers;
 using CuteAnt.Extensions.Internal;
 using Utf8Json;
-using Utf8Json.Resolvers;
 using Microsoft.Extensions.Logging;
 
 namespace CuteAnt.Extensions.Serialization
@@ -17,26 +16,17 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>The default singlegton instance</summary>
     public static readonly Utf8JsonMessageFormatter DefaultInstance = new Utf8JsonMessageFormatter();
 
-    private static IJsonFormatterResolver s_defaultResolver = StandardResolver.Default;
-    protected static IJsonFormatterResolver DefaultResolver => s_defaultResolver;
+    private IJsonFormatterResolver _defaultResolver = Utf8JsonStandardResolver.Default;
+    public IJsonFormatterResolver DefaultResolver => _defaultResolver;
 
     /// <summary>Constructor</summary>
     public Utf8JsonMessageFormatter() { }
 
-    #region -- Register --
-
-    public static void Register(IJsonFormatter[] formatters, IJsonFormatterResolver[] resolvers)
+    /// <summary>Constructor</summary>
+    public Utf8JsonMessageFormatter(IJsonFormatterResolver resolver)
     {
-      if ((null == formatters || formatters.Length == 0) && (null == resolvers || resolvers.Length == 0)) { return; }
-
-      if (formatters != null && formatters.Length > 0) { CompositeResolver.Register(formatters); }
-      if (resolvers != null && resolvers.Length > 0) { CompositeResolver.Register(resolvers); }
-
-      s_defaultResolver = CompositeResolver.Instance;
-      JsonSerializer.SetDefaultResolver(s_defaultResolver);
+      _defaultResolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
     }
-
-    #endregion
 
     #region -- IsSupportedType --
 
@@ -53,8 +43,8 @@ namespace CuteAnt.Extensions.Serialization
       if (source == null) { return null; }
 
       var type = source.GetType();
-      var serializedObject = JsonSerializer.NonGeneric.SerializeUnsafe(type, source, s_defaultResolver);
-      return JsonSerializer.NonGeneric.Deserialize(type, serializedObject.Array, serializedObject.Offset, s_defaultResolver);
+      var serializedObject = JsonSerializer.NonGeneric.SerializeUnsafe(type, source, _defaultResolver);
+      return JsonSerializer.NonGeneric.Deserialize(type, serializedObject.Array, serializedObject.Offset, _defaultResolver);
     }
 
     /// <inheritdoc />
@@ -62,8 +52,8 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (source == null) { return default; }
 
-      var serializedObject = JsonSerializer.SerializeUnsafe<T>(source, s_defaultResolver);
-      return JsonSerializer.Deserialize<T>(serializedObject.Array, serializedObject.Offset, s_defaultResolver);
+      var serializedObject = JsonSerializer.SerializeUnsafe<T>(source, _defaultResolver);
+      return JsonSerializer.Deserialize<T>(serializedObject.Array, serializedObject.Offset, _defaultResolver);
     }
 
     #endregion
@@ -75,7 +65,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return JsonSerializer.Deserialize<T>(serializedObject, 0, s_defaultResolver);
+        return JsonSerializer.Deserialize<T>(serializedObject, 0, _defaultResolver);
       }
       catch (Exception ex)
       {
@@ -88,7 +78,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return JsonSerializer.Deserialize<T>(serializedObject.Array, serializedObject.Offset, s_defaultResolver);
+        return JsonSerializer.Deserialize<T>(serializedObject.Array, serializedObject.Offset, _defaultResolver);
       }
       catch (Exception ex)
       {
@@ -101,7 +91,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return JsonSerializer.Deserialize<T>(serializedObject, offset, s_defaultResolver);
+        return JsonSerializer.Deserialize<T>(serializedObject, offset, _defaultResolver);
       }
       catch (Exception ex)
       {
@@ -114,7 +104,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return JsonSerializer.NonGeneric.Deserialize(type, serializedObject, 0, s_defaultResolver);
+        return JsonSerializer.NonGeneric.Deserialize(type, serializedObject, 0, _defaultResolver);
       }
       catch (Exception ex)
       {
@@ -127,7 +117,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return JsonSerializer.NonGeneric.Deserialize(type, serializedObject.Array, serializedObject.Offset, s_defaultResolver);
+        return JsonSerializer.NonGeneric.Deserialize(type, serializedObject.Array, serializedObject.Offset, _defaultResolver);
       }
       catch (Exception ex)
       {
@@ -140,7 +130,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       try
       {
-        return JsonSerializer.NonGeneric.Deserialize(type, serializedObject, offset, s_defaultResolver);
+        return JsonSerializer.NonGeneric.Deserialize(type, serializedObject, offset, _defaultResolver);
       }
       catch (Exception ex)
       {
@@ -160,7 +150,7 @@ namespace CuteAnt.Extensions.Serialization
 
       try
       {
-        return JsonSerializer.Deserialize<T>(readStream, s_defaultResolver);
+        return JsonSerializer.Deserialize<T>(readStream, _defaultResolver);
       }
       catch (Exception ex)
       {
@@ -179,7 +169,7 @@ namespace CuteAnt.Extensions.Serialization
 
       try
       {
-        return JsonSerializer.NonGeneric.Deserialize(type, readStream, s_defaultResolver);
+        return JsonSerializer.NonGeneric.Deserialize(type, readStream, _defaultResolver);
       }
       catch (Exception ex)
       {
@@ -200,12 +190,12 @@ namespace CuteAnt.Extensions.Serialization
 
     public override byte[] Serialize<T>(T item)
     {
-      return JsonSerializer.Serialize<object>(item, s_defaultResolver);
+      return JsonSerializer.Serialize<object>(item, _defaultResolver);
     }
 
     public override byte[] Serialize<T>(T item, int initialBufferSize)
     {
-      return JsonSerializer.Serialize<object>(item, s_defaultResolver);
+      return JsonSerializer.Serialize<object>(item, _defaultResolver);
     }
 
     #endregion
@@ -215,13 +205,13 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public override byte[] SerializeObject(object item)
     {
-      return JsonSerializer.Serialize(item, s_defaultResolver);
+      return JsonSerializer.Serialize(item, _defaultResolver);
     }
 
     /// <inheritdoc />
     public override byte[] SerializeObject(object item, int initialBufferSize)
     {
-      return JsonSerializer.Serialize(item, s_defaultResolver);
+      return JsonSerializer.Serialize(item, _defaultResolver);
     }
 
     #endregion
@@ -230,7 +220,7 @@ namespace CuteAnt.Extensions.Serialization
 
     public override ArraySegment<byte> WriteToMemoryPool<T>(T item)
     {
-      var serializedObject = JsonSerializer.SerializeUnsafe<object>(item, s_defaultResolver);
+      var serializedObject = JsonSerializer.SerializeUnsafe<object>(item, _defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -239,7 +229,7 @@ namespace CuteAnt.Extensions.Serialization
 
     public override ArraySegment<byte> WriteToMemoryPool<T>(T item, int initialBufferSize)
     {
-      var serializedObject = JsonSerializer.SerializeUnsafe<object>(item, s_defaultResolver);
+      var serializedObject = JsonSerializer.SerializeUnsafe<object>(item, _defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -248,7 +238,7 @@ namespace CuteAnt.Extensions.Serialization
 
     public override ArraySegment<byte> WriteToMemoryPool(object item)
     {
-      var serializedObject = JsonSerializer.SerializeUnsafe(item, s_defaultResolver);
+      var serializedObject = JsonSerializer.SerializeUnsafe(item, _defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -257,7 +247,7 @@ namespace CuteAnt.Extensions.Serialization
 
     public override ArraySegment<byte> WriteToMemoryPool(object item, int initialBufferSize)
     {
-      var serializedObject = JsonSerializer.SerializeUnsafe(item, s_defaultResolver);
+      var serializedObject = JsonSerializer.SerializeUnsafe(item, _defaultResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -275,7 +265,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      JsonSerializer.Serialize<object>(writeStream, value, s_defaultResolver);
+      JsonSerializer.Serialize<object>(writeStream, value, _defaultResolver);
     }
 
     /// <inheritdoc />
@@ -285,7 +275,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      JsonSerializer.Serialize(writeStream, value, s_defaultResolver);
+      JsonSerializer.Serialize(writeStream, value, _defaultResolver);
     }
 
     /// <inheritdoc />
@@ -295,7 +285,7 @@ namespace CuteAnt.Extensions.Serialization
 
       if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
 
-      JsonSerializer.Serialize(writeStream, value, s_defaultResolver);
+      JsonSerializer.Serialize(writeStream, value, _defaultResolver);
     }
 
     #endregion

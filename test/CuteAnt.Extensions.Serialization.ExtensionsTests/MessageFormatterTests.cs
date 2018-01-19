@@ -370,11 +370,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
   }
   public class MessagePackTypelessMessageFormatterTest : SerializeTestBase
   {
-    public MessagePackTypelessMessageFormatterTest() : base(MessagePackTypelessMessageFormatter.DefaultInstance) { }
+    public MessagePackTypelessMessageFormatterTest() : base(TypelessMessagePackMessageFormatter.DefaultInstance) { }
   }
   public class LZ4MessagePackTypelessMessageFormatterTest : SerializeTestBase
   {
-    public LZ4MessagePackTypelessMessageFormatterTest() : base(LZ4MessagePackTypelessMessageFormatter.DefaultInstance) { }
+    public LZ4MessagePackTypelessMessageFormatterTest() : base(LZ4TypelessMessagePackMessageFormatter.DefaultInstance) { }
   }
 
   public class Utf8JsonMessageFormatterTest : SerializeTestBase
