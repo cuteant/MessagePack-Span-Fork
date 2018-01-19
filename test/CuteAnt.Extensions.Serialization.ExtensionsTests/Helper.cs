@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Linq;
 using MessagePack;
 using ProtoBuf;
@@ -18,6 +19,49 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(expected.ChildDictionaryProperty.Keys.ToArray(), actual.ChildDictionaryProperty.Keys.ToArray());
       Assert.Equal((expected.ChildDictionaryProperty.Values.ToArray())[0].StringProperty, (actual.ChildDictionaryProperty.Values.ToArray())[0].StringProperty);
     }
+  }
+
+  [MessagePackObject]
+  [DataContract]
+  public class FooBar
+  {
+    [Key(0), DataMember(Name = "foo")]
+    public int FooProperty { get; set; }
+
+    [IgnoreMember, IgnoreDataMember]
+    public string BarProperty { get; set; }
+  }
+
+  [MessagePackObject]
+  [DataContract]
+  public class FooBar1
+  {
+    [Key("fo"), DataMember(Name = "foo")]
+    public int FooProperty { get; set; }
+
+    [IgnoreMember, IgnoreDataMember]
+    public string BarProperty { get; set; }
+  }
+
+  [DataContract]
+  public class FooBar2
+  {
+    [DataMember(Name = "f")]
+    public int FooProperty { get; set; }
+
+    [IgnoreDataMember]
+    public string BarProperty { get; set; }
+  }
+
+  [MessagePackObject(true)]
+  [DataContract]
+  public class FooBar3
+  {
+    [Key("fo"), DataMember(Name = "foo")]
+    public int FooProperty { get; set; }
+
+    [IgnoreMember, IgnoreDataMember]
+    public string BarProperty { get; set; }
   }
 
   [Serializable]

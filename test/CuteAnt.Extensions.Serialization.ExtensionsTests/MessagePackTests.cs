@@ -54,9 +54,6 @@ namespace CuteAnt.Extensions.Serialization.Tests
       bytes = MessagePackSerializer.Serialize(bar);
       var newBar = MessagePackSerializer.Deserialize<BarClass>(bytes);
       Assert.Equal(bar.OPQ, newBar.OPQ);
-
-      Assert.Throws<InvalidOperationException>(() => MessagePackMessageFormatter.Register(ImmutableCollectionResolver.Instance));
-      Assert.Throws<InvalidOperationException>(() => TypelessMessagePackMessageFormatter.Register(ImmutableCollectionResolver.Instance));
     }
 
     [Fact]
@@ -121,6 +118,27 @@ namespace CuteAnt.Extensions.Serialization.Tests
       bytes = TypelessMessagePackMessageFormatter.DefaultInstance.SerializeObject(imList);
       newList = TypelessMessagePackMessageFormatter.DefaultInstance.Deserialize<ImmutableList<int>>(bytes);
       Assert.Equal(imList, newList);
+    }
+
+    [Fact]
+    public void DataContractTest()
+    {
+      var foobar = new FooBar { FooProperty = 2018, BarProperty = "good" };
+      var bytes = MessagePackSerializer.Serialize(foobar);
+      Assert.Equal(@"[2018]", MessagePackSerializer.ToJson(bytes));
+      Assert.Equal(@"{""foo"":2018}", Utf8Json.JsonSerializer.ToJsonString(foobar));
+
+      var foobar1 = new FooBar1 { FooProperty = 2018, BarProperty = "good" };
+      bytes = MessagePackSerializer.Serialize(foobar1);
+      Assert.Equal(@"{""fo"":2018}", MessagePackSerializer.ToJson(bytes));
+
+      var foobar2 = new FooBar2 { FooProperty = 2018, BarProperty = "good" };
+      bytes = MessagePackSerializer.Serialize(foobar2);
+      Assert.Equal(@"{""f"":2018}", MessagePackSerializer.ToJson(bytes));
+
+      var foobar3 = new FooBar3 { FooProperty = 2018, BarProperty = "good" };
+      bytes = MessagePackSerializer.Serialize(foobar3);
+      Assert.Equal(@"{""FooProperty"":2018}", MessagePackSerializer.ToJson(bytes));
     }
   }
 }
