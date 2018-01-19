@@ -45,6 +45,7 @@ namespace CuteAnt.Extensions.Serialization.Internal
 
     public static void Register(params IFormatterResolver[] resolvers)
     {
+      if (null == resolvers || resolvers.Length == 0) { return; }
       if (Locked == s_isFreezed)
       {
         throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
@@ -55,6 +56,7 @@ namespace CuteAnt.Extensions.Serialization.Internal
 
     public static void Register(params IMessagePackFormatter[] formatters)
     {
+      if (null == formatters || formatters.Length == 0) { return; }
       if (Locked == s_isFreezed)
       {
         throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
@@ -70,8 +72,14 @@ namespace CuteAnt.Extensions.Serialization.Internal
         throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
       }
 
-      Interlocked.Exchange(ref s_formatters, formatters);
-      Interlocked.Exchange(ref s_resolvers, resolvers.Concat(s_defaultResolvers).ToArray());
+      if (formatters != null && formatters.Length > 0)
+      {
+        Interlocked.Exchange(ref s_formatters, formatters);
+      }
+      if (resolvers != null && resolvers.Length > 0)
+      {
+        Interlocked.Exchange(ref s_resolvers, resolvers.Concat(s_defaultResolvers).ToArray());
+      }
     }
 
     public IMessagePackFormatter<T> GetFormatter<T>()

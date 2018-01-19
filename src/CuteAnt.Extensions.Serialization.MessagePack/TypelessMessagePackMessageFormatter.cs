@@ -5,7 +5,6 @@ using CuteAnt.Buffers;
 using CuteAnt.Extensions.Internal;
 using CuteAnt.Extensions.Serialization.Internal;
 using MessagePack;
-using MessagePack.Formatters;
 using Microsoft.Extensions.Logging;
 
 namespace CuteAnt.Extensions.Serialization
@@ -18,25 +17,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>The default singlegton instance</summary>
     public static readonly TypelessMessagePackMessageFormatter DefaultInstance = new TypelessMessagePackMessageFormatter();
 
-    internal static IFormatterResolver s_typelessResolver = TypelessDefaultResolver.Instance;
-    public static IFormatterResolver CurrentResolver => s_typelessResolver;
+    internal static readonly IFormatterResolver s_typelessResolver = MessagePackStandardResolver.Typeless;
 
     /// <summary>Constructor</summary>
     public TypelessMessagePackMessageFormatter() { }
-
-    #region -- Register --
-
-    public static void Register(params IMessagePackFormatter[] formatters) => Register(formatters, null);
-    public static void Register(params IFormatterResolver[] resolvers) => Register(null, resolvers);
-    public static void Register(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
-    {
-      if ((null == formatters || formatters.Length == 0) && (null == resolvers || resolvers.Length == 0)) { return; }
-
-      if (formatters != null && formatters.Length > 0) { TypelessDefaultResolver.Register(formatters); }
-      if (resolvers != null && resolvers.Length > 0) { TypelessDefaultResolver.Register(resolvers); }
-    }
-
-    #endregion
 
     #region -- IsSupportedType --
 

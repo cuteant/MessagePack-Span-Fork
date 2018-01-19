@@ -1,13 +1,10 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using CuteAnt.Buffers;
 using CuteAnt.Extensions.Internal;
 using CuteAnt.Extensions.Serialization.Internal;
 using MessagePack;
-using MessagePack.Formatters;
-using MessagePack.Resolvers;
 using Microsoft.Extensions.Logging;
 
 namespace CuteAnt.Extensions.Serialization
@@ -20,29 +17,10 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>The default singlegton instance</summary>
     public static readonly MessagePackMessageFormatter DefaultInstance = new MessagePackMessageFormatter();
 
-    internal static IFormatterResolver s_defaultResolver = DefaultResolver.Instance;
-    public static IFormatterResolver CurrentResolver => s_defaultResolver;
+    internal static readonly IFormatterResolver s_defaultResolver = MessagePackStandardResolver.Default;
 
     /// <summary>Constructor</summary>
     public MessagePackMessageFormatter() { }
-
-    #region -- Register --
-
-    public static void Register(params IMessagePackFormatter[] formatters) => Register(formatters, null);
-    public static void Register(params IFormatterResolver[] resolvers) => Register(null, resolvers);
-    public static void Register(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
-    {
-      if (formatters != null && formatters.Length > 0)
-      {
-        DefaultResolverCore.Register(formatters.Where(_ => _.GetType() != typeof(TypelessFormatter)).ToArray());
-      }
-      if (resolvers != null && resolvers.Length > 0)
-      {
-        DefaultResolverCore.Register(resolvers.Where(_ => _.GetType() != typeof(TypelessObjectResolver) && _.GetType() != typeof(TypelessContractlessStandardResolver)).ToArray());
-      }
-    }
-
-    #endregion
 
     #region -- IsSupportedType --
 
