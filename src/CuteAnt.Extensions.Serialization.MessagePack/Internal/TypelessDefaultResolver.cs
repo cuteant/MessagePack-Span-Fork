@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading;
 using MessagePack;
 using MessagePack.Formatters;
+using MessagePack.ImmutableCollection;
 using MessagePack.Resolvers;
 
 namespace CuteAnt.Extensions.Serialization.Internal
@@ -14,6 +15,8 @@ namespace CuteAnt.Extensions.Serialization.Internal
 
     private static readonly IFormatterResolver[] s_defaultResolvers = new IFormatterResolver[]
     {
+      ImmutableCollectionResolver.Instance,
+
       UnsafeBinaryResolver.Instance,
       NativeDateTimeResolver.Instance, // Native c# DateTime format, preserving timezone
 

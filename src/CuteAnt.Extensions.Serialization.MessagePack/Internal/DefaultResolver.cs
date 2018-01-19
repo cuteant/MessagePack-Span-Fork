@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using MessagePack;
 using MessagePack.Formatters;
+using MessagePack.ImmutableCollection;
 using MessagePack.Resolvers;
 
 namespace CuteAnt.Extensions.Serialization.Internal
@@ -12,7 +14,18 @@ namespace CuteAnt.Extensions.Serialization.Internal
   {
     public static readonly DefaultResolver Instance = new DefaultResolver();
 
-    public static readonly IMessagePackFormatter<object> ObjectFallbackFormatter = new DynamicObjectTypeFallbackFormatter(DefaultResolverCore.Instance);
+    private static IMessagePackFormatter<object> s_objectFallbackFormatter;
+    public static IMessagePackFormatter<object> ObjectFallbackFormatter
+    {
+      [MethodImpl(InlineMethod.Value)]
+      get { return Volatile.Read(ref s_objectFallbackFormatter) ?? EnsureObjectFallbackFormatterCreated(); }
+    }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static IMessagePackFormatter<object> EnsureObjectFallbackFormatterCreated()
+    {
+      Interlocked.CompareExchange(ref s_objectFallbackFormatter, new DynamicObjectTypeFallbackFormatter(DefaultResolverCore.Instance), null);
+      return s_objectFallbackFormatter;
+    }
 
     DefaultResolver()
     {
@@ -48,6 +61,8 @@ namespace CuteAnt.Extensions.Serialization.Internal
 
     private static readonly IFormatterResolver[] s_defaultResolvers = new IFormatterResolver[]
     {
+      ImmutableCollectionResolver.Instance,
+
       UnsafeBinaryResolver.Instance,
       NativeDateTimeResolver.Instance, // Native c# DateTime format, preserving timezone
 

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Utf8Json;
 using Utf8Json.Formatters;
+using Utf8Json.ImmutableCollection;
 using Utf8Json.Resolvers;
 
 namespace CuteAnt.Extensions.Serialization
@@ -37,6 +39,8 @@ namespace CuteAnt.Extensions.Serialization
   {
     internal static readonly IJsonFormatterResolver[] CompositeResolverBase = new[]
     {
+      ImmutableCollectionResolver.Instance,
+
       BuiltinResolver.Instance, // Builtin
       EnumResolver.Default,     // Enum(default => string)
       DynamicGenericResolver.Instance, // T[], List<T>, etc...
@@ -49,8 +53,18 @@ namespace CuteAnt.Extensions.Serialization
     // configure
     public static readonly IJsonFormatterResolver Instance = new AllowPrivateExcludeNullStandardResolver();
 
-
-    static readonly IJsonFormatter<object> fallbackFormatter = new DynamicObjectTypeFallbackFormatter(AllowPrivateExcludeNullStandardResolverCore.Instance);
+    private static IJsonFormatter<object> s_objectFallbackFormatter;
+    public static IJsonFormatter<object> ObjectFallbackFormatter
+    {
+      [MethodImpl(InlineMethod.Value)]
+      get { return Volatile.Read(ref s_objectFallbackFormatter) ?? EnsureObjectFallbackFormatterCreated(); }
+    }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static IJsonFormatter<object> EnsureObjectFallbackFormatterCreated()
+    {
+      Interlocked.CompareExchange(ref s_objectFallbackFormatter, new DynamicObjectTypeFallbackFormatter(AllowPrivateExcludeNullStandardResolverCore.Instance), null);
+      return s_objectFallbackFormatter;
+    }
 
     AllowPrivateExcludeNullStandardResolver()
     {
@@ -69,7 +83,7 @@ namespace CuteAnt.Extensions.Serialization
       {
         if (typeof(T) == typeof(object))
         {
-          formatter = (IJsonFormatter<T>)fallbackFormatter;
+          formatter = (IJsonFormatter<T>)ObjectFallbackFormatter;
         }
         else
         {
@@ -176,8 +190,18 @@ namespace CuteAnt.Extensions.Serialization
     // configure
     public static readonly IJsonFormatterResolver Instance = new AllowPrivateExcludeNullCamelCaseStandardResolver();
 
-
-    private static readonly IJsonFormatter<object> fallbackFormatter = new DynamicObjectTypeFallbackFormatter(AllowPrivateExcludeNullCamelCaseStandardResolverCore.Instance);
+    private static IJsonFormatter<object> s_objectFallbackFormatter;
+    public static IJsonFormatter<object> ObjectFallbackFormatter
+    {
+      [MethodImpl(InlineMethod.Value)]
+      get { return Volatile.Read(ref s_objectFallbackFormatter) ?? EnsureObjectFallbackFormatterCreated(); }
+    }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static IJsonFormatter<object> EnsureObjectFallbackFormatterCreated()
+    {
+      Interlocked.CompareExchange(ref s_objectFallbackFormatter, new DynamicObjectTypeFallbackFormatter(AllowPrivateExcludeNullCamelCaseStandardResolverCore.Instance), null);
+      return s_objectFallbackFormatter;
+    }
 
     AllowPrivateExcludeNullCamelCaseStandardResolver()
     {
@@ -196,7 +220,7 @@ namespace CuteAnt.Extensions.Serialization
       {
         if (typeof(T) == typeof(object))
         {
-          formatter = (IJsonFormatter<T>)fallbackFormatter;
+          formatter = (IJsonFormatter<T>)ObjectFallbackFormatter;
         }
         else
         {

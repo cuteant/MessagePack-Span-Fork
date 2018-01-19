@@ -12,12 +12,6 @@ namespace CuteAnt.Extensions.Serialization.Tests
     static MessagePackTests()
     {
       CompositeResolver.RegisterAndSetAsDefault(ImmutableCollectionResolver.Instance, ContractlessStandardResolverAllowPrivate.Instance);
-      try
-      {
-        MessagePackMessageFormatter.Register(ImmutableCollectionResolver.Instance);
-        TypelessMessagePackMessageFormatter.Register(ImmutableCollectionResolver.Instance);
-      }
-      catch { }
     }
 
     [Fact]

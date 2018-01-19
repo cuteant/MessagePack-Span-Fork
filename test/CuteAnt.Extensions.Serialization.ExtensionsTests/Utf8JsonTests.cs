@@ -12,11 +12,6 @@ namespace CuteAnt.Extensions.Serialization.Tests
     static Utf8JsonTests()
     {
       CompositeResolver.RegisterAndSetAsDefault(ImmutableCollectionResolver.Instance, StandardResolver.AllowPrivate);
-      try
-      {
-        Utf8JsonStandardResolver.Register(ImmutableCollectionResolver.Instance);
-      }
-      catch { }
     }
 
     [Fact]

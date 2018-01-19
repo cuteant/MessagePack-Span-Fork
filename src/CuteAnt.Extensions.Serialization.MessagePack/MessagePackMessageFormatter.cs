@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using CuteAnt.Buffers;
 using CuteAnt.Extensions.Internal;
+using CuteAnt.Extensions.Serialization.Internal;
 using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
 using Microsoft.Extensions.Logging;
-using CuteAnt.Extensions.Serialization.Internal;
 
 namespace CuteAnt.Extensions.Serialization
 {
