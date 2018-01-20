@@ -10,7 +10,7 @@ namespace CuteAnt.Extensions.Serialization
   /// <summary><see cref="MessageFormatter"/> class to handle wire.</summary>
   public class JsvMessageFormatter : MessageFormatter
   {
-    protected static readonly ILogger s_logger = TraceLogger.GetLogger(typeof(JsvMessageFormatter));
+    private static readonly ILogger s_logger = TraceLogger.GetLogger(typeof(JsvMessageFormatter));
 
     /// <summary>The default singlegton instance</summary>
     public static readonly JsvMessageFormatter DefaultInstance = new JsvMessageFormatter();
@@ -29,7 +29,7 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- DeepCopy --
 
-    public override object DeepCopyObject(object source)
+    public sealed override object DeepCopyObject(object source)
     {
       if (source == null) { return null; }
 
@@ -47,7 +47,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- ReadFromStream --
 
     /// <inheritdoc />
-    public override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
+    public sealed override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
@@ -66,7 +66,7 @@ namespace CuteAnt.Extensions.Serialization
     }
 
     /// <inheritdoc />
-    public override T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
+    public sealed override T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
     {
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
@@ -88,7 +88,7 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- WriteToStream --
 
-    public override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (null == value) { return; }
 
@@ -98,7 +98,7 @@ namespace CuteAnt.Extensions.Serialization
     }
 
     /// <inheritdoc />
-    public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (null == value) { return; }
 
@@ -109,7 +109,7 @@ namespace CuteAnt.Extensions.Serialization
     }
 
     /// <inheritdoc />
-    public override void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (null == value) { return; }
 

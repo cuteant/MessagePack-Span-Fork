@@ -11,12 +11,12 @@ namespace CuteAnt.Extensions.Serialization
   /// <summary><see cref="MessageFormatter"/> class to handle wire.</summary>
   public class Utf8JsonMessageFormatter : MessageFormatter
   {
-    protected static readonly ILogger s_logger = TraceLogger.GetLogger(typeof(Utf8JsonMessageFormatter));
+    private static readonly ILogger s_logger = TraceLogger.GetLogger(typeof(Utf8JsonMessageFormatter));
 
     /// <summary>The default singlegton instance</summary>
     public static readonly Utf8JsonMessageFormatter DefaultInstance = new Utf8JsonMessageFormatter();
 
-    private readonly IJsonFormatterResolver _defaultResolver = Utf8JsonStandardResolver.Default;
+    internal readonly IJsonFormatterResolver _defaultResolver = Utf8JsonStandardResolver.Default;
     public IJsonFormatterResolver DefaultResolver => _defaultResolver;
 
     /// <summary>Constructor</summary>
@@ -38,22 +38,23 @@ namespace CuteAnt.Extensions.Serialization
     #region -- DeepCopy --
 
     /// <inheritdoc />
-    public override object DeepCopyObject(object source)
+    public sealed override object DeepCopyObject(object source)
     {
       if (source == null) { return null; }
 
       var type = source.GetType();
-      var serializedObject = JsonSerializer.NonGeneric.SerializeUnsafe(type, source, _defaultResolver);
+      var serializedObject = JsonSerializer.SerializeUnsafe(source, _defaultResolver);
       return JsonSerializer.NonGeneric.Deserialize(type, serializedObject.Array, serializedObject.Offset, _defaultResolver);
     }
 
     /// <inheritdoc />
-    public override T DeepCopy<T>(T source)
+    public sealed override T DeepCopy<T>(T source)
     {
       if (source == null) { return default; }
 
-      var serializedObject = JsonSerializer.SerializeUnsafe<T>(source, _defaultResolver);
-      return JsonSerializer.Deserialize<T>(serializedObject.Array, serializedObject.Offset, _defaultResolver);
+      var type = source.GetType(); // 要获取对象本身的类型，忽略基类、接口
+      var serializedObject = JsonSerializer.SerializeUnsafe<object>(source, _defaultResolver);
+      return (T)JsonSerializer.NonGeneric.Deserialize(type, serializedObject.Array, serializedObject.Offset, _defaultResolver);
     }
 
     #endregion
@@ -61,7 +62,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- Deserialize --
 
     /// <inheritdoc />
-    public override T Deserialize<T>(byte[] serializedObject)
+    public sealed override T Deserialize<T>(byte[] serializedObject)
     {
       try
       {
@@ -74,7 +75,7 @@ namespace CuteAnt.Extensions.Serialization
       }
     }
     /// <inheritdoc />
-    public override T Deserialize<T>(in ArraySegment<byte> serializedObject)
+    public sealed override T Deserialize<T>(in ArraySegment<byte> serializedObject)
     {
       try
       {
@@ -87,7 +88,7 @@ namespace CuteAnt.Extensions.Serialization
       }
     }
     /// <inheritdoc />
-    public override T Deserialize<T>(byte[] serializedObject, int offset, int count)
+    public sealed override T Deserialize<T>(byte[] serializedObject, int offset, int count)
     {
       try
       {
@@ -100,7 +101,7 @@ namespace CuteAnt.Extensions.Serialization
       }
     }
     /// <inheritdoc />
-    public override object Deserialize(Type type, byte[] serializedObject)
+    public sealed override object Deserialize(Type type, byte[] serializedObject)
     {
       try
       {
@@ -113,7 +114,7 @@ namespace CuteAnt.Extensions.Serialization
       }
     }
     /// <inheritdoc />
-    public override object Deserialize(Type type, in ArraySegment<byte> serializedObject)
+    public sealed override object Deserialize(Type type, in ArraySegment<byte> serializedObject)
     {
       try
       {
@@ -126,7 +127,7 @@ namespace CuteAnt.Extensions.Serialization
       }
     }
     /// <inheritdoc />
-    public override object Deserialize(Type type, byte[] serializedObject, int offset, int count)
+    public sealed override object Deserialize(Type type, byte[] serializedObject, int offset, int count)
     {
       try
       {
@@ -144,7 +145,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- ReadFromStream --
 
     /// <inheritdoc />
-    public override T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
+    public sealed override T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
     {
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
@@ -160,7 +161,7 @@ namespace CuteAnt.Extensions.Serialization
     }
 
     /// <inheritdoc />
-    public override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
+    public sealed override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
@@ -188,12 +189,12 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- Serialize --
 
-    public override byte[] Serialize<T>(T item)
+    public sealed override byte[] Serialize<T>(T item)
     {
       return JsonSerializer.Serialize<object>(item, _defaultResolver);
     }
 
-    public override byte[] Serialize<T>(T item, int initialBufferSize)
+    public sealed override byte[] Serialize<T>(T item, int initialBufferSize)
     {
       return JsonSerializer.Serialize<object>(item, _defaultResolver);
     }
@@ -203,13 +204,13 @@ namespace CuteAnt.Extensions.Serialization
     #region -- SerializeObject --
 
     /// <inheritdoc />
-    public override byte[] SerializeObject(object item)
+    public sealed override byte[] SerializeObject(object item)
     {
       return JsonSerializer.Serialize(item, _defaultResolver);
     }
 
     /// <inheritdoc />
-    public override byte[] SerializeObject(object item, int initialBufferSize)
+    public sealed override byte[] SerializeObject(object item, int initialBufferSize)
     {
       return JsonSerializer.Serialize(item, _defaultResolver);
     }
@@ -218,7 +219,7 @@ namespace CuteAnt.Extensions.Serialization
 
     #region -- WriteToMemoryPool --
 
-    public override ArraySegment<byte> WriteToMemoryPool<T>(T item)
+    public sealed override ArraySegment<byte> WriteToMemoryPool<T>(T item)
     {
       var serializedObject = JsonSerializer.SerializeUnsafe<object>(item, _defaultResolver);
       var length = serializedObject.Count;
@@ -227,7 +228,7 @@ namespace CuteAnt.Extensions.Serialization
       return new ArraySegment<byte>(buffer, 0, length);
     }
 
-    public override ArraySegment<byte> WriteToMemoryPool<T>(T item, int initialBufferSize)
+    public sealed override ArraySegment<byte> WriteToMemoryPool<T>(T item, int initialBufferSize)
     {
       var serializedObject = JsonSerializer.SerializeUnsafe<object>(item, _defaultResolver);
       var length = serializedObject.Count;
@@ -236,7 +237,7 @@ namespace CuteAnt.Extensions.Serialization
       return new ArraySegment<byte>(buffer, 0, length);
     }
 
-    public override ArraySegment<byte> WriteToMemoryPool(object item)
+    public sealed override ArraySegment<byte> WriteToMemoryPool(object item)
     {
       var serializedObject = JsonSerializer.SerializeUnsafe(item, _defaultResolver);
       var length = serializedObject.Count;
@@ -245,7 +246,7 @@ namespace CuteAnt.Extensions.Serialization
       return new ArraySegment<byte>(buffer, 0, length);
     }
 
-    public override ArraySegment<byte> WriteToMemoryPool(object item, int initialBufferSize)
+    public sealed override ArraySegment<byte> WriteToMemoryPool(object item, int initialBufferSize)
     {
       var serializedObject = JsonSerializer.SerializeUnsafe(item, _defaultResolver);
       var length = serializedObject.Count;
@@ -259,7 +260,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- WriteToStream --
 
     /// <inheritdoc />
-    public override void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override void WriteToStream<T>(T value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (null == value) { return; }
 
@@ -269,7 +270,7 @@ namespace CuteAnt.Extensions.Serialization
     }
 
     /// <inheritdoc />
-    public override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (null == value) { return; }
 
@@ -279,7 +280,7 @@ namespace CuteAnt.Extensions.Serialization
     }
 
     /// <inheritdoc />
-    public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (null == value) { return; }
 

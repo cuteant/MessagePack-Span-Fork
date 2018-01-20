@@ -54,6 +54,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
       bytes = MessagePackSerializer.Serialize(bar);
       var newBar = MessagePackSerializer.Deserialize<BarClass>(bytes);
       Assert.Equal(bar.OPQ, newBar.OPQ);
+
+      Assert.Throws<InvalidOperationException>(() => MessagePackStandardResolver.Register(ImmutableCollectionResolver.Instance));
     }
 
     [Fact]
@@ -90,6 +92,15 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(guid, newSubUnionType1.MyProperty); Assert.Equal(20, newSubUnionType1.MyProperty1);
       newSubUnionType1 = (SubUnionType1)TypelessMessagePackMessageFormatter.DefaultInstance.Deserialize<ParentUnionType>(typeof(SubUnionType1), bytes);
       Assert.Equal(guid, newSubUnionType1.MyProperty); Assert.Equal(20, newSubUnionType1.MyProperty1);
+
+      var copy = (SubUnionType1)MessagePackMessageFormatter.DefaultInstance.DeepCopy(subUnionType1);
+      Assert.Equal(guid, copy.MyProperty); Assert.Equal(20, copy.MyProperty1);
+      copy = (SubUnionType1)LZ4MessagePackMessageFormatter.DefaultInstance.DeepCopy(subUnionType1);
+      Assert.Equal(guid, copy.MyProperty); Assert.Equal(20, copy.MyProperty1);
+      copy = (SubUnionType1)TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(subUnionType1);
+      Assert.Equal(guid, copy.MyProperty); Assert.Equal(20, copy.MyProperty1);
+      copy = (SubUnionType1)LZ4TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(subUnionType1);
+      Assert.Equal(guid, copy.MyProperty); Assert.Equal(20, copy.MyProperty1);
     }
 
     [Fact]

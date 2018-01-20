@@ -36,7 +36,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (source == null) { return null; }
 
-      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(source, s_typelessResolver);
+      var serializedObject = MessagePackSerializer.SerializeUnsafe(source, s_typelessResolver);
       return MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
     }
 
@@ -45,8 +45,8 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (source == null) { return default; }
 
-      var serializedObject = MessagePackSerializer.SerializeUnsafe<T>(source, s_typelessResolver);
-      return MessagePackSerializer.Deserialize<T>(serializedObject, s_typelessResolver);
+      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(source, s_typelessResolver);
+      return (T)MessagePackSerializer.Deserialize<object>(serializedObject, s_typelessResolver);
     }
 
     #endregion
@@ -197,14 +197,14 @@ namespace CuteAnt.Extensions.Serialization
     public override byte[] SerializeObject(object item)
     {
       if (null == item) { return EmptyArray<byte>.Instance; }
-      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+      return MessagePackSerializer.Serialize(item, s_typelessResolver);
     }
 
     /// <inheritdoc />
     public override byte[] SerializeObject(object item, int initialBufferSize)
     {
       if (null == item) { return EmptyArray<byte>.Instance; }
-      return MessagePackSerializer.Serialize<object>(item, s_typelessResolver);
+      return MessagePackSerializer.Serialize(item, s_typelessResolver);
     }
 
     #endregion
@@ -234,7 +234,7 @@ namespace CuteAnt.Extensions.Serialization
     public override ArraySegment<byte> WriteToMemoryPool(object item)
     {
       if (null == item) { return BufferManager.Empty; }
-      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(item, s_typelessResolver);
+      var serializedObject = MessagePackSerializer.SerializeUnsafe(item, s_typelessResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);
@@ -244,7 +244,7 @@ namespace CuteAnt.Extensions.Serialization
     public override ArraySegment<byte> WriteToMemoryPool(object item, int initialBufferSize)
     {
       if (null == item) { return BufferManager.Empty; }
-      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(item, s_typelessResolver);
+      var serializedObject = MessagePackSerializer.SerializeUnsafe(item, s_typelessResolver);
       var length = serializedObject.Count;
       var buffer = BufferManager.Shared.Rent(length);
       PlatformDependent.CopyMemory(serializedObject.Array, serializedObject.Offset, buffer, 0, length);

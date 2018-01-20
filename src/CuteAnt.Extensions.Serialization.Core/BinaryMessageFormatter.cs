@@ -37,7 +37,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- DeepCopy --
 
     /// <inheritdoc />
-    public override object DeepCopyObject(object source)
+    public sealed override object DeepCopyObject(object source)
     {
       if (null == source) { return null; }
 
@@ -56,7 +56,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- ReadFromStream --
 
     /// <inheritdoc />
-    public override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
+    public sealed override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
       if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
 
@@ -80,7 +80,7 @@ namespace CuteAnt.Extensions.Serialization
     #region -- WriteToStream --
 
     /// <inheritdoc />
-    public override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override void WriteToStream(object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (null == value) { return; }
 
@@ -92,7 +92,7 @@ namespace CuteAnt.Extensions.Serialization
     }
 
     /// <inheritdoc />
-    public override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
+    public sealed override void WriteToStream(Type type, object value, Stream writeStream, Encoding effectiveEncoding)
     {
       if (null == value) { return; }
 

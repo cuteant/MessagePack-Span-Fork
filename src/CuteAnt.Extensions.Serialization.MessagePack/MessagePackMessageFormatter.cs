@@ -46,8 +46,9 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (source == null) { return default; }
 
-      var serializedObject = MessagePackSerializer.SerializeUnsafe(source, s_defaultResolver);
-      return MessagePackSerializer.Deserialize<T>(serializedObject, s_defaultResolver);
+      var type = source.GetType(); // 要获取对象本身的类型，忽略基类、接口
+      var serializedObject = MessagePackSerializer.SerializeUnsafe<object>(source, s_defaultResolver);
+      return (T)MessagePackSerializer.NonGeneric.Deserialize(type, serializedObject, s_defaultResolver);
     }
 
     #endregion

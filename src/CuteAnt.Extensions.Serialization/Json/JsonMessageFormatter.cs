@@ -5,7 +5,6 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
-using CuteAnt.IO;
 using CuteAnt.Text;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -24,7 +23,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>The default singlegton instance</summary>
     public static readonly JsonMessageFormatter DefaultInstance = new JsonMessageFormatter();
 
-    protected static readonly ILogger s_logger = TraceLogger.GetLogger("CuteAnt.Extensions.Serialization.JsonMessageFormatter");
+    private static readonly ILogger s_logger = TraceLogger.GetLogger<JsonMessageFormatter>();
 
     // Though MaxDepth is not supported in portable library, we still override JsonReader's MaxDepth
     private int _maxDepth = FormattingUtilities.DefaultMaxDepth;
