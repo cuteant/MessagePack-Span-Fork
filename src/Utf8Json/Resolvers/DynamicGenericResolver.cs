@@ -315,6 +315,11 @@ namespace Utf8Json.Resolvers.Internal
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(NonGenericDictionaryFormatter<>).GetCachedGenericType(t));
                 }
+                // Exception
+                if (typeof(Exception).GetTypeInfo().IsAssignableFrom(ti))
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(ExceptionFormatter<>).GetCachedGenericType(t));
+                }
             }
 
             return null;
