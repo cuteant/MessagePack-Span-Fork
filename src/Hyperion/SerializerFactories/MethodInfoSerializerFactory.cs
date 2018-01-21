@@ -16,60 +16,60 @@ using Hyperion.ValueSerializers;
 
 namespace Hyperion.SerializerFactories
 {
-  public class MethodInfoSerializerFactory : ValueSerializerFactory
-  {
-    public override bool CanSerialize(Serializer serializer, Type type)
+    internal sealed class MethodInfoSerializerFactory : ValueSerializerFactory
     {
-      return type.GetTypeInfo().IsSubclassOf(typeof(MethodInfo));
-    }
-
-    public override bool CanDeserialize(Serializer serializer, Type type)
-    {
-      return CanSerialize(serializer, type);
-    }
-
-    public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
-        ConcurrentDictionary<Type, ValueSerializer> typeMapping)
-    {
-      var os = new ObjectSerializer(type);
-      typeMapping.TryAdd(type, os);
-      ObjectReader reader = (stream, session) =>
-      {
-        var name = stream.ReadString(session);
-        var owner = stream.ReadObject(session) as Type;
-        var parameterTypes = stream.ReadObject(session) as Type[];
-        var method = owner.GetMethodExt(name,
-            BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
-            parameterTypes);
-        if (method.IsGenericMethodDefinition)
+        public override bool CanSerialize(Serializer serializer, Type type)
         {
-          var genericTypeArguments = stream.ReadObject(session) as Type[];
-          method = method.MakeGenericMethod(genericTypeArguments);
+            return type.GetTypeInfo().IsSubclassOf(typeof(MethodInfo));
         }
 
-        return method;
-      };
-      ObjectWriter writer = (stream, obj, session) =>
-      {
-        var method = (MethodInfo)obj;
-        var name = method.Name;
-        var owner = method.DeclaringType;
-
-        StringSerializer.WriteValueImpl(stream, name, session);
-        stream.WriteObjectWithManifest(owner, session);
-        var arguments = method.GetParameters().Select(p => p.ParameterType).ToArray();
-        stream.WriteObjectWithManifest(arguments, session);
-        if (method.IsGenericMethod)
+        public override bool CanDeserialize(Serializer serializer, Type type)
         {
-          // we use the parameter types to find the method above but, if generic, we need to store the generic type arguments as well
-          // in order to MakeGenericType
-          var genericTypeArguments = method.GetGenericArguments();
-          stream.WriteObjectWithManifest(genericTypeArguments, session);
+            return CanSerialize(serializer, type);
         }
-      };
-      os.Initialize(reader, writer);
 
-      return os;
+        public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
+            ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+        {
+            var os = new ObjectSerializer(type);
+            typeMapping.TryAdd(type, os);
+            ObjectReader reader = (stream, session) =>
+            {
+                var name = stream.ReadString(session);
+                var owner = stream.ReadObject(session) as Type;
+                var parameterTypes = stream.ReadObject(session) as Type[];
+                var method = owner.GetMethodExt(name,
+                    BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                    parameterTypes);
+                if (method.IsGenericMethodDefinition)
+                {
+                    var genericTypeArguments = stream.ReadObject(session) as Type[];
+                    method = method.MakeGenericMethod(genericTypeArguments);
+                }
+
+                return method;
+            };
+            ObjectWriter writer = (stream, obj, session) =>
+            {
+                var method = (MethodInfo)obj;
+                var name = method.Name;
+                var owner = method.DeclaringType;
+
+                StringSerializer.WriteValueImpl(stream, name, session);
+                stream.WriteObjectWithManifest(owner, session);
+                var arguments = method.GetParameters().Select(p => p.ParameterType).ToArray();
+                stream.WriteObjectWithManifest(arguments, session);
+                if (method.IsGenericMethod)
+                {
+                    // we use the parameter types to find the method above but, if generic, we need to store the generic type arguments as well
+                    // in order to MakeGenericType
+                    var genericTypeArguments = method.GetGenericArguments();
+                    stream.WriteObjectWithManifest(genericTypeArguments, session);
+                }
+            };
+            os.Initialize(reader, writer);
+
+            return os;
+        }
     }
-  }
 }

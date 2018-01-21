@@ -16,46 +16,46 @@ using Hyperion.ValueSerializers;
 
 namespace Hyperion.SerializerFactories
 {
-  public class ConstructorInfoSerializerFactory : ValueSerializerFactory
-  {
-    public override bool CanSerialize(Serializer serializer, Type type)
+    internal sealed class ConstructorInfoSerializerFactory : ValueSerializerFactory
     {
-      return type.GetTypeInfo().IsSubclassOf(typeof(ConstructorInfo));
-    }
+        public override bool CanSerialize(Serializer serializer, Type type)
+        {
+            return type.GetTypeInfo().IsSubclassOf(typeof(ConstructorInfo));
+        }
 
-    public override bool CanDeserialize(Serializer serializer, Type type)
-    {
-      return CanSerialize(serializer, type);
-    }
+        public override bool CanDeserialize(Serializer serializer, Type type)
+        {
+            return CanSerialize(serializer, type);
+        }
 
-    public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
-        ConcurrentDictionary<Type, ValueSerializer> typeMapping)
-    {
-      var os = new ObjectSerializer(type);
-      typeMapping.TryAdd(type, os);
-      ObjectReader reader = (stream, session) =>
-      {
-        var owner = stream.ReadObject(session) as Type;
-        var arguments = stream.ReadObject(session) as Type[];
+        public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
+            ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+        {
+            var os = new ObjectSerializer(type);
+            typeMapping.TryAdd(type, os);
+            ObjectReader reader = (stream, session) =>
+            {
+                var owner = stream.ReadObject(session) as Type;
+                var arguments = stream.ReadObject(session) as Type[];
 
 #if NET40
-        var ctor = owner.GetConstructor(arguments);
+                var ctor = owner.GetConstructor(arguments);
 #else
-        var ctor = owner.GetTypeInfo().GetConstructor(arguments);
+                var ctor = owner.GetTypeInfo().GetConstructor(arguments);
 #endif
-        return ctor;
-      };
-      ObjectWriter writer = (stream, obj, session) =>
-      {
-        var ctor = (ConstructorInfo)obj;
-        var owner = ctor.DeclaringType;
-        var arguments = ctor.GetParameters().Select(p => p.ParameterType).ToArray();
-        stream.WriteObjectWithManifest(owner, session);
-        stream.WriteObjectWithManifest(arguments, session);
-      };
-      os.Initialize(reader, writer);
+                return ctor;
+            };
+            ObjectWriter writer = (stream, obj, session) =>
+            {
+                var ctor = (ConstructorInfo)obj;
+                var owner = ctor.DeclaringType;
+                var arguments = ctor.GetParameters().Select(p => p.ParameterType).ToArray();
+                stream.WriteObjectWithManifest(owner, session);
+                stream.WriteObjectWithManifest(arguments, session);
+            };
+            os.Initialize(reader, writer);
 
-      return os;
+            return os;
+        }
     }
-  }
 }

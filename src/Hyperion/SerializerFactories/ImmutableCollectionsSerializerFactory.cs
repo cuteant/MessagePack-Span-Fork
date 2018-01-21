@@ -19,159 +19,159 @@ using Hyperion.ValueSerializers;
 
 namespace Hyperion.SerializerFactories
 {
-  public class ImmutableCollectionsSerializerFactory : ValueSerializerFactory
-  {
-    private const string ImmutableCollectionsNamespace = "System.Collections.Immutable";
-    private const string ImmutableCollectionsAssembly = "System.Collections.Immutable";
-
-    public override bool CanSerialize(Serializer serializer, Type type)
+    internal sealed class ImmutableCollectionsSerializerFactory : ValueSerializerFactory
     {
-      if (type.Namespace == null || !type.Namespace.Equals(ImmutableCollectionsNamespace, StringComparison.Ordinal)) return false;
-      var isGenericEnumerable = GetEnumerableType(type) != null;
-      if (isGenericEnumerable)
-        return true;
+        private const string ImmutableCollectionsNamespace = "System.Collections.Immutable";
+        private const string ImmutableCollectionsAssembly = "System.Collections.Immutable";
 
-      return false;
-    }
+        public override bool CanSerialize(Serializer serializer, Type type)
+        {
+            if (type.Namespace == null || !type.Namespace.Equals(ImmutableCollectionsNamespace, StringComparison.Ordinal)) return false;
+            var isGenericEnumerable = GetEnumerableType(type) != null;
+            if (isGenericEnumerable)
+                return true;
 
-    public override bool CanDeserialize(Serializer serializer, Type type) => CanSerialize(serializer, type);
+            return false;
+        }
 
-    private static Type GetEnumerableType(Type type)
-    {
-      return type
+        public override bool CanDeserialize(Serializer serializer, Type type) => CanSerialize(serializer, type);
+
+        private static Type GetEnumerableType(Type type)
+        {
+            return type
 #if !NET40
-          .GetTypeInfo()
+                .GetTypeInfo()
 #endif
-          .GetInterfaces()
+                .GetInterfaces()
 #if NET40
-          .Where(intType => intType.IsGenericType && intType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-          .Select(intType => intType.GetGenericArguments()[0])
+                .Where(intType => intType.IsGenericType && intType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                .Select(intType => intType.GetGenericArguments()[0])
 #else
-          .Where(intType => intType.GetTypeInfo().IsGenericType && intType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IEnumerable<>))
-          .Select(intType => intType.GetTypeInfo().GetGenericArguments()[0])
+                .Where(intType => intType.GetTypeInfo().IsGenericType && intType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                .Select(intType => intType.GetTypeInfo().GetGenericArguments()[0])
 #endif
-          .FirstOrDefault();
-    }
+                .FirstOrDefault();
+        }
 
-    public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
-        ConcurrentDictionary<Type, ValueSerializer> typeMapping)
-    {
-      var x = new ObjectSerializer(type);
-      typeMapping.TryAdd(type, x);
-      var preserveObjectReferences = serializer.Options.PreserveObjectReferences;
+        public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
+            ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+        {
+            var x = new ObjectSerializer(type);
+            typeMapping.TryAdd(type, x);
+            var preserveObjectReferences = serializer.Options.PreserveObjectReferences;
 
-      var elementType = GetEnumerableType(type) ?? typeof(object);
-      var elementSerializer = serializer.GetSerializerByType(elementType);
+            var elementType = GetEnumerableType(type) ?? typeof(object);
+            var elementSerializer = serializer.GetSerializerByType(elementType);
 
-      var typeName = type.Name;
-      var genericSufixIdx = typeName.IndexOf('`');
-      typeName = genericSufixIdx != -1 ? typeName.Substring(0, genericSufixIdx) : typeName;
-      var creatorType =
-          Type.GetType(ImmutableCollectionsNamespace + "." + typeName + ", " + ImmutableCollectionsAssembly);
+            var typeName = type.Name;
+            var genericSufixIdx = typeName.IndexOf('`');
+            typeName = genericSufixIdx != -1 ? typeName.Substring(0, genericSufixIdx) : typeName;
+            var creatorType =
+                Type.GetType(ImmutableCollectionsNamespace + "." + typeName + ", " + ImmutableCollectionsAssembly);
 
 #if NET40
-      var createRangeMethodInfo = creatorType != null
-          ? creatorType.GetMethods(BindingFlags.Public | BindingFlags.Static)
-              .First(methodInfo => methodInfo.Name == "CreateRange" && methodInfo.GetParameters().Length == 1)
-          : null;
+            var createRangeMethodInfo = creatorType != null
+                ? creatorType.GetMethods(BindingFlags.Public | BindingFlags.Static)
+                    .First(methodInfo => methodInfo.Name == "CreateRange" && methodInfo.GetParameters().Length == 1)
+                : null;
 
-      // If the element type is a generic type and the method located to create the collection instance requires more than one generic type parameter
-      // we need to obtain the generic arguments of the element type.
-      var genericTypes = elementType.GetTypeInfo().IsGenericType && createRangeMethodInfo != null && createRangeMethodInfo.GetGenericArguments().Length > 1
-          ? elementType.GetGenericArguments()
-          : new[] { elementType };
+            // If the element type is a generic type and the method located to create the collection instance requires more than one generic type parameter
+            // we need to obtain the generic arguments of the element type.
+            var genericTypes = elementType.GetTypeInfo().IsGenericType && createRangeMethodInfo != null && createRangeMethodInfo.GetGenericArguments().Length > 1
+                ? elementType.GetGenericArguments()
+                : new[] { elementType };
 #else
-      var createRangeMethodInfo = creatorType != null
-          ? creatorType.GetTypeInfo().GetMethods(BindingFlags.Public | BindingFlags.Static)
-              .First(methodInfo => methodInfo.Name == "CreateRange" && methodInfo.GetParameters().Length == 1)
-          : null;
+            var createRangeMethodInfo = creatorType != null
+                ? creatorType.GetTypeInfo().GetMethods(BindingFlags.Public | BindingFlags.Static)
+                    .First(methodInfo => methodInfo.Name == "CreateRange" && methodInfo.GetParameters().Length == 1)
+                : null;
 
-      // If the element type is a generic type and the method located to create the collection instance requires more than one generic type parameter
-      // we need to obtain the generic arguments of the element type.
-      var genericTypes = elementType.GetTypeInfo().IsGenericType && createRangeMethodInfo != null && createRangeMethodInfo.GetGenericArguments().Length > 1
-          ? elementType.GetTypeInfo().GetGenericArguments()
-          : new[] { elementType };
+            // If the element type is a generic type and the method located to create the collection instance requires more than one generic type parameter
+            // we need to obtain the generic arguments of the element type.
+            var genericTypes = elementType.GetTypeInfo().IsGenericType && createRangeMethodInfo != null && createRangeMethodInfo.GetGenericArguments().Length > 1
+                ? elementType.GetTypeInfo().GetGenericArguments()
+                : new[] { elementType };
 #endif
 
-      // if creatorType == null it means that type is probably an interface
-      // we propagate null to create mock serializer - it won't be used anyway
+            // if creatorType == null it means that type is probably an interface
+            // we propagate null to create mock serializer - it won't be used anyway
 
-      var stackTypeDef = Type.GetType(ImmutableCollectionsNamespace + ".IImmutableStack`1, " + ImmutableCollectionsAssembly, true);
-      //var stackInterface = stackTypeDef.MakeGenericType(genericTypes[0]);
-      var stackInterface = stackTypeDef.GetCachedGenericType(genericTypes[0]);
+            var stackTypeDef = Type.GetType(ImmutableCollectionsNamespace + ".IImmutableStack`1, " + ImmutableCollectionsAssembly, true);
+            //var stackInterface = stackTypeDef.MakeGenericType(genericTypes[0]);
+            var stackInterface = stackTypeDef.GetCachedGenericType(genericTypes[0]);
 
-      var isStack = stackInterface.IsAssignableFrom(type);
+            var isStack = stackInterface.IsAssignableFrom(type);
 
-      var createRange = createRangeMethodInfo != null
-          ? createRangeMethodInfo.MakeGenericMethod(genericTypes)
-          : null;
+            var createRange = createRangeMethodInfo != null
+                ? createRangeMethodInfo.MakeGenericMethod(genericTypes)
+                : null;
 
-      ObjectWriter writer = (stream, o, session) =>
-      {
-        var enumerable = o as ICollection;
-        if (enumerable == null)
-        {
-          // object can be IEnumerable but not ICollection i.e. ImmutableQueue
-          var e = (IEnumerable)o;
-          var list = e.Cast<object>().ToList();//
+            ObjectWriter writer = (stream, o, session) =>
+            {
+                var enumerable = o as ICollection;
+                if (enumerable == null)
+                {
+                    // object can be IEnumerable but not ICollection i.e. ImmutableQueue
+                    var e = (IEnumerable)o;
+                    var list = e.Cast<object>().ToList();//
 
-          enumerable = list;
+                    enumerable = list;
+                }
+                Int32Serializer.WriteValueImpl(stream, enumerable.Count, session);
+                foreach (var value in enumerable)
+                {
+                    stream.WriteObject(value, elementType, elementSerializer, preserveObjectReferences, session);
+                }
+                if (preserveObjectReferences)
+                {
+                    session.TrackSerializedObject(o);
+                }
+            };
+            ObjectReader reader;
+
+            if (isStack)
+            {
+                // if we are dealing with stack, we need to apply arguments in reverse order
+                reader = (stream, session) =>
+                {
+                    var count = stream.ReadInt32(session);
+                    var items = Array.CreateInstance(elementType, count);
+                    for (var i = 0; i < count; i++)
+                    {
+                        var value = stream.ReadObject(session);
+                        items.SetValue(value, count - i - 1);
+                    }
+
+                    var instance = createRange.Invoke(null, new object[] { items });
+                    if (preserveObjectReferences)
+                    {
+                        session.TrackDeserializedObject(instance);
+                    }
+                    return instance;
+                };
+            }
+            else
+            {
+                reader = (stream, session) =>
+                {
+                    var count = stream.ReadInt32(session);
+                    var items = Array.CreateInstance(elementType, count);
+                    for (var i = 0; i < count; i++)
+                    {
+                        var value = stream.ReadObject(session);
+                        items.SetValue(value, i);
+                    }
+
+                    var instance = createRange.Invoke(null, new object[] { items });
+                    if (preserveObjectReferences)
+                    {
+                        session.TrackDeserializedObject(instance);
+                    }
+                    return instance;
+                };
+            }
+            x.Initialize(reader, writer);
+            return x;
         }
-        Int32Serializer.WriteValueImpl(stream, enumerable.Count, session);
-        foreach (var value in enumerable)
-        {
-          stream.WriteObject(value, elementType, elementSerializer, preserveObjectReferences, session);
-        }
-        if (preserveObjectReferences)
-        {
-          session.TrackSerializedObject(o);
-        }
-      };
-      ObjectReader reader;
-
-      if (isStack)
-      {
-        // if we are dealing with stack, we need to apply arguments in reverse order
-        reader = (stream, session) =>
-        {
-          var count = stream.ReadInt32(session);
-          var items = Array.CreateInstance(elementType, count);
-          for (var i = 0; i < count; i++)
-          {
-            var value = stream.ReadObject(session);
-            items.SetValue(value, count - i - 1);
-          }
-
-          var instance = createRange.Invoke(null, new object[] { items });
-          if (preserveObjectReferences)
-          {
-            session.TrackDeserializedObject(instance);
-          }
-          return instance;
-        };
-      }
-      else
-      {
-        reader = (stream, session) =>
-        {
-          var count = stream.ReadInt32(session);
-          var items = Array.CreateInstance(elementType, count);
-          for (var i = 0; i < count; i++)
-          {
-            var value = stream.ReadObject(session);
-            items.SetValue(value, i);
-          }
-
-          var instance = createRange.Invoke(null, new object[] { items });
-          if (preserveObjectReferences)
-          {
-            session.TrackDeserializedObject(instance);
-          }
-          return instance;
-        };
-      }
-      x.Initialize(reader, writer);
-      return x;
     }
-  }
 }

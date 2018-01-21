@@ -15,7 +15,7 @@ using System.Reflection.Emit;
 namespace Hyperion.Compilation
 {
 #if DESKTOPCLR
-    public class IlCompiler<TDel> : IlBuilder, ICompiler<TDel>
+    internal sealed class IlCompiler<TDel> : IlBuilder, ICompiler<TDel>
     {
         public TDel Compile()
         {

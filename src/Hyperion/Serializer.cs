@@ -122,10 +122,8 @@ namespace Hyperion
         [MethodImpl(InlineMethod.Value)]
         private ValueSerializer GetCustomDeserializer([NotNull] Type type)
         {
-            ValueSerializer serializer;
-
             //do we already have a deserializer for this type?
-            if (_deserializers.TryGetValue(type, out serializer))
+            if (_deserializers.TryGetValue(type, out ValueSerializer serializer))
                 return serializer;
 
             //is there a deserializer factory that can handle this type?
@@ -209,10 +207,8 @@ namespace Hyperion
 
         public ValueSerializer GetSerializerByType([NotNull] Type type)
         {
-            ValueSerializer serializer;
-
             //do we already have a serializer for this type?
-            if (_serializers.TryGetValue(type, out serializer))
+            if (_serializers.TryGetValue(type, out ValueSerializer serializer))
                 return serializer;
 
             //is there a serializer factory that can handle this type?
@@ -226,8 +222,7 @@ namespace Hyperion
 
             //none of the above, lets create a POCO object serializer
             serializer = new ObjectSerializer(type);
-            ushort index;
-            if (Options.KnownTypesDict.TryGetValue(type, out index))
+            if (Options.KnownTypesDict.TryGetValue(type, out ushort index))
             {
                 var wrapper = new KnownTypeObjectSerializer((ObjectSerializer)serializer, index);
                 if (!_serializers.TryAdd(type, wrapper))

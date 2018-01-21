@@ -20,67 +20,67 @@ using System.Reflection;
 
 namespace Hyperion.SerializerFactories
 {
-  public class DefaultDictionarySerializerFactory : ValueSerializerFactory
-  {
-    public override bool CanSerialize(Serializer serializer, Type type) => IsInterface(type);
-
-    private static bool IsInterface(Type type)
+    internal sealed class DefaultDictionarySerializerFactory : ValueSerializerFactory
     {
-      return type
+        public override bool CanSerialize(Serializer serializer, Type type) => IsInterface(type);
+
+        private static bool IsInterface(Type type)
+        {
+            return type
 #if NET40
-             .IsConstructedGenericType()
+                .IsConstructedGenericType()
 #else
-             .IsConstructedGenericType 
+                .IsConstructedGenericType
 #endif
-             && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
+                && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
+        }
+
+        public override bool CanDeserialize(Serializer serializer, Type type) => IsInterface(type);
+
+        public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
+            ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+        {
+            var ser = new ObjectSerializer(type);
+            typeMapping.TryAdd(type, ser);
+            var elementSerializer = serializer.GetSerializerByType(typeof(DictionaryEntry));
+            var preserveObjectReferences = serializer.Options.PreserveObjectReferences;
+            ObjectReader reader = (stream, session) =>
+            {
+                var count = stream.ReadInt32(session);
+                var instance = (IDictionary)ActivatorUtils.CreateInstance(type, count);
+                if (preserveObjectReferences)
+                {
+                    session.TrackDeserializedObject(instance);
+                }
+
+                for (var i = 0; i < count; i++)
+                {
+                    var entry = (DictionaryEntry)stream.ReadObject(session);
+                    instance.Add(entry.Key, entry.Value);
+                }
+                return instance;
+            };
+
+            ObjectWriter writer = (stream, obj, session) =>
+            {
+
+                if (preserveObjectReferences)
+                {
+                    session.TrackSerializedObject(obj);
+                }
+                var dict = obj as IDictionary;
+                // ReSharper disable once PossibleNullReferenceException
+                Int32Serializer.WriteValueImpl(stream, dict.Count, session);
+                foreach (DictionaryEntry item in dict)
+                {
+                    stream.WriteObject(item, typeof(DictionaryEntry), elementSerializer,
+                        serializer.Options.PreserveObjectReferences, session);
+                    // elementSerializer.WriteValue(stream,item,session);
+                }
+            };
+            ser.Initialize(reader, writer);
+
+            return ser;
+        }
     }
-
-    public override bool CanDeserialize(Serializer serializer, Type type) => IsInterface(type);
-
-    public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
-        ConcurrentDictionary<Type, ValueSerializer> typeMapping)
-    {
-      var ser = new ObjectSerializer(type);
-      typeMapping.TryAdd(type, ser);
-      var elementSerializer = serializer.GetSerializerByType(typeof(DictionaryEntry));
-      var preserveObjectReferences = serializer.Options.PreserveObjectReferences;
-      ObjectReader reader = (stream, session) =>
-      {
-        var count = stream.ReadInt32(session);
-        var instance = (IDictionary)ActivatorUtils.CreateInstance(type, count);
-        if (preserveObjectReferences)
-        {
-          session.TrackDeserializedObject(instance);
-        }
-
-        for (var i = 0; i < count; i++)
-        {
-          var entry = (DictionaryEntry)stream.ReadObject(session);
-          instance.Add(entry.Key, entry.Value);
-        }
-        return instance;
-      };
-
-      ObjectWriter writer = (stream, obj, session) =>
-      {
-
-        if (preserveObjectReferences)
-        {
-          session.TrackSerializedObject(obj);
-        }
-        var dict = obj as IDictionary;
-              // ReSharper disable once PossibleNullReferenceException
-              Int32Serializer.WriteValueImpl(stream, dict.Count, session);
-        foreach (DictionaryEntry item in dict)
-        {
-          stream.WriteObject(item, typeof(DictionaryEntry), elementSerializer,
-                    serializer.Options.PreserveObjectReferences, session);
-                // elementSerializer.WriteValue(stream,item,session);
-              }
-      };
-      ser.Initialize(reader, writer);
-
-      return ser;
-    }
-  }
 }

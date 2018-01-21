@@ -18,7 +18,7 @@ using CuteAnt.Reflection;
 
 namespace Hyperion.Extensions
 {
-    public static class TypeEx
+    internal static class TypeEx
     {
         //Why not inline typeof you ask?
         //Because it actually generates calls to get the type.

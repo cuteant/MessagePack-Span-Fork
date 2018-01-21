@@ -14,7 +14,7 @@ using Hyperion.Extensions;
 
 namespace Hyperion.ValueSerializers
 {
-  public class CombGuidSerializer : SessionIgnorantValueSerializer<CombGuid>
+    internal sealed class CombGuidSerializer : SessionIgnorantValueSerializer<CombGuid>
   {
     public const byte Manifest = 168;
     public static readonly CombGuidSerializer Instance = new CombGuidSerializer();
