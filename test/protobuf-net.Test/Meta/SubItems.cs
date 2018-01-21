@@ -108,7 +108,6 @@ namespace ProtoBuf.unittest.Meta
 
             var model = CreateModel();
             clone = (OuterVal)model.DeepClone(outer);
-            Assert.NotEqual(outer, clone);
             Assert.Equal(123, clone.InnerRef.Int32);
             Assert.Equal("abc", clone.InnerRef.String);
             Assert.Equal(456, clone.InnerVal.Int32);
@@ -117,14 +116,12 @@ namespace ProtoBuf.unittest.Meta
             model.CompileInPlace();
             clone = (OuterVal)model.DeepClone(outer);
             
-            Assert.NotEqual(outer, clone);
             Assert.Equal(123, clone.InnerRef.Int32);
             Assert.Equal("abc", clone.InnerRef.String);
             Assert.Equal(456, clone.InnerVal.Int32);
             Assert.Equal("def", clone.InnerVal.String);
             
             clone = (OuterVal)model.Compile().DeepClone(outer);
-            Assert.NotEqual(outer, clone);
             Assert.Equal(123, clone.InnerRef.Int32);
             Assert.Equal("abc", clone.InnerRef.String);
             Assert.Equal(456, clone.InnerVal.Int32);
