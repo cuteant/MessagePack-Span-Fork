@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using CuteAnt;
@@ -93,6 +94,8 @@ namespace MessagePack.Internal
 
             {typeof(Type), SimpleTypeFormatter.Instance},
             {typeof(CultureInfo), CultureInfoFormatter.Instance},
+            {typeof(IPAddress), IPAddressFormatter.Instance},
+            {typeof(IPEndPoint), IPEndPointFormatter.Instance},
             
             // special primitive
             {typeof(byte[]), ByteArrayFormatter.Instance},

@@ -26,7 +26,7 @@ namespace MessagePack.Formatters
             bytes[offset] = MessagePackCode.Bin8;
             bytes[offset + 1] = _byteSize;
 
-            Array.Copy(buffer, 0, bytes, offset + 2, c_valueSize);
+            Buffer.BlockCopy(buffer, 0, bytes, offset + 2, c_valueSize);
 
             return c_totalSize;
         }
@@ -34,7 +34,7 @@ namespace MessagePack.Formatters
         public CombGuid Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
             var newBytes = new byte[c_valueSize];
-            Array.Copy(bytes, offset + 2, newBytes, 0, c_valueSize);
+            Buffer.BlockCopy(bytes, offset + 2, newBytes, 0, c_valueSize);
 
             readSize = c_totalSize;
 

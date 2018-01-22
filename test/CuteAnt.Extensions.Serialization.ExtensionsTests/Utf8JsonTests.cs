@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Globalization;
+using System.Net;
 using Utf8Json;
 using Utf8Json.ImmutableCollection;
 using Utf8Json.Resolvers;
@@ -103,6 +104,17 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var culture = CultureInfo.InvariantCulture;
       var bytes = JsonSerializer.Serialize(culture);
       Assert.Equal(culture, JsonSerializer.Deserialize<CultureInfo>(bytes));
+    }
+
+    [Fact]
+    public void CanSerializeIPAddress()
+    {
+      var ip = IPAddress.Parse("192.168.0.108");
+      var bytes = JsonSerializer.Serialize(ip);
+      Assert.Equal(ip, JsonSerializer.Deserialize<IPAddress>(bytes));
+      var endPoint = new IPEndPoint(ip, 8080);
+      bytes= JsonSerializer.Serialize(endPoint);
+      Assert.Equal(endPoint, JsonSerializer.Deserialize<IPEndPoint>(bytes));
     }
   }
 }

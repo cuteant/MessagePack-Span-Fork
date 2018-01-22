@@ -25,7 +25,6 @@ namespace MessagePack.Formatters
                 return null;
             }
 
-            var startOffset = offset;
             var hashCode = MessagePackBinary.ReadInt32(bytes, offset, out var hashCodeSize);
             offset += hashCodeSize;
             var typeName = MessagePackBinary.ReadBytes(bytes, offset, out readSize);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Globalization;
+using System.Net;
 using MessagePack;
 using MessagePack.ImmutableCollection;
 using MessagePack.Resolvers;
@@ -167,6 +168,17 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var culture = CultureInfo.InvariantCulture;
       var bytes = MessagePackSerializer.Serialize(culture);
       Assert.Equal(culture, MessagePackSerializer.Deserialize<CultureInfo>(bytes));
+    }
+
+    [Fact]
+    public void CanSerializeIPAddress()
+    {
+      var ip = IPAddress.Parse("192.168.0.108");
+      var bytes = MessagePackSerializer.Serialize(ip);
+      Assert.Equal(ip, MessagePackSerializer.Deserialize<IPAddress>(bytes));
+      var endPoint = new IPEndPoint(ip, 8080);
+      bytes = MessagePackSerializer.Serialize(endPoint);
+      Assert.Equal(endPoint, MessagePackSerializer.Deserialize<IPEndPoint>(bytes));
     }
   }
 }
