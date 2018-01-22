@@ -10,6 +10,7 @@ using System.Threading;
 using CuteAnt.Reflection;
 using CuteAnt.Pool;
 using ServiceStack.Text;
+using SSTTypeSerializer = ServiceStack.Text.TypeSerializer;
 
 namespace ServiceStack
 {
@@ -751,7 +752,7 @@ namespace ServiceStack
                     {
                         to[entry.Key] = entry.Value;
                     }
-                    else if (!TypeSerializer.HasCircularReferences(entry.Value))
+                    else if (!SSTTypeSerializer.HasCircularReferences(entry.Value))
                     {
                         if (entry.Value is IEnumerable enumerable)
                         {

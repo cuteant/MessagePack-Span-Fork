@@ -11,6 +11,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using CuteAnt.Reflection;
 using ServiceStack.Text;
+using SSTTypeSerializer = ServiceStack.Text.TypeSerializer;
 
 namespace ServiceStack
 {
@@ -119,7 +120,7 @@ namespace ServiceStack
         private static object ChangeValueType(object from, Type type)
         {
             if (from is string strValue)
-                return TypeSerializer.DeserializeFromString(strValue, type);
+                return SSTTypeSerializer.DeserializeFromString(strValue, type);
 
             if (type == typeof(string))
                 return from.ToJsv();
@@ -140,7 +141,7 @@ namespace ServiceStack
                     Tracer.Instance.WriteError(ex);
                 }
             }
-            return TypeSerializer.DeserializeFromString(strValue, type);
+            return SSTTypeSerializer.DeserializeFromString(strValue, type);
         }
 
         private static readonly Dictionary<Type, List<string>> TypePropertyNamesMap = new Dictionary<Type, List<string>>();
@@ -789,10 +790,10 @@ namespace ServiceStack
                 return null;
 
             if (fromType == typeof(string))
-                return fromValue => TypeSerializer.DeserializeFromString((string)fromValue, toType);
+                return fromValue => SSTTypeSerializer.DeserializeFromString((string)fromValue, toType);
 
             if (toType == typeof(string))
-                return TypeSerializer.SerializeToString;
+                return SSTTypeSerializer.SerializeToString;
             
             var underlyingToType = Nullable.GetUnderlyingType(toType) ?? toType;
             var underlyingFromType = Nullable.GetUnderlyingType(fromType) ?? fromType;
