@@ -10,7 +10,7 @@
     <PackageReference Include="BenchmarkDotNet" Version="$(BenchmarkDotNetPackageVersion)" />
     <PackageReference Include="MessagePackAnalyzer" Version="$(MessagePackAnalyzerPackageVersion)" />
     <PackageReference Include="MessagePack" Version="1.7.3.2" />
-    <PackageReference Include="Utf8Json" Version="1.3.5" />
+    <PackageReference Include="Utf8Json" Version="1.3.6" />
   </ItemGroup>
 
 </Project>
