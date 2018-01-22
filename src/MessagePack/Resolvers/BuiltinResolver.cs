@@ -92,6 +92,9 @@ namespace MessagePack.Internal
             {typeof(StringBuilder), StringBuilderFormatter.Instance},
             {typeof(BitArray), BitArrayFormatter.Instance},
 
+            {typeof(FieldInfo), FieldInfoFormatter.Instance},
+            {typeof(PropertyInfo), PropertyInfoFormatter.Instance},
+            {typeof(MethodInfo), MethodInfoFormatter.Instance},
             {typeof(Type), SimpleTypeFormatter.Instance},
             {typeof(CultureInfo), CultureInfoFormatter.Instance},
             {typeof(IPAddress), IPAddressFormatter.Instance},

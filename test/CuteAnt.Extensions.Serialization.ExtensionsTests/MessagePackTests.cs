@@ -160,6 +160,10 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var fooType = typeof(FooClass);
       var bytes = MessagePackSerializer.Serialize(fooType);
       Assert.Equal(fooType, MessagePackSerializer.Deserialize<Type>(bytes));
+      var copy = MessagePackMessageFormatter.DefaultInstance.DeepCopy(fooType);
+      Assert.Equal(fooType, copy);
+      copy = (Type)MessagePackMessageFormatter.DefaultInstance.DeepCopyObject(fooType);
+      Assert.Equal(fooType, copy);
     }
 
     [Fact]
@@ -168,6 +172,10 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var culture = CultureInfo.InvariantCulture;
       var bytes = MessagePackSerializer.Serialize(culture);
       Assert.Equal(culture, MessagePackSerializer.Deserialize<CultureInfo>(bytes));
+      var copy = MessagePackMessageFormatter.DefaultInstance.DeepCopy(culture);
+      Assert.Equal(culture, copy);
+      copy = (CultureInfo)MessagePackMessageFormatter.DefaultInstance.DeepCopyObject(culture);
+      Assert.Equal(culture, copy);
     }
 
     [Fact]
@@ -176,9 +184,36 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var ip = IPAddress.Parse("192.168.0.108");
       var bytes = MessagePackSerializer.Serialize(ip);
       Assert.Equal(ip, MessagePackSerializer.Deserialize<IPAddress>(bytes));
+      var copy = MessagePackMessageFormatter.DefaultInstance.DeepCopy(ip);
+      Assert.Equal(ip, copy);
+      copy = (IPAddress)MessagePackMessageFormatter.DefaultInstance.DeepCopyObject(ip);
+      Assert.Equal(ip, copy);
+
       var endPoint = new IPEndPoint(ip, 8080);
       bytes = MessagePackSerializer.Serialize(endPoint);
       Assert.Equal(endPoint, MessagePackSerializer.Deserialize<IPEndPoint>(bytes));
+      var copy1 = MessagePackMessageFormatter.DefaultInstance.DeepCopy(endPoint);
+      Assert.Equal(endPoint, copy1);
+      copy1 = (IPEndPoint)MessagePackMessageFormatter.DefaultInstance.DeepCopyObject(endPoint);
+      Assert.Equal(endPoint, copy1);
+    }
+
+    [Fact]
+    public void CanSerializeInterfaceField()
+    {
+      var b = new Bar
+      {
+        Foo = new Foo()
+        {
+          A = 123,
+          B = "hello"
+        }
+      };
+      var copy = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
+      Assert.NotNull(copy);
+      Assert.IsAssignableFrom<IFoo>(b.Foo);
+      Assert.Equal(b.Foo.A, copy.Foo.A);
+      Assert.Equal(b.Foo.B, copy.Foo.B);
     }
   }
 }

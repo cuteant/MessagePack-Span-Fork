@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -42,10 +43,15 @@ namespace Utf8Json.Formatters
                 {
                     if (!serializers.TryGetValue(type, out formatterAndDelegate))
                     {
+                        var aliasType = type;
+                        if (typeof(Type).IsAssignableFrom(type))
+                        {
+                            aliasType = typeof(Type);
+                        }
                         object formatter = null;
                         foreach (var innerResolver in innerResolvers)
                         {
-                            formatter = innerResolver.GetFormatterDynamic(type);
+                            formatter = innerResolver.GetFormatterDynamic(aliasType);
                             if (formatter != null) break;
                         }
                         if (formatter == null)
@@ -53,7 +59,7 @@ namespace Utf8Json.Formatters
                             throw new FormatterNotRegisteredException(type.FullName + " is not registered in this resolver. resolvers:" + string.Join(", ", innerResolvers.Select(x => x.GetType().Name).ToArray()));
                         }
 
-                        var t = type;
+                        var t = aliasType;
                         {
                             var dm = new DynamicMethod("Serialize", null, new[] { typeof(object), typeof(JsonWriter).MakeByRefType(), typeof(object), typeof(IJsonFormatterResolver) }, type.Module, true);
                             var il = dm.GetILGenerator();
@@ -74,7 +80,7 @@ namespace Utf8Json.Formatters
                             formatterAndDelegate = new KeyValuePair<object, SerializeMethod>(formatter, (SerializeMethod)dm.CreateDelegate(typeof(SerializeMethod)));
                         }
 
-                        serializers.TryAdd(t, formatterAndDelegate);
+                        serializers.TryAdd(type, formatterAndDelegate);
                     }
                 }
             }

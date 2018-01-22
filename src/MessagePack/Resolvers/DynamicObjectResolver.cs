@@ -312,6 +312,14 @@ namespace MessagePack.Internal
             {typeof(System.DateTime)},
             {typeof(System.DateTimeOffset)},
             {typeof(MessagePack.Nil)},
+
+            {typeof(FieldInfo)},
+            {typeof(PropertyInfo)},
+            {typeof(MethodInfo)},
+            {typeof(Type)},
+            {typeof(System.Globalization.CultureInfo)},
+            {typeof(System.Net.IPAddress)},
+            {typeof(System.Net.IPEndPoint)},
         };
 
         public static TypeInfo BuildType(DynamicAssembly assembly, Type type, bool forceStringKey, bool contractless)
@@ -399,6 +407,9 @@ namespace MessagePack.Internal
 
         public static object BuildFormatterToDynamicMethod(Type type, bool forceStringKey, bool contractless, bool allowPrivate)
         {
+            // ## 苦竹 添加 ##
+            if (ignoreTypes.Contains(type)) return null;
+
             var serializationInfo = ObjectSerializationInfo.CreateOrNull(type, forceStringKey, contractless, allowPrivate);
             if (serializationInfo == null) return null;
 

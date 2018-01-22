@@ -5,9 +5,17 @@ using CuteAnt.Reflection;
 
 namespace MessagePack.Formatters
 {
-    public sealed class SimpleTypeFormatter : IMessagePackFormatter<Type>
+    public sealed class SimpleTypeFormatter : SimpleTypeFormatter<Type>
     {
         public static readonly SimpleTypeFormatter Instance = new SimpleTypeFormatter();
+        public SimpleTypeFormatter() : base() { }
+
+        public SimpleTypeFormatter(bool throwOnError) : base(throwOnError) { }
+    }
+
+    public class SimpleTypeFormatter<TType> : IMessagePackFormatter<TType>
+        where TType : Type
+    {
         private readonly bool _throwOnError;
 
         public SimpleTypeFormatter() : this(true) { }
@@ -17,7 +25,7 @@ namespace MessagePack.Formatters
             _throwOnError = throwOnError;
         }
 
-        public Type Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public TType Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
             if (MessagePackBinary.IsNil(bytes, offset))
             {
@@ -29,10 +37,10 @@ namespace MessagePack.Formatters
             offset += hashCodeSize;
             var typeName = MessagePackBinary.ReadBytes(bytes, offset, out readSize);
             readSize += hashCodeSize;
-            return TypeSerializer.GetTypeFromTypeKey(new TypeKey(hashCode, typeName), _throwOnError);
+            return (TType)TypeSerializer.GetTypeFromTypeKey(new TypeKey(hashCode, typeName), _throwOnError);
         }
 
-        public int Serialize(ref byte[] bytes, int offset, Type value, IFormatterResolver formatterResolver)
+        public int Serialize(ref byte[] bytes, int offset, TType value, IFormatterResolver formatterResolver)
         {
             if (value == null)
             {

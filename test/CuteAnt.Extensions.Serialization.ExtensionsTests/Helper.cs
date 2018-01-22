@@ -21,6 +21,34 @@ namespace CuteAnt.Extensions.Serialization.Tests
     }
   }
 
+  public class Bar
+  {
+    public IFoo Foo { get; set; }
+  }
+
+  [Union(0, typeof(Foo))]
+  public interface IFoo
+  {
+    int A { get; set; }
+    string B { get; set; }
+    string Fact();
+    string Fact(string input);
+    string Fact<T>(T input);
+  }
+
+  [MessagePackObject]
+  public class Foo : IFoo
+  {
+    [Key(0)]
+    public int A { get; set; }
+    [Key(1)]
+    public string B { get; set; }
+    public string Fact() => "Hello";
+    public string Fact(string input) => input;
+    public string Fact<T>(T input) => input.ToString();
+  }
+
+
   [MessagePackObject]
   [DataContract]
   public class FooBar

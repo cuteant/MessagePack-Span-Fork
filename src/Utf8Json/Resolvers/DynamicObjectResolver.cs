@@ -504,6 +504,11 @@ namespace Utf8Json.Resolvers.Internal
             {typeof(System.TimeSpan)},
             {typeof(System.DateTime)},
             {typeof(System.DateTimeOffset)},
+
+            {typeof(Type)},
+            {typeof(System.Globalization.CultureInfo)},
+            {typeof(System.Net.IPAddress)},
+            {typeof(System.Net.IPEndPoint)},
         };
 
         static HashSet<Type> jsonPrimitiveTypes = new HashSet<Type>

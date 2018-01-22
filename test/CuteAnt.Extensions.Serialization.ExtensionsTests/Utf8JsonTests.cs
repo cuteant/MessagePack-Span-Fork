@@ -96,6 +96,10 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var fooType = typeof(FooClass);
       var bytes = JsonSerializer.Serialize(fooType);
       Assert.Equal(fooType, JsonSerializer.Deserialize<Type>(bytes));
+      var copy = Utf8JsonMessageFormatter.DefaultInstance.DeepCopy(fooType);
+      Assert.Equal(fooType, copy);
+      copy = (Type)Utf8JsonMessageFormatter.DefaultInstance.DeepCopyObject(fooType);
+      Assert.Equal(fooType, copy);
     }
 
     [Fact]
@@ -104,6 +108,10 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var culture = CultureInfo.InvariantCulture;
       var bytes = JsonSerializer.Serialize(culture);
       Assert.Equal(culture, JsonSerializer.Deserialize<CultureInfo>(bytes));
+      var copy = Utf8JsonMessageFormatter.DefaultInstance.DeepCopy(culture);
+      Assert.Equal(culture, copy);
+      copy = (CultureInfo)Utf8JsonMessageFormatter.DefaultInstance.DeepCopyObject(culture);
+      Assert.Equal(culture, copy);
     }
 
     [Fact]
@@ -112,9 +120,37 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var ip = IPAddress.Parse("192.168.0.108");
       var bytes = JsonSerializer.Serialize(ip);
       Assert.Equal(ip, JsonSerializer.Deserialize<IPAddress>(bytes));
+      var copy = Utf8JsonMessageFormatter.DefaultInstance.DeepCopy(ip);
+      Assert.Equal(ip, copy);
+      copy = (IPAddress)Utf8JsonMessageFormatter.DefaultInstance.DeepCopyObject(ip);
+      Assert.Equal(ip, copy);
+
       var endPoint = new IPEndPoint(ip, 8080);
       bytes= JsonSerializer.Serialize(endPoint);
       Assert.Equal(endPoint, JsonSerializer.Deserialize<IPEndPoint>(bytes));
+      var copy1 = Utf8JsonMessageFormatter.DefaultInstance.DeepCopy(endPoint);
+      Assert.Equal(endPoint, copy1);
+      copy1 = (IPEndPoint)Utf8JsonMessageFormatter.DefaultInstance.DeepCopyObject(endPoint);
+      Assert.Equal(endPoint, copy1);
+    }
+
+    [Fact]
+    public void CanSerializeInterfaceField()
+    {
+      var b = new Bar
+      {
+        Foo = new Foo()
+        {
+          A = 123,
+          B = "hello"
+        }
+      };
+      //var copy = Utf8JsonMessageFormatter.DefaultInstance.DeepCopy(b);
+      //Assert.NotNull(copy);
+      //Assert.IsAssignableFrom<IFoo>(b.Foo);
+      //Assert.Equal(b.Foo.A, copy.Foo.A);
+      //Assert.Equal(b.Foo.B, copy.Foo.B);
+      Assert.Throws<InvalidOperationException>(() => Utf8JsonMessageFormatter.DefaultInstance.DeepCopy(b));
     }
   }
 }

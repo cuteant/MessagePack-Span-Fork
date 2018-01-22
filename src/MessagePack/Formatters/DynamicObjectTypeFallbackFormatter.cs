@@ -46,10 +46,32 @@ namespace MessagePack.Formatters
                 {
                     if (!serializers.TryGetValue(type, out formatterAndDelegate))
                     {
+                        var aliasType = type;
+                        var aliasTypeInfo = ti;
+                        if (typeof(Type).IsAssignableFrom(type))
+                        {
+                            aliasType = typeof(Type);
+                            aliasTypeInfo = typeof(Type).GetTypeInfo();
+                        }
+                        else if (typeof(FieldInfo).IsAssignableFrom(type))
+                        {
+                            aliasType = typeof(FieldInfo);
+                            aliasTypeInfo = typeof(FieldInfo).GetTypeInfo();
+                        }
+                        else if (typeof(PropertyInfo).IsAssignableFrom(type))
+                        {
+                            aliasType = typeof(PropertyInfo);
+                            aliasTypeInfo = typeof(PropertyInfo).GetTypeInfo();
+                        }
+                        else if (typeof(MethodInfo).IsAssignableFrom(type))
+                        {
+                            aliasType = typeof(MethodInfo);
+                            aliasTypeInfo = typeof(MethodInfo).GetTypeInfo();
+                        }
                         object formatter = null;
                         foreach (var innerResolver in innerResolvers)
                         {
-                            formatter = innerResolver.GetFormatterDynamic(type);
+                            formatter = innerResolver.GetFormatterDynamic(aliasType);
                             if (formatter != null) break;
                         }
                         if (formatter == null)
@@ -57,7 +79,7 @@ namespace MessagePack.Formatters
                             throw new FormatterNotRegisteredException(type.FullName + " is not registered in this resolver. resolvers:" + string.Join(", ", innerResolvers.Select(x => x.GetType().Name).ToArray()));
                         }
 
-                        var t = type;
+                        var t = aliasType;
                         {
                             var formatterType = typeof(IMessagePackFormatter<>).GetCachedGenericType(t);
                             var param0 = Expression.Parameter(typeof(object), "formatter");
@@ -73,7 +95,7 @@ namespace MessagePack.Formatters
                                 serializeMethodInfo,
                                 param1,
                                 param2,
-                                ti.IsValueType ? Expression.Unbox(param3, t) : Expression.Convert(param3, t),
+                                aliasTypeInfo.IsValueType ? Expression.Unbox(param3, t) : Expression.Convert(param3, t),
                                 param4);
 
                             var lambda = Expression.Lambda<SerializeMethod>(body, param0, param1, param2, param3, param4).Compile();
@@ -81,7 +103,7 @@ namespace MessagePack.Formatters
                             formatterAndDelegate = new KeyValuePair<object, SerializeMethod>(formatter, lambda);
                         }
 
-                        serializers.TryAdd(t, formatterAndDelegate);
+                        serializers.TryAdd(type, formatterAndDelegate);
                     }
                 }
             }

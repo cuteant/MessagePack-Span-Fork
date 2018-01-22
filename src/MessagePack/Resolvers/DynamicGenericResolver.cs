@@ -307,6 +307,22 @@ namespace MessagePack.Internal
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(NonGenericDictionaryFormatter<>).GetCachedGenericType(t));
                 }
+                if (typeof(Type).GetTypeInfo().IsAssignableFrom(ti))
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(SimpleTypeFormatter<>).GetCachedGenericType(t));
+                }
+                if (typeof(FieldInfo).GetTypeInfo().IsAssignableFrom(ti))
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(FieldInfoFormatter<>).GetCachedGenericType(t));
+                }
+                if (typeof(PropertyInfo).GetTypeInfo().IsAssignableFrom(ti))
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(PropertyInfoFormatter<>).GetCachedGenericType(t));
+                }
+                if (typeof(MethodInfo).GetTypeInfo().IsAssignableFrom(ti))
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(MethodInfoFormatter<>).GetCachedGenericType(t));
+                }
             }
 
             return null;
