@@ -151,5 +151,13 @@ namespace CuteAnt.Extensions.Serialization.Tests
       bytes = MessagePackSerializer.Serialize(foobar3);
       Assert.Equal(@"{""FooProperty"":2018}", MessagePackSerializer.ToJson(bytes));
     }
+
+    [Fact]
+    public void CanSerializeType()
+    {
+      var fooType = typeof(FooClass);
+      var bytes = MessagePackSerializer.Serialize(fooType);
+      Assert.Equal(fooType, MessagePackSerializer.Deserialize<Type>(bytes));
+    }
   }
 }

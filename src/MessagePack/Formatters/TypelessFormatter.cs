@@ -159,7 +159,7 @@ namespace MessagePack.Formatters
                 }
                 else
                 {
-                    typeName = StringEncoding.UTF8.GetBytes(RuntimeTypeNameFormatter.Format(type));// BuildTypeName(type));
+                    typeName = TypeSerializer.GetTypeKeyFromType(type).TypeName; // StringEncoding.UTF8.GetBytes(BuildTypeName(type));
                 }
                 typeNameCache.TryAdd(type, typeName);
             }

@@ -17,14 +17,14 @@ namespace MessagePack.Formatters
 
         public int Serialize(ref byte[] bytes, int offset, CombGuid value, IFormatterResolver formatterResolver)
         {
-            const byte _size1 = 18;
+            const byte _byteSize = 16;
 
             var buffer = value.GetByteArray(CombGuidSequentialSegmentType.Guid);
 
             MessagePackBinary.EnsureCapacity(ref bytes, offset, c_totalSize);
 
             bytes[offset] = MessagePackCode.Bin8;
-            bytes[offset + 1] = _size1;
+            bytes[offset + 1] = _byteSize;
 
             Array.Copy(buffer, 0, bytes, offset + 2, c_valueSize);
 

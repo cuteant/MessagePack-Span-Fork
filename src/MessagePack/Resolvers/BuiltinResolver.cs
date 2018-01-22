@@ -89,6 +89,7 @@ namespace MessagePack.Internal
             {typeof(Version), VersionFormatter.Instance},
             {typeof(StringBuilder), StringBuilderFormatter.Instance},
             {typeof(BitArray), BitArrayFormatter.Instance},
+            {typeof(Type), SimpleTypeFormatter.Default},
             
             // special primitive
             {typeof(byte[]), ByteArrayFormatter.Instance},
