@@ -217,5 +217,27 @@ namespace Utf8Json.Tests
 
             aaa.Is(origstr);
         }
+
+        [Fact]
+        public void LargeString3()
+        {
+            var origstr = new string('a', 999999);
+            var str = "\"" + origstr + "\"";
+
+            var reader = new JsonReader(Encoding.UTF8.GetBytes(str), 0);
+            var aaa = reader.ReadString();
+
+            aaa.Is(origstr);
+        }
+
+        [Fact]
+        public void LargeString4()
+        {
+            var origstr = new string('a', 999999);
+            var str = "\"" + origstr + "\"";
+
+            var serialized = JsonSerializer.Serialize(str);
+            var deserialized = JsonSerializer.Deserialize<string>(serialized);
+        }
     }
 }

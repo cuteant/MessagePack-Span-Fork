@@ -140,9 +140,9 @@ namespace Hyperion.Extensions
             return TypeNameLookup.GetOrAdd(byteArr, b =>
             {
                 var shortName = StringEx.FromUtf8Bytes(b.Bytes, 0, b.Bytes.Length);
-          //var typename = ToQualifiedAssemblyName(shortName);
-          //return Type.GetType(typename, true);
-          return TypeUtils.ResolveType(shortName);
+                //var typename = ToQualifiedAssemblyName(shortName);
+                //return Type.GetType(typename, true);
+                return TypeUtils.ResolveType(shortName);
             });
         }
 
