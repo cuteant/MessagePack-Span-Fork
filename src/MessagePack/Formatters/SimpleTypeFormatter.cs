@@ -7,7 +7,7 @@ namespace MessagePack.Formatters
 {
     public sealed class SimpleTypeFormatter : IMessagePackFormatter<Type>
     {
-        public static readonly SimpleTypeFormatter Default = new SimpleTypeFormatter();
+        public static readonly SimpleTypeFormatter Instance = new SimpleTypeFormatter();
         private readonly bool _throwOnError;
 
         public SimpleTypeFormatter() : this(true) { }

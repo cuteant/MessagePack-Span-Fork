@@ -4,6 +4,7 @@ using MessagePack.Resolvers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 using CuteAnt;
@@ -89,7 +90,9 @@ namespace MessagePack.Internal
             {typeof(Version), VersionFormatter.Instance},
             {typeof(StringBuilder), StringBuilderFormatter.Instance},
             {typeof(BitArray), BitArrayFormatter.Instance},
-            {typeof(Type), SimpleTypeFormatter.Default},
+
+            {typeof(Type), SimpleTypeFormatter.Instance},
+            {typeof(CultureInfo), CultureInfoFormatter.Instance},
             
             // special primitive
             {typeof(byte[]), ByteArrayFormatter.Instance},

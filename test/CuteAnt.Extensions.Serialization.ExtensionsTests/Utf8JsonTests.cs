@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Globalization;
 using Utf8Json;
 using Utf8Json.ImmutableCollection;
 using Utf8Json.Resolvers;
@@ -94,6 +95,14 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var fooType = typeof(FooClass);
       var bytes = JsonSerializer.Serialize(fooType);
       Assert.Equal(fooType, JsonSerializer.Deserialize<Type>(bytes));
+    }
+
+    [Fact]
+    public void CanSerializeCultureInfo()
+    {
+      var culture = CultureInfo.InvariantCulture;
+      var bytes = JsonSerializer.Serialize(culture);
+      Assert.Equal(culture, JsonSerializer.Deserialize<CultureInfo>(bytes));
     }
   }
 }

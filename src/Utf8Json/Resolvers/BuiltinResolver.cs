@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 using CuteAnt;
@@ -88,6 +89,8 @@ namespace Utf8Json.Resolvers
                 {typeof(StringBuilder), StringBuilderFormatter.Default},
                 {typeof(BitArray), BitArrayFormatter.Default},
                 {typeof(Type), SimpleTypeFormatter.Default}, // TypeFormatter.Default
+
+                {typeof(CultureInfo), CultureInfoFormatter.Default},
             
                 // special primitive
                 {typeof(byte[]), ByteArrayFormatter.Default},

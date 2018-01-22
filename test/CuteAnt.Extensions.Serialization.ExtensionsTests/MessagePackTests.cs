@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Globalization;
 using MessagePack;
 using MessagePack.ImmutableCollection;
 using MessagePack.Resolvers;
@@ -158,6 +159,14 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var fooType = typeof(FooClass);
       var bytes = MessagePackSerializer.Serialize(fooType);
       Assert.Equal(fooType, MessagePackSerializer.Deserialize<Type>(bytes));
+    }
+
+    [Fact]
+    public void CanSerializeCultureInfo()
+    {
+      var culture = CultureInfo.InvariantCulture;
+      var bytes = MessagePackSerializer.Serialize(culture);
+      Assert.Equal(culture, MessagePackSerializer.Deserialize<CultureInfo>(bytes));
     }
   }
 }
