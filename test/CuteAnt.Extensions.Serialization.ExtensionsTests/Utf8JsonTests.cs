@@ -87,5 +87,13 @@ namespace CuteAnt.Extensions.Serialization.Tests
       newList = Utf8JsonMessageFormatter.DefaultInstance.Deserialize<ImmutableList<int>>(bytes);
       Assert.Equal(imList, newList);
     }
+
+    [Fact]
+    public void CanSerializeType()
+    {
+      var fooType = typeof(FooClass);
+      var bytes = JsonSerializer.Serialize(fooType);
+      Assert.Equal(fooType, JsonSerializer.Deserialize<Type>(bytes));
+    }
   }
 }
