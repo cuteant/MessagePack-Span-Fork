@@ -75,6 +75,7 @@ namespace MessagePack.Formatters
                 }
                 method = method.MakeGenericMethod(genericTypeArguments);
             }
+            readSize = offset - startOffset;
             return (TMethod)method;
         }
 

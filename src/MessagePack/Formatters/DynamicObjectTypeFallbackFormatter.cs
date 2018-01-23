@@ -78,6 +78,11 @@ namespace MessagePack.Formatters
                             aliasType = typeof(Delegate);
                             aliasTypeInfo = typeof(Delegate).GetTypeInfo();
                         }
+                        else if (typeof(Exception).IsAssignableFrom(type))
+                        {
+                            aliasType = typeof(Exception);
+                            aliasTypeInfo = typeof(Exception).GetTypeInfo();
+                        }
                         object formatter = null;
                         foreach (var innerResolver in innerResolvers)
                         {

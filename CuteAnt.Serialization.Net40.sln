@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2020
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1F97D5A4-285F-4962-8F8C-BCEF8278143B}"
 EndProject
@@ -74,8 +74,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utf8Json.Abstractions", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CuteAnt.Extensions.Serialization.Utf8Json", "src\CuteAnt.Extensions.Serialization.Utf8Json\CuteAnt.Extensions.Serialization.Utf8Json.csproj", "{FB39AF56-D5F9-47E8-B7FF-74634C0E0E28}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CuteAnt.Extensions.IO.Sources", "..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.IO.Sources\CuteAnt.Extensions.IO.Sources.shproj", "{88B40B6F-FDBD-4384-9581-F53A140D4FFA}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.IO.Sources\CuteAnt.Extensions.IO.Sources.projitems*{88b40b6f-fdbd-4384-9581-f53a140d4ffa}*SharedItemsImports = 13
 		..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems*{c7f8dbe6-77b7-494d-af00-018f7579548c}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -219,6 +222,7 @@ Global
 		{BF8467EF-62D8-4ADB-965C-88177F44A4A5} = {ABC72801-895A-4C64-B795-B8CD5B56CEA8}
 		{9E2800C9-8980-4F95-9F01-C40CEEF958CE} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{FB39AF56-D5F9-47E8-B7FF-74634C0E0E28} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
+		{88B40B6F-FDBD-4384-9581-F53A140D4FFA} = {4744CD6C-82C3-4D38-A708-3D301A74397F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93230366-D5C3-4397-83D3-ED46E43B8121}

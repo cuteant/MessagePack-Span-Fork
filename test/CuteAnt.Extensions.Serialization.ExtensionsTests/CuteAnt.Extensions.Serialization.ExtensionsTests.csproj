@@ -30,4 +30,6 @@
     <ProjectReference Include="..\CuteAnt.Extensions.Serialization.Tests\CuteAnt.Extensions.Serialization.Tests.csproj" />
   </ItemGroup>
 
+  <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.IO.Sources\CuteAnt.Extensions.IO.Sources.projitems" Label="Shared" />
+
 </Project>

@@ -101,6 +101,7 @@ namespace MessagePack.Internal
             {typeof(CultureInfo), CultureInfoFormatter.Instance},
             {typeof(IPAddress), IPAddressFormatter.Instance},
             {typeof(IPEndPoint), IPEndPointFormatter.Instance},
+            {typeof(Exception), SimpleExceptionFormatter.Instance},
             
             // special primitive
             {typeof(byte[]), ByteArrayFormatter.Instance},

@@ -55,6 +55,7 @@ namespace MessagePack.Formatters
                     parameterTypes[idx] = TypeSerializer.GetTypeFromTypeKey(new TypeKey(hashCode, typeName), _throwOnError);
                 }
             }
+            readSize = offset - startOffset;
 #if NET40
             var ctor = declaringType.GetConstructor(parameterTypes);
 #else

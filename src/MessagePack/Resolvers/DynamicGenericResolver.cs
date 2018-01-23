@@ -290,6 +290,10 @@ namespace MessagePack.Internal
                     {
                         return ActivatorUtils.FastCreateInstance(typeof(DelegateFormatter<>).GetCachedGenericType(t));
                     }
+                    if (typeof(Exception).GetTypeInfo().IsAssignableFrom(ti))
+                    {
+                        return ActivatorUtils.FastCreateInstance(typeof(SimpleExceptionFormatter<>).GetCachedGenericType(t));
+                    }
                 }
             }
             else
@@ -334,6 +338,10 @@ namespace MessagePack.Internal
                 if (ti.IsSubclassOf(typeof(Delegate)))
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(DelegateFormatter<>).GetCachedGenericType(t));
+                }
+                if (typeof(Exception).GetTypeInfo().IsAssignableFrom(ti))
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(SimpleExceptionFormatter<>).GetCachedGenericType(t));
                 }
             }
 

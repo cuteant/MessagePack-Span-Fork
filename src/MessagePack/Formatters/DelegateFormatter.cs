@@ -48,7 +48,6 @@ namespace MessagePack.Formatters
         }
     }
 
-
     [MessagePackObject]
     public class DelegateShim<T> : IDelegateShim
     {
