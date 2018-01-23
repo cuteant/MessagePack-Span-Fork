@@ -35,7 +35,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
   public interface IFoo
   {
     int A { get; set; }
-    string B { get; set; }
+    //string B { get; set; }
     string Fact();
     string Fact(string input);
     string Fact1<T>(T input);

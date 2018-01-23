@@ -84,7 +84,7 @@ namespace MessagePack.Resolvers
         {
             var ti = type.GetTypeInfo();
             // order by key(important for use jump-table of switch)
-            var unionAttrs = type.GetCustomAttributesX<UnionAttribute>().OrderBy(x => x.Key).ToArray();
+            var unionAttrs = type.GetAllAttributes<UnionAttribute>().OrderBy(x => x.Key).ToArray();
 
             if (unionAttrs.Length == 0) return null;
             if (!ti.IsInterface && !ti.IsAbstract)

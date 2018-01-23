@@ -216,7 +216,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.NotNull(copy);
       Assert.IsAssignableFrom<IFoo>(b.Foo);
       Assert.Equal(b.Foo.A, copy.Foo.A);
-      Assert.Equal(b.Foo.B, copy.Foo.B);
+      Assert.Equal(((Foo)b.Foo).B, ((Foo)copy.Foo).B);
       bytes = TypelessMessagePackMessageFormatter.DefaultInstance.Serialize(b);
       json = MessagePackSerializer.ToJson(bytes);
       Assert.Equal(@"{""$type"":""CuteAnt.Extensions.Serialization.Tests.Bar, CuteAnt.Extensions.Serialization.ExtensionsTests"",""Foo"":[0,[123,""hello""]]}", json);
@@ -224,7 +224,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.NotNull(copy);
       Assert.IsAssignableFrom<IFoo>(b.Foo);
       Assert.Equal(b.Foo.A, copy.Foo.A);
-      Assert.Equal(b.Foo.B, copy.Foo.B);
+      Assert.Equal(((Foo)b.Foo).B, ((Foo)copy.Foo).B);
     }
 
     [Fact]
