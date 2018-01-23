@@ -1,107 +1,92 @@
-﻿//#region copyright
+﻿using System;
+using System.IO;
+using MessagePack;
+using MessagePack.Resolvers;
+using Xunit;
 
-//// -----------------------------------------------------------------------
-////  <copyright file="DelegateTests.cs" company="Akka.NET Team">
-////      Copyright (C) 2015-2016 AsynkronIT <https://github.com/AsynkronIT>
-////      Copyright (C) 2016-2016 Akka.NET Team <https://github.com/akkadotnet>
-////  </copyright>
-//// -----------------------------------------------------------------------
+namespace CuteAnt.Extensions.Serialization.Tests
+{
+  public class DelegateTests
+  {
+    public class Dummy
+    {
+      public int Prop { get; set; }
+    }
 
-//#endregion
+    public class HasClosure
+    {
+      public Func<int> Del;
 
-//using System;
-//using System.IO;
-//using Xunit;
+      public void Create()
+      {
+        var a = 3;
+        Del = () => a + 1;
+      }
+    }
 
-//namespace CuteAnt.Extensions.Serialization.Tests
-//{
-//  public class DelegateTests
-//  {
-//    public class Dummy
-//    {
-//      public int Prop { get; set; }
-//    }
+    [Fact]
+    public void CanSerializeMemberMethod()
+    {
+      Func<string> a = 123.ToString;
+      var bytes = MessagePackSerializer.Serialize(a);
+      var res = MessagePackSerializer.Deserialize<Func<string>>(bytes);
+      Assert.NotNull(res);
+      var actual = res();
+      Assert.Equal("123", actual);
 
-//    public class HasClosure
-//    {
-//      public Func<int> Del;
+      res = MessagePackMessageFormatter.DefaultInstance.DeepCopy(a);
+      Assert.NotNull(res);
+      actual = res();
+      Assert.Equal("123", actual);
 
-//      public void Create()
-//      {
-//        var a = 3;
-//        Del = () => a + 1;
-//      }
-//    }
+      res = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(a);
+      Assert.NotNull(res);
+      actual = res();
+      Assert.Equal("123", actual);
+    }
 
-//    [Fact]
-//    public void CanSerializeMemberMethod()
-//    {
-//      var stream = new MemoryStream();
-//      var serializer = new Serializer(new SerializerOptions());
+    [Fact]
+    public void CanSerializeDelegate()
+    {
+      Action<Dummy> a = dummy => dummy.Prop = 1;
+      var bytes = MessagePackSerializer.Serialize(a, ContractlessStandardResolverAllowPrivate.Instance);
+      var res = MessagePackSerializer.Deserialize<Action<Dummy>>(bytes, ContractlessStandardResolverAllowPrivate.Instance);
+      Assert.NotNull(res);
 
-//      Func<string> a = 123.ToString;
-//      serializer.Serialize(a, stream);
-//      stream.Position = 0;
-//      var res = serializer.Deserialize<Func<string>>(stream);
-//      Assert.NotNull(res);
-//      var actual = res();
-//      Assert.Equal("123", actual);
-//    }
+      var d = new Dummy { Prop = 0 };
+      res(d);
+      Assert.Equal(1, d.Prop);
+    }
 
-//    [Fact]
-//    public void CanSerializeDelegate()
-//    {
-//      var stream = new MemoryStream();
-//      var serializer = new Serializer(new SerializerOptions());
+    private static int StaticFunc(int a)
+    {
+      return a + 1;
+    }
 
-//      Action<Dummy> a = dummy => dummy.Prop = 1;
-//      serializer.Serialize(a, stream);
-//      stream.Position = 0;
-//      var res = serializer.Deserialize<Action<Dummy>>(stream);
-//      Assert.NotNull(res);
+    [Fact]
+    public void CanSerializeStaticDelegate()
+    {
+      Func<int, int> fun = StaticFunc;
 
-//      var d = new Dummy { Prop = 0 };
-//      res(d);
-//      Assert.Equal(1, d.Prop);
-//    }
+      var bytes = MessagePackSerializer.Serialize(fun);
+      var res = MessagePackSerializer.Deserialize<Func<int, int>>(bytes);
+      Assert.NotNull(res);
+      var actual = res(4);
 
-//    private static int StaticFunc(int a)
-//    {
-//      return a + 1;
-//    }
+      Assert.Equal(5, actual);
+    }
 
-//    [Fact]
-//    public void CanSerializeStaticDelegate()
-//    {
-//      var stream = new MemoryStream();
-//      var serializer = new Serializer(new SerializerOptions());
+    [Fact]
+    public void CanSerializeObjectWithClosure()
+    {
+      var hasClosure = new HasClosure();
+      hasClosure.Create();
 
-//      Func<int, int> fun = StaticFunc;
-
-//      serializer.Serialize(fun, stream);
-//      stream.Position = 0;
-//      var res = serializer.Deserialize<Func<int, int>>(stream);
-//      Assert.NotNull(res);
-//      var actual = res(4);
-
-//      Assert.Equal(5, actual);
-//    }
-
-//    [Fact]
-//    public void CanSerializeObjectWithClosure()
-//    {
-//      var stream = new MemoryStream();
-//      var serializer = new Serializer(new SerializerOptions());
-
-//      var hasClosure = new HasClosure();
-//      hasClosure.Create();
-
-//      serializer.Serialize(hasClosure, stream);
-//      stream.Position = 0;
-//      var res = serializer.Deserialize<HasClosure>(stream);
-//      Assert.NotNull(res);
-//      var actual = res.Del();
-//      Assert.Equal(4, actual);
-//    }
-//  }
-//}
+      var bytes = MessagePackSerializer.Serialize(hasClosure, ContractlessStandardResolverAllowPrivate.Instance);
+      var res = MessagePackSerializer.Deserialize<HasClosure>(bytes, ContractlessStandardResolverAllowPrivate.Instance);
+      Assert.NotNull(res);
+      var actual = res.Del();
+      Assert.Equal(4, actual);
+    }
+  }
+}

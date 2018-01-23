@@ -314,6 +314,8 @@ namespace MessagePack.Internal
             {typeof(MessagePack.Nil)},
 
             {typeof(ConstructorInfo)},
+            {typeof(Delegate)},
+            {typeof(Action)},
             {typeof(FieldInfo)},
             {typeof(PropertyInfo)},
             {typeof(MethodInfo)},

@@ -286,6 +286,10 @@ namespace MessagePack.Internal
                         var valueType = ti.GenericTypeArguments[1];
                         return CreateInstance(typeof(GenericDictionaryFormatter<,,>), new[] { keyType, valueType, t });
                     }
+                    if (ti.IsSubclassOf(typeof(Delegate)))
+                    {
+                        return ActivatorUtils.FastCreateInstance(typeof(DelegateFormatter<>).GetCachedGenericType(t));
+                    }
                 }
             }
             else
@@ -326,6 +330,10 @@ namespace MessagePack.Internal
                 if (typeof(MethodInfo).GetTypeInfo().IsAssignableFrom(ti))
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(MethodInfoFormatter<>).GetCachedGenericType(t));
+                }
+                if (ti.IsSubclassOf(typeof(Delegate)))
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(DelegateFormatter<>).GetCachedGenericType(t));
                 }
             }
 

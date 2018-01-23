@@ -209,11 +209,17 @@ namespace CuteAnt.Extensions.Serialization.Tests
           B = "hello"
         }
       };
+      var bytes = MessagePackMessageFormatter.DefaultInstance.Serialize(b);
+      var json = MessagePackSerializer.ToJson(bytes);
+      Assert.Equal(@"{""Foo"":[0,[123,""hello""]]}", json);
       var copy = MessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
       Assert.NotNull(copy);
       Assert.IsAssignableFrom<IFoo>(b.Foo);
       Assert.Equal(b.Foo.A, copy.Foo.A);
       Assert.Equal(b.Foo.B, copy.Foo.B);
+      bytes = TypelessMessagePackMessageFormatter.DefaultInstance.Serialize(b);
+      json = MessagePackSerializer.ToJson(bytes);
+      Assert.Equal(@"{""$type"":""CuteAnt.Extensions.Serialization.Tests.Bar, CuteAnt.Extensions.Serialization.ExtensionsTests"",""Foo"":[0,[123,""hello""]]}", json);
       copy = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
       Assert.NotNull(copy);
       Assert.IsAssignableFrom<IFoo>(b.Foo);
@@ -232,6 +238,9 @@ namespace CuteAnt.Extensions.Serialization.Tests
           B = "hello"
         }
       };
+      var bytes = MessagePackMessageFormatter.DefaultInstance.Serialize(b);
+      var json = MessagePackSerializer.ToJson(bytes);
+      Assert.Equal(@"{""Foo"":[123,""hello""]}", json);
       var copy = MessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
       Assert.NotNull(copy);
       Assert.IsType<Foo>(b.Foo);
@@ -239,6 +248,9 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(123, foo.A);
       Assert.Equal("hello", foo.B);
 
+      bytes = TypelessMessagePackMessageFormatter.DefaultInstance.Serialize(b);
+      json = MessagePackSerializer.ToJson(bytes);
+      Assert.Equal(@"{""$type"":""CuteAnt.Extensions.Serialization.Tests.Bar1, CuteAnt.Extensions.Serialization.ExtensionsTests"",""Foo"":[""CuteAnt.Extensions.Serialization.Tests.Foo, CuteAnt.Extensions.Serialization.ExtensionsTests"",123,""hello""]}", json);
       copy = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
       Assert.NotNull(copy);
       Assert.IsType<Foo>(b.Foo);

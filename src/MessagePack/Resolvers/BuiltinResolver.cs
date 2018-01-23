@@ -93,6 +93,7 @@ namespace MessagePack.Internal
             {typeof(BitArray), BitArrayFormatter.Instance},
 
             {typeof(ConstructorInfo), ConstructorInfoFormatter.Instance},
+            {typeof(Delegate), DelegateFormatter.Instance},
             {typeof(FieldInfo), FieldInfoFormatter.Instance},
             {typeof(PropertyInfo), PropertyInfoFormatter.Instance},
             {typeof(MethodInfo), MethodInfoFormatter.Instance},
