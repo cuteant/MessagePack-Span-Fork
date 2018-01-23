@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Serialization;
+using CuteAnt.Reflection;
 using MessagePack;
 using Xunit;
 
@@ -20,7 +21,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
       public int TestProperty { get; set; }
 
       public string Fact(string input) => input;
-      //public string Fact<T>(T input) => input.ToString();
+      public string Fact1<T>(T input) => input.ToString();
+      public string Fact1<T1, T2>(T1 input1, T2 input2) => input1.ToString() + input2.ToString();
 
       public static void StaticMethod() { }
 
@@ -66,8 +68,32 @@ namespace CuteAnt.Extensions.Serialization.Tests
     [Fact]
     public void CanSerializeMethodInfo()
     {
-      var methodInfo = typeof(Dummy).GetMethod("Fact");
+      var methodInfo = TypeUtils.Method((Dummy d) => d.Fact(default));
       var copy = s_formatter.DeepCopy(methodInfo);
+      Assert.Equal(methodInfo, copy);
+
+      methodInfo = TypeUtils.Method((Dummy d) => d.Fact1<int>(default));
+      copy = s_formatter.DeepCopy(methodInfo);
+      Assert.Equal(methodInfo, copy);
+
+      methodInfo = TypeUtils.Method((Dummy d) => d.Fact1<int, int>(default, default));
+      copy = s_formatter.DeepCopy(methodInfo);
+      Assert.Equal(methodInfo, copy);
+
+      methodInfo = TypeUtils.Method(() => Dummy.StaticMethod());
+      copy = s_formatter.DeepCopy(methodInfo);
+      Assert.Equal(methodInfo, copy);
+
+      methodInfo = TypeUtils.Method((IFoo d) => d.Fact());
+      copy = s_formatter.DeepCopy(methodInfo);
+      Assert.Equal(methodInfo, copy);
+
+      methodInfo = TypeUtils.Method((IFoo d) => d.Fact(default));
+      copy = s_formatter.DeepCopy(methodInfo);
+      Assert.Equal(methodInfo, copy);
+
+      methodInfo = TypeUtils.Method((IFoo d) => d.Fact1<int>(default));
+      copy = s_formatter.DeepCopy(methodInfo);
       Assert.Equal(methodInfo, copy);
     }
 

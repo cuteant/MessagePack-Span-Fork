@@ -209,11 +209,42 @@ namespace CuteAnt.Extensions.Serialization.Tests
           B = "hello"
         }
       };
-      var copy = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
+      var copy = MessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
       Assert.NotNull(copy);
       Assert.IsAssignableFrom<IFoo>(b.Foo);
       Assert.Equal(b.Foo.A, copy.Foo.A);
       Assert.Equal(b.Foo.B, copy.Foo.B);
+      copy = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
+      Assert.NotNull(copy);
+      Assert.IsAssignableFrom<IFoo>(b.Foo);
+      Assert.Equal(b.Foo.A, copy.Foo.A);
+      Assert.Equal(b.Foo.B, copy.Foo.B);
+    }
+
+    [Fact]
+    public void CanSerializeObjectField()
+    {
+      var b = new Bar1
+      {
+        Foo = new Foo()
+        {
+          A = 123,
+          B = "hello"
+        }
+      };
+      var copy = MessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
+      Assert.NotNull(copy);
+      Assert.IsType<Foo>(b.Foo);
+      var foo = (Foo)b.Foo;
+      Assert.Equal(123, foo.A);
+      Assert.Equal("hello", foo.B);
+
+      copy = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
+      Assert.NotNull(copy);
+      Assert.IsType<Foo>(b.Foo);
+      foo = (Foo)b.Foo;
+      Assert.Equal(123, foo.A);
+      Assert.Equal("hello", foo.B);
     }
   }
 }

@@ -26,6 +26,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public IFoo Foo { get; set; }
   }
 
+  public class Bar1
+  {
+    public object Foo { get; set; }
+  }
+
   [Union(0, typeof(Foo))]
   public interface IFoo
   {
@@ -33,7 +38,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
     string B { get; set; }
     string Fact();
     string Fact(string input);
-    string Fact<T>(T input);
+    string Fact1<T>(T input);
   }
 
   [MessagePackObject]
@@ -45,7 +50,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public string B { get; set; }
     public string Fact() => "Hello";
     public string Fact(string input) => input;
-    public string Fact<T>(T input) => input.ToString();
+    public string Fact1<T>(T input) => input.ToString();
   }
 
 
