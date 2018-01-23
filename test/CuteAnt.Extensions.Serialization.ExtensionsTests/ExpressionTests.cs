@@ -86,20 +86,21 @@ namespace CuteAnt.Extensions.Serialization.Tests
     //  }
     //}
 
-    //[Fact]
-    //public void CanSerializeConstructorInfo()
-    //{
-    //  var constructorInfo = typeof(Dummy).GetConstructor(new[] { typeof(string) });
-    //  var serializer = new Hyperion.Serializer();
+    [Fact]
+    public void CanSerializeConstructorInfo()
+    {
+      var constructorInfo = typeof(Dummy).GetConstructor(new[] { typeof(string) });
+      var bytes = MessagePackSerializer.Serialize(constructorInfo);
+      Assert.Equal(constructorInfo, MessagePackSerializer.Deserialize<ConstructorInfo>(bytes));
+      var copy = s_formatter.DeepCopy(constructorInfo);
+      Assert.Equal(constructorInfo, copy);
 
-    //  using (var stream = new MemoryStream())
-    //  {
-    //    serializer.Serialize(constructorInfo, stream);
-    //    stream.Position = 0;
-    //    var deserialized = serializer.Deserialize<ConstructorInfo>(stream);
-    //    Assert.Equal(constructorInfo, deserialized);
-    //  }
-    //}
+      constructorInfo = typeof(Dummy).GetConstructor(Type.EmptyTypes);
+      bytes = MessagePackSerializer.Serialize(constructorInfo);
+      Assert.Equal(constructorInfo, MessagePackSerializer.Deserialize<ConstructorInfo>(bytes));
+      copy = s_formatter.DeepCopy(constructorInfo);
+      Assert.Equal(constructorInfo, copy);
+    }
 
     //[Fact]
     //public void CanSerializeConstantExpression()

@@ -313,6 +313,7 @@ namespace MessagePack.Internal
             {typeof(System.DateTimeOffset)},
             {typeof(MessagePack.Nil)},
 
+            {typeof(ConstructorInfo)},
             {typeof(FieldInfo)},
             {typeof(PropertyInfo)},
             {typeof(MethodInfo)},

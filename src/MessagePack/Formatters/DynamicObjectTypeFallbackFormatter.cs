@@ -53,6 +53,11 @@ namespace MessagePack.Formatters
                             aliasType = typeof(Type);
                             aliasTypeInfo = typeof(Type).GetTypeInfo();
                         }
+                        else if (typeof(ConstructorInfo).IsAssignableFrom(type))
+                        {
+                            aliasType = typeof(ConstructorInfo);
+                            aliasTypeInfo = typeof(ConstructorInfo).GetTypeInfo();
+                        }
                         else if (typeof(FieldInfo).IsAssignableFrom(type))
                         {
                             aliasType = typeof(FieldInfo);

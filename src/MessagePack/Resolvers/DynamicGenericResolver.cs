@@ -311,6 +311,10 @@ namespace MessagePack.Internal
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(SimpleTypeFormatter<>).GetCachedGenericType(t));
                 }
+                if (typeof(ConstructorInfo).GetTypeInfo().IsAssignableFrom(ti))
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(ConstructorInfoFormatter<>).GetCachedGenericType(t));
+                }
                 if (typeof(FieldInfo).GetTypeInfo().IsAssignableFrom(ti))
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(FieldInfoFormatter<>).GetCachedGenericType(t));
