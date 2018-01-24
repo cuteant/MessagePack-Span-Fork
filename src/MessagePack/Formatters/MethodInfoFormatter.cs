@@ -37,12 +37,9 @@ namespace MessagePack.Formatters
             var startOffset = offset;
             var name = MessagePackBinary.ReadString(bytes, offset, out readSize);
             offset += readSize;
-            var hashCode = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+            var declaringType = MessagePackBinary.ReadNamedType(bytes, offset, out readSize, _throwOnError);
             offset += readSize;
-            var typeName = MessagePackBinary.ReadBytes(bytes, offset, out readSize);
-            offset += readSize;
-            var declaringType = TypeSerializer.GetTypeFromTypeKey(new TypeKey(hashCode, typeName), _throwOnError);
-            var argumentCount = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+            var argumentCount = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
             offset += readSize;
             var parameterTypes = Type.EmptyTypes;
             if (argumentCount > 0)
@@ -50,11 +47,8 @@ namespace MessagePack.Formatters
                 parameterTypes = new Type[argumentCount];
                 for (var idx = 0; idx < argumentCount; idx++)
                 {
-                    hashCode = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+                    parameterTypes[idx] = MessagePackBinary.ReadNamedType(bytes, offset, out readSize, _throwOnError);
                     offset += readSize;
-                    typeName = MessagePackBinary.ReadBytes(bytes, offset, out readSize);
-                    offset += readSize;
-                    parameterTypes[idx] = TypeSerializer.GetTypeFromTypeKey(new TypeKey(hashCode, typeName), _throwOnError);
                 }
             }
             var method = GetMethodExt(declaringType, name,
@@ -62,16 +56,13 @@ namespace MessagePack.Formatters
                 parameterTypes);
             if (method.IsGenericMethodDefinition)
             {
-                argumentCount = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+                argumentCount = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
                 offset += readSize;
                 var genericTypeArguments = new Type[argumentCount];
                 for (var idx = 0; idx < argumentCount; idx++)
                 {
-                    hashCode = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+                    genericTypeArguments[idx] = MessagePackBinary.ReadNamedType(bytes, offset, out readSize, _throwOnError);
                     offset += readSize;
-                    typeName = MessagePackBinary.ReadBytes(bytes, offset, out readSize);
-                    offset += readSize;
-                    genericTypeArguments[idx] = TypeSerializer.GetTypeFromTypeKey(new TypeKey(hashCode, typeName), _throwOnError);
                 }
                 method = method.MakeGenericMethod(genericTypeArguments);
             }
@@ -86,32 +77,25 @@ namespace MessagePack.Formatters
                 return MessagePackBinary.WriteNil(ref bytes, offset);
             }
 
-            var declaringType = value.DeclaringType;
             var startOffset = offset;
+
             offset += MessagePackBinary.WriteString(ref bytes, offset, value.Name);
-            var typeKey = TypeSerializer.GetTypeKeyFromType(declaringType);
-            offset += MessagePackBinary.WriteInt32(ref bytes, offset, typeKey.HashCode);
-            var typeName = typeKey.TypeName;
-            offset += MessagePackBinary.WriteBytes(ref bytes, offset, typeName, 0, typeName.Length);
+
+            offset += MessagePackBinary.WriteNamedType(ref bytes, offset, value.DeclaringType);
+
             var arguments = value.GetParameters().Select(p => p.ParameterType).ToArray();
-            offset += MessagePackBinary.WriteInt32(ref bytes, offset, arguments.Length);
+            offset += MessagePackBinary.WriteArrayHeader(ref bytes, offset, arguments.Length);
             for (int idx = 0; idx < arguments.Length; idx++)
             {
-                typeKey = TypeSerializer.GetTypeKeyFromType(arguments[idx]);
-                offset += MessagePackBinary.WriteInt32(ref bytes, offset, typeKey.HashCode);
-                typeName = typeKey.TypeName;
-                offset += MessagePackBinary.WriteBytes(ref bytes, offset, typeName, 0, typeName.Length);
+                offset += MessagePackBinary.WriteNamedType(ref bytes, offset, arguments[idx]);
             }
             if (value.IsGenericMethod)
             {
                 var genericTypeArguments = value.GetGenericArguments();
-                offset += MessagePackBinary.WriteInt32(ref bytes, offset, genericTypeArguments.Length);
+                offset += MessagePackBinary.WriteArrayHeader(ref bytes, offset, genericTypeArguments.Length);
                 for (int idx = 0; idx < genericTypeArguments.Length; idx++)
                 {
-                    typeKey = TypeSerializer.GetTypeKeyFromType(genericTypeArguments[idx]);
-                    offset += MessagePackBinary.WriteInt32(ref bytes, offset, typeKey.HashCode);
-                    typeName = typeKey.TypeName;
-                    offset += MessagePackBinary.WriteBytes(ref bytes, offset, typeName, 0, typeName.Length);
+                    offset += MessagePackBinary.WriteNamedType(ref bytes, offset, genericTypeArguments[idx]);
                 }
             }
             return offset - startOffset;

@@ -32,12 +32,8 @@ namespace MessagePack.Formatters
             }
 
             var name = MessagePackBinary.ReadString(bytes, offset, out var nameSize);
-            offset += nameSize;
-            var hashCode = MessagePackBinary.ReadInt32(bytes, offset, out var hashCodeSize);
-            offset += hashCodeSize;
-            var typeName = MessagePackBinary.ReadBytes(bytes, offset, out readSize);
-            readSize += (nameSize + hashCodeSize);
-            var declaringType = TypeSerializer.GetTypeFromTypeKey(new TypeKey(hashCode, typeName), _throwOnError);
+            var declaringType = MessagePackBinary.ReadNamedType(bytes, offset + nameSize, out readSize, _throwOnError);
+            readSize += nameSize;
             return (TProperty)declaringType
 #if !NET40
                 .GetTypeInfo()
@@ -52,14 +48,9 @@ namespace MessagePack.Formatters
                 return MessagePackBinary.WriteNil(ref bytes, offset);
             }
 
-            var declaringType = value.DeclaringType;
-            var startOffset = offset;
-            offset += MessagePackBinary.WriteString(ref bytes, offset, value.Name);
-            var typeKey = TypeSerializer.GetTypeKeyFromType(declaringType);
-            offset += MessagePackBinary.WriteInt32(ref bytes, offset, typeKey.HashCode);
-            var typeName = typeKey.TypeName;
-            offset += MessagePackBinary.WriteBytes(ref bytes, offset, typeName, 0, typeName.Length);
-            return offset - startOffset;
+            var nameSize = MessagePackBinary.WriteString(ref bytes, offset, value.Name);
+            var typeSize = MessagePackBinary.WriteNamedType(ref bytes, offset + nameSize, value.DeclaringType);
+            return nameSize + typeSize;
         }
     }
 }

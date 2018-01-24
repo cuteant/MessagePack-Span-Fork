@@ -33,11 +33,7 @@ namespace MessagePack.Formatters
                 return null;
             }
 
-            var hashCode = MessagePackBinary.ReadInt32(bytes, offset, out var hashCodeSize);
-            offset += hashCodeSize;
-            var typeName = MessagePackBinary.ReadBytes(bytes, offset, out readSize);
-            readSize += hashCodeSize;
-            return (TType)TypeSerializer.GetTypeFromTypeKey(new TypeKey(hashCode, typeName), _throwOnError);
+            return (TType)MessagePackBinary.ReadNamedType(bytes, offset, out readSize, _throwOnError);
         }
 
         public int Serialize(ref byte[] bytes, int offset, TType value, IFormatterResolver formatterResolver)
@@ -47,12 +43,7 @@ namespace MessagePack.Formatters
                 return MessagePackBinary.WriteNil(ref bytes, offset);
             }
 
-            var typeKey = TypeSerializer.GetTypeKeyFromType(value);
-            var startOffset = offset;
-            offset += MessagePackBinary.WriteInt32(ref bytes, offset, typeKey.HashCode);
-            var typeName = typeKey.TypeName;
-            offset += MessagePackBinary.WriteBytes(ref bytes, offset, typeName, 0, typeName.Length);
-            return offset - startOffset;
+            return MessagePackBinary.WriteNamedType(ref bytes, offset, value);
         }
     }
 }
