@@ -30,9 +30,9 @@ namespace Utf8Json.Internal.Emit
                 foreach (var item in type.GetRuntimeProperties())
                 {
                     if (item.GetIndexParameters().Length > 0) continue; // skip indexer
-                    if (item.GetCustomAttribute<IgnoreDataMemberAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<IgnoreDataMemberAttribute>(true) != null) continue;
 
-                    var dm = item.GetCustomAttribute<DataMemberAttribute>(true);
+                    var dm = item.GetCustomAttributeX<DataMemberAttribute>(true);
                     var name = (dm != null && dm.Name != null) ? dm.Name : nameMutetor(item.Name);
 
                     var member = new MetaMember(item, name, allowPrivate);
@@ -46,12 +46,12 @@ namespace Utf8Json.Internal.Emit
                 }
                 foreach (var item in type.GetRuntimeFields())
                 {
-                    if (item.GetCustomAttribute<IgnoreDataMemberAttribute>(true) != null) continue;
-                    if (item.GetCustomAttribute<System.Runtime.CompilerServices.CompilerGeneratedAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<IgnoreDataMemberAttribute>(true) != null) continue;
+                    if (item.GetCustomAttributeX<System.Runtime.CompilerServices.CompilerGeneratedAttribute>(true) != null) continue;
                     if (item.IsStatic) continue;
                     if (item.Name.StartsWith("<")) continue; // compiler generated field(anonymous type, etc...)
 
-                    var dm = item.GetCustomAttribute<DataMemberAttribute>(true);
+                    var dm = item.GetCustomAttributeX<DataMemberAttribute>(true);
                     var name = (dm != null && dm.Name != null) ? dm.Name : nameMutetor(item.Name);
 
                     var member = new MetaMember(item, name, allowPrivate);
@@ -67,7 +67,7 @@ namespace Utf8Json.Internal.Emit
 
             // GetConstructor
             var ctor = ti.DeclaredConstructors.Where(x => x.IsPublic)
-                .SingleOrDefault(x => x.GetCustomAttribute<SerializationConstructorAttribute>(false) != null);
+                .SingleOrDefault(x => x.GetCustomAttributeX<SerializationConstructorAttribute>(false) != null);
             var constructorParameters = new List<MetaMember>();
             {
                 IEnumerator<ConstructorInfo> ctorEnumerator = null;
