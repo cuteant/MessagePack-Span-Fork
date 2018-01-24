@@ -20,7 +20,7 @@ namespace MessagePack.Formatters
             }
 
             var delegateShim = (IDelegateShim)TypelessFormatter.Instance.Deserialize(bytes, offset, formatterResolver, out readSize);
-            return (TDelegate)(object)delegateShim.Method.CreateDelegate(typeof(TDelegate), delegateShim.GetTarget());
+            return (TDelegate)(object)delegateShim.Method.CreateDelegate(delegateShim.DelegateType, delegateShim.GetTarget());
 
         }
 
@@ -42,6 +42,7 @@ namespace MessagePack.Formatters
             {
                 delegateShim = new DelegateShim<object>();
             }
+            delegateShim.DelegateType = value.GetType();
             delegateShim.SetTarget(target);
             delegateShim.Method = d.GetMethodInfo();
             return TypelessFormatter.Instance.Serialize(ref bytes, offset, delegateShim, formatterResolver);
@@ -52,8 +53,10 @@ namespace MessagePack.Formatters
     public class DelegateShim<T> : IDelegateShim
     {
         [Key(0)]
-        public T Target { get; set; }
+        public Type DelegateType { get; set; }
         [Key(1)]
+        public T Target { get; set; }
+        [Key(2)]
         public MethodInfo Method { get; set; }
 
         public object GetTarget() => Target;
@@ -62,8 +65,9 @@ namespace MessagePack.Formatters
 
     public interface IDelegateShim
     {
+        Type DelegateType { get; set; }
+        MethodInfo Method { get; set; }
         object GetTarget();
         void SetTarget(object target);
-        MethodInfo Method { get; set; }
     }
 }
