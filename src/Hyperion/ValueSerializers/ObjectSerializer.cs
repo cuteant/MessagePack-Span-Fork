@@ -40,8 +40,9 @@ namespace Hyperion.ValueSerializers
             //var typeName = type.GetShortAssemblyQualifiedName();
             // ReSharper disable once PossibleNullReferenceException
             // ReSharper disable once AssignNullToNotNullAttribute
-            var typeNameBytes = AntTypeSerializer.GetTypeKeyFromType(type).TypeName;
-
+            var typeKey = AntTypeSerializer.GetTypeKeyFromType(type);
+            var typeNameBytes = typeKey.TypeName;
+            var hashCodeBytes = BitConverter.GetBytes(typeKey.HashCode);
             var fields = type.GetFieldInfosForType();
             var fieldNames = fields.Select(field => field.Name.ToUtf8Bytes()).ToList();
             var versionInfo = TypeEx.GetTypeManifest(fieldNames);
@@ -52,6 +53,7 @@ namespace Hyperion.ValueSerializers
                 new[] {ManifestFull}
                     .Concat(BitConverter.GetBytes(typeNameBytes.Length))
                     .Concat(typeNameBytes)
+                    .Concat(hashCodeBytes)
                     .ToArray(); //serializer id 255 + assembly qualified name
 
             //TODO: this should only work this way for standard poco objects
@@ -62,6 +64,7 @@ namespace Hyperion.ValueSerializers
                 new[] {ManifestVersion}
                     .Concat(BitConverter.GetBytes(typeNameBytes.Length))
                     .Concat(typeNameBytes)
+                    .Concat(hashCodeBytes)
                     .Concat(versionInfo)
                     .ToArray(); //serializer id 255 + assembly qualified name + versionInfo
 

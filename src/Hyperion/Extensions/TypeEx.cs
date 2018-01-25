@@ -136,8 +136,9 @@ namespace Hyperion.Extensions
 
         private static Type GetTypeFromManifestName(Stream stream, DeserializerSession session)
         {
-            var bytes = stream.ReadLengthEncodedByteArray(session);
-            return AntTypeSerializer.GetTypeFromTypeKey(new TypeKey(bytes));
+            var typeName = stream.ReadLengthEncodedByteArray(session);
+            var hashcode = stream.ReadInt32(session);
+            return AntTypeSerializer.GetTypeFromTypeKey(new TypeKey(hashcode, typeName));
         }
 
         public static Type GetTypeFromManifestFull(Stream stream, DeserializerSession session)
