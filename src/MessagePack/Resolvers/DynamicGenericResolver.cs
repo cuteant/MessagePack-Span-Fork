@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Collections.ObjectModel;
 using System.Collections;
+using System.Linq.Expressions;
 using CuteAnt.Reflection;
 #if NETSTANDARD || DESKTOPCLR
 using System.Threading.Tasks;
@@ -286,13 +287,26 @@ namespace MessagePack.Internal
                         var valueType = ti.GenericTypeArguments[1];
                         return CreateInstance(typeof(GenericDictionaryFormatter<,,>), new[] { keyType, valueType, t });
                     }
-                    if (ti.IsSubclassOf(typeof(Delegate)))
+
+                    if (typeof(Delegate).GetTypeInfo().IsAssignableFrom(ti))
                     {
                         return ActivatorUtils.FastCreateInstance(typeof(DelegateFormatter<>).GetCachedGenericType(t));
                     }
                     if (typeof(Exception).GetTypeInfo().IsAssignableFrom(ti))
                     {
                         return ActivatorUtils.FastCreateInstance(typeof(SimpleExceptionFormatter<>).GetCachedGenericType(t));
+                    }
+                    if (typeof(Expression).GetTypeInfo().IsAssignableFrom(ti))
+                    {
+                        return ActivatorUtils.FastCreateInstance(typeof(SimpleExpressionFormatter<>).GetCachedGenericType(t));
+                    }
+                    if (typeof(SymbolDocumentInfo).GetTypeInfo().IsAssignableFrom(ti))
+                    {
+                        return ActivatorUtils.FastCreateInstance(typeof(SymbolDocumentInfoFormatter<>).GetCachedGenericType(t));
+                    }
+                    if (typeof(MemberBinding).GetTypeInfo().IsAssignableFrom(ti))
+                    {
+                        return ActivatorUtils.FastCreateInstance(typeof(MemberBindingFormatter<>).GetCachedGenericType(t));
                     }
                 }
             }
@@ -315,6 +329,7 @@ namespace MessagePack.Internal
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(NonGenericDictionaryFormatter<>).GetCachedGenericType(t));
                 }
+
                 if (typeof(Type).GetTypeInfo().IsAssignableFrom(ti))
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(SimpleTypeFormatter<>).GetCachedGenericType(t));
@@ -322,6 +337,10 @@ namespace MessagePack.Internal
                 if (typeof(ConstructorInfo).GetTypeInfo().IsAssignableFrom(ti))
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(ConstructorInfoFormatter<>).GetCachedGenericType(t));
+                }
+                if (typeof(EventInfo).GetTypeInfo().IsAssignableFrom(ti))
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(EventInfoFormatter<>).GetCachedGenericType(t));
                 }
                 if (typeof(FieldInfo).GetTypeInfo().IsAssignableFrom(ti))
                 {
@@ -335,13 +354,29 @@ namespace MessagePack.Internal
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(MethodInfoFormatter<>).GetCachedGenericType(t));
                 }
-                if (ti.IsSubclassOf(typeof(Delegate)))
+                if (typeof(MemberInfo).GetTypeInfo().IsAssignableFrom(ti)) // 是否无用
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(MemberInfoFormatter<>).GetCachedGenericType(t));
+                }
+                if (typeof(Delegate).GetTypeInfo().IsAssignableFrom(ti))
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(DelegateFormatter<>).GetCachedGenericType(t));
                 }
                 if (typeof(Exception).GetTypeInfo().IsAssignableFrom(ti))
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(SimpleExceptionFormatter<>).GetCachedGenericType(t));
+                }
+                if (typeof(Expression).GetTypeInfo().IsAssignableFrom(ti))
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(SimpleExpressionFormatter<>).GetCachedGenericType(t));
+                }
+                if (typeof(SymbolDocumentInfo).GetTypeInfo().IsAssignableFrom(ti))
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(SymbolDocumentInfoFormatter<>).GetCachedGenericType(t));
+                }
+                if (typeof(MemberBinding).GetTypeInfo().IsAssignableFrom(ti))
+                {
+                    return ActivatorUtils.FastCreateInstance(typeof(MemberBindingFormatter<>).GetCachedGenericType(t));
                 }
             }
 

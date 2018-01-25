@@ -1,6 +1,5 @@
 ﻿#if NETSTANDARD || DESKTOPCLR
 
-using MessagePack.Resolvers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +13,7 @@ namespace MessagePack.Formatters
     {
         delegate int SerializeMethod(object dynamicFormatter, ref byte[] bytes, int offset, object value, IFormatterResolver formatterResolver);
 
-        readonly MessagePack.Internal.ThreadsafeTypeKeyHashTable<KeyValuePair<object, SerializeMethod>> serializers = new Internal.ThreadsafeTypeKeyHashTable<KeyValuePair<object, SerializeMethod>>();
+        readonly MessagePack.Internal.ThreadsafeTypeKeyHashTable<KeyValuePair<object, SerializeMethod>> serializers = new MessagePack.Internal.ThreadsafeTypeKeyHashTable<KeyValuePair<object, SerializeMethod>>();
 
         readonly IFormatterResolver[] innerResolvers;
 
@@ -58,6 +57,11 @@ namespace MessagePack.Formatters
                             aliasType = typeof(ConstructorInfo);
                             aliasTypeInfo = typeof(ConstructorInfo).GetTypeInfo();
                         }
+                        else if (typeof(EventInfo).IsAssignableFrom(type))
+                        {
+                            aliasType = typeof(EventInfo);
+                            aliasTypeInfo = typeof(EventInfo).GetTypeInfo();
+                        }
                         else if (typeof(FieldInfo).IsAssignableFrom(type))
                         {
                             aliasType = typeof(FieldInfo);
@@ -73,7 +77,12 @@ namespace MessagePack.Formatters
                             aliasType = typeof(MethodInfo);
                             aliasTypeInfo = typeof(MethodInfo).GetTypeInfo();
                         }
-                        else if (type.IsSubclassOf(typeof(Delegate)))
+                        else if (typeof(MemberInfo).IsAssignableFrom(type))
+                        {
+                            aliasType = typeof(MemberInfo);
+                            aliasTypeInfo = typeof(MemberInfo).GetTypeInfo();
+                        }
+                        else if (typeof(Delegate).IsAssignableFrom(type))
                         {
                             aliasType = typeof(Delegate);
                             aliasTypeInfo = typeof(Delegate).GetTypeInfo();
@@ -82,6 +91,21 @@ namespace MessagePack.Formatters
                         {
                             aliasType = typeof(Exception);
                             aliasTypeInfo = typeof(Exception).GetTypeInfo();
+                        }
+                        else if (typeof(Expression).IsAssignableFrom(type))
+                        {
+                            aliasType = typeof(Expression);
+                            aliasTypeInfo = typeof(Expression).GetTypeInfo();
+                        }
+                        else if (typeof(SymbolDocumentInfo).IsAssignableFrom(type))
+                        {
+                            aliasType = typeof(SymbolDocumentInfo);
+                            aliasTypeInfo = typeof(SymbolDocumentInfo).GetTypeInfo();
+                        }
+                        else if (typeof(MemberBinding).IsAssignableFrom(type))
+                        {
+                            aliasType = typeof(MemberBinding);
+                            aliasTypeInfo = typeof(MemberBinding).GetTypeInfo();
                         }
                         object formatter = null;
                         foreach (var innerResolver in innerResolvers)

@@ -214,7 +214,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(@"{""Foo"":[0,[123,""hello""]]}", json);
       var copy = MessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
       Assert.NotNull(copy);
-      Assert.IsAssignableFrom<IFoo>(b.Foo);
+      Assert.IsAssignableFrom<IFoo>(copy.Foo);
       Assert.Equal(b.Foo.A, copy.Foo.A);
       Assert.Equal(((Foo)b.Foo).B, ((Foo)copy.Foo).B);
       bytes = TypelessMessagePackMessageFormatter.DefaultInstance.Serialize(b);
@@ -222,9 +222,37 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(@"{""$type"":""CuteAnt.Extensions.Serialization.Tests.Bar, CuteAnt.Extensions.Serialization.ExtensionsTests"",""Foo"":[0,[123,""hello""]]}", json);
       copy = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
       Assert.NotNull(copy);
-      Assert.IsAssignableFrom<IFoo>(b.Foo);
+      Assert.IsAssignableFrom<IFoo>(copy.Foo);
       Assert.Equal(b.Foo.A, copy.Foo.A);
       Assert.Equal(((Foo)b.Foo).B, ((Foo)copy.Foo).B);
+    }
+
+    [Fact]
+    public void CanSerializeInterfaceField1()
+    {
+      var b = new Bar0
+      {
+        Foo = new Foo()
+        {
+          A = 123,
+          B = "hello"
+        }
+      };
+      Assert.Throws<EntryPointNotFoundException>(() => MessagePackSerializer.Serialize(b));
+    }
+
+    [Fact]
+    public void CanSerializeInterfaceField2()
+    {
+      var b = new Bar00
+      {
+        Foo = new Foo()
+        {
+          A = 123,
+          B = "hello"
+        }
+      };
+      Assert.Throws<EntryPointNotFoundException>(() => MessagePackSerializer.Serialize(b));
     }
 
     [Fact]
@@ -240,11 +268,34 @@ namespace CuteAnt.Extensions.Serialization.Tests
       };
       var bytes = MessagePackMessageFormatter.DefaultInstance.Serialize(b);
       var json = MessagePackSerializer.ToJson(bytes);
-      Assert.Equal(@"{""Foo"":[123,""hello""]}", json);
+      Assert.Equal(@"{""Foo"":[""CuteAnt.Extensions.Serialization.Tests.Foo, CuteAnt.Extensions.Serialization.ExtensionsTests"",123,""hello""]}", json);
+
       var copy = MessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
       Assert.NotNull(copy);
-      Assert.IsType<Foo>(b.Foo);
-      var foo = (Foo)b.Foo;
+      Assert.IsType<Foo>(copy.Foo);
+      Assert.NotNull(copy);
+      Assert.IsType<Foo>(copy.Foo);
+      var foo = (Foo)copy.Foo;
+      Assert.Equal(123, foo.A);
+      Assert.Equal("hello", foo.B);
+
+      bytes = MessagePackSerializer.Serialize(b);
+      copy = MessagePackSerializer.Deserialize<Bar1>(bytes);
+      Assert.NotNull(copy);
+      Assert.IsType<Foo>(copy.Foo);
+      Assert.NotNull(copy);
+      Assert.IsType<Foo>(copy.Foo);
+      foo = (Foo)copy.Foo;
+      Assert.Equal(123, foo.A);
+      Assert.Equal("hello", foo.B);
+
+
+      copy = (Bar1)MessagePackMessageFormatter.DefaultInstance.DeepCopyObject(b);
+      Assert.NotNull(copy);
+      Assert.IsType<Foo>(copy.Foo);
+      Assert.NotNull(copy);
+      Assert.IsType<Foo>(copy.Foo);
+      foo = (Foo)copy.Foo;
       Assert.Equal(123, foo.A);
       Assert.Equal("hello", foo.B);
 
@@ -253,10 +304,39 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(@"{""$type"":""CuteAnt.Extensions.Serialization.Tests.Bar1, CuteAnt.Extensions.Serialization.ExtensionsTests"",""Foo"":[""CuteAnt.Extensions.Serialization.Tests.Foo, CuteAnt.Extensions.Serialization.ExtensionsTests"",123,""hello""]}", json);
       copy = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
       Assert.NotNull(copy);
-      Assert.IsType<Foo>(b.Foo);
-      foo = (Foo)b.Foo;
+      Assert.IsType<Foo>(copy.Foo);
+      foo = (Foo)copy.Foo;
       Assert.Equal(123, foo.A);
       Assert.Equal("hello", foo.B);
+    }
+
+    [Fact]
+    public void CanSerializeObjectField1()
+    {
+      var b = new Bar2
+      {
+        Foo = SerializerPocoSerializable.Create()
+      };
+
+      var copy = MessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
+      Assert.NotNull(copy);
+      Assert.IsType<SerializerPocoSerializable>(copy.Foo);
+      Helper.ComparePoco((SerializerPocoSerializable)b.Foo, (SerializerPocoSerializable)copy.Foo);
+
+      copy = (Bar2)LZ4MessagePackMessageFormatter.DefaultInstance.DeepCopyObject(b);
+      Assert.NotNull(copy);
+      Assert.IsType<SerializerPocoSerializable>(copy.Foo);
+      Helper.ComparePoco((SerializerPocoSerializable)b.Foo, (SerializerPocoSerializable)copy.Foo);
+
+      copy = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(b);
+      Assert.NotNull(copy);
+      Assert.IsType<SerializerPocoSerializable>(copy.Foo);
+      Helper.ComparePoco((SerializerPocoSerializable)b.Foo, (SerializerPocoSerializable)copy.Foo);
+
+      copy = (Bar2)LZ4TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopyObject(b);
+      Assert.NotNull(copy);
+      Assert.IsType<SerializerPocoSerializable>(copy.Foo);
+      Helper.ComparePoco((SerializerPocoSerializable)b.Foo, (SerializerPocoSerializable)copy.Foo);
     }
   }
 }

@@ -47,8 +47,17 @@ namespace MessagePack.Formatters
             var fields = s_filedCache.GetOrAdd(actualType, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer);
             foreach (var (field, getter, setter) in fields)
             {
-                var fieldFormatter = s_objectFormatterCache.GetOrAdd(field.FieldType, s_createObjectTypeFormatterFunc);
-                var fieldValue = fieldFormatter.Deserialize(bytes, offset, formatterResolver, out readSize);
+                var fieldType = field.FieldType;
+                object fieldValue;
+                if (fieldType != TypeConstants.ObjectType)
+                {
+                    var fieldFormatter = s_objectFormatterCache.GetOrAdd(field.FieldType, s_createObjectTypeFormatterFunc);
+                    fieldValue = fieldFormatter.Deserialize(bytes, offset, formatterResolver, out readSize);
+                }
+                else
+                {
+                    fieldValue = TypelessFormatter.Instance.Deserialize(bytes, offset, formatterResolver, out readSize);
+                }
                 offset += readSize;
                 setter(obj, fieldValue);
             }
@@ -77,9 +86,17 @@ namespace MessagePack.Formatters
             var fields = s_filedCache.GetOrAdd(actualType, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer);
             foreach (var (field, getter, setter) in fields)
             {
-                var fieldFormatter = s_objectFormatterCache.GetOrAdd(field.FieldType, s_createObjectTypeFormatterFunc);
+                var fieldType = field.FieldType;
                 var v = getter(value);
-                offset += fieldFormatter.Serialize(ref bytes, offset, v, formatterResolver);
+                if (fieldType != TypeConstants.ObjectType)
+                {
+                    var fieldFormatter = s_objectFormatterCache.GetOrAdd(fieldType, s_createObjectTypeFormatterFunc);
+                    offset += fieldFormatter.Serialize(ref bytes, offset, v, formatterResolver);
+                }
+                else
+                {
+                    offset += TypelessFormatter.Instance.Serialize(ref bytes, offset, v, formatterResolver);
+                }
             }
 
             return offset - startOffset;

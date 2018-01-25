@@ -7,6 +7,7 @@ using MessagePack.Internal;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization;
 using System.Text;
@@ -316,13 +317,21 @@ namespace MessagePack.Internal
             {typeof(ConstructorInfo)},
             {typeof(Delegate)},
             {typeof(Action)},
+            {typeof(EventInfo)},
             {typeof(FieldInfo)},
             {typeof(PropertyInfo)},
             {typeof(MethodInfo)},
             {typeof(Type)},
+            {typeof(MemberInfo)},
             {typeof(System.Globalization.CultureInfo)},
             {typeof(System.Net.IPAddress)},
             {typeof(System.Net.IPEndPoint)},
+            {typeof(Expression)},
+            {typeof(SymbolDocumentInfo)},
+            {typeof(MemberBinding)},
+            {typeof(MemberAssignment)},
+            {typeof(MemberListBinding)},
+            {typeof(MemberMemberBinding)},
         };
 
         public static TypeInfo BuildType(DynamicAssembly assembly, Type type, bool forceStringKey, bool contractless)

@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -92,16 +93,27 @@ namespace MessagePack.Internal
             {typeof(StringBuilder), StringBuilderFormatter.Instance},
             {typeof(BitArray), BitArrayFormatter.Instance},
 
-            {typeof(ConstructorInfo), ConstructorInfoFormatter.Instance},
             {typeof(Delegate), DelegateFormatter.Instance},
+            {typeof(Type), SimpleTypeFormatter.Instance},
+            {typeof(ConstructorInfo), ConstructorInfoFormatter.Instance},
+            {typeof(EventInfo), EventInfoFormatter.Instance},
             {typeof(FieldInfo), FieldInfoFormatter.Instance},
             {typeof(PropertyInfo), PropertyInfoFormatter.Instance},
             {typeof(MethodInfo), MethodInfoFormatter.Instance},
-            {typeof(Type), SimpleTypeFormatter.Instance},
+            {typeof(MemberInfo), MemberInfoFormatter.Instance},
             {typeof(CultureInfo), CultureInfoFormatter.Instance},
             {typeof(IPAddress), IPAddressFormatter.Instance},
             {typeof(IPEndPoint), IPEndPointFormatter.Instance},
             {typeof(Exception), SimpleExceptionFormatter.Instance},
+            {typeof(Expression), SimpleExpressionFormatter.Instance},
+            {typeof(SymbolDocumentInfo), SymbolDocumentInfoFormatter.Instance},
+            {typeof(MemberBinding), MemberBindingFormatter.Instance},
+            {typeof(MemberAssignment), MemberAssignmentFormatter.Instance},
+            {typeof(MemberListBinding), MemberListBindingFormatter.Instance},
+            {typeof(MemberMemberBinding), MemberMemberBindingFormatter.Instance},
+            {typeof(CatchBlock), CatchBlockFormatter.Instance},
+            {typeof(ElementInit), ElementInitFormatter.Instance},
+            {typeof(LabelTarget), LabelTargetFormatter.Instance},
             
             // special primitive
             {typeof(byte[]), ByteArrayFormatter.Instance},

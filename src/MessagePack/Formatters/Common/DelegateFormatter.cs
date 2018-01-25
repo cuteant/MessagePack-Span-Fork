@@ -4,6 +4,8 @@ using CuteAnt.Reflection;
 
 namespace MessagePack.Formatters
 {
+    using MessagePack.Formatters.Internal;
+
     public sealed class DelegateFormatter : DelegateFormatter<Delegate>
     {
         public static readonly IMessagePackFormatter<Delegate> Instance = new DelegateFormatter();
@@ -48,7 +50,10 @@ namespace MessagePack.Formatters
             return TypelessFormatter.Instance.Serialize(ref bytes, offset, delegateShim, formatterResolver);
         }
     }
+}
 
+namespace MessagePack.Formatters.Internal
+{
     [MessagePackObject]
     public class DelegateShim<T> : IDelegateShim
     {

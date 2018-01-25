@@ -26,9 +26,37 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public IFoo Foo { get; set; }
   }
 
+  public class Bar0
+  {
+    [MessagePackFormatter(typeof(MessagePack.Formatters.TypelessFormatter))]
+    public IFoo Foo { get; set; }
+  }
+
+  public class Bar00
+  {
+    [MessagePackFormatter(typeof(MessagePack.Formatters.TypelessFormatter))]
+    public IFoo0 Foo { get; set; }
+  }
+
   public class Bar1
   {
+    [MessagePackFormatter(typeof(MessagePack.Formatters.TypelessFormatter))]
     public object Foo { get; set; }
+  }
+
+  public class Bar2
+  {
+    [MessagePackFormatter(typeof(MessagePack.Formatters.TypelessFormatter))]
+    public object Foo { get; set; }
+  }
+
+  public interface IFoo0
+  {
+    int A { get; set; }
+    //string B { get; set; }
+    string Fact();
+    string Fact(string input);
+    string Fact1<T>(T input);
   }
 
   [Union(0, typeof(Foo))]
@@ -42,7 +70,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
   }
 
   [MessagePackObject]
-  public class Foo : IFoo
+  public class Foo : IFoo, IFoo0
   {
     [Key(0)]
     public int A { get; set; }
