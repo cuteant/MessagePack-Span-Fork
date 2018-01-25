@@ -9,6 +9,7 @@
 
 using System;
 using System.IO;
+using CuteAnt;
 using Hyperion.ValueSerializers;
 
 namespace Hyperion.Extensions
@@ -91,6 +92,7 @@ namespace Hyperion.Extensions
         public static byte[] ReadLengthEncodedByteArray(this Stream self, DeserializerSession session)
         {
             var length = self.ReadInt32(session);
+            if (length == 0) { return EmptyArray<byte>.Instance; }
             var buffer = new byte[length];
             self.Read(buffer, 0, length);
             return buffer;

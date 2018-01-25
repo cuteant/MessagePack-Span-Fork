@@ -9,8 +9,10 @@
 
 using System;
 using System.IO;
+using CuteAnt;
 using CuteAnt.Reflection;
 using Hyperion.Extensions;
+using AntTypeSerializer = CuteAnt.Reflection.TypeSerializer;
 
 namespace Hyperion.ValueSerializers
 {
@@ -22,14 +24,14 @@ namespace Hyperion.ValueSerializers
         public override void WriteManifest(Stream stream, SerializerSession session)
         {
             ushort typeIdentifier;
-            if (session.ShouldWriteTypeManifest(TypeEx.RuntimeType,out typeIdentifier))
+            if (session.ShouldWriteTypeManifest(TypeEx.RuntimeType, out typeIdentifier))
             {
                 stream.WriteByte(Manifest);
             }
             else
             {
                 stream.Write(new[] { ObjectSerializer.ManifestIndex });
-                UInt16Serializer.WriteValueImpl(stream,typeIdentifier,session);
+                UInt16Serializer.WriteValueImpl(stream, typeIdentifier, session);
             }
         }
 
@@ -37,11 +39,11 @@ namespace Hyperion.ValueSerializers
         {
             if (value == null)
             {
-                StringSerializer.WriteValueImpl(stream,null,session);
+                stream.WriteLengthEncodedByteArray(EmptyArray<byte>.Instance, session);
             }
             else
             {
-                var type = (Type) value;
+                var type = (Type)value;
                 int existingId;
                 if (session.Serializer.Options.PreserveObjectReferences && session.TryGetObjectId(type, out existingId))
                 {
@@ -49,28 +51,25 @@ namespace Hyperion.ValueSerializers
                     ObjectReferenceSerializer.Instance.WriteValue(stream, existingId, session);
                 }
                 else
-                { 
+                {
                     if (session.Serializer.Options.PreserveObjectReferences)
                     {
                         session.TrackSerializedObject(type);
                     }
                     //type was not written before, add it to the tacked object list
-                    //var name = type.GetShortAssemblyQualifiedName();
-                    var name = RuntimeTypeNameFormatter.Format(type);
-                    StringSerializer.WriteValueImpl(stream, name, session);
+                    var typeKey = AntTypeSerializer.GetTypeKeyFromType(type);
+                    stream.WriteLengthEncodedByteArray(typeKey.TypeName, session);
+                    Int32Serializer.WriteValueImpl(stream, typeKey.HashCode, session);
                 }
             }
         }
 
         public override object ReadValue(Stream stream, DeserializerSession session)
         {
-            var shortname = stream.ReadString(session);
-            if (shortname == null)
-                return null;
-
-            //var name = TypeEx.ToQualifiedAssemblyName(shortname);
-            //var type = Type.GetType(name,true);
-            var type = TypeUtils.ResolveType(shortname);
+            var typeName = stream.ReadLengthEncodedByteArray(session);
+            if (typeName.Length == 0) { return null; }
+            var hashCode = stream.ReadInt32(session);
+            var type = AntTypeSerializer.GetTypeFromTypeKey(new TypeKey(hashCode, typeName));
 
             //add the deserialized type to lookup
             if (session.Serializer.Options.PreserveObjectReferences)
@@ -82,7 +81,7 @@ namespace Hyperion.ValueSerializers
 
         public override Type GetElementType()
         {
-            return typeof (Type);
+            return typeof(Type);
         }
     }
 }

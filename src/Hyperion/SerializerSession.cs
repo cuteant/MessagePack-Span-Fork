@@ -9,6 +9,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using CuteAnt;
+using CuteAnt.Buffers;
+using CuteAnt.Pool;
 
 namespace Hyperion
 {
@@ -16,21 +21,41 @@ namespace Hyperion
     {
         public const int MinBufferSize = 9;
         private readonly Dictionary<object, int> _objects;
-        public readonly Serializer Serializer;
+        public Serializer Serializer { get; private set; }
         private LinkedList<Type> _trackedTypes;
-        private byte[] _buffer = new byte[MinBufferSize];
+        internal byte[] _buffer;
 
         private int _nextObjectId;
-        private readonly ushort _nextTypeId;
+        private /*readonly*/ ushort _nextTypeId;
+
+        protected SerializerSession()
+        {
+            _objects = new Dictionary<object, int>();
+        }
 
         public SerializerSession(Serializer serializer)
         {
-            Serializer = serializer;
             if (serializer.Options.PreserveObjectReferences)
             {
                 _objects = new Dictionary<object, int>();
             }
-            _nextTypeId = (ushort)(serializer.Options.KnownTypes.Length );
+            Reinitialize(serializer);
+        }
+
+        public void Reinitialize(Serializer serializer)
+        {
+            Serializer = serializer;
+            _nextTypeId = (ushort)(serializer.Options.KnownTypes.Length);
+        }
+
+        public virtual void Clear()
+        {
+            _objects?.Clear();
+            _trackedTypes?.Clear();
+
+            Serializer = null;
+            _buffer = null;
+            _nextObjectId = 0;
         }
 
         public void TrackSerializedObject(object obj)
@@ -55,12 +80,12 @@ namespace Hyperion
             return !TryGetValue(type, out index);
         }
 
-        public byte[] GetBuffer(int length)
+        public virtual byte[] GetBuffer(int length)
         {
-            if (length <= _buffer.Length)
-                return _buffer;
+            if (null == _buffer) { _buffer = new byte[length]; return _buffer; }
+            if (length <= _buffer.Length) { return _buffer; }
 
-            length = Math.Max(length, _buffer.Length*2);
+            length = Math.Max(length, _buffer.Length * 2);
 
             _buffer = new byte[length];
 
@@ -98,5 +123,92 @@ namespace Hyperion
             }
             _trackedTypes.AddLast(type);
         }
+    }
+
+    public sealed class BufferManagerSerializerSession : SerializerSession
+    {
+        public BufferManagerSerializerSession() : base() { }
+
+        public override void Clear()
+        {
+            if (_buffer != null) { BufferManager.Shared.Return(_buffer); }
+            base.Clear();
+        }
+
+        public override byte[] GetBuffer(int length)
+        {
+            if (null == _buffer) { _buffer = BufferManager.Shared.Rent(length); return _buffer; }
+            if (length <= _buffer.Length) { return _buffer; }
+
+            length = Math.Max(length, _buffer.Length * 2);
+
+            BufferManager.Shared.Return(_buffer);
+            _buffer = BufferManager.Shared.Rent(length);
+
+            return _buffer;
+        }
+    }
+
+
+    /// <summary></summary>
+    public sealed class SerializerSessionPooledObjectPolicy : IPooledObjectPolicy<SerializerSession>
+    {
+        public SerializerSession Create() => new BufferManagerSerializerSession();
+
+        [MethodImpl(InlineMethod.Value)]
+        public SerializerSession PreGetting(SerializerSession session) => session;
+
+        public bool Return(SerializerSession session)
+        {
+            if (null == session) { return false; }
+            session.Clear();
+            return true;
+        }
+    }
+
+    /// <summary></summary>
+    public sealed class SerializerSessionManager
+    {
+        private static SerializerSessionPooledObjectPolicy _defaultPolicy = new SerializerSessionPooledObjectPolicy();
+        public static SerializerSessionPooledObjectPolicy DefaultPolicy { get => _defaultPolicy; set => _defaultPolicy = value; }
+
+        private static ObjectPool<SerializerSession> _innerPool;
+        public static ObjectPool<SerializerSession> InnerPool
+        {
+            [MethodImpl(InlineMethod.Value)]
+            get
+            {
+                var pool = Volatile.Read(ref _innerPool);
+                if (pool == null)
+                {
+                    pool = SynchronizedObjectPoolProvider.Default.Create(DefaultPolicy);
+                    var current = Interlocked.CompareExchange(ref _innerPool, pool, null);
+                    if (current != null) { return current; }
+                }
+                return pool;
+            }
+            set
+            {
+                if (null == value) { throw new ArgumentNullException(nameof(value)); }
+                Interlocked.CompareExchange(ref _innerPool, value, null);
+            }
+        }
+
+        public static PooledObject<SerializerSession> Create(Serializer serializer)
+        {
+            var sb = Allocate(serializer);
+            return new PooledObject<SerializerSession>(InnerPool, sb);
+        }
+
+        public static SerializerSession Allocate(Serializer serializer)
+        {
+            var session = InnerPool.Take();
+            session.Reinitialize(serializer);
+            return session;
+        }
+
+        public static void Free(SerializerSession session) => InnerPool.Return(session);
+
+        public static void Clear() => InnerPool.Clear();
     }
 }

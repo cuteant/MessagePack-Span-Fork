@@ -15,6 +15,7 @@ using System.Linq;
 using System.Reflection;
 using CuteAnt;
 using CuteAnt.Reflection;
+using AntTypeSerializer = CuteAnt.Reflection.TypeSerializer;
 
 namespace Hyperion.Extensions
 {
@@ -113,8 +114,8 @@ namespace Hyperion.Extensions
             return type.IsArray && type.GetArrayRank() == 1 && type.GetElementType().IsHyperionPrimitive();
         }
 
-        private static readonly ConcurrentDictionary<ByteArrayKey, Type> TypeNameLookup =
-            new ConcurrentDictionary<ByteArrayKey, Type>(ByteArrayKeyComparer.Instance);
+        //private static readonly ConcurrentDictionary<ByteArrayKey, Type> TypeNameLookup =
+        //    new ConcurrentDictionary<ByteArrayKey, Type>(ByteArrayKeyComparer.Instance);
 
 #if NET40
         public static byte[] GetTypeManifest(ICollection<byte[]> fieldNames)
@@ -136,14 +137,7 @@ namespace Hyperion.Extensions
         private static Type GetTypeFromManifestName(Stream stream, DeserializerSession session)
         {
             var bytes = stream.ReadLengthEncodedByteArray(session);
-            var byteArr = ByteArrayKey.Create(bytes);
-            return TypeNameLookup.GetOrAdd(byteArr, b =>
-            {
-                var shortName = StringEx.FromUtf8Bytes(b.Bytes, 0, b.Bytes.Length);
-                //var typename = ToQualifiedAssemblyName(shortName);
-                //return Type.GetType(typename, true);
-                return TypeUtils.ResolveType(shortName);
-            });
+            return AntTypeSerializer.GetTypeFromTypeKey(new TypeKey(bytes));
         }
 
         public static Type GetTypeFromManifestFull(Stream stream, DeserializerSession session)

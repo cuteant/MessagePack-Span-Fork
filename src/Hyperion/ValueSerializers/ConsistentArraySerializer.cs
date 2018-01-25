@@ -9,6 +9,7 @@
 
 using System;
 using System.IO;
+using CuteAnt.Buffers;
 using Hyperion.Extensions;
 
 namespace Hyperion.ValueSerializers
@@ -80,9 +81,11 @@ namespace Hyperion.ValueSerializers
             if (typeof(T).IsFixedSizeType())
             {
                 var size = typeof(T).GetTypeSize();
-                var result = new byte[array.Length * size];
-                Buffer.BlockCopy(array, 0, result, 0, result.Length);
-                stream.Write(result);
+                var bufferSize = array.Length * size;
+                var result = BufferManager.Shared.Rent(bufferSize);
+                Buffer.BlockCopy(array, 0, result, 0, bufferSize);
+                stream.Write(result,0, bufferSize);
+                BufferManager.Shared.Return(result);
             }
             else
             {

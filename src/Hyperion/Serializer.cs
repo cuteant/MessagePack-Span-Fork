@@ -148,25 +148,28 @@ namespace Hyperion
 
         public void Serialize(object obj, [NotNull] Stream stream, SerializerSession session)
         {
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
+            if (obj == null) { throw new ArgumentNullException(nameof(obj)); }
 
             var type = obj.GetType();
             var s = GetSerializerByType(type);
             s.WriteManifest(stream, session);
             s.WriteValue(stream, obj, session);
+
+            session.Clear();
         }
 
         public void Serialize(object obj, [NotNull] Stream stream)
         {
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
-            SerializerSession session = GetSerializerSession();
+            if (obj == null) { throw new ArgumentNullException(nameof(obj)); }
+
+            SerializerSession session = SerializerSessionManager.Allocate(this);
 
             var type = obj.GetType();
             var s = GetSerializerByType(type);
             s.WriteManifest(stream, session);
             s.WriteValue(stream, obj, session);
+
+            SerializerSessionManager.Free(session);
         }
 
         public SerializerSession GetSerializerSession()
@@ -176,9 +179,11 @@ namespace Hyperion
 
         public T Deserialize<T>([NotNull] Stream stream)
         {
-            DeserializerSession session = GetDeserializerSession();
+            DeserializerSession session = DeserializerSessionManager.Allocate(this);
             var s = GetDeserializerByManifest(stream, session);
-            return (T)s.ReadValue(stream, session);
+            var result = (T)s.ReadValue(stream, session);
+            DeserializerSessionManager.Free(session);
+            return result;
         }
 
         public DeserializerSession GetDeserializerSession()
@@ -189,20 +194,26 @@ namespace Hyperion
         public T Deserialize<T>([NotNull] Stream stream, DeserializerSession session)
         {
             var s = GetDeserializerByManifest(stream, session);
-            return (T)s.ReadValue(stream, session);
+            var result = (T)s.ReadValue(stream, session);
+            session.Clear();
+            return result;
         }
 
         public object Deserialize([NotNull] Stream stream)
         {
-            var session = new DeserializerSession(this);
+            var session = DeserializerSessionManager.Allocate(this);
             var s = GetDeserializerByManifest(stream, session);
-            return s.ReadValue(stream, session);
+            var result = s.ReadValue(stream, session);
+            DeserializerSessionManager.Free(session);
+            return result;
         }
 
         public object Deserialize([NotNull] Stream stream, DeserializerSession session)
         {
             var s = GetDeserializerByManifest(stream, session);
-            return s.ReadValue(stream, session);
+            var result = s.ReadValue(stream, session);
+            session.Clear();
+            return result;
         }
 
         public ValueSerializer GetSerializerByType([NotNull] Type type)

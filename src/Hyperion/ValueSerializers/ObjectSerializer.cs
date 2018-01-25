@@ -11,8 +11,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using CuteAnt.Reflection;
 using Hyperion.Extensions;
+using AntTypeSerializer = CuteAnt.Reflection.TypeSerializer;
 
 namespace Hyperion.ValueSerializers
 {
@@ -38,10 +38,9 @@ namespace Hyperion.ValueSerializers
             Type = type;
             //TODO: remove version info
             //var typeName = type.GetShortAssemblyQualifiedName();
-            var typeName = RuntimeTypeNameFormatter.Format(type);
             // ReSharper disable once PossibleNullReferenceException
             // ReSharper disable once AssignNullToNotNullAttribute
-            var typeNameBytes = typeName.ToUtf8Bytes();
+            var typeNameBytes = AntTypeSerializer.GetTypeKeyFromType(type).TypeName;
 
             var fields = type.GetFieldInfosForType();
             var fieldNames = fields.Select(field => field.Name.ToUtf8Bytes()).ToList();

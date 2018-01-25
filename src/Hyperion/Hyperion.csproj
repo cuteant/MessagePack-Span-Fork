@@ -18,11 +18,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(ImportLibs)' == 'netfx' ">
-    <DefineConstants>$(DefineConstants);SERIALIZATION;UNSAFE</DefineConstants>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition=" '$(ImportLibs)' == 'netcore' ">
-    <DefineConstants>$(DefineConstants);UNSAFE</DefineConstants>
+    <DefineConstants>$(DefineConstants);SERIALIZATION</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
@@ -35,6 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CuteAnt.Core" Version="$(CuteAntCorePackageVersion)" />
+    <PackageReference Include="CuteAnt.Runtime" Version="$(CuteAntRuntimePackageVersion)" />
   </ItemGroup>
 </Project>

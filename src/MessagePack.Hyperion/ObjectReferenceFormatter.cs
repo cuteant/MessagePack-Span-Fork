@@ -9,6 +9,8 @@ namespace MessagePack.Formatters
 {
     public class ObjectReferenceFormatter<T> : IMessagePackFormatter<T>
     {
+        public static readonly IMessagePackFormatter<T> Instance = new ObjectReferenceFormatter<T>();
+
         private const int c_initialBufferSize = 1024 * 64;
 
         private readonly Serializer _serializer;

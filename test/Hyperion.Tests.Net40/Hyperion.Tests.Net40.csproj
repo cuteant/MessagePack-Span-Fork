@@ -2,18 +2,16 @@
   <PropertyGroup>
     <RootNamespace>Hyperion.Tests</RootNamespace>
     <AssemblyName>Hyperion.Tests.Net40</AssemblyName>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFramework>net45</TargetFramework>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net452' or '$(TargetFramework)' == 'net451' or '$(TargetFramework)' == 'net40' ">
+  <PropertyGroup>
     <DefineConstants>$(DefineConstants);SERIALIZATION</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNetTestSdkPackageVersion)" />
-    <PackageReference Include="xunit" Version="$(xUnitPackageVersion)" />
-    <PackageReference Include="xunit.analyzers" Version="$(xUnitAnalyzersPackageVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitRunnerVsPackageVersion)" />
+    <PackageReference Include="xunit" Version="2.1.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,24 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="CuteAnt.Core">
-      <HintPath>..\..\src\Hyperion\bin\Debug\net40\CuteAnt.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="CuteAnt.Core.Abstractions">
-      <HintPath>..\..\src\Hyperion\bin\Debug\net40\CuteAnt.Core.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Hyperion">
-      <HintPath>..\..\src\Hyperion\bin\Debug\net40\Hyperion.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Primitives">
-      <HintPath>..\..\src\Hyperion\bin\Debug\net40\Microsoft.Extensions.Primitives.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Collections.Immutable">
-      <HintPath>..\..\src\Hyperion\bin\Debug\net40\System.Collections.Immutable.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reflection.Metadata">
-      <HintPath>..\..\src\Hyperion\bin\Debug\net40\System.Reflection.Metadata.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\src\Hyperion\Hyperion.csproj" />
   </ItemGroup>
 
 </Project>
