@@ -154,8 +154,6 @@ namespace Hyperion
             var s = GetSerializerByType(type);
             s.WriteManifest(stream, session);
             s.WriteValue(stream, obj, session);
-
-            session.Clear();
         }
 
         public void Serialize(object obj, [NotNull] Stream stream)
@@ -194,9 +192,7 @@ namespace Hyperion
         public T Deserialize<T>([NotNull] Stream stream, DeserializerSession session)
         {
             var s = GetDeserializerByManifest(stream, session);
-            var result = (T)s.ReadValue(stream, session);
-            session.Clear();
-            return result;
+            return (T)s.ReadValue(stream, session);
         }
 
         public object Deserialize([NotNull] Stream stream)
@@ -211,9 +207,7 @@ namespace Hyperion
         public object Deserialize([NotNull] Stream stream, DeserializerSession session)
         {
             var s = GetDeserializerByManifest(stream, session);
-            var result = s.ReadValue(stream, session);
-            session.Clear();
-            return result;
+            return s.ReadValue(stream, session);
         }
 
         public ValueSerializer GetSerializerByType([NotNull] Type type)
