@@ -26,6 +26,7 @@ namespace MessagePack.Resolvers
         static class FormatterCache<T>
         {
             public static readonly IMessagePackFormatter<T> formatter;
+            private static readonly Type TypelessFormatterType = typeof(TypelessFormatter);
 
             static FormatterCache()
             {
@@ -34,18 +35,22 @@ namespace MessagePack.Resolvers
 #else
                 var attr = typeof(T).GetCustomAttributeX<MessagePackFormatterAttribute>();
 #endif
-                if (attr == null)
-                {
-                    return;
-                }
+                if (attr == null) { return; }
 
-                if (attr.Arguments == null)
+                if (attr.FormatterType == TypelessFormatterType)
                 {
-                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.FastCreateInstance(attr.FormatterType);
+                    formatter = (IMessagePackFormatter<T>)TypelessFormatter.Instance;
                 }
                 else
                 {
-                    formatter = (IMessagePackFormatter<T>)ActivatorUtil.CreateInstance(attr.FormatterType, attr.Arguments);
+                    if (attr.Arguments == null)
+                    {
+                        formatter = (IMessagePackFormatter<T>)ActivatorUtils.FastCreateInstance(attr.FormatterType);
+                    }
+                    else
+                    {
+                        formatter = (IMessagePackFormatter<T>)ActivatorUtil.CreateInstance(attr.FormatterType, attr.Arguments);
+                    }
                 }
             }
         }

@@ -2,22 +2,29 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using CuteAnt;
 using CuteAnt.Collections;
 using CuteAnt.Reflection;
 
 namespace MessagePack.Formatters
 {
+    using MessagePack.Formatters.Internal;
+
     public abstract class DynamicObjectTypeFormatterBase<T> : IMessagePackFormatter<T>
     {
         private static readonly Func<FieldInfo, bool> s_defaultFieldFilter = f => true;
+
         private readonly IComparer<FieldInfo> _fieldInfoComparer;
         private readonly Func<FieldInfo, bool> _fieldFilter;
+        private readonly Func<Type, bool> _isSupportedFieldType;
 
-        protected DynamicObjectTypeFormatterBase(Func<FieldInfo, bool> fieldFilter = null, IComparer<FieldInfo> fieldInfoComparer = null)
+        protected DynamicObjectTypeFormatterBase(Func<FieldInfo, bool> fieldFilter = null,
+            IComparer<FieldInfo> fieldInfoComparer = null, Func<Type, bool> isSupportedFieldType = null)
         {
             _fieldFilter = fieldFilter ?? s_defaultFieldFilter;
             _fieldInfoComparer = fieldInfoComparer ?? FieldInfoComparer.Instance;
+            _isSupportedFieldType = isSupportedFieldType ?? IsSupportedFieldType;
         }
 
         public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
@@ -44,14 +51,14 @@ namespace MessagePack.Formatters
             offset += readSize;
             var obj = ActivatorUtils.FastCreateInstance(actualType);
 
-            var fields = s_filedCache.GetOrAdd(actualType, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer);
+            var fields = _filedCache.GetOrAdd(actualType, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer, _isSupportedFieldType);
             foreach (var (field, getter, setter) in fields)
             {
                 var fieldType = field.FieldType;
                 object fieldValue;
                 if (fieldType != TypeConstants.ObjectType)
                 {
-                    var fieldFormatter = s_objectFormatterCache.GetOrAdd(field.FieldType, s_createObjectTypeFormatterFunc);
+                    var fieldFormatter = DynamicObjectTypeFormatter.GetObjectTypeFormatter(fieldType);
                     fieldValue = fieldFormatter.Deserialize(bytes, offset, formatterResolver, out readSize);
                 }
                 else
@@ -83,14 +90,14 @@ namespace MessagePack.Formatters
 
             offset += MessagePackBinary.WriteNamedType(ref bytes, offset, actualType);
 
-            var fields = s_filedCache.GetOrAdd(actualType, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer);
+            var fields = _filedCache.GetOrAdd(actualType, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer, _isSupportedFieldType);
             foreach (var (field, getter, setter) in fields)
             {
                 var fieldType = field.FieldType;
                 var v = getter(value);
                 if (fieldType != TypeConstants.ObjectType)
                 {
-                    var fieldFormatter = s_objectFormatterCache.GetOrAdd(fieldType, s_createObjectTypeFormatterFunc);
+                    var fieldFormatter = DynamicObjectTypeFormatter.GetObjectTypeFormatter(fieldType);
                     offset += fieldFormatter.Serialize(ref bytes, offset, v, formatterResolver);
                 }
                 else
@@ -102,6 +109,12 @@ namespace MessagePack.Formatters
             return offset - startOffset;
         }
 
+        [MethodImpl(InlineMethod.Value)]
+        protected List<(FieldInfo field, MemberGetter getter, MemberSetter setter)> GetFieldsFromCache(Type type)
+        {
+            return _filedCache.GetOrAdd(type, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer, _isSupportedFieldType); ;
+        }
+
         #region ++ IsSupportedType ++
 
         /// <summary>Returns a value indicating whether the provided <paramref name="type"/> is supported.</summary>
@@ -109,50 +122,31 @@ namespace MessagePack.Formatters
         /// <returns>A value indicating whether the provided <paramref name="type"/> is supported.</returns>
         protected bool IsSupportedType(Type type)
         {
-            return !type.IsAbstract && !type.IsInterface && !type.IsArray && !type.IsEnum && IsSupportedFieldType(type);
-        }
-
-        #endregion
-
-        #region ++ GetObjectTypeFormatter ++
-
-        private static readonly CachedReadConcurrentDictionary<Type, IDynamicObjectTypeFormatter> s_objectFormatterCache =
-            new CachedReadConcurrentDictionary<Type, IDynamicObjectTypeFormatter>(DictionaryCacheConstants.SIZE_MEDIUM);
-        private static readonly Func<Type, IDynamicObjectTypeFormatter> s_createObjectTypeFormatterFunc = CreateObjectTypeFormatter;
-
-        private static IDynamicObjectTypeFormatter CreateObjectTypeFormatter(Type type)
-        {
-            var formatterType = typeof(DynamicObjectTypeFormatter<>).GetCachedGenericType(type);
-            return ActivatorUtils.FastCreateInstance<IDynamicObjectTypeFormatter>(formatterType);
-        }
-
-        protected static IDynamicObjectTypeFormatter GetObjectTypeFormatter(Type type)
-        {
-            if (null == type) { throw new ArgumentNullException(nameof(type)); }
-            return s_objectFormatterCache.GetOrAdd(type, s_createObjectTypeFormatterFunc);
+            return !type.IsAbstract && !type.IsInterface && !type.IsArray && !type.IsEnum && _isSupportedFieldType(type);
         }
 
         #endregion
 
         #region ++ GetFields ++
 
-        private readonly CachedReadConcurrentDictionary<Type, List<(FieldInfo field, MemberGetter getter, MemberSetter setter)>> s_filedCache =
+        private readonly CachedReadConcurrentDictionary<Type, List<(FieldInfo field, MemberGetter getter, MemberSetter setter)>> _filedCache =
             new CachedReadConcurrentDictionary<Type, List<(FieldInfo field, MemberGetter getter, MemberSetter setter)>>();
-        private readonly Func<Type, Func<FieldInfo, bool>, IComparer<FieldInfo>, List<(FieldInfo field, MemberGetter getter, MemberSetter setter)>> s_getFieldsFunc = GetFields;
+        private static readonly Func<Type, Func<FieldInfo, bool>, IComparer<FieldInfo>, Func<Type, bool>, List<(FieldInfo field, MemberGetter getter, MemberSetter setter)>> s_getFieldsFunc = GetFields;
         /// <summary>Returns a sorted list of the fields of the provided type.</summary>
         /// <param name="type">The type.</param>
         /// <param name="fieldFilter">The predicate used in addition to the default logic to select which fields are included.</param>
         /// <param name="fieldInfoComparer">The comparer used to sort fields.</param>
+        /// <param name="isSupportedFieldType"></param>
         /// <returns>A sorted list of the fields of the provided type.</returns>
         private static List<(FieldInfo field, MemberGetter getter, MemberSetter setter)> GetFields(Type type,
-            Func<FieldInfo, bool> fieldFilter, IComparer<FieldInfo> fieldInfoComparer)
+            Func<FieldInfo, bool> fieldFilter, IComparer<FieldInfo> fieldInfoComparer, Func<Type, bool> isSupportedFieldType)
         {
             var result =
                 GetAllFields(type)
                     .Where(
                         field =>
                             !field.IsStatic
-                            && IsSupportedFieldType(field.FieldType)
+                            && isSupportedFieldType(field.FieldType)
                             && fieldFilter(field))
                     .ToList();
             result.Sort(fieldInfoComparer);
@@ -212,6 +206,31 @@ namespace MessagePack.Formatters
 
         #endregion
     }
+}
+
+namespace MessagePack.Formatters.Internal
+{
+    public static class DynamicObjectTypeFormatter
+    {
+        private static readonly CachedReadConcurrentDictionary<Type, IDynamicObjectTypeFormatter> s_objectFormatterCache =
+            new CachedReadConcurrentDictionary<Type, IDynamicObjectTypeFormatter>(DictionaryCacheConstants.SIZE_MEDIUM);
+        private static readonly Func<Type, IDynamicObjectTypeFormatter> s_createObjectTypeFormatterFunc = CreateObjectTypeFormatter;
+
+        private static IDynamicObjectTypeFormatter CreateObjectTypeFormatter(Type type)
+        {
+            if (null == type) { throw new ArgumentNullException(nameof(type)); }
+
+            var formatterType = typeof(DynamicObjectTypeFormatter<>).GetCachedGenericType(type);
+            return ActivatorUtils.FastCreateInstance<IDynamicObjectTypeFormatter>(formatterType);
+        }
+
+        public static IDynamicObjectTypeFormatter GetObjectTypeFormatter(Type type)
+        {
+            if (null == type) { throw new ArgumentNullException(nameof(type)); }
+
+            return s_objectFormatterCache.GetOrAdd(type, s_createObjectTypeFormatterFunc);
+        }
+    }
 
     public class DynamicObjectTypeFormatter<T> : IDynamicObjectTypeFormatter
     {
@@ -234,3 +253,4 @@ namespace MessagePack.Formatters
         object Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize);
     }
 }
+;
