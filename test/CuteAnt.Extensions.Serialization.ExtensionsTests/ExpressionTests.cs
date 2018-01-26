@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using CuteAnt.Reflection;
 using MessagePack;
+using MessagePack.Formatters;
+using MessagePack.Resolvers;
 using Xunit;
 
 namespace CuteAnt.Extensions.Serialization.Tests
@@ -865,36 +867,36 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(expr.Parameters[0].Name, deserialized.Parameters[0].Name);
     }
 
-    [Fact(Skip ="not support")]
+    [Fact]
     public void CanSerializeLambdaExpressionContainingGenericMethod()
     {
       Expression<Func<Dummy, bool>> expr = dummy => dummy.TestField.Contains('s');
 
-      var bytes = MessagePackSerializer.Serialize(expr);
-      var deserialized = MessagePackSerializer.Deserialize<Expression<Func<Dummy, bool>>>(bytes);
+      var bytes = MessagePackSerializer.Serialize(expr, WithExpressionResolver.Instance);
+      var deserialized = MessagePackSerializer.Deserialize<Expression<Func<Dummy, bool>>>(bytes, WithExpressionResolver.Instance);
       Assert.NotNull(((MethodCallExpression)deserialized.Body).Method);
       Assert.True(deserialized.Compile()(new Dummy("sausages")));
       Assert.False(deserialized.Compile()(new Dummy("field")));
 
-      deserialized = MessagePackMessageFormatter.DefaultInstance.DeepCopy(expr);
-      Assert.NotNull(((MethodCallExpression)deserialized.Body).Method);
-      Assert.True(deserialized.Compile()(new Dummy("sausages")));
-      Assert.False(deserialized.Compile()(new Dummy("field")));
+      //deserialized = MessagePackMessageFormatter.DefaultInstance.DeepCopy(expr);
+      //Assert.NotNull(((MethodCallExpression)deserialized.Body).Method);
+      //Assert.True(deserialized.Compile()(new Dummy("sausages")));
+      //Assert.False(deserialized.Compile()(new Dummy("field")));
 
-      deserialized = (Expression<Func<Dummy, bool>>)MessagePackMessageFormatter.DefaultInstance.DeepCopyObject(expr);
-      Assert.NotNull(((MethodCallExpression)deserialized.Body).Method);
-      Assert.True(deserialized.Compile()(new Dummy("sausages")));
-      Assert.False(deserialized.Compile()(new Dummy("field")));
+      //deserialized = (Expression<Func<Dummy, bool>>)MessagePackMessageFormatter.DefaultInstance.DeepCopyObject(expr);
+      //Assert.NotNull(((MethodCallExpression)deserialized.Body).Method);
+      //Assert.True(deserialized.Compile()(new Dummy("sausages")));
+      //Assert.False(deserialized.Compile()(new Dummy("field")));
 
-      deserialized = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(expr);
-      Assert.NotNull(((MethodCallExpression)deserialized.Body).Method);
-      Assert.True(deserialized.Compile()(new Dummy("sausages")));
-      Assert.False(deserialized.Compile()(new Dummy("field")));
+      //deserialized = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(expr);
+      //Assert.NotNull(((MethodCallExpression)deserialized.Body).Method);
+      //Assert.True(deserialized.Compile()(new Dummy("sausages")));
+      //Assert.False(deserialized.Compile()(new Dummy("field")));
 
-      deserialized = (Expression<Func<Dummy, bool>>)TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopyObject(expr);
-      Assert.NotNull(((MethodCallExpression)deserialized.Body).Method);
-      Assert.True(deserialized.Compile()(new Dummy("sausages")));
-      Assert.False(deserialized.Compile()(new Dummy("field")));
+      //deserialized = (Expression<Func<Dummy, bool>>)TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopyObject(expr);
+      //Assert.NotNull(((MethodCallExpression)deserialized.Body).Method);
+      //Assert.True(deserialized.Compile()(new Dummy("sausages")));
+      //Assert.False(deserialized.Compile()(new Dummy("field")));
     }
 
 
@@ -1019,5 +1021,16 @@ namespace CuteAnt.Extensions.Serialization.Tests
   internal static class ExpressionExtensions
   {
     public static object ConstantValue(this Expression expr) => ((ConstantExpression)expr).Value;
+  }
+
+  public class WithExpressionResolver : IFormatterResolver
+  {
+    public static readonly WithExpressionResolver Instance = new WithExpressionResolver();
+
+    public IMessagePackFormatter<T> GetFormatter<T>()
+    {
+      return (HyperionExpressionResolver.Instance.GetFormatter<T>()
+           ?? StandardResolver.Instance.GetFormatter<T>());
+    }
   }
 }

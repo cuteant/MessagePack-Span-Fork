@@ -10,7 +10,7 @@ namespace MessagePack.Formatters
         public static readonly IMessagePackFormatter<SymbolDocumentInfo> Instance = new SymbolDocumentInfoFormatter();
     }
 
-    public class SymbolDocumentInfoFormatter<TExpression> : DynamicObjectTypeFormatterBase<TExpression>, IMessagePackFormatter<TExpression>
+    public class SymbolDocumentInfoFormatter<TExpression> : DynamicObjectTypeFormatterBase<TExpression>
         where TExpression : SymbolDocumentInfo
     {
         public SymbolDocumentInfoFormatter() : base(null, ExpressionFieldInfoComparer.Instance) { }

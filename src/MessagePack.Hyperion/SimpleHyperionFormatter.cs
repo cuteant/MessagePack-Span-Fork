@@ -7,40 +7,42 @@ using Hyperion.SerializerFactories;
 
 namespace MessagePack.Formatters
 {
-    public class ObjectReferenceFormatter<T> : IMessagePackFormatter<T>
+    public class SimpleHyperionFormatter<T> : IMessagePackFormatter<T>
     {
-        public static readonly IMessagePackFormatter<T> Instance = new ObjectReferenceFormatter<T>();
+        public static readonly IMessagePackFormatter<T> Instance = new SimpleHyperionFormatter<T>();
 
         private const int c_initialBufferSize = 1024 * 64;
 
         private readonly Serializer _serializer;
 
-        public ObjectReferenceFormatter() : this(surrogates: null) { }
-        public ObjectReferenceFormatter(IEnumerable<Surrogate> surrogates,
-          IEnumerable<ValueSerializerFactory> serializerFactories = null,
-          IEnumerable<Type> knownTypes = null, bool ignoreISerializable = false)
+        public SimpleHyperionFormatter() : this(new SerializerOptions(versionTolerance: false, preserveObjectReferences: true)) { }
+        public SimpleHyperionFormatter(SerializerOptions options)
         {
-            var options = new SerializerOptions(
-                versionTolerance: true,
-                preserveObjectReferences: true,
-                surrogates: surrogates,
-                serializerFactories: serializerFactories,
-                knownTypes: knownTypes,
-                ignoreISerializable: ignoreISerializable
-            );
+            if (null == options) { throw new ArgumentNullException(nameof(options)); }
             _serializer = new Serializer(options);
         }
 
         public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
-            var ms = new MemoryStream(bytes, offset, bytes.Length);
+            if (MessagePackBinary.IsNil(bytes, offset))
+            {
+                readSize = 1;
+                return default;
+            }
+
+            var serializedObject = MessagePackBinary.ReadBytes(bytes, offset, out readSize);
+            var ms = new MemoryStream(serializedObject);
             var result = _serializer.Deserialize<T>(ms);
-            readSize = (int)ms.Position;
             return result;
         }
 
         public int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
         {
+            if (value == null)
+            {
+                return MessagePackBinary.WriteNil(ref bytes, offset);
+            }
+
             var bufferPool = BufferManager.Shared;
 
             byte[] buffer; int bufferSize;
@@ -53,10 +55,10 @@ namespace MessagePack.Formatters
                 buffer = outputStream.ToArray(out bufferSize);
             }
 
-            MessagePackBinary.WriteBytes(ref bytes, offset, buffer, 0, bufferSize);
+            var size = MessagePackBinary.WriteBytes(ref bytes, offset, buffer, 0, bufferSize);
             bufferPool.Return(buffer);
 
-            return bufferSize;
+            return size;
         }
     }
 }

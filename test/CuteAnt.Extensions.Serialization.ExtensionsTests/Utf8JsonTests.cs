@@ -11,11 +11,6 @@ namespace CuteAnt.Extensions.Serialization.Tests
 {
   public class Utf8JsonTests
   {
-    static Utf8JsonTests()
-    {
-      CompositeResolver.RegisterAndSetAsDefault(ImmutableCollectionResolver.Instance, StandardResolver.AllowPrivate);
-    }
-
     [Fact]
     public void SerializeInterfaceTest()
     {
@@ -39,7 +34,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       newFoo = (FooClass)Utf8JsonMessageFormatter.DefaultInstance.Deserialize<IUnionSample>(typeof(FooClass), bytes);
       Assert.Equal(9999, newFoo.XYZ);
 
-      Assert.Throws<InvalidOperationException>(()=> Utf8JsonStandardResolver.Register(ImmutableCollectionResolver.Instance));
+      Assert.Throws<InvalidOperationException>(() => Utf8JsonStandardResolver.Register(ImmutableCollectionResolver.Instance));
     }
 
     [Fact]
@@ -74,8 +69,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public void SerializeImmutableCollectionTest()
     {
       var imList = ImmutableList<int>.Empty.AddRange(new[] { 1, 2 });
-      var bytes = JsonSerializer.Serialize(imList);
-      var newList = JsonSerializer.Deserialize<ImmutableList<int>>(bytes);
+      var bytes = JsonSerializer.Serialize(imList, WithImmutableDefaultResolverUtf8Json.Instance);
+      var newList = JsonSerializer.Deserialize<ImmutableList<int>>(bytes, WithImmutableDefaultResolverUtf8Json.Instance);
       Assert.Equal(imList, newList);
 
       // 此时如果序列化 Object 对象，则无法正确序列化，说明官方的 CompositeResolver 所采用的策略还是有问题的
@@ -126,7 +121,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(ip, copy);
 
       var endPoint = new IPEndPoint(ip, 8080);
-      bytes= JsonSerializer.Serialize(endPoint);
+      bytes = JsonSerializer.Serialize(endPoint);
       Assert.Equal(endPoint, JsonSerializer.Deserialize<IPEndPoint>(bytes));
       var copy1 = Utf8JsonMessageFormatter.DefaultInstance.DeepCopy(endPoint);
       Assert.Equal(endPoint, copy1);
@@ -151,6 +146,17 @@ namespace CuteAnt.Extensions.Serialization.Tests
       //Assert.Equal(b.Foo.A, copy.Foo.A);
       //Assert.Equal(b.Foo.B, copy.Foo.B);
       Assert.Throws<InvalidOperationException>(() => Utf8JsonMessageFormatter.DefaultInstance.DeepCopy(b));
+    }
+  }
+
+  public class WithImmutableDefaultResolverUtf8Json : IJsonFormatterResolver
+  {
+    public static readonly WithImmutableDefaultResolverUtf8Json Instance = new WithImmutableDefaultResolverUtf8Json();
+
+    IJsonFormatter<T> IJsonFormatterResolver.GetFormatter<T>()
+    {
+      return (ImmutableCollectionResolver.Instance.GetFormatter<T>()
+           ?? StandardResolver.Default.GetFormatter<T>());
     }
   }
 }

@@ -1,12 +1,13 @@
-﻿using Utf8Json.Formatters;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
+using CuteAnt.Reflection;
+using Utf8Json.Formatters;
 
 namespace Utf8Json.ImmutableCollection
 {
-    public class ImmutableCollectionResolver : IJsonFormatterResolver
+    public sealed class ImmutableCollectionResolver : IJsonFormatterResolver
     {
         public static IJsonFormatterResolver Instance = new ImmutableCollectionResolver();
 
@@ -72,16 +73,16 @@ namespace Utf8Json.ImmutableCollection
                 else if (isNullable && nullableElementType.IsConstructedGenericType && nullableElementType.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
 #endif
                 {
-                    return CreateInstance(typeof(NullableFormatter<>), new[] { nullableElementType });
+                    return CreateInstance(typeof(NullableFormatter<>), nullableElementType);
                 }
             }
 
             return null;
         }
 
-        static object CreateInstance(Type genericType, Type[] genericTypeArguments, params object[] arguments)
+        static object CreateInstance(Type genericType, params Type[] genericTypeArguments)
         {
-            return Activator.CreateInstance(genericType.MakeGenericType(genericTypeArguments), arguments);
+            return ActivatorUtils.FastCreateInstance(genericType.GetCachedGenericType(genericTypeArguments));
         }
     }
 

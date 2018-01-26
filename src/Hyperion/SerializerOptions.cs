@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using CuteAnt;
 using Hyperion.SerializerFactories;
 using Hyperion.Surrogates;
 
@@ -62,12 +63,15 @@ namespace Hyperion
         internal readonly Type[] KnownTypes;
         internal readonly Dictionary<Type, ushort> KnownTypesDict = new Dictionary<Type, ushort>();
 
+        private readonly Surrogate[] _surrogates;
+        private readonly ValueSerializerFactory[] _serializerFactories;
+
         public SerializerOptions(bool versionTolerance = false, bool preserveObjectReferences = false,
           IEnumerable<Surrogate> surrogates = null, IEnumerable<ValueSerializerFactory> serializerFactories = null,
           IEnumerable<Type> knownTypes = null, bool ignoreISerializable = false)
         {
             VersionTolerance = versionTolerance;
-            //Surrogates = surrogates?.ToArray() ?? EmptySurrogates;
+            _surrogates = surrogates?.ToArray() ?? EmptySurrogates;
             if (surrogates != null && surrogates.Any())
             {
                 Surrogates = surrogates.Concat(DefaultSurrogates).ToArray();
@@ -77,6 +81,7 @@ namespace Hyperion
                 Surrogates = DefaultSurrogates;
             }
 
+            _serializerFactories = serializerFactories?.ToArray() ?? EmptyArray<ValueSerializerFactory>.Instance;
             //use the default factories + any user defined
             ValueSerializerFactories = serializerFactories == null
                 ? DefaultValueSerializerFactories
@@ -90,6 +95,17 @@ namespace Hyperion
 
             PreserveObjectReferences = preserveObjectReferences;
             IgnoreISerializable = ignoreISerializable;
+        }
+
+        public SerializerOptions Clone(bool? versionTolerance = null)
+        {
+            return new SerializerOptions(
+                versionTolerance: versionTolerance.HasValue ? versionTolerance.Value : this.VersionTolerance,
+                preserveObjectReferences: this.PreserveObjectReferences,
+                surrogates: this._surrogates,
+                serializerFactories: this._serializerFactories,
+                knownTypes: this.KnownTypes,
+                ignoreISerializable: this.IgnoreISerializable);
         }
     }
 }

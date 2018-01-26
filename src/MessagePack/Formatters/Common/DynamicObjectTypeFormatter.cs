@@ -13,7 +13,8 @@ namespace MessagePack.Formatters
 
     public abstract class DynamicObjectTypeFormatterBase<T> : IMessagePackFormatter<T>
     {
-        private static readonly Func<FieldInfo, bool> s_defaultFieldFilter = f => true;
+        private const string _syncRoot = "_syncRoot";
+        private static readonly Func<FieldInfo, bool> s_defaultFieldFilter = f => !string.Equals(_syncRoot, f.Name, StringComparison.Ordinal);
 
         private readonly IComparer<FieldInfo> _fieldInfoComparer;
         private readonly Func<FieldInfo, bool> _fieldFilter;

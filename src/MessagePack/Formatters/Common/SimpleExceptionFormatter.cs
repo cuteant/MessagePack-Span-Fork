@@ -10,7 +10,7 @@ namespace MessagePack.Formatters
         public static readonly IMessagePackFormatter<Exception> Instance = new SimpleExceptionFormatter();
 
     }
-    public class SimpleExceptionFormatter<TException> : DynamicObjectTypeFormatterBase<TException>, IMessagePackFormatter<TException>
+    public class SimpleExceptionFormatter<TException> : DynamicObjectTypeFormatterBase<TException>
         where TException : Exception
     {
         public SimpleExceptionFormatter() : base(ExceptionFieldFilter, ExceptionFieldInfoComparer.Instance) { }

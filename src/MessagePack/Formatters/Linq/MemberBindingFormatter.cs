@@ -22,7 +22,7 @@ namespace MessagePack.Formatters
         public static readonly IMessagePackFormatter<MemberBinding> Instance = new MemberBindingFormatter();
     }
 
-    public class MemberBindingFormatter<TExpression> : DynamicObjectTypeFormatterBase<TExpression>, IMessagePackFormatter<TExpression>
+    public class MemberBindingFormatter<TExpression> : DynamicObjectTypeFormatterBase<TExpression>
         where TExpression : MemberBinding
     {
         public MemberBindingFormatter() : base(null, ExpressionFieldInfoComparer.Instance) { }

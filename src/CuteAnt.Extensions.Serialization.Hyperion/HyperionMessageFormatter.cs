@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using CuteAnt.IO;
 using Hyperion;
-using Hyperion.SerializerFactories;
 using Microsoft.Extensions.Logging;
 
 namespace CuteAnt.Extensions.Serialization
@@ -35,33 +33,18 @@ namespace CuteAnt.Extensions.Serialization
 
     /// <summary>Constructor</summary>
     public HyperionMessageFormatter()
-      : this(surrogates: null)
+      : this(new SerializerOptions(versionTolerance: false, preserveObjectReferences: true))
     {
     }
 
     /// <summary>Constructor</summary>
-    public HyperionMessageFormatter(IEnumerable<Surrogate> surrogates,
-      IEnumerable<ValueSerializerFactory> serializerFactories = null,
-      IEnumerable<Type> knownTypes = null, bool ignoreISerializable = false)
+    public HyperionMessageFormatter(SerializerOptions options)
     {
-      var options = new SerializerOptions(
-          versionTolerance: true,
-          preserveObjectReferences: true,
-          surrogates: surrogates,
-          serializerFactories: serializerFactories,
-          knownTypes: knownTypes,
-          ignoreISerializable: ignoreISerializable
-      );
+      if (null == options) { throw new ArgumentNullException(nameof(options)); }
+
       _serializer = new Hyperion.Serializer(options);
-      options = new SerializerOptions(
-          versionTolerance: false,
-          preserveObjectReferences: true,
-          surrogates: surrogates,
-          serializerFactories: serializerFactories,
-          knownTypes: knownTypes,
-          ignoreISerializable: ignoreISerializable
-      );
-      _copier = new Hyperion.Serializer(options);
+      var copyOptions = options.Clone(false);
+      _copier = new Hyperion.Serializer(copyOptions);
     }
 
     #endregion

@@ -10,7 +10,7 @@ namespace MessagePack.Formatters
         public static readonly IMessagePackFormatter<Expression> Instance = new SimpleExpressionFormatter();
     }
 
-    public class SimpleExpressionFormatter<TExpression> : DynamicObjectTypeFormatterBase<TExpression>, IMessagePackFormatter<TExpression>
+    public class SimpleExpressionFormatter<TExpression> : DynamicObjectTypeFormatterBase<TExpression>
         where TExpression : Expression
     {
         public SimpleExpressionFormatter() : base(null, ExpressionFieldInfoComparer.Instance) { }

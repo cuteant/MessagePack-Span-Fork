@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Net;
 using MessagePack;
+using MessagePack.Formatters;
 using MessagePack.ImmutableCollection;
 using MessagePack.Resolvers;
 using Xunit;
@@ -11,11 +12,6 @@ namespace CuteAnt.Extensions.Serialization.Tests
 {
   public class MessagePackTests
   {
-    static MessagePackTests()
-    {
-      CompositeResolver.RegisterAndSetAsDefault(ImmutableCollectionResolver.Instance, ContractlessStandardResolverAllowPrivate.Instance);
-    }
-
     [Fact]
     public void SerializeInterfaceTest()
     {
@@ -53,8 +49,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(9999, newFoo.XYZ);
 
       var bar = new BarClass { OPQ = "t" };
-      bytes = MessagePackSerializer.Serialize(bar);
-      var newBar = MessagePackSerializer.Deserialize<BarClass>(bytes);
+      bytes = MessagePackSerializer.Serialize(bar, ContractlessStandardResolverAllowPrivate.Instance);
+      var newBar = MessagePackSerializer.Deserialize<BarClass>(bytes, ContractlessStandardResolverAllowPrivate.Instance);
       Assert.Equal(bar.OPQ, newBar.OPQ);
 
       Assert.Throws<InvalidOperationException>(() => MessagePackStandardResolver.Register(ImmutableCollectionResolver.Instance));
@@ -109,8 +105,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public void SerializeImmutableCollectionTest()
     {
       var imList = ImmutableList<int>.Empty.AddRange(new[] { 1, 2 });
-      var bytes = MessagePackSerializer.Serialize(imList);
-      var newList = MessagePackSerializer.Deserialize<ImmutableList<int>>(bytes);
+      var bytes = MessagePackSerializer.Serialize(imList, WithImmutableDefaultResolver.Instance);
+      var newList = MessagePackSerializer.Deserialize<ImmutableList<int>>(bytes, WithImmutableDefaultResolver.Instance);
       Assert.Equal(imList, newList);
 
       // 此时如果序列化 Object 对象，则无法正确序列化，说明官方的 CompositeResolver 所采用的策略还是有问题的
@@ -238,7 +234,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
           B = "hello"
         }
       };
-      Assert.Throws<EntryPointNotFoundException>(() => MessagePackSerializer.Serialize(b));
+      Assert.Throws<EntryPointNotFoundException>(() => MessagePackSerializer.Serialize(b, ContractlessStandardResolverAllowPrivate.Instance));
     }
 
     [Fact]
@@ -252,7 +248,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
           B = "hello"
         }
       };
-      Assert.Throws<EntryPointNotFoundException>(() => MessagePackSerializer.Serialize(b));
+      Assert.Throws<EntryPointNotFoundException>(() => MessagePackSerializer.Serialize(b, ContractlessStandardResolverAllowPrivate.Instance));
     }
 
     [Fact]
@@ -279,8 +275,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(123, foo.A);
       Assert.Equal("hello", foo.B);
 
-      bytes = MessagePackSerializer.Serialize(b);
-      copy = MessagePackSerializer.Deserialize<Bar1>(bytes);
+      bytes = MessagePackSerializer.Serialize(b, ContractlessStandardResolverAllowPrivate.Instance);
+      copy = MessagePackSerializer.Deserialize<Bar1>(bytes, ContractlessStandardResolverAllowPrivate.Instance);
       Assert.NotNull(copy);
       Assert.IsType<Foo>(copy.Foo);
       Assert.NotNull(copy);
@@ -337,6 +333,17 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.NotNull(copy);
       Assert.IsType<SerializerPocoSerializable>(copy.Foo);
       Helper.ComparePoco((SerializerPocoSerializable)b.Foo, (SerializerPocoSerializable)copy.Foo);
+    }
+  }
+
+  public class WithImmutableDefaultResolver : IFormatterResolver
+  {
+    public static readonly WithImmutableDefaultResolver Instance = new WithImmutableDefaultResolver();
+
+    public IMessagePackFormatter<T> GetFormatter<T>()
+    {
+      return (ImmutableCollectionResolver.Instance.GetFormatter<T>()
+           ?? StandardResolver.Instance.GetFormatter<T>());
     }
   }
 }
