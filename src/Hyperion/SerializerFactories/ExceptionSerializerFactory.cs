@@ -8,8 +8,8 @@
 #endregion
 
 using System;
-using System.Collections.Concurrent;
 using System.Reflection;
+using CuteAnt.Collections;
 using CuteAnt.Reflection;
 using Hyperion.Extensions;
 using Hyperion.ValueSerializers;
@@ -47,7 +47,7 @@ namespace Hyperion.SerializerFactories
         public override bool CanDeserialize(Serializer serializer, Type type) => CanSerialize(serializer, type);
 
         public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
-          ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+          CachedReadConcurrentDictionary<Type, ValueSerializer> typeMapping)
         {
             var exceptionSerializer = new ObjectSerializer(type);
 

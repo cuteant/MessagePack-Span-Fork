@@ -18,6 +18,7 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using CuteAnt;
+using CuteAnt.Collections;
 using Hyperion.SerializerFactories;
 using Hyperion.ValueSerializers;
 using Hyperion.Extensions;
@@ -537,7 +538,7 @@ namespace Hyperion.Tests
             public override bool CanDeserialize(Serializer serializer, Type type)
               => typeof(DerivedContainer) == type;
 
-            public override ValueSerializer BuildSerializer(Serializer serializer, Type type, ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+            public override ValueSerializer BuildSerializer(Serializer serializer, Type type, CachedReadConcurrentDictionary<Type, ValueSerializer> typeMapping)
             {
                 var os = new ObjectSerializer(type);
                 typeMapping.TryAdd(type, os);

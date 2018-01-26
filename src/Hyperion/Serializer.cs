@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using CuteAnt;
+using CuteAnt.Collections;
 using Hyperion.Extensions;
 using Hyperion.Internal;
 using Hyperion.ValueSerializers;
@@ -23,13 +24,13 @@ namespace Hyperion
     {
         private readonly ValueSerializer[] _deserializerLookup = new ValueSerializer[256];
 
-        private readonly ConcurrentDictionary<Type, ValueSerializer> _deserializers =
-            new ConcurrentDictionary<Type, ValueSerializer>();
+        private readonly CachedReadConcurrentDictionary<Type, ValueSerializer> _deserializers =
+            new CachedReadConcurrentDictionary<Type, ValueSerializer>();
 
         private readonly ValueSerializer[] _knownValueSerializers;
 
-        private readonly ConcurrentDictionary<Type, ValueSerializer> _serializers =
-            new ConcurrentDictionary<Type, ValueSerializer>();
+        private readonly CachedReadConcurrentDictionary<Type, ValueSerializer> _serializers =
+            new CachedReadConcurrentDictionary<Type, ValueSerializer>();
 
         public readonly ICodeGenerator CodeGenerator = new DefaultCodeGenerator();
 
@@ -160,7 +161,7 @@ namespace Hyperion
         {
             if (obj == null) { throw new ArgumentNullException(nameof(obj)); }
 
-            SerializerSession session = SerializerSessionManager.Allocate(this);
+            var session = SerializerSessionManager.Allocate(this);
 
             var type = obj.GetType();
             var s = GetSerializerByType(type);
@@ -177,7 +178,7 @@ namespace Hyperion
 
         public T Deserialize<T>([NotNull] Stream stream)
         {
-            DeserializerSession session = DeserializerSessionManager.Allocate(this);
+            var session = DeserializerSessionManager.Allocate(this);
             var s = GetDeserializerByManifest(stream, session);
             var result = (T)s.ReadValue(stream, session);
             DeserializerSessionManager.Free(session);

@@ -19,7 +19,7 @@ using Hyperion.ValueSerializers;
 
 namespace Hyperion
 {
-  internal class DefaultCodeGenerator : ICodeGenerator
+  internal sealed class DefaultCodeGenerator : ICodeGenerator
   {
     public const string PreallocatedByteBuffer = "PreallocatedByteBuffer";
 

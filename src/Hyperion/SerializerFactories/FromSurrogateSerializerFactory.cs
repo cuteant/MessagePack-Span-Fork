@@ -8,9 +8,9 @@
 #endregion
 
 using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
+using CuteAnt.Collections;
 using Hyperion.ValueSerializers;
 
 namespace Hyperion.SerializerFactories
@@ -26,7 +26,7 @@ namespace Hyperion.SerializerFactories
         }
 
         public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
-            ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+            CachedReadConcurrentDictionary<Type, ValueSerializer> typeMapping)
         {
             var surrogate = serializer.Options.Surrogates.FirstOrDefault(s => s.To.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()));
             var objectSerializer = new ObjectSerializer(type);

@@ -9,8 +9,8 @@
 
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using CuteAnt.Collections;
 using CuteAnt.Reflection;
 using Hyperion.Extensions;
 using Hyperion.ValueSerializers;
@@ -38,7 +38,7 @@ namespace Hyperion.SerializerFactories
         public override bool CanDeserialize(Serializer serializer, Type type) => IsInterface(type);
 
         public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
-            ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+            CachedReadConcurrentDictionary<Type, ValueSerializer> typeMapping)
         {
             var ser = new ObjectSerializer(type);
             typeMapping.TryAdd(type, ser);

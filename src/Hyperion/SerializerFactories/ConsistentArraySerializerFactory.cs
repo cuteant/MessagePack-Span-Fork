@@ -8,7 +8,7 @@
 #endregion
 
 using System;
-using System.Collections.Concurrent;
+using CuteAnt.Collections;
 using Hyperion.Extensions;
 using Hyperion.ValueSerializers;
 
@@ -26,7 +26,8 @@ namespace Hyperion.SerializerFactories
             return CanSerialize(serializer,type);
         }
 
-        public override ValueSerializer BuildSerializer(Serializer serializer, Type type, ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+        public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
+            CachedReadConcurrentDictionary<Type, ValueSerializer> typeMapping)
         {
             var res = ConsistentArraySerializer.Instance;
             typeMapping.TryAdd(type, res);

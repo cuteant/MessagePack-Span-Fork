@@ -9,10 +9,10 @@
 
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CuteAnt.Collections;
 using CuteAnt.Reflection;
 using Hyperion.Extensions;
 using Hyperion.ValueSerializers;
@@ -54,7 +54,7 @@ namespace Hyperion.SerializerFactories
         }
 
         public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
-            ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+            CachedReadConcurrentDictionary<Type, ValueSerializer> typeMapping)
         {
             var x = new ObjectSerializer(type);
             typeMapping.TryAdd(type, x);

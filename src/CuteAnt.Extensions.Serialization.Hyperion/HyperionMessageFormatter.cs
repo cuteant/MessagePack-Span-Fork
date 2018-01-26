@@ -33,7 +33,7 @@ namespace CuteAnt.Extensions.Serialization
 
     /// <summary>Constructor</summary>
     public HyperionMessageFormatter()
-      : this(new SerializerOptions(versionTolerance: false, preserveObjectReferences: true))
+      : this(new SerializerOptions(versionTolerance: false, preserveObjectReferences: true, ignoreISerializable: true))
     {
     }
 

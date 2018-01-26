@@ -8,8 +8,8 @@
 #endregion
 
 using System;
-using System.Collections.Concurrent;
 using System.Linq;
+using CuteAnt.Collections;
 using Hyperion.ValueSerializers;
 
 namespace Hyperion.SerializerFactories
@@ -25,7 +25,7 @@ namespace Hyperion.SerializerFactories
         public override bool CanDeserialize(Serializer serializer, Type type) => false;
 
         public override ValueSerializer BuildSerializer(Serializer serializer, Type type,
-            ConcurrentDictionary<Type, ValueSerializer> typeMapping)
+            CachedReadConcurrentDictionary<Type, ValueSerializer> typeMapping)
         {
             var surrogate = serializer
                 .Options

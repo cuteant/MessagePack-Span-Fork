@@ -9,6 +9,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using CuteAnt.Collections;
 using Hyperion.ValueSerializers;
 
 namespace Hyperion.SerializerFactories
@@ -19,6 +20,6 @@ namespace Hyperion.SerializerFactories
         public abstract bool CanDeserialize(Serializer serializer, Type type);
 
         public abstract ValueSerializer BuildSerializer(Serializer serializer, Type type,
-            ConcurrentDictionary<Type, ValueSerializer> typeMapping);
+            CachedReadConcurrentDictionary<Type, ValueSerializer> typeMapping);
     }
 }

@@ -44,8 +44,7 @@ namespace Hyperion.ValueSerializers
             else
             {
                 var type = (Type)value;
-                int existingId;
-                if (session.Serializer.Options.PreserveObjectReferences && session.TryGetObjectId(type, out existingId))
+                if (session.Serializer.Options.PreserveObjectReferences && session.TryGetObjectId(type, out int existingId))
                 {
                     ObjectReferenceSerializer.Instance.WriteManifest(stream, session);
                     ObjectReferenceSerializer.Instance.WriteValue(stream, existingId, session);
