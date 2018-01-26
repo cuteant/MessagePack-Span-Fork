@@ -14,7 +14,15 @@ namespace MessagePack.Formatters
     public abstract class DynamicObjectTypeFormatterBase<T> : IMessagePackFormatter<T>
     {
         private const string _syncRoot = "_syncRoot";
-        private static readonly Func<FieldInfo, bool> s_defaultFieldFilter = f => !string.Equals(_syncRoot, f.Name, StringComparison.Ordinal);
+        protected static readonly Func<FieldInfo, bool> DefaultFieldFilter = f =>
+        {
+            if (f.IsDefined(typeof(NonSerializedAttribute))) { return false; }
+            if (f.HasAttributeNamed("Ignore", false)) { return false; }
+            if (f.HasAttributeNamed("IgnoreDataMember", false)) { return false; }
+            if (f.HasAttributeNamed("IgnoreMember", false)) { return false; }
+
+            return !string.Equals(_syncRoot, f.Name, StringComparison.Ordinal);
+        };
 
         private readonly IComparer<FieldInfo> _fieldInfoComparer;
         private readonly Func<FieldInfo, bool> _fieldFilter;
@@ -23,7 +31,7 @@ namespace MessagePack.Formatters
         protected DynamicObjectTypeFormatterBase(Func<FieldInfo, bool> fieldFilter = null,
             IComparer<FieldInfo> fieldInfoComparer = null, Func<Type, bool> isSupportedFieldType = null)
         {
-            _fieldFilter = fieldFilter ?? s_defaultFieldFilter;
+            _fieldFilter = fieldFilter ?? DefaultFieldFilter;
             _fieldInfoComparer = fieldInfoComparer ?? FieldInfoComparer.Instance;
             _isSupportedFieldType = isSupportedFieldType ?? IsSupportedFieldType;
         }
@@ -173,7 +181,7 @@ namespace MessagePack.Formatters
 
         private static readonly RuntimeTypeHandle IntPtrTypeHandle = typeof(IntPtr).TypeHandle;
         private static readonly RuntimeTypeHandle UIntPtrTypeHandle = typeof(UIntPtr).TypeHandle;
-        private static readonly Type DelegateType = typeof(Delegate);
+        //private static readonly Type DelegateType = typeof(Delegate);
         /// <summary>Returns a value indicating whether the provided type is supported as a field by this class.</summary>
         /// <param name="type">The type.</param>
         /// <returns>A value indicating whether the provided type is supported as a field by this class.</returns>
@@ -184,7 +192,7 @@ namespace MessagePack.Formatters
             var handle = type.TypeHandle;
             if (handle.Equals(IntPtrTypeHandle)) return false;
             if (handle.Equals(UIntPtrTypeHandle)) return false;
-            if (DelegateType.IsAssignableFrom(type)) return false;
+            //if (DelegateType.IsAssignableFrom(type)) return false;
 
             return true;
         }

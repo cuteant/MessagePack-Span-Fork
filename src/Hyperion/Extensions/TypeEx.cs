@@ -54,7 +54,7 @@ namespace Hyperion.Extensions
             {
                 Int32Type, Int64Type, Int16Type, UInt32Type, UInt64Type, UInt16Type,
                 ByteType, SByteType, DateTimeType, BoolType, StringType, GuidType,
-                CombGuidType, FloatType, DoubleType, DecimalType, CharType
+                CombGuidType, FloatType, DoubleType, DecimalType, CharType, DateTimeOffsetType
             });
         }
 

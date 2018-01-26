@@ -21,6 +21,8 @@ namespace MessagePack.Formatters
         /// <returns></returns>
         private static bool ExceptionFieldFilter(FieldInfo field)
         {
+            if (!DefaultFieldFilter(field)) { return false; }
+
             // Any field defined below Exception is acceptable.
             if (field.DeclaringType != TypeConstants.ExceptionType) return true;
 
