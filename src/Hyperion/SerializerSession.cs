@@ -30,14 +30,14 @@ namespace Hyperion
 
         protected SerializerSession()
         {
-            _objects = new Dictionary<object, int>();
+            _objects = new Dictionary<object, int>(ReferenceEqualsComparer.Instance);
         }
 
         public SerializerSession(Serializer serializer)
         {
             if (serializer.Options.PreserveObjectReferences)
             {
-                _objects = new Dictionary<object, int>();
+                _objects = new Dictionary<object, int>(ReferenceEqualsComparer.Instance);
             }
             Reinitialize(serializer);
         }
@@ -196,8 +196,8 @@ namespace Hyperion
 
         public static PooledObject<SerializerSession> Create(Serializer serializer)
         {
-            var sb = Allocate(serializer);
-            return new PooledObject<SerializerSession>(InnerPool, sb);
+            var session = Allocate(serializer);
+            return new PooledObject<SerializerSession>(InnerPool, session);
         }
 
         public static SerializerSession Allocate(Serializer serializer)

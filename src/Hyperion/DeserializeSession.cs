@@ -195,8 +195,8 @@ namespace Hyperion
 
         public static PooledObject<DeserializerSession> Create(Serializer serializer)
         {
-            var sb = Allocate(serializer);
-            return new PooledObject<DeserializerSession>(InnerPool, sb);
+            var session = Allocate(serializer);
+            return new PooledObject<DeserializerSession>(InnerPool, session);
         }
 
         public static DeserializerSession Allocate(Serializer serializer)

@@ -53,8 +53,9 @@ namespace Hyperion.Extensions
             _primitiveTypes = new HashSet<Type>(new[]
             {
                 Int32Type, Int64Type, Int16Type, UInt32Type, UInt64Type, UInt16Type,
-                ByteType, SByteType, DateTimeType, BoolType, StringType, GuidType,
-                CombGuidType, FloatType, DoubleType, DecimalType, CharType, DateTimeOffsetType
+                ByteType, SByteType, BoolType, DateTimeType, DateTimeOffsetType, StringType,
+                GuidType, CombGuidType, FloatType, DoubleType, DecimalType, CharType,
+                typeof(TimeSpan)
             });
         }
 

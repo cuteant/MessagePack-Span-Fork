@@ -37,7 +37,8 @@ namespace MessagePack
             var ti = t.GetTypeInfo();
             if (ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(Expression<>))
             {
-                return ActivatorUtils.FastCreateInstance(typeof(SimpleHyperionFormatter<>).GetCachedGenericType(t));
+                //return ActivatorUtils.FastCreateInstance(typeof(SimpleHyperionFormatter<>).GetCachedGenericType(t));
+                return ActivatorUtils.FastCreateInstance(typeof(HyperionExpressionFormatter<>).GetCachedGenericType(t));
             }
 
             return null;

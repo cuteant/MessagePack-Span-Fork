@@ -20,14 +20,18 @@
     <Description>This package includes a mostly complete port of the MessagePack(for more info see: https://github.com/neuecc/MessagePack-CSharp/) assembly to support .NET 4.0 and newer.
 
 These types can serialize by default:
+System.Delegate
 System.Type
 System.Globalization.CultureInfo
 System.Net.IPAddress
 System.Net.IPEndPoint
 System.Reflection.ConstructorInfo
+System.Reflection.EventInfo
 System.Reflection.FieldInfo
+System.Reflection.MemberInfo
 System.Reflection.MethodInfo
 System.Reflection.PropertyInfo
+System.Linq.Expressions.*
     </Description>
     <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer, Unity, Xamarin</PackageTags>
   </PropertyGroup>

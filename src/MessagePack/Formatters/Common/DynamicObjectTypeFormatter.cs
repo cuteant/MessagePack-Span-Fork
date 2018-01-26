@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Runtime.CompilerServices;
 using CuteAnt;
 using CuteAnt.Collections;
@@ -14,12 +15,12 @@ namespace MessagePack.Formatters
     public abstract class DynamicObjectTypeFormatterBase<T> : IMessagePackFormatter<T>
     {
         private const string _syncRoot = "_syncRoot";
-        protected static readonly Func<FieldInfo, bool> DefaultFieldFilter = f =>
+        private static readonly Func<FieldInfo, bool> DefaultFieldFilter = f =>
         {
-            if (f.IsDefined(typeof(NonSerializedAttribute))) { return false; }
+            if (f.IsNotSerialized) { return false; }
+            if (f.IsDefined(typeof(IgnoreDataMemberAttribute))) { return false; }
+            if (f.IsDefined(typeof(IgnoreMemberAttribute))) { return false; }
             if (f.HasAttributeNamed("Ignore", false)) { return false; }
-            if (f.HasAttributeNamed("IgnoreDataMember", false)) { return false; }
-            if (f.HasAttributeNamed("IgnoreMember", false)) { return false; }
 
             return !string.Equals(_syncRoot, f.Name, StringComparison.Ordinal);
         };
@@ -31,7 +32,7 @@ namespace MessagePack.Formatters
         protected DynamicObjectTypeFormatterBase(Func<FieldInfo, bool> fieldFilter = null,
             IComparer<FieldInfo> fieldInfoComparer = null, Func<Type, bool> isSupportedFieldType = null)
         {
-            _fieldFilter = fieldFilter ?? DefaultFieldFilter;
+            _fieldFilter = (FieldInfo field) => DefaultFieldFilter(field) && (fieldFilter?.Invoke(field) ?? true);
             _fieldInfoComparer = fieldInfoComparer ?? FieldInfoComparer.Instance;
             _isSupportedFieldType = isSupportedFieldType ?? IsSupportedFieldType;
         }

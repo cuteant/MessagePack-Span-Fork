@@ -12,17 +12,21 @@
   <PropertyGroup Label="NuGet">
     <PackageId>MessagePack.Hyperion.Unofficial</PackageId>
     <Title>MessagePack.Hyperion (Unofficial).</Title>
-    <Description>This package includes a mostly complete port of the MessagePack(for more info see: https://github.com/neuecc/MessagePack-CSharp/) assembly to support .NET 4.0 and newer.</Description>
+    <Description>Provides extensions formatters for MessagePack that are designed to preserve object references.
+    
+Commonly Used Types:
+
+MessagePack.Formatters.SimpleHyperionFormatter
+MessagePack.Formatters.HyperionFormatter
+MessagePack.Formatters.HyperionExceptionFormatter
+MessagePack.Formatters.HyperionExpressionFormatter
+    </Description>
     <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer, Unity, Xamarin</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CuteAnt.Runtime" Version="$(CuteAntRuntimePackageVersion)" />
   </ItemGroup>
-
-  <ImportGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems" Label="Shared" />
-  </ImportGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Hyperion\Hyperion.csproj" />

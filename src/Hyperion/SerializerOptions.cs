@@ -87,7 +87,7 @@ namespace Hyperion
                 ? DefaultValueSerializerFactories
                 : serializerFactories.Concat(DefaultValueSerializerFactories).ToArray();
 
-            KnownTypes = knownTypes?.ToArray() ?? new Type[] { };
+            KnownTypes = knownTypes?.ToArray() ?? Type.EmptyTypes;
             for (var i = 0; i < KnownTypes.Length; i++)
             {
                 KnownTypesDict.Add(KnownTypes[i], (ushort)i);
@@ -97,11 +97,13 @@ namespace Hyperion
             IgnoreISerializable = ignoreISerializable;
         }
 
-        public SerializerOptions Clone(bool? versionTolerance = null)
+        public SerializerOptions Clone(bool? versionTolerance = null) => Clone(versionTolerance, null);
+
+        public SerializerOptions Clone(bool? versionTolerance, bool? preserveObjectReferences)
         {
             return new SerializerOptions(
                 versionTolerance: versionTolerance.HasValue ? versionTolerance.Value : this.VersionTolerance,
-                preserveObjectReferences: this.PreserveObjectReferences,
+                preserveObjectReferences: preserveObjectReferences.HasValue ? preserveObjectReferences.Value : this.PreserveObjectReferences,
                 surrogates: this._surrogates,
                 serializerFactories: this._serializerFactories,
                 knownTypes: this.KnownTypes,

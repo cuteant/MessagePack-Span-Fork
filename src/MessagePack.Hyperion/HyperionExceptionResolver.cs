@@ -35,7 +35,8 @@ namespace MessagePack
         {
             if (typeof(Exception).GetTypeInfo().IsAssignableFrom(t.GetTypeInfo()))
             {
-                return ActivatorUtils.FastCreateInstance(typeof(SimpleHyperionFormatter<>).GetCachedGenericType(t));
+                //return ActivatorUtils.FastCreateInstance(typeof(SimpleHyperionFormatter<>).GetCachedGenericType(t));
+                return ActivatorUtils.FastCreateInstance(typeof(HyperionExceptionFormatter<>).GetCachedGenericType(t));
             }
 
             return null;

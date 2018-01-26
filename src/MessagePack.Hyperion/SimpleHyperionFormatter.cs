@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using CuteAnt.Buffers;
 using Hyperion;
-using Hyperion.SerializerFactories;
 
 namespace MessagePack.Formatters
 {
@@ -15,11 +13,16 @@ namespace MessagePack.Formatters
 
         private readonly Serializer _serializer;
 
-        public SimpleHyperionFormatter() : this(new SerializerOptions(versionTolerance: false, preserveObjectReferences: true)) { }
+        public SimpleHyperionFormatter()
+        {
+            _serializer = new Serializer(new SerializerOptions(versionTolerance: false, preserveObjectReferences: true));
+        }
+
         public SimpleHyperionFormatter(SerializerOptions options)
         {
             if (null == options) { throw new ArgumentNullException(nameof(options)); }
-            _serializer = new Serializer(options);
+
+            _serializer = new Serializer(options.Clone(false, true));
         }
 
         public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
@@ -44,8 +47,8 @@ namespace MessagePack.Formatters
             }
 
             var bufferPool = BufferManager.Shared;
-
             byte[] buffer; int bufferSize;
+
             using (var pooledStream = BufferManagerOutputStreamManager.Create())
             {
                 var outputStream = pooledStream.Object;
@@ -55,10 +58,10 @@ namespace MessagePack.Formatters
                 buffer = outputStream.ToArray(out bufferSize);
             }
 
-            var size = MessagePackBinary.WriteBytes(ref bytes, offset, buffer, 0, bufferSize);
+            var objSize = MessagePackBinary.WriteBytes(ref bytes, offset, buffer, 0, bufferSize);
             bufferPool.Return(buffer);
 
-            return size;
+            return objSize;
         }
     }
 }
