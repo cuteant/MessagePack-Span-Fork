@@ -6,7 +6,7 @@
 //  </copyright>
 // -----------------------------------------------------------------------
 #endregion
-#if SERIALIZATION
+//#if SERIALIZATION
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -77,4 +77,4 @@ namespace Hyperion.SerializerFactories
         }
     }
 }
-#endif
+//#endif

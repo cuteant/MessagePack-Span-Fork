@@ -37,7 +37,7 @@ namespace Hyperion.Tests
 
     public class DummyException : Exception
     {
-#if SERIALIZATION
+//#if SERIALIZATION
 
       protected DummyException(
           SerializationInfo info,
@@ -45,7 +45,7 @@ namespace Hyperion.Tests
       {
       }
 
-#endif
+//#endif
     }
 
     [Fact]

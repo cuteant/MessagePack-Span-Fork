@@ -137,10 +137,10 @@ namespace Hyperion.Tests
             public string Foo { get; set; }
         }
 
-#if SERIALIZATION
+//#if SERIALIZATION
 
         [Serializable]
-#endif
+//#endif
         public sealed class Recover
         {
             public static readonly Recover Default = new Recover(SnapshotSelectionCriteria.Latest);

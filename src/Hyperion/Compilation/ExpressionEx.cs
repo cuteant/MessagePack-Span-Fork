@@ -30,7 +30,7 @@ namespace Hyperion.Compilation
         var convert = Expression.Convert(x, typeof(object));
         return convert;
       }
-#if SERIALIZATION
+//#if SERIALIZATION
       var defaultCtor = type
 #if !NET40
           .GetTypeInfo()
@@ -43,7 +43,7 @@ namespace Hyperion.Compilation
         //the ctor exists and the size is empty. lets use the New operator
         return Expression.New(defaultCtor);
       }
-#endif
+//#endif
       var emptyObjectMethod = typeof(TypeEx)
 #if !NET40
           .GetTypeInfo()

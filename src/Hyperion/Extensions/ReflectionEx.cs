@@ -13,10 +13,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-#if SERIALIZATION
-
-#endif
-
 namespace Hyperion.Extensions
 {
   internal static class BindingFlagsEx
@@ -43,9 +39,9 @@ namespace Hyperion.Extensions
                 .GetTypeInfo()
 #endif
                 .GetFields(BindingFlagsEx.All)
-#if SERIALIZATION
+//#if SERIALIZATION
                 .Where(f => !f.IsDefined(typeof(NonSerializedAttribute)))
-#endif
+//#endif
                 .Where(f => !f.IsDefined(typeof(IgnoreDataMemberAttribute)))
                 .Where(f => !f.IsDefined(typeof(IgnoreAttribute)))
                 .Where(f => !f.IsStatic)

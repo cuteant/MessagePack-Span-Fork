@@ -5,7 +5,7 @@
     <TargetFrameworks>netcoreapp2.1;netcoreapp2.0;net471;net452</TargetFrameworks>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(ImportLibs)' == 'netfx' ">
+  <PropertyGroup>
     <DefineConstants>$(DefineConstants);SERIALIZATION</DefineConstants>
   </PropertyGroup>
 

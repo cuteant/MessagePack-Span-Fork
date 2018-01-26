@@ -7,7 +7,7 @@
 // -----------------------------------------------------------------------
 #endregion
 
-#if SERIALIZATION
+//#if SERIALIZATION
 using System;
 using System.Runtime.Serialization;
 using Xunit;
@@ -182,4 +182,4 @@ namespace Hyperion.Tests
     }
   }
 }
-#endif
+//#endif

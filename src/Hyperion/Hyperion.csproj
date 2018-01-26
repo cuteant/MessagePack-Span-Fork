@@ -17,7 +17,7 @@
     <PackageTags>serialization akka.net poco</PackageTags>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(ImportLibs)' == 'netfx' ">
+  <PropertyGroup>
     <DefineConstants>$(DefineConstants);SERIALIZATION</DefineConstants>
   </PropertyGroup>
 

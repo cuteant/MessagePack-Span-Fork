@@ -15,7 +15,7 @@ namespace MessagePack.Formatters
 
         private readonly Serializer _serializer;
 
-        public SimpleHyperionFormatter() : this(new SerializerOptions(versionTolerance: false, preserveObjectReferences: true, ignoreISerializable: true)) { }
+        public SimpleHyperionFormatter() : this(new SerializerOptions(versionTolerance: false, preserveObjectReferences: true)) { }
         public SimpleHyperionFormatter(SerializerOptions options)
         {
             if (null == options) { throw new ArgumentNullException(nameof(options)); }
