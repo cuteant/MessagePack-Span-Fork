@@ -10,8 +10,8 @@
   </PropertyGroup>
   
   <PropertyGroup Label="NuGet">
-    <PackageId>MessagePack.Hyperion.Unofficial</PackageId>
-    <Title>MessagePack.Hyperion (Unofficial).</Title>
+    <PackageId>MessagePack.Hyperion</PackageId>
+    <Title>MessagePack.Hyperion</Title>
     <Description>Provides extensions formatters for MessagePack that are designed to preserve object references.
     
 Commonly Used Types:
