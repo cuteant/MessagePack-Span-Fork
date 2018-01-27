@@ -1,6 +1,6 @@
 ﻿namespace CuteAnt.Extensions.Serialization
 {
-  public enum SerializationToken
+  public enum SerializingToken
   {
     /// <summary>Using <c>Newtonsoft.Json</c> serialization.</summary>
     Json,
