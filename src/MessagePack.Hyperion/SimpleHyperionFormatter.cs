@@ -33,10 +33,12 @@ namespace MessagePack.Formatters
                 return default;
             }
 
-            var serializedObject = MessagePackBinary.ReadBytes(bytes, offset, out readSize);
-            var ms = new MemoryStream(serializedObject);
-            var result = _serializer.Deserialize<T>(ms);
-            return result;
+            var serializedObject = MessagePackBinary.ReadBytesSegment(bytes, offset, out readSize);
+            using (var ms = new MemoryStream(serializedObject.Array, serializedObject.Offset, serializedObject.Count, false))
+            {
+                var result = _serializer.Deserialize<T>(ms);
+                return result;
+            }
         }
 
         public int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)

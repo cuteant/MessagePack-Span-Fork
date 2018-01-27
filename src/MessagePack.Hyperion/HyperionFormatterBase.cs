@@ -53,38 +53,40 @@ namespace MessagePack.Formatters
             var startOffset = offset;
 
             var actualType = MessagePackBinary.ReadNamedType(bytes, offset, out var typeSize, true);
-            var serializedObject = MessagePackBinary.ReadBytes(bytes, offset + typeSize, out readSize);
+            var serializedObject = MessagePackBinary.ReadBytesSegment(bytes, offset + typeSize, out readSize);
             readSize += typeSize;
 
             var obj = ActivatorUtils.FastCreateInstance(actualType);
 
-            var ms = new MemoryStream(serializedObject);
             var session = DeserializerSessionManager.Allocate(_serializer);
 
             session.TrackDeserializedObject(obj);
             session.TrackDeserializedType(actualType);
 
-            var fields = GetFieldsFromCache(actualType);
-            foreach (var (field, getter, setter) in fields)
+            using (var ms = new MemoryStream(serializedObject.Array, serializedObject.Offset, serializedObject.Count, false))
             {
-                var fieldType = field.FieldType;
-                object fieldValue;
-                if (s_primitiveTypes.Contains(fieldType))
+                var fields = GetFieldsFromCache(actualType);
+                foreach (var (field, getter, setter) in fields)
                 {
-                    var valueSerializer = _serializer.GetSerializerByType(fieldType);
-                    fieldValue = valueSerializer.ReadValue(ms, session);
-                }
-                else
-                {
-                    var valueType = fieldType;
-                    if (fieldType.IsNullableType())
+                    var fieldType = field.FieldType;
+                    object fieldValue;
+                    if (s_primitiveTypes.Contains(fieldType))
                     {
-                        valueType = Nullable.GetUnderlyingType(fieldType);
+                        var valueSerializer = _serializer.GetSerializerByType(fieldType);
+                        fieldValue = valueSerializer.ReadValue(ms, session);
                     }
-                    var valueSerializer = _serializer.GetSerializerByType(valueType);
-                    fieldValue = ms.ReadObject(session);
+                    else
+                    {
+                        var valueType = fieldType;
+                        if (fieldType.IsNullableType())
+                        {
+                            valueType = Nullable.GetUnderlyingType(fieldType);
+                        }
+                        var valueSerializer = _serializer.GetSerializerByType(valueType);
+                        fieldValue = ms.ReadObject(session);
+                    }
+                    setter(obj, fieldValue);
                 }
-                setter(obj, fieldValue);
             }
 
             DeserializerSessionManager.Free(session);
@@ -105,9 +107,7 @@ namespace MessagePack.Formatters
                 throw new InvalidOperationException($"Type '{actualType}' is an interface or abstract class and cannot be serialized.");
             }
 
-            var startOffset = offset;
-
-            offset += MessagePackBinary.WriteNamedType(ref bytes, offset, actualType);
+            var typeSize = MessagePackBinary.WriteNamedType(ref bytes, offset, actualType);
 
             var session = SerializerSessionManager.Allocate(_serializer);
             var bufferPool = BufferManager.Shared;
@@ -146,11 +146,11 @@ namespace MessagePack.Formatters
                 buffer = outputStream.ToArray(out bufferSize);
             }
 
-            offset += MessagePackBinary.WriteBytes(ref bytes, offset, buffer, 0, bufferSize);
+            var objSize = MessagePackBinary.WriteBytes(ref bytes, offset + typeSize, buffer, 0, bufferSize);
             bufferPool.Return(buffer);
             SerializerSessionManager.Free(session);
 
-            return offset - startOffset;
+            return typeSize + objSize;
         }
     }
 }
