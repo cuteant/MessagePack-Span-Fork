@@ -60,10 +60,11 @@ namespace MessagePack.Formatters
                 buffer = outputStream.ToArray(out bufferSize);
             }
 
-            var objSize = MessagePackBinary.WriteBytes(ref bytes, offset, buffer, 0, bufferSize);
-            bufferPool.Return(buffer);
-
-            return objSize;
+            try
+            {
+                return MessagePackBinary.WriteBytes(ref bytes, offset, buffer, 0, bufferSize);
+            }
+            finally { bufferPool.Return(buffer); }
         }
     }
 }

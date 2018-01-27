@@ -58,38 +58,38 @@ namespace MessagePack.Formatters
 
             var obj = ActivatorUtils.FastCreateInstance(actualType);
 
-            var session = DeserializerSessionManager.Allocate(_serializer);
-
-            session.TrackDeserializedObject(obj);
-            session.TrackDeserializedType(actualType);
-
-            using (var ms = new MemoryStream(serializedObject.Array, serializedObject.Offset, serializedObject.Count, false))
+            using (var pooledSession = DeserializerSessionManager.Create(_serializer))
             {
-                var fields = GetFieldsFromCache(actualType);
-                foreach (var (field, getter, setter) in fields)
+                var session = pooledSession.Object;
+                session.TrackDeserializedObject(obj);
+                session.TrackDeserializedType(actualType);
+
+                using (var ms = new MemoryStream(serializedObject.Array, serializedObject.Offset, serializedObject.Count, false))
                 {
-                    var fieldType = field.FieldType;
-                    object fieldValue;
-                    if (s_primitiveTypes.Contains(fieldType))
+                    var fields = GetFieldsFromCache(actualType);
+                    foreach (var (field, getter, setter) in fields)
                     {
-                        var valueSerializer = _serializer.GetSerializerByType(fieldType);
-                        fieldValue = valueSerializer.ReadValue(ms, session);
-                    }
-                    else
-                    {
-                        var valueType = fieldType;
-                        if (fieldType.IsNullableType())
+                        var fieldType = field.FieldType;
+                        object fieldValue;
+                        if (s_primitiveTypes.Contains(fieldType))
                         {
-                            valueType = Nullable.GetUnderlyingType(fieldType);
+                            var valueSerializer = _serializer.GetSerializerByType(fieldType);
+                            fieldValue = valueSerializer.ReadValue(ms, session);
                         }
-                        var valueSerializer = _serializer.GetSerializerByType(valueType);
-                        fieldValue = ms.ReadObject(session);
+                        else
+                        {
+                            var valueType = fieldType;
+                            if (fieldType.IsNullableType())
+                            {
+                                valueType = Nullable.GetUnderlyingType(fieldType);
+                            }
+                            var valueSerializer = _serializer.GetSerializerByType(valueType);
+                            fieldValue = ms.ReadObject(session);
+                        }
+                        setter(obj, fieldValue);
                     }
-                    setter(obj, fieldValue);
                 }
             }
-
-            DeserializerSessionManager.Free(session);
 
             return obj;
         }
@@ -109,48 +109,51 @@ namespace MessagePack.Formatters
 
             var typeSize = MessagePackBinary.WriteNamedType(ref bytes, offset, actualType);
 
-            var session = SerializerSessionManager.Allocate(_serializer);
             var bufferPool = BufferManager.Shared;
             byte[] buffer; int bufferSize;
 
-            session.TrackSerializedType(actualType);
-            session.TrackSerializedObject(value);
-
-            using (var pooledStream = BufferManagerOutputStreamManager.Create())
+            using (var pooledSession = SerializerSessionManager.Create(_serializer))
             {
-                var outputStream = pooledStream.Object;
-                outputStream.Reinitialize(c_initialBufferSize, bufferPool);
+                var session = pooledSession.Object;
+                session.TrackSerializedType(actualType);
+                session.TrackSerializedObject(value);
 
-                var fields = GetFieldsFromCache(actualType);
-                foreach (var (field, getter, setter) in fields)
+                using (var pooledStream = BufferManagerOutputStreamManager.Create())
                 {
-                    var fieldType = field.FieldType;
-                    var v = getter(value);
-                    if (s_primitiveTypes.Contains(fieldType))
-                    {
-                        var valueSerializer = _serializer.GetSerializerByType(fieldType);
-                        valueSerializer.WriteValue(outputStream, v, session);
-                    }
-                    else
-                    {
-                        var valueType = fieldType;
-                        if (fieldType.IsNullableType())
-                        {
-                            valueType = Nullable.GetUnderlyingType(fieldType);
-                        }
-                        var valueSerializer = _serializer.GetSerializerByType(valueType);
-                        outputStream.WriteObject(v, valueType, valueSerializer, true, session);
-                    }
-                }
+                    var outputStream = pooledStream.Object;
+                    outputStream.Reinitialize(c_initialBufferSize, bufferPool);
 
-                buffer = outputStream.ToArray(out bufferSize);
+                    var fields = GetFieldsFromCache(actualType);
+                    foreach (var (field, getter, setter) in fields)
+                    {
+                        var fieldType = field.FieldType;
+                        var v = getter(value);
+                        if (s_primitiveTypes.Contains(fieldType))
+                        {
+                            var valueSerializer = _serializer.GetSerializerByType(fieldType);
+                            valueSerializer.WriteValue(outputStream, v, session);
+                        }
+                        else
+                        {
+                            var valueType = fieldType;
+                            if (fieldType.IsNullableType())
+                            {
+                                valueType = Nullable.GetUnderlyingType(fieldType);
+                            }
+                            var valueSerializer = _serializer.GetSerializerByType(valueType);
+                            outputStream.WriteObject(v, valueType, valueSerializer, true, session);
+                        }
+                    }
+
+                    buffer = outputStream.ToArray(out bufferSize);
+                }
             }
 
-            var objSize = MessagePackBinary.WriteBytes(ref bytes, offset + typeSize, buffer, 0, bufferSize);
-            bufferPool.Return(buffer);
-            SerializerSessionManager.Free(session);
-
-            return typeSize + objSize;
+            try
+            {
+                return MessagePackBinary.WriteBytes(ref bytes, offset + typeSize, buffer, 0, bufferSize) + typeSize;
+            }
+            finally { bufferPool.Return(buffer); }
         }
     }
 }

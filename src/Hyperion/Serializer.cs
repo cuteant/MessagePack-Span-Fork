@@ -161,14 +161,14 @@ namespace Hyperion
         {
             if (obj == null) { throw new ArgumentNullException(nameof(obj)); }
 
-            var session = SerializerSessionManager.Allocate(this);
-
-            var type = obj.GetType();
-            var s = GetSerializerByType(type);
-            s.WriteManifest(stream, session);
-            s.WriteValue(stream, obj, session);
-
-            SerializerSessionManager.Free(session);
+            using (var pooledSession = SerializerSessionManager.Create(this))
+            {
+                var session = pooledSession.Object;
+                var type = obj.GetType();
+                var s = GetSerializerByType(type);
+                s.WriteManifest(stream, session);
+                s.WriteValue(stream, obj, session);
+            }
         }
 
         public SerializerSession GetSerializerSession()
@@ -178,11 +178,12 @@ namespace Hyperion
 
         public T Deserialize<T>([NotNull] Stream stream)
         {
-            var session = DeserializerSessionManager.Allocate(this);
-            var s = GetDeserializerByManifest(stream, session);
-            var result = (T)s.ReadValue(stream, session);
-            DeserializerSessionManager.Free(session);
-            return result;
+            using (var pooledSession = DeserializerSessionManager.Create(this))
+            {
+                var session = pooledSession.Object;
+                var s = GetDeserializerByManifest(stream, session);
+                return (T)s.ReadValue(stream, session);
+            }
         }
 
         public DeserializerSession GetDeserializerSession()
@@ -198,11 +199,12 @@ namespace Hyperion
 
         public object Deserialize([NotNull] Stream stream)
         {
-            var session = DeserializerSessionManager.Allocate(this);
-            var s = GetDeserializerByManifest(stream, session);
-            var result = s.ReadValue(stream, session);
-            DeserializerSessionManager.Free(session);
-            return result;
+            using (var pooledSession = DeserializerSessionManager.Create(this))
+            {
+                var session = pooledSession.Object;
+                var s = GetDeserializerByManifest(stream, session);
+                return s.ReadValue(stream, session);
+            }
         }
 
         public object Deserialize([NotNull] Stream stream, DeserializerSession session)
