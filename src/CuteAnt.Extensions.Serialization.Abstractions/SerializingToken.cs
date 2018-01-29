@@ -14,8 +14,8 @@
     /// <summary>Using <c>MessagePack</c> serialization and the <c>LZ4</c> loseless compression.</summary>
     Lz4MessagePack,
 
-    /// <summary>Using <c>Hyperion</c> serialization.</summary>
-    Hyperion,
+    // /// <summary>Using <c>Hyperion</c> serialization.</summary>
+    // Hyperion,
 
     /// <summary>Using <c>protobuf-net</c> serialization.</summary>
     Protobuf,
