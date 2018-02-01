@@ -7,10 +7,11 @@
 //// -----------------------------------------------------------------------
 //#endregion
 
-//#if AKKA
+//#if FSHARP
+
 //using Akka.Actor;
-//#endif
-//using Hyperion.FSharpTestTypes;
+//using System.Threading;
+//using Hyperion.Tests.FSharpData;
 //using Microsoft.FSharp.Collections;
 //using Microsoft.FSharp.Control;
 //using Microsoft.FSharp.Core;
@@ -44,6 +45,16 @@
 //        }
 
 //        [Fact]
+//        public void CanSerializeFSharpSet()
+//        {
+//            var expected = SetModule.OfArray(new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
+//            Serialize(expected);
+//            Reset();
+//            var actual = Deserialize<object>();
+//            Assert.Equal(expected, actual);
+//        }
+
+//        [Fact]
 //        public void CanSerializeSimpleDU()
 //        {
 //            var expected = DU1.NewA(1);
@@ -51,6 +62,16 @@
 //            Reset();
 //            var actual = Deserialize<object>();
 //            Assert.Equal(expected,actual);
+//        }
+
+//        [Fact]
+//        public void CanSerializeStructBasedDU()
+//        {
+//            var expected = SDU1.NewB("hello", 1);
+//            Serialize(expected);
+//            Reset();
+//            var actual = Deserialize<object>();
+//            Assert.Equal(expected, actual);
 //        }
 
 //        [Fact]
@@ -83,22 +104,20 @@
 //            Assert.Equal(expected, actual);
 //        }
 
-//#if AKKA
 //        public class FooActor : UntypedActor
 //        {
 //            protected override void OnReceive(object message)
 //            {                
 //            }
 //        }
-//#endif
 
 //        [Fact]
-//        public void CanSerializeUser()
+//        public void CanSerializeRecord()
 //        {
-//                var expected = new User("foo", new FSharpOption<string>(null), "hello");
+//                var expected = new TestRecord("foo", new FSharpOption<string>(null), "hello");
 //                Serialize(expected);
 //                Reset();
-//                var actual = Deserialize<User>();
+//                var actual = Deserialize<TestRecord>();
 //               // Assert.Equal(expected, actual);
 //                Assert.Equal(expected.aref, actual.aref);
 //                Assert.Equal(expected.name, actual.name);
@@ -106,16 +125,38 @@
 
 //        }
 
+//        [Fact]
+//        public void CanSerializeStructRecord()
+//        {
+//            var expected = new TestStructRecord("foo", new FSharpOption<string>(null), "hello");
+//            Serialize(expected);
+//            Reset();
+//            var actual = Deserialize<TestStructRecord>();
+//            // Assert.Equal(expected, actual);
+//            Assert.Equal(expected.aref, actual.aref);
+//            Assert.Equal(expected.name, actual.name);
+//            Assert.Equal(expected.connections, actual.connections);
+
+//        }
+
 //        //FIXME: make F# quotations and Async serializable
-//        //[Fact]
+//        [Fact(Skip = "FIXME: problem with System.Core version=4.0")]
 //        public void CanSerializeQuotation()
 //        {
 //            var expected = TestQuotations.Quotation;
 //            Serialize(expected);
 //            Reset();
 //            var actual = Deserialize<FSharpExpr<FSharpFunc<int, FSharpAsync<int>>>>();
-//            // Assert.Equal(expected, actual);
-//            Assert.Equal(expected, actual);
+
+//            var expectedFn = QuotationEvaluator.Compile(expected);
+//            var actualFn = QuotationEvaluator.Compile(actual);
+
+//            var a = FSharpAsync.RunSynchronously(expectedFn.Invoke(5), FSharpOption<int>.None, FSharpOption<CancellationToken>.None);
+//            var b = FSharpAsync.RunSynchronously(actualFn.Invoke(5), FSharpOption<int>.None, FSharpOption<CancellationToken>.None);
+            
+//            Assert.Equal(a, b);
 //        }
 //    }
 //}
+
+//#endif
