@@ -938,8 +938,8 @@ namespace Utf8Json.Resolvers.Internal
                 il.EmitLdloc(exceptionType);
                 il.Emit(OpCodes.Ldtoken, typeof(Exception));
                 il.EmitCall(EmitInfo.GetTypeFromHandle);
-                il.EmitCall(EmitInfo.TypeOpInequality);
-                il.Emit(OpCodes.Brfalse, elseBody);
+                il.EmitCall(EmitInfo.TypeEquals);
+                il.Emit(OpCodes.Brtrue, elseBody);
 
                 il.EmitLdloc(exceptionType);
                 argWriter.EmitLoad();
@@ -1514,11 +1514,8 @@ namespace Utf8Json.Resolvers.Internal
             public static readonly MethodInfo GetUninitializedObject = ExpressionUtility.GetMethodInfo(() => System.Runtime.Serialization.FormatterServices.GetUninitializedObject(default(Type)));
 
             public static readonly MethodInfo GetTypeMethod = ExpressionUtility.GetMethodInfo((object o) => o.GetType());
-#if NET40
-            public static readonly MethodInfo TypeOpInequality = typeof(Type).GetRuntimeMethods().First(x => x.Name == "op_Inequality");
-#else
-            public static readonly MethodInfo TypeOpInequality = typeof(Type).GetTypeInfo().GetRuntimeMethods().First(x => x.Name == "op_Inequality");
-#endif
+            public static readonly MethodInfo TypeEquals = ExpressionUtility.GetMethodInfo((Type t) => t.Equals(default(Type)));
+
             public static readonly MethodInfo NongenericSerialize = ExpressionUtility.GetMethodInfo<Utf8Json.JsonWriter>(writer => JsonSerializer.NonGeneric.Serialize(default(Type), ref writer, default(object), default(IJsonFormatterResolver)));
 
             public static MethodInfo Serialize(Type type)
