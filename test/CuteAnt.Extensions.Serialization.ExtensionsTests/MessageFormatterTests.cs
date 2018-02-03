@@ -191,6 +191,35 @@ namespace CuteAnt.Extensions.Serialization.Tests
 #endif
 
     [Fact]
+    public void SerializeToBytes_WithByteArray()
+    {
+      byte[] data = new byte[1];
+      data[0] = 10;
+
+      byte[] serializedData = _formatter.Serialize(data);
+      Assert.NotNull(serializedData);
+
+      byte[] deserializedData = _formatter.Deserialize<byte[]>(serializedData);
+      Assert.NotNull(deserializedData);
+      Assert.Equal(deserializedData.Length, data.Length);
+      Assert.Equal(data[0], deserializedData[0]);
+    }
+
+    [Fact]
+    public void SerializeToBytes_WithEmptyByteArray()
+    {
+      byte[] data = new byte[0];
+      byte[] serializedData = _formatter.Serialize(data);
+      Assert.NotNull(serializedData);
+      byte[] deserializedData = _formatter.Deserialize<byte[]>(serializedData);
+      if (!(_formatter is JsvMessageFormatter))
+      {
+        Assert.NotNull(deserializedData);
+        Assert.Equal(deserializedData.Length, data.Length);
+      }
+    }
+
+    [Fact]
     public void SerializeToBytesTest()
     {
       var poco = SerializerPocoSerializable.Create();
