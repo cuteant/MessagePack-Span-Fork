@@ -177,6 +177,36 @@ namespace ServiceStack.Text.Tests
             JsConfig.Reset();
         }
 
+        [Test]
+        public void Does_write_EnumValues_when_ExcludeDefaultValues()
+        {
+            using (JsConfig.With(excludeDefaultValues:true))
+            {
+                Assert.That(new ClassWithEnums
+                {
+                    NoFlagsEnum = EnumWithoutFlags.One
+                }.ToJson(), Is.EqualTo("{\"FlagsEnum\":0,\"NoFlagsEnum\":\"One\"}"));
+
+                Assert.That(new ClassWithEnums
+                {
+                    NoFlagsEnum = EnumWithoutFlags.Zero
+                }.ToJson(), Is.EqualTo("{\"FlagsEnum\":0,\"NoFlagsEnum\":\"Zero\"}"));
+            }
+
+            using (JsConfig.With(excludeDefaultValues:true, includeDefaultEnums:false))
+            {
+                Assert.That(new ClassWithEnums
+                {
+                    NoFlagsEnum = EnumWithoutFlags.One
+                }.ToJson(), Is.EqualTo("{\"NoFlagsEnum\":\"One\"}"));
+
+                Assert.That(new ClassWithEnums
+                {
+                    NoFlagsEnum = EnumWithoutFlags.Zero
+                }.ToJson(), Is.EqualTo("{}"));
+            }
+        }
+
     }
 }
 

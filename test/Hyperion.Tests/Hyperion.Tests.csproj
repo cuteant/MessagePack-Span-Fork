@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFrameworks>$(StandardTestTfms)</TargetFrameworks>
     <RootNamespace>Hyperion.Tests</RootNamespace>
     <AssemblyName>Hyperion.Tests</AssemblyName>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp2.0;net471;net452</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -5,7 +5,7 @@ using System.Text;
 using CuteAnt;
 using CuteAnt.Buffers;
 using CuteAnt.IO;
-using CuteAnt.IO.Pipelines;
+//using CuteAnt.IO.Pipelines;
 using BenchmarkDotNet.Attributes;
 using CuteAnt.Extensions.Serialization;
 using MessagePack;
@@ -80,20 +80,20 @@ namespace PerfBenchmark
       }
     }
 
-    [Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
-    public byte[] CorefxLabPipelines()
-    {
-      using (var pooledPipe = PipelineManager.Create())
-      {
-        var pipe = pooledPipe.Object;
-        var outputStream = new PipelineStream(pipe, c_initialBufferSize);
-        _formatter.WriteToStream(_persionData, outputStream);
-        pipe.Flush();
-        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
-        var length = (int)readBuffer.Length;
-        if (c_zeroSize == length) { return EmptyArray<byte>.Instance; }
-        return readBuffer.ToArray();
-      }
-    }
+    //[Benchmark(OperationsPerInvoke = OperationsPerInvoke)]
+    //public byte[] CorefxLabPipelines()
+    //{
+    //  using (var pooledPipe = PipelineManager.Create())
+    //  {
+    //    var pipe = pooledPipe.Object;
+    //    var outputStream = new PipelineStream(pipe, c_initialBufferSize);
+    //    _formatter.WriteToStream(_persionData, outputStream);
+    //    pipe.Flush();
+    //    var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
+    //    var length = (int)readBuffer.Length;
+    //    if (c_zeroSize == length) { return EmptyArray<byte>.Instance; }
+    //    return readBuffer.ToArray();
+    //  }
+    //}
   }
 }

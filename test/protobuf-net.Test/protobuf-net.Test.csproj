@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp2.0;net452</TargetFrameworks>
+    <TargetFrameworks>$(StandardTestTfms)</TargetFrameworks>
     <RootNamespace>ProtoBuf.unittest</RootNamespace>
     <AssemblyName>protobuf-net.Test</AssemblyName>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>

@@ -311,12 +311,11 @@ namespace ServiceStack.Text.Common
 
             public bool ShouldWriteProperty(object propertyValue)
             {
-                if ((propertySuppressDefaultAttribute || JsConfig.ExcludeDefaultValues) && Equals(DefaultValue, propertyValue))
+                if ((!isEnum || !JsConfig.IncludeDefaultEnums) && (propertySuppressDefaultAttribute || JsConfig.ExcludeDefaultValues) && Equals(DefaultValue, propertyValue))
                     return false;
 
                 if (!Serializer.IncludeNullValues
-                    && (propertyValue == null
-                        || (propertySuppressDefaultConfig && Equals(DefaultValue, propertyValue))))
+                    && (propertyValue == null || (propertySuppressDefaultConfig && Equals(DefaultValue, propertyValue))))
                 {
                     return false;
                 }

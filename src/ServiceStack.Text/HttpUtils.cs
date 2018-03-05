@@ -46,7 +46,7 @@ namespace ServiceStack
             var qsPos = url.IndexOf('?');
             if (qsPos != -1)
             {
-                var existingKeyPos = qsPos + 1 == url.IndexOf(key, qsPos, PclExport.Instance.InvariantComparison)
+                var existingKeyPos = qsPos + 1 == url.IndexOf(key + "=", qsPos, PclExport.Instance.InvariantComparison)
                     ? qsPos
                     : url.IndexOf("&" + key, qsPos, PclExport.Instance.InvariantComparison);
 
@@ -85,7 +85,7 @@ namespace ServiceStack
             var hPos = url.IndexOf('#');
             if (hPos != -1)
             {
-                var existingKeyPos = hPos + 1 == url.IndexOf(key, hPos, PclExport.Instance.InvariantComparison)
+                var existingKeyPos = hPos + 1 == url.IndexOf(key + "=", hPos, PclExport.Instance.InvariantComparison)
                     ? hPos
                     : url.IndexOf("/" + key, hPos, PclExport.Instance.InvariantComparison);
 
@@ -968,7 +968,7 @@ namespace ServiceStack
         }
 
         public static void UploadFile(this WebRequest webRequest, Stream fileStream, string fileName, string mimeType,
-            string accept = null, Action<HttpWebRequest> requestFilter = null, string method = "POST")
+            string accept = null, Action<HttpWebRequest> requestFilter = null, string method = "POST", string field = "file")
         {
             var httpReq = (HttpWebRequest)webRequest;
             httpReq.Method = method;
@@ -984,10 +984,8 @@ namespace ServiceStack
 
             var boundarybytes = ("\r\n--" + boundary + "--\r\n").ToAsciiBytes();
 
-            var headerTemplate = "\r\n--" + boundary +
-                                 "\r\nContent-Disposition: form-data; name=\"file\"; filename=\"{0}\"\r\nContent-Type: {1}\r\n\r\n";
-
-            var header = string.Format(headerTemplate, fileName, mimeType);
+            var header = "\r\n--" + boundary +
+                         $"\r\nContent-Disposition: form-data; name=\"{field}\"; filename=\"{fileName}\"\r\nContent-Type: {mimeType}\r\n\r\n";
 
             var headerbytes = header.ToAsciiBytes();
 
@@ -1150,6 +1148,7 @@ namespace ServiceStack
         public const string ImagePng = "image/png";
         public const string ImageGif = "image/gif";
         public const string ImageJpg = "image/jpeg";
+        public const string ImageSvg = "image/svg+xml";
 
         public const string Bson = "application/bson";
         public const string Binary = "application/octet-stream";
