@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 using CuteAnt.Pool;
@@ -33,137 +34,146 @@ using CuteAnt.Extensions.Serialization.Json.Utilities;
 
 namespace CuteAnt.Extensions.Serialization.Json
 {
-  internal enum JsonContainerType
-  {
-    None = 0,
-    Object = 1,
-    Array = 2,
-    Constructor = 3
-  }
-
-  internal struct JsonPosition
-  {
-    private static readonly char[] SpecialCharacters = { '.', ' ', '[', ']', '(', ')' };
-
-    internal JsonContainerType Type;
-    internal int Position;
-    internal string PropertyName;
-    internal bool HasIndex;
-
-    public JsonPosition(JsonContainerType type)
+    internal enum JsonContainerType
     {
-      Type = type;
-      HasIndex = TypeHasIndex(type);
-      Position = -1;
-      PropertyName = null;
+        None = 0,
+        Object = 1,
+        Array = 2,
+        Constructor = 3
     }
 
-    internal int CalculateLength()
+    internal struct JsonPosition
     {
-      switch (Type)
-      {
-        case JsonContainerType.Object:
-          return PropertyName.Length + 5;
-        case JsonContainerType.Array:
-        case JsonContainerType.Constructor:
-          return MathUtils.IntLength((ulong)Position) + 2;
-        default:
-          throw new ArgumentOutOfRangeException(nameof(Type));
-      }
-    }
+        private static readonly char[] SpecialCharacters = { '.', ' ', '\'', '/', '"', '[', ']', '(', ')', '\t', '\n', '\r', '\f', '\b', '\\', '\u0085', '\u2028', '\u2029' };
 
-    internal void WriteTo(StringBuilder sb)
-    {
-      switch (Type)
-      {
-        case JsonContainerType.Object:
-          string propertyName = PropertyName;
-          if (propertyName.IndexOfAny(SpecialCharacters) != -1)
-          {
-            sb.Append(@"['");
-            sb.Append(propertyName);
-            sb.Append(@"']");
-          }
-          else
-          {
-            if (sb.Length > 0)
+        internal JsonContainerType Type;
+        internal int Position;
+        internal string PropertyName;
+        internal bool HasIndex;
+
+        public JsonPosition(JsonContainerType type)
+        {
+            Type = type;
+            HasIndex = TypeHasIndex(type);
+            Position = -1;
+            PropertyName = null;
+        }
+
+        internal int CalculateLength()
+        {
+            switch (Type)
             {
-              sb.Append('.');
+                case JsonContainerType.Object:
+                    return PropertyName.Length + 5;
+                case JsonContainerType.Array:
+                case JsonContainerType.Constructor:
+                    return MathUtils.IntLength((ulong)Position) + 2;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(Type));
+            }
+        }
+
+        internal void WriteTo(StringBuilder sb, ref StringWriter writer, ref char[] buffer)
+        {
+            switch (Type)
+            {
+                case JsonContainerType.Object:
+                    string propertyName = PropertyName;
+                    if (propertyName.IndexOfAny(SpecialCharacters) != -1)
+                    {
+                        sb.Append(@"['");
+
+                        if (writer == null)
+                        {
+                            writer = new StringWriter(sb);
+                        }
+
+                        JavaScriptUtils.WriteEscapedJavaScriptString(writer, propertyName, '\'', false, JavaScriptUtils.SingleQuoteCharEscapeFlags, StringEscapeHandling.Default, null, ref buffer);
+
+                        sb.Append(@"']");
+                    }
+                    else
+                    {
+                        if (sb.Length > 0)
+                        {
+                            sb.Append('.');
+                        }
+
+                        sb.Append(propertyName);
+                    }
+                    break;
+                case JsonContainerType.Array:
+                case JsonContainerType.Constructor:
+                    sb.Append('[');
+                    sb.Append(Position);
+                    sb.Append(']');
+                    break;
+            }
+        }
+
+        internal static bool TypeHasIndex(JsonContainerType type)
+        {
+            return (type == JsonContainerType.Array || type == JsonContainerType.Constructor);
+        }
+
+        internal static string BuildPath(List<JsonPosition> positions, JsonPosition? currentPosition)
+        {
+            int capacity = 0;
+            if (positions != null)
+            {
+                for (int i = 0; i < positions.Count; i++)
+                {
+                    capacity += positions[i].CalculateLength();
+                }
+            }
+            if (currentPosition != null)
+            {
+                capacity += currentPosition.GetValueOrDefault().CalculateLength();
             }
 
-            sb.Append(propertyName);
-          }
-          break;
-        case JsonContainerType.Array:
-        case JsonContainerType.Constructor:
-          sb.Append('[');
-          sb.Append(Position);
-          sb.Append(']');
-          break;
-      }
-    }
+            var sb = StringBuilderManager.Allocate(capacity);
+            StringWriter writer = null;
+            char[] buffer = null;
+            if (positions != null)
+            {
+                foreach (JsonPosition state in positions)
+                {
+                    state.WriteTo(sb, ref writer, ref buffer);
+                }
+            }
+            if (currentPosition != null)
+            {
+                currentPosition.GetValueOrDefault().WriteTo(sb, ref writer, ref buffer);
+            }
 
-    internal static bool TypeHasIndex(JsonContainerType type)
-    {
-      return (type == JsonContainerType.Array || type == JsonContainerType.Constructor);
-    }
-
-    internal static string BuildPath(List<JsonPosition> positions, JsonPosition? currentPosition)
-    {
-      int capacity = 0;
-      if (positions != null)
-      {
-        for (int i = 0; i < positions.Count; i++)
-        {
-          capacity += positions[i].CalculateLength();
-        }
-      }
-      if (currentPosition != null)
-      {
-        capacity += currentPosition.GetValueOrDefault().CalculateLength();
-      }
-
-      var sb = StringBuilderManager.Allocate(capacity);
-      if (positions != null)
-      {
-        foreach (JsonPosition state in positions)
-        {
-          state.WriteTo(sb);
-        }
-      }
-      if (currentPosition != null)
-      {
-        currentPosition.GetValueOrDefault().WriteTo(sb);
-      }
-
-      return StringBuilderManager.ReturnAndFree(sb);
-    }
-
-    internal static string FormatMessage(IJsonLineInfo lineInfo, string path, string message)
-    {
-      // don't add a fullstop and space when message ends with a new line
-      if (!message.EndsWith(Environment.NewLine, StringComparison.Ordinal))
-      {
-        message = message.Trim();
-
-        if (!message.EndsWith('.'))
-        {
-          message += ".";
+            return StringBuilderManager.ReturnAndFree(sb);
         }
 
-        message += " ";
-      }
+        internal static string FormatMessage(IJsonLineInfo lineInfo, string path, string message)
+        {
+            // don't add a fullstop and space when message ends with a new line
+            if (!message.EndsWith(Environment.NewLine, StringComparison.Ordinal))
+            {
+                message = message.Trim();
 
-      message += "Path '{0}'".FormatWith(CultureInfo.InvariantCulture, path);
+                if (!message.EndsWith('.'))
+                {
+                    message += ".";
+                }
 
-      if (lineInfo != null && lineInfo.HasLineInfo())
-      {
-        message += ", line {0}, position {1}".FormatWith(CultureInfo.InvariantCulture, lineInfo.LineNumber, lineInfo.LinePosition);
-      }
+                message += " ";
+            }
 
-      message += ".";
+            message += "Path '{0}'".FormatWith(CultureInfo.InvariantCulture, path);
 
-      return message;
+            if (lineInfo != null && lineInfo.HasLineInfo())
+            {
+                message += ", line {0}, position {1}".FormatWith(CultureInfo.InvariantCulture, lineInfo.LineNumber, lineInfo.LinePosition);
+            }
+
+            message += ".";
+
+            return message;
+        }
     }
-  }
 }

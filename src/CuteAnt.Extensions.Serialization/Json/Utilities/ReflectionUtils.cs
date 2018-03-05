@@ -653,7 +653,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
                 }
                 else
                 {
-                    IList<MemberInfo> resolvedMembers = new List<MemberInfo>();
+                    List<MemberInfo> resolvedMembers = new List<MemberInfo>();
                     foreach (MemberInfo memberInfo in groupedMember)
                     {
                         // this is a bit hacky
@@ -665,6 +665,13 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
                         }
                         else if (!IsOverridenGenericMember(memberInfo, bindingAttr) || memberInfo.Name == "Item")
                         {
+                            // two members with the same name were declared on a type
+                            // this can be done via IL emit, e.g. Moq
+                            if (resolvedMembers.Any(m => m.DeclaringType == memberInfo.DeclaringType))
+                            {
+                                continue;
+                            }
+
                             resolvedMembers.Add(memberInfo);
                         }
                     }
@@ -1110,7 +1117,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
         }
     }
 
-    internal struct TypeNameKey : IEquatable<TypeNameKey>
+    internal readonly struct TypeNameKey : IEquatable<TypeNameKey>
     {
         internal readonly string AssemblyName;
         internal readonly string TypeName;

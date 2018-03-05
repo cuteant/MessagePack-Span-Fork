@@ -58,6 +58,8 @@ namespace CuteAnt.Extensions.Serialization.Json.Serialization
         public const string ShouldSerializePrefix = "ShouldSerialize";
         public const string SpecifiedPostfix = "Specified";
 
+        public const string ConcurrentDictionaryTypeName = "System.Collections.Concurrent.ConcurrentDictionary`2";
+
         private static readonly ThreadSafeStore<Type, Func<object[], object>> CreatorCache = 
             new ThreadSafeStore<Type, Func<object[], object>>(GetCreator);
 

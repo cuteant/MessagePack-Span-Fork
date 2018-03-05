@@ -27,7 +27,7 @@ using System;
 
 namespace CuteAnt.Extensions.Serialization.Json.Utilities
 {
-    internal struct StringReference
+    internal readonly struct StringReference
     {
         private readonly char[] _chars;
         private readonly int _startIndex;
