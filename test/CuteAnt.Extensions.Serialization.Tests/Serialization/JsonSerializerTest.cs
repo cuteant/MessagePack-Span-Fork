@@ -975,6 +975,11 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
     {
       JsonSerializer serializer = new JsonSerializer();
 
+#pragma warning disable CS0618 // Type or member is obsolete
+      Assert.IsNotNull(serializer.Binder);
+#pragma warning restore CS0618 // Type or member is obsolete
+      Assert.IsNotNull(serializer.SerializationBinder);
+
       DefaultSerializationBinder customBinder = new DefaultSerializationBinder();
 #pragma warning disable CS0618 // Type or member is obsolete
       serializer.Binder = customBinder;
@@ -1094,6 +1099,11 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
     {
       JsonSerializerSettings settings = new JsonSerializerSettings();
 
+#pragma warning disable CS0618 // Type or member is obsolete
+      Assert.IsNull(settings.Binder);
+#pragma warning restore CS0618 // Type or member is obsolete
+      Assert.IsNull(settings.SerializationBinder);
+
       DefaultSerializationBinder customBinder = new DefaultSerializationBinder();
 #pragma warning disable CS0618 // Type or member is obsolete
       settings.Binder = customBinder;
@@ -1208,6 +1218,11 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
 //    public void JsonSerializerProxyProperties()
 //    {
 //      JsonSerializerProxy serializerProxy = new JsonSerializerProxy(new JsonSerializerInternalReader(new JsonSerializer()));
+
+//#pragma warning disable CS0618 // Type or member is obsolete
+//    Assert.IsNotNull(serializerProxy.Binder);
+//#pragma warning restore CS0618 // Type or member is obsolete
+//            Assert.IsNotNull(serializerProxy.SerializationBinder);
 
 //      DefaultSerializationBinder customBinder = new DefaultSerializationBinder();
 //#pragma warning disable CS0618 // Type or member is obsolete

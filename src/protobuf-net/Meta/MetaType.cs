@@ -1428,32 +1428,36 @@ namespace ProtoBuf.Meta
             if (mi == null) throw new ArgumentException("Unable to determine member: " + memberName, "memberName");
 
             Type miType;
-            // ## 苦竹 屏蔽 ##
-//#if WINRT || PORTABLE || COREFX
-//            PropertyInfo pi = mi as PropertyInfo;
-//            if (pi == null)
-//            {
-//                FieldInfo fi = mi as FieldInfo;
-//                if (fi == null)
-//                {
-//                    throw new NotSupportedException(mi.GetType().Name);
-//                }
-//                else
-//                {
-//                    miType = fi.FieldType;
-//                }
-//            }
-//            else
-//            {
-//                miType = pi.PropertyType;
-//            }
-//#else   
-            switch (mi.MemberType)
+      PropertyInfo pi = null;
+      FieldInfo fi = null;
+      // ## 苦竹 屏蔽 ##
+      //#if WINRT || PORTABLE || COREFX
+      //            pi = mi as PropertyInfo;
+      //            if (pi == null)
+      //            {
+      //                fi = mi as FieldInfo;
+      //                if (fi == null)
+      //                {
+      //                    throw new NotSupportedException(mi.GetType().Name);
+      //                }
+      //                else
+      //                {
+      //                    miType = fi.FieldType;
+      //                }
+      //            }
+      //            else
+      //            {
+      //                miType = pi.PropertyType;
+      //            }
+      //#else   
+      switch (mi.MemberType)
             {
                 case MemberTypes.Field:
-                    miType = ((FieldInfo)mi).FieldType; break;
+                    fi = (FieldInfo)mi;
+                    miType = fi.FieldType; break;
                 case MemberTypes.Property:
-                    miType = ((PropertyInfo)mi).PropertyType; break;
+                    pi = (PropertyInfo)mi;
+                    miType = pi.PropertyType; break;
                 default:
                     throw new NotSupportedException(mi.MemberType.ToString());
             }
@@ -1461,7 +1465,7 @@ namespace ProtoBuf.Meta
             ResolveListTypes(model, miType, ref itemType, ref defaultType);
 
             MemberInfo backingField = null;
-            if ((mi as PropertyInfo)?.CanWrite == false)
+            if (pi?.CanWrite == false)
             {
                 var backingMembers = type.GetMember($"<{((PropertyInfo)mi).Name}>k__BackingField", Helpers.IsEnum(type) ? BindingFlags.Static | BindingFlags.Public : BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                 if (backingMembers!= null && backingMembers.Length == 1 && (backingMembers[0] as FieldInfo) != null)

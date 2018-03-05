@@ -750,7 +750,7 @@ namespace ProtoBuf.Meta
 
                             if (type.Name == "KeyValuePair`2")
                             {
-                                message += "; please see http://stackoverflow.com/q/14436606/";
+                                message += "; please see https://stackoverflow.com/q/14436606/23354";
                             }
                             else
                             {

@@ -36,9 +36,9 @@ namespace ProtoBuf.Meta
       }
       return result;
 #else
-//#if WINRT || COREFX
-//      Attribute[] all = System.Linq.Enumerable.ToArray(type.GetTypeInfo().GetCustomAttributes(inherit));
-//#else
+      //#if WINRT || COREFX
+      //      Attribute[] all = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.OfType<Attribute>(type.GetTypeInfo().GetCustomAttributes(inherit)));
+      //#else
       Attribute[] all = type.GetAllAttributes(null, inherit).ToArray();
 //#endif
       AttributeMap[] result = new AttributeMap[all.Length];
@@ -62,9 +62,9 @@ namespace ProtoBuf.Meta
       }
       return result;
 #else
-//#if WINRT || COREFX
-//      Attribute[] all = System.Linq.Enumerable.ToArray(member.GetCustomAttributes(inherit));
-//#else
+      //#if WINRT || COREFX
+      //      Attribute[] all = System.Linq.Enumerable.ToArray(System.Linq.Enumerable.OfType<Attribute>(member.GetCustomAttributes(inherit)));
+      //#else
       Attribute[] all = member.GetAllAttributes(null, inherit).ToArray();
 //#endif
       AttributeMap[] result = new AttributeMap[all.Length];

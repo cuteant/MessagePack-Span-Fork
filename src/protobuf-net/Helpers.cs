@@ -511,7 +511,7 @@ namespace ProtoBuf
         }
         internal static ConstructorInfo[] GetConstructors(TypeInfo typeInfo, bool nonPublic)
         {
-            return typeInfo.DeclaredConstructors.Where(c => !c.IsStatic && (nonPublic || c.IsPublic)).ToArray();
+            return typeInfo.DeclaredConstructors.Where(c => !c.IsStatic && ((!nonPublic && c.IsPublic) || nonPublic)).ToArray();
         }
         internal static PropertyInfo GetProperty(Type type, string name, bool nonPublic)
         {
