@@ -5,7 +5,6 @@
     <Company>ServiceStack</Company>
     <Product>ServiceStack.Text</Product>
     <Copyright>ServiceStack 2018 and contributors</Copyright>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <PackageIconUrl></PackageIconUrl>
     <PackageProjectUrl>https://github.com/ServiceStack/ServiceStack.Text</PackageProjectUrl>
     <PackageLicenseUrl>https://servicestack.net/terms</PackageLicenseUrl>
