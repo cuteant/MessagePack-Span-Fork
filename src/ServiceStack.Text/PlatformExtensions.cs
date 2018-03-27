@@ -677,9 +677,15 @@ namespace ServiceStack
             return dict;
         }
 
-        public static object FromObjectDictionary(this Dictionary<string, object> values, Type type)
+#if NET40
+        public static object FromObjectDictionary(this IDictionary<string, object> values, Type type)
         {
-            var alreadyDict = type == typeof(Dictionary<string, object>);
+            var alreadyDict = type == typeof(IDictionary<string, object>);
+#else
+        public static object FromObjectDictionary(this IReadOnlyDictionary<string, object> values, Type type)
+        {
+            var alreadyDict = type == typeof(IReadOnlyDictionary<string, object>);
+#endif
             if (alreadyDict)
                 return true;
 
@@ -699,7 +705,11 @@ namespace ServiceStack
             return to;
         }
 
-        public static T FromObjectDictionary<T>(this Dictionary<string, object> values)
+#if NET40
+        public static T FromObjectDictionary<T>(this IDictionary<string, object> values)
+#else
+        public static T FromObjectDictionary<T>(this IReadOnlyDictionary<string, object> values)
+#endif
         {
             return (T)values.FromObjectDictionary(typeof(T));
         }
