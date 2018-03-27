@@ -1,14 +1,15 @@
-MessagePack for C#(.NET, .NET Core, Unity, Xamarin)
+MessagePack for C# (.NET, .NET Core, Unity, Xamarin)
 ===
+[![AppVeyor](https://img.shields.io/appveyor/ci/neuecc/messagepack-csharp/master.svg?label=appveyor)](https://ci.appveyor.com/project/neuecc/messagepack-csharp/branch/master) 
 [![Join the chat at https://gitter.im/MessagePack-CSharp/Lobby](https://badges.gitter.im/MessagePack-CSharp/Lobby.svg)](https://gitter.im/MessagePack-CSharp/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Releases](https://img.shields.io/github/release/neuecc/MessagePack-CSharp.svg)](https://github.com/neuecc/MessagePack-CSharp/releases)
 
-Extremely fast [MessagePack](http://msgpack.org/) serializer for C#, x10 faster than MsgPack-Cli and acquires best performance compared with all the other C# serializers. MessagePack for C# has built-in LZ4 compression which can achieve super fast and small binary size.  Performance is always important! for Game, Distributed computing, Microservices, Store data to Redis, etc.
+The extremely fast [MessagePack](http://msgpack.org/) serializer for C#. It is 10x faster than [MsgPack-Cli](https://github.com/msgpack/msgpack-cli) and outperforms other C# serializers. MessagePack for C# also ships with built-in support for LZ4 compression - an extremely fast compression algorithm. Performance is important, particularly in applications like game development, distributed computing, microservice architecture, and caching.
 
 ![image](https://cloud.githubusercontent.com/assets/46207/23835716/89c8ab08-07af-11e7-9183-9e9415bdc87f.png)
 
 MessagePack has compact binary size and full set of general purpose expression. Please see the [comparison with JSON, protobuf, ZeroFormatter section](https://github.com/neuecc/MessagePack-CSharp#compare-with-protobuf-json-zeroformatter). If you want to know why MessagePack C# is fastest, please see [performance section](https://github.com/neuecc/MessagePack-CSharp#performance).
 
-Install
+Installation
 ---
 The library provides in NuGet except for Unity.
 
@@ -476,7 +477,7 @@ Type information is serialized by mspgack `ext` format, typecode is 100.
 
 TypelessFormatter can use standalone and combinate with existing resolvers.
 
-``csharp
+```csharp
 // replace `object` uses typeless
 MessagePack.Resolvers.CompositeResolver.RegisterAndSetAsDefault(
     new[] { MessagePack.Formatters.TypelessFormatter.Instance },
@@ -734,10 +735,11 @@ Author is creating other extension packages, too.
 * [MagicOnion](https://github.com/neuecc/MagicOnion) - gRPC based HTTP/2 RPC Streaming Framework
 * [DatadogSharp](https://github.com/neuecc/DatadogSharp) - C# Datadog client
 
-You can make your own extension serializers, let's create them and share it!
+You can make your own extension serializers or integrate with framework, let's create them and share it!
 
 * [pocketberserker/MessagePack.FSharpExtensions](https://github.com/pocketberserker/MessagePack.FSharpExtensions) - supports F# list,set,map,unit,option,discriminated union
 * [WebApiContrib.Core.Formatter.MessagePack](https://github.com/WebApiContrib/WebAPIContrib.Core#formatters) - supports ASP.NET Core MVC([details in blog post](https://www.strathweb.com/2017/06/using-messagepack-with-asp-net-core-mvc/))
+* [sketch7/MessagePack.MediaTypeFormatter](https://github.com/sketch7/MessagePack.MediaTypeFormatter) - MessagePack MediaTypeFormatter
 
 High-Level API(MessagePackSerializer)
 ---
@@ -1035,9 +1037,9 @@ internal static class SampleCustomResolverGetFormatterHelper
 }
 ```
 
-MessaegPackFormatterAttribute
+MessagePackFormatterAttribute
 ---
-MessaegPackFormatterAttribute is lightweight extension point of class, struct, interface, enum and property/field. This is like JSON.NET's JsonConverterAttribute. For example, serialize private field, serialize x10 formatter.
+MessagePackFormatterAttribute is lightweight extension point of class, struct, interface, enum and property/field. This is like JSON.NET's JsonConverterAttribute. For example, serialize private field, serialize x10 formatter.
 
 ```csharp
 [MessagePackFormatter(typeof(CustomObjectFormatter))]
