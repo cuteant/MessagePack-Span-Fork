@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Runtime.Serialization;
 using CuteAnt.Pool;
 using Microsoft.Extensions.Primitives;
 using ServiceStack.Text.Common;
@@ -291,6 +292,17 @@ namespace ServiceStack.Text.Json
         public void WriteEnumFlags(TextWriter writer, object enumFlagValue)
         {
             JsWriter.WriteEnumFlags(writer, enumFlagValue);
+        }
+
+        public void WriteEnumMember(TextWriter writer, object enumValue)
+        {
+            if (enumValue == null) return;
+
+            var enumType = enumValue.GetType();
+            var mi = enumType.GetMember(enumValue.ToString());
+            var enumMemberAttr = mi[0].FirstAttribute<EnumMemberAttribute>();
+            var useValue = enumMemberAttr?.Value ?? enumValue;
+            WriteRawString(writer, useValue.ToString());
         }
 
         public ParseStringDelegate GetParseFn<T>()
