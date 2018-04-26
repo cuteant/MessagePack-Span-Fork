@@ -542,15 +542,9 @@ namespace Newtonsoft.Json
     /// <returns>A JSON string representation of the object.</returns>
     public static string SerializeObject(object value, Type type, JsonSerializerSettings settings)
     {
-      var jsonSerializer = AllocateSerializerInternal(settings);
-      try
-      {
-        return SerializeObjectInternal(value, type, jsonSerializer);
-      }
-      finally
-      {
-        FreeSerializerInternal(settings, jsonSerializer);
-      }
+      var jsonSerializer = JsonSerializer.Create(settings);
+
+      return SerializeObjectInternal(value, type, jsonSerializer);
     }
 
     /// <summary>Serializes the specified object to a JSON string using formatting and <see cref="JsonSerializerSettings"/>.</summary>
@@ -575,19 +569,10 @@ namespace Newtonsoft.Json
     /// <returns>A JSON string representation of the object.</returns>
     public static string SerializeObject(object value, Type type, Formatting formatting, JsonSerializerSettings settings)
     {
-      var jsonSerializer = AllocateSerializerInternal(settings);
-      var previousFormatting = jsonSerializer.GetFormatting();
-      try
-      {
-        jsonSerializer.Formatting = formatting;
+      var jsonSerializer = JsonSerializer.Create(settings);
+      jsonSerializer.Formatting = formatting;
 
-        return SerializeObjectInternal(value, type, jsonSerializer);
-      }
-      finally
-      {
-        jsonSerializer.SetFormatting(previousFormatting);
-        FreeSerializerInternal(settings, jsonSerializer);
-      }
+      return SerializeObjectInternal(value, type, jsonSerializer);
     }
 
     private static string SerializeObjectInternal(object value, Type type, JsonSerializer jsonSerializer)

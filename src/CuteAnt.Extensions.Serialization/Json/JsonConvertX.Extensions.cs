@@ -491,15 +491,9 @@ namespace Newtonsoft.Json
     /// <returns>A JSON string representation of the object.</returns>
     public static byte[] SerializeToByteArray(object value, Type type, JsonSerializerSettings settings, int initialBufferSize = c_initialBufferSize)
     {
-      var jsonSerializer = AllocateSerializerInternal(settings);
-      try
-      {
-        return SerializeToByteArrayInternal(value, type, jsonSerializer, initialBufferSize);
-      }
-      finally
-      {
-        FreeSerializerInternal(settings, jsonSerializer);
-      }
+      var jsonSerializer = JsonSerializer.Create(settings);
+
+      return SerializeToByteArrayInternal(value, type, jsonSerializer, initialBufferSize);
     }
 
     /// <summary>Serializes the specified object to a JSON byte array using formatting and <see cref="JsonSerializerSettings"/>.</summary>
@@ -526,24 +520,15 @@ namespace Newtonsoft.Json
     /// <returns>A JSON string representation of the object.</returns>
     public static byte[] SerializeToByteArray(object value, Type type, Formatting formatting, JsonSerializerSettings settings, int initialBufferSize = c_initialBufferSize)
     {
-      var jsonSerializer = AllocateSerializerInternal(settings);
-      var previousFormatting = jsonSerializer.GetFormatting();
-      try
-      {
-        jsonSerializer.Formatting = formatting;
+      var jsonSerializer = JsonSerializer.Create(settings);
+      jsonSerializer.Formatting = formatting;
 
-        return SerializeToByteArrayInternal(value, type, jsonSerializer, initialBufferSize);
-      }
-      finally
-      {
-        jsonSerializer.SetFormatting(previousFormatting);
-        FreeSerializerInternal(settings, jsonSerializer);
-      }
+      return SerializeToByteArrayInternal(value, type, jsonSerializer, initialBufferSize);
     }
 
     private static byte[] SerializeToByteArrayInternal(object value, Type type, JsonSerializer jsonSerializer, int initialBufferSize = c_initialBufferSize)
     {
-//#if NET40
+      //#if NET40
       using (var pooledOutputStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledOutputStream.Object;
@@ -559,26 +544,26 @@ namespace Newtonsoft.Json
         }
         return outputStream.ToByteArray();
       }
-//#else
-//      using (var pooledPipe = PipelineManager.Create())
-//      {
-//        var pipe = pooledPipe.Object;
-//        var outputStream = new PipelineStream(pipe, initialBufferSize);
-//        using (JsonTextWriter jsonWriter = new JsonTextWriter(new StreamWriterX(outputStream)))
-//        {
-//          jsonWriter.ArrayPool = GlobalCharacterArrayPool;
-//          //jsonWriter.CloseOutput = false;
-//          jsonWriter.Formatting = jsonSerializer.Formatting;
+      //#else
+      //      using (var pooledPipe = PipelineManager.Create())
+      //      {
+      //        var pipe = pooledPipe.Object;
+      //        var outputStream = new PipelineStream(pipe, initialBufferSize);
+      //        using (JsonTextWriter jsonWriter = new JsonTextWriter(new StreamWriterX(outputStream)))
+      //        {
+      //          jsonWriter.ArrayPool = GlobalCharacterArrayPool;
+      //          //jsonWriter.CloseOutput = false;
+      //          jsonWriter.Formatting = jsonSerializer.Formatting;
 
-//          jsonSerializer.Serialize(jsonWriter, value, type);
-//          jsonWriter.Flush();
-//        }
-//        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
-//        var length = (int)readBuffer.Length;
-//        if (c_zeroSize == length) { return EmptyArray<byte>.Instance; }
-//        return readBuffer.ToArray();
-//      }
-//#endif
+      //          jsonSerializer.Serialize(jsonWriter, value, type);
+      //          jsonWriter.Flush();
+      //        }
+      //        var readBuffer = pipe.Reader.ReadAsync().GetResult().Buffer;
+      //        var length = (int)readBuffer.Length;
+      //        if (c_zeroSize == length) { return EmptyArray<byte>.Instance; }
+      //        return readBuffer.ToArray();
+      //      }
+      //#endif
     }
 
     #endregion
@@ -664,15 +649,9 @@ namespace Newtonsoft.Json
     /// <returns>A JSON string representation of the object.</returns>
     public static ArraySegment<Byte> SerializeToArraySegment(object value, Type type, JsonSerializerSettings settings, int initialBufferSize = c_initialBufferSize)
     {
-      var jsonSerializer = AllocateSerializerInternal(settings);
-      try
-      {
-        return SerializeToArraySegmentInternal(value, type, jsonSerializer, initialBufferSize);
-      }
-      finally
-      {
-        FreeSerializerInternal(settings, jsonSerializer);
-      }
+      var jsonSerializer = JsonSerializer.Create(settings);
+
+      return SerializeToArraySegmentInternal(value, type, jsonSerializer, initialBufferSize);
     }
 
     /// <summary>Serializes the specified object to a JSON byte array using formatting and <see cref="JsonSerializerSettings"/>.</summary>
@@ -699,19 +678,10 @@ namespace Newtonsoft.Json
     /// <returns>A JSON string representation of the object.</returns>
     public static ArraySegment<Byte> SerializeToArraySegment(object value, Type type, Formatting formatting, JsonSerializerSettings settings, int initialBufferSize = c_initialBufferSize)
     {
-      var jsonSerializer = AllocateSerializerInternal(settings);
-      var previousFormatting = jsonSerializer.GetFormatting();
-      try
-      {
-        jsonSerializer.Formatting = formatting;
+      var jsonSerializer = JsonSerializer.Create(settings);
+      jsonSerializer.Formatting = formatting;
 
-        return SerializeToArraySegmentInternal(value, type, jsonSerializer, initialBufferSize);
-      }
-      finally
-      {
-        jsonSerializer.SetFormatting(previousFormatting);
-        FreeSerializerInternal(settings, jsonSerializer);
-      }
+      return SerializeToArraySegmentInternal(value, type, jsonSerializer, initialBufferSize);
     }
 
     private static ArraySegment<Byte> SerializeToArraySegmentInternal(object value, Type type, JsonSerializer jsonSerializer, int initialBufferSize = c_initialBufferSize)
@@ -1112,15 +1082,9 @@ namespace Newtonsoft.Json
     /// Specifying the type is optional.</param>
     public static void SerializeToStream(Stream stream, object value, Type type, JsonSerializerSettings settings)
     {
-      var jsonSerializer = AllocateSerializerInternal(settings);
-      try
-      {
-        SerializeToStreamInternal(stream, value, type, jsonSerializer);
-      }
-      finally
-      {
-        FreeSerializerInternal(settings, jsonSerializer);
-      }
+      var jsonSerializer = JsonSerializer.Create(settings);
+
+      SerializeToStreamInternal(stream, value, type, jsonSerializer);
     }
 
     /// <summary>Serializes the specified object to a <see cref="Stream"/> using formatting and <see cref="JsonSerializerSettings"/>.</summary>
@@ -1145,19 +1109,10 @@ namespace Newtonsoft.Json
     /// Specifying the type is optional.</param>
     public static void SerializeToStream(Stream stream, object value, Type type, Formatting formatting, JsonSerializerSettings settings)
     {
-      var jsonSerializer = AllocateSerializerInternal(settings);
-      var previousFormatting = jsonSerializer.GetFormatting();
-      try
-      {
-        jsonSerializer.Formatting = formatting;
+      var jsonSerializer = JsonSerializer.Create(settings);
+      jsonSerializer.Formatting = formatting;
 
-        SerializeToStreamInternal(stream, value, type, jsonSerializer);
-      }
-      finally
-      {
-        jsonSerializer.SetFormatting(previousFormatting);
-        FreeSerializerInternal(settings, jsonSerializer);
-      }
+      SerializeToStreamInternal(stream, value, type, jsonSerializer);
     }
 
     private static void SerializeToStreamInternal(Stream stream, object value, Type type, JsonSerializer jsonSerializer)
@@ -1382,15 +1337,9 @@ namespace Newtonsoft.Json
     /// Specifying the type is optional.</param>
     public static void SerializeToWriter(TextWriter textWriter, object value, Type type, JsonSerializerSettings settings)
     {
-      var jsonSerializer = AllocateSerializerInternal(settings);
-      try
-      {
-        SerializeToWriterInternal(textWriter, value, type, jsonSerializer);
-      }
-      finally
-      {
-        FreeSerializerInternal(settings, jsonSerializer);
-      }
+      var jsonSerializer = JsonSerializer.Create(settings);
+
+      SerializeToWriterInternal(textWriter, value, type, jsonSerializer);
     }
 
     /// <summary>Serializes the specified object to a <see cref="TextWriter"/> using formatting and <see cref="JsonSerializerSettings"/>.</summary>
@@ -1415,19 +1364,10 @@ namespace Newtonsoft.Json
     /// Specifying the type is optional.</param>
     public static void SerializeToWriter(TextWriter textWriter, object value, Type type, Formatting formatting, JsonSerializerSettings settings)
     {
-      var jsonSerializer = AllocateSerializerInternal(settings);
-      var previousFormatting = jsonSerializer.GetFormatting();
-      try
-      {
-        jsonSerializer.Formatting = formatting;
+      var jsonSerializer = JsonSerializer.Create(settings);
+      jsonSerializer.Formatting = formatting;
 
-        SerializeToWriterInternal(textWriter, value, type, jsonSerializer);
-      }
-      finally
-      {
-        jsonSerializer.SetFormatting(previousFormatting);
-        FreeSerializerInternal(settings, jsonSerializer);
-      }
+      SerializeToWriterInternal(textWriter, value, type, jsonSerializer);
     }
 
     private static void SerializeToWriterInternal(TextWriter textWriter, object value, Type type, JsonSerializer jsonSerializer)

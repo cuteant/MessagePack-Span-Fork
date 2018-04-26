@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using CuteAnt.Text;
 using Microsoft.Extensions.Logging;
+using System.Runtime.ExceptionServices;
 using Newtonsoft.Json;
 #if !NET40
 using System.Threading.Tasks;
@@ -285,23 +286,60 @@ namespace CuteAnt.Extensions.Serialization
           jsonSerializer.CheckAdditionalContent = true;
         }
 
-        // Error must always be marked as handled
-        // Failure to do so can cause the exception to be rethrown at every recursive level and overflow the stack for x64 CLR processes
-        EventHandler<Newtonsoft.Json.Serialization.ErrorEventArgs> errorHandler = JsonErrorHandler;
-        jsonSerializer.Error += errorHandler;
+        var successful = true;
+        Exception exception = null;
+        void ErrorHandler(object sender, Newtonsoft.Json.Serialization.ErrorEventArgs eventArgs)
+        {
+          successful = false;
 
+          var errorContext = eventArgs.ErrorContext;
+
+          s_logger.LogError(errorContext.Error, "JSON deserialization threw an exception.");
+
+          exception = errorContext.Error;
+
+          // Error must always be marked as handled
+          // Failure to do so can cause the exception to be rethrown at every recursive level and
+          // overflow the stack for x64 CLR processes
+          errorContext.Handled = true;
+        }
+        jsonSerializer.Error += ErrorHandler;
+
+        object model;
         try
         {
-          return jsonSerializer.Deserialize(jsonReader, type);
+          model = jsonSerializer.Deserialize(jsonReader, type);
         }
         finally
         {
           // Clean up the error handler in case CreateJsonSerializer() reuses a serializer
-          jsonSerializer.Error -= errorHandler;
+          jsonSerializer.Error -= ErrorHandler;
           if (isCheckAdditionalContentNoSet) { jsonSerializer.SetCheckAdditionalContent(); }
           //ReleaseJsonSerializer(serializerSettings, jsonSerializer);
           JsonConvertX.FreeSerializer(serializerSettings, jsonSerializer);
         }
+
+        if (!successful)
+        {
+          switch (exception)
+          {
+            case JsonException jsonException:
+              break;
+            case OverflowException overflowException:
+              break;
+
+            default:
+#if NET40
+              throw exception;
+#else
+              var exceptionDispatchInfo = ExceptionDispatchInfo.Capture(exception);
+              exceptionDispatchInfo.Throw();
+#endif
+              break;
+          }
+        }
+
+        return model;
       }
     }
 
@@ -374,11 +412,8 @@ namespace CuteAnt.Extensions.Serialization
 
       using (JsonWriter jsonWriter = CreateJsonWriter(writeStream, effectiveEncoding, _charPool, JsonFormatting))
       {
-        //jsonWriter.CloseOutput = false;
-
         if (null == serializerSettings) { serializerSettings = _defaultSerializerSettings; }
-        //var jsonSerializer = CreateJsonSerializerInternal(serializerSettings);
-        var jsonSerializer = JsonConvertX.AllocateSerializer(serializerSettings);
+        var jsonSerializer = JsonSerializer.Create(serializerSettings);
         if (null == JsonFormatting)
         {
           jsonSerializer.Serialize(jsonWriter, value, type);
@@ -392,8 +427,6 @@ namespace CuteAnt.Extensions.Serialization
           jsonWriter.Flush();
           jsonSerializer.SetFormatting(previousFormatting);
         }
-        //ReleaseJsonSerializer(serializerSettings, jsonSerializer);
-        JsonConvertX.FreeSerializer(serializerSettings, jsonSerializer);
       }
     }
 
@@ -406,7 +439,12 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (null == effectiveEncoding) { effectiveEncoding = StringHelper.SecureUTF8NoBOM; }
 
-      var jsonWriter = new JsonTextWriter(new StreamWriterX(writeStream, effectiveEncoding)) { ArrayPool = charPool };
+      var jsonWriter = new JsonTextWriter(new StreamWriterX(writeStream, effectiveEncoding))
+      {
+        ArrayPool = charPool,
+        CloseOutput = false,
+        AutoCompleteOnClose = false
+      };
       if (Formatting.Indented == jsonFormatting.GetValueOrDefault())
       {
         jsonWriter.Formatting = Formatting.Indented;
