@@ -129,6 +129,14 @@ namespace MessagePack
             stream.Write(buffer, 0, len);
         }
 
+        /// <summary>
+        /// Reflect of resolver.GetFormatterWithVerify[T].Serialize.
+        /// </summary>
+        public static int Serialize<T>(ref byte[] bytes, int offset, T value, IFormatterResolver resolver)
+        {
+            return resolver.GetFormatterWithVerify<T>().Serialize(ref bytes, offset, value, resolver);
+        }
+
 #if NETSTANDARD || DESKTOPCLR
 
 #if !NET40
@@ -276,6 +284,14 @@ namespace MessagePack
                 if (c_zeroSize == inputLength) { return default; }
                 return formatter.Deserialize(bytes, 0, resolver, out int readSize);
             }
+        }
+
+        /// <summary>
+        /// Reflect of resolver.GetFormatterWithVerify[T].Deserialize.
+        /// </summary>
+        public static T Deserialize<T>(byte[] bytes, int offset, IFormatterResolver resolver, out int readSize)
+        {
+            return resolver.GetFormatterWithVerify<T>().Deserialize(bytes, offset, resolver, out readSize);
         }
 
 #if NETSTANDARD || DESKTOPCLR
