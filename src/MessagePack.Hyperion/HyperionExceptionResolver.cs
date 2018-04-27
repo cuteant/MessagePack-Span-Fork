@@ -7,7 +7,7 @@ namespace MessagePack
 {
     public sealed class HyperionExceptionResolver : IFormatterResolver
     {
-        public static IFormatterResolver Instance = new HyperionExceptionResolver();
+        public static readonly IFormatterResolver Instance = new HyperionExceptionResolver();
 
         HyperionExceptionResolver()
         {

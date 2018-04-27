@@ -9,7 +9,7 @@ namespace Utf8Json.ImmutableCollection
 {
     public sealed class ImmutableCollectionResolver : IJsonFormatterResolver
     {
-        public static IJsonFormatterResolver Instance = new ImmutableCollectionResolver();
+        public static readonly IJsonFormatterResolver Instance = new ImmutableCollectionResolver();
 
         ImmutableCollectionResolver()
         {

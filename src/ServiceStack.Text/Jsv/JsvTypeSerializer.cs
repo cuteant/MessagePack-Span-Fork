@@ -14,7 +14,7 @@ namespace ServiceStack.Text.Jsv
     public class JsvTypeSerializer
         : ITypeSerializer
     {
-        public static ITypeSerializer Instance = new JsvTypeSerializer();
+        public static readonly ITypeSerializer Instance = new JsvTypeSerializer();
 
         public Func<StringSegment, object> ObjectDeserializer { get; set; }
 

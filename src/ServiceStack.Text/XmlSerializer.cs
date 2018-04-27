@@ -12,7 +12,7 @@ namespace ServiceStack.Text
         public static readonly XmlWriterSettings XmlWriterSettings = new XmlWriterSettings();
         public static readonly XmlReaderSettings XmlReaderSettings = new XmlReaderSettings();
 
-        public static XmlSerializer Instance = new XmlSerializer();
+        public static readonly XmlSerializer Instance = new XmlSerializer();
 
         public XmlSerializer(bool omitXmlDeclaration = false, int maxCharsInDocument = 1024 * 1024)
         {

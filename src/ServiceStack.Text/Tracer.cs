@@ -5,7 +5,7 @@ namespace ServiceStack.Text
 {
     public class Tracer
     {
-        public static ITracer Instance = new MsLoggingTracer();
+        public static readonly ITracer Instance = new MsLoggingTracer();
 
         public class NullTracer : ITracer
         {

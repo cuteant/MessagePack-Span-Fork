@@ -17,7 +17,7 @@ namespace MessagePack.Resolvers
     /// </summary>
     public sealed class TypelessObjectResolver : IFormatterResolver
     {
-        public static IFormatterResolver Instance = new TypelessObjectResolver();
+        public static readonly IFormatterResolver Instance = new TypelessObjectResolver();
 
         TypelessObjectResolver()
         {
@@ -46,7 +46,7 @@ namespace MessagePack.Resolvers
 
     internal sealed class ForceSizePrimitiveObjectResolver : IFormatterResolver
     {
-        public static IFormatterResolver Instance = new ForceSizePrimitiveObjectResolver();
+        public static readonly IFormatterResolver Instance = new ForceSizePrimitiveObjectResolver();
 
         ForceSizePrimitiveObjectResolver()
         {
@@ -114,7 +114,7 @@ namespace MessagePack.Resolvers
 
     internal sealed class TypelessFormatterFallbackResolver : IFormatterResolver
     {
-        public static IFormatterResolver Instance = new TypelessFormatterFallbackResolver();
+        public static readonly IFormatterResolver Instance = new TypelessFormatterFallbackResolver();
 
         static IMessagePackFormatter<object> fallbackFormatter = new DynamicObjectTypeFallbackFormatter(
             ForceSizePrimitiveObjectResolver.Instance,

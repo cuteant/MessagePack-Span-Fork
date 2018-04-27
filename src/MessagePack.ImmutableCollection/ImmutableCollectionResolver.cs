@@ -9,7 +9,7 @@ namespace MessagePack.ImmutableCollection
 {
     public sealed class ImmutableCollectionResolver : IFormatterResolver
     {
-        public static IFormatterResolver Instance = new ImmutableCollectionResolver();
+        public static readonly IFormatterResolver Instance = new ImmutableCollectionResolver();
 
         ImmutableCollectionResolver()
         {

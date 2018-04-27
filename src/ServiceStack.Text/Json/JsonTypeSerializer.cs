@@ -15,7 +15,7 @@ namespace ServiceStack.Text.Json
     public class JsonTypeSerializer
         : ITypeSerializer
     {
-        public static ITypeSerializer Instance = new JsonTypeSerializer();
+        public static readonly ITypeSerializer Instance = new JsonTypeSerializer();
 
         public Func<StringSegment, object> ObjectDeserializer { get; set; }
 

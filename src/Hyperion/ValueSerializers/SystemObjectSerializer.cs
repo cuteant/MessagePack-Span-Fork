@@ -15,7 +15,7 @@ namespace Hyperion.ValueSerializers
     internal sealed class SystemObjectSerializer : ValueSerializer
     {
         public const byte Manifest = 1;
-        public static SystemObjectSerializer Instance = new SystemObjectSerializer();
+        public static readonly SystemObjectSerializer Instance = new SystemObjectSerializer();
         public override void WriteManifest(Stream stream, SerializerSession session)
         {
             stream.WriteByte(Manifest);

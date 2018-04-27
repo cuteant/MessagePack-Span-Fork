@@ -8,7 +8,7 @@ namespace MessagePack
 {
     public sealed class HyperionExpressionResolver : IFormatterResolver
     {
-        public static IFormatterResolver Instance = new HyperionExpressionResolver();
+        public static readonly IFormatterResolver Instance = new HyperionExpressionResolver();
 
         HyperionExpressionResolver()
         {

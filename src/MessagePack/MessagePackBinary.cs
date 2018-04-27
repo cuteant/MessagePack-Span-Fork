@@ -3574,7 +3574,7 @@ namespace MessagePack.Decoders
 
     internal sealed class True : IBooleanDecoder
     {
-        internal static IBooleanDecoder Instance = new True();
+        internal static readonly IBooleanDecoder Instance = new True();
 
         True() { }
 
@@ -3586,7 +3586,7 @@ namespace MessagePack.Decoders
 
     internal sealed class False : IBooleanDecoder
     {
-        internal static IBooleanDecoder Instance = new False();
+        internal static readonly IBooleanDecoder Instance = new False();
 
         False() { }
 
@@ -3598,7 +3598,7 @@ namespace MessagePack.Decoders
 
     internal sealed class InvalidBoolean : IBooleanDecoder
     {
-        internal static IBooleanDecoder Instance = new InvalidBoolean();
+        internal static readonly IBooleanDecoder Instance = new InvalidBoolean();
 
         InvalidBoolean() { }
 
