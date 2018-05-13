@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using CuteAnt.Pool;
 
 namespace ServiceStack.Text.Support
@@ -35,7 +36,7 @@ namespace ServiceStack.Text.Support
 
                 if (remainingSecs > 0)
                 {
-                    var secFmt = string.Format("{0:0.0000000}", remainingSecs);
+                    var secFmt = string.Format(CultureInfo.InvariantCulture, "{0:0.0000000}", remainingSecs);
                     secFmt = secFmt.TrimEnd('0').TrimEnd('.');
                     sb.Append(secFmt + "S");
                 }
@@ -95,7 +96,7 @@ namespace ServiceStack.Text.Support
                 if (s.Length == 2)
                 {
                     decimal millis;
-                    if (decimal.TryParse(s[0], out millis))
+                    if (decimal.TryParse(s[0], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out millis))
                         seconds = millis;
                 }
             }

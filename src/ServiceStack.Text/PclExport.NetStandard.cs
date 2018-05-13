@@ -57,22 +57,22 @@ namespace ServiceStack
         static readonly Action<HttpWebRequest, string> SetUserAgentDelegate =
             (Action<HttpWebRequest, string>)typeof(HttpWebRequest)
                 .GetProperty("UserAgent")
-                ?.GetSetMethod(nonPublic:true)?.CreateDelegate(typeof(Action<HttpWebRequest, string>));
+                ?.GetSetMethod(nonPublic: true)?.CreateDelegate(typeof(Action<HttpWebRequest, string>));
 
         static readonly Action<HttpWebRequest, bool> SetAllowAutoRedirectDelegate =
             (Action<HttpWebRequest, bool>)typeof(HttpWebRequest)
                 .GetProperty("AllowAutoRedirect")
-                ?.GetSetMethod(nonPublic:true)?.CreateDelegate(typeof(Action<HttpWebRequest, bool>));
+                ?.GetSetMethod(nonPublic: true)?.CreateDelegate(typeof(Action<HttpWebRequest, bool>));
 
         static readonly Action<HttpWebRequest, bool> SetKeepAliveDelegate =
             (Action<HttpWebRequest, bool>)typeof(HttpWebRequest)
                 .GetProperty("KeepAlive")
-                ?.GetSetMethod(nonPublic:true)?.CreateDelegate(typeof(Action<HttpWebRequest, bool>));
+                ?.GetSetMethod(nonPublic: true)?.CreateDelegate(typeof(Action<HttpWebRequest, bool>));
 
         static readonly Action<HttpWebRequest, long> SetContentLengthDelegate =
             (Action<HttpWebRequest, long>)typeof(HttpWebRequest)
                 .GetProperty("ContentLength")
-                ?.GetSetMethod(nonPublic:true)?.CreateDelegate(typeof(Action<HttpWebRequest, long>));
+                ?.GetSetMethod(nonPublic: true)?.CreateDelegate(typeof(Action<HttpWebRequest, long>));
 
         private bool allowToChangeRestrictedHeaders;
 
@@ -80,36 +80,26 @@ namespace ServiceStack
         {
             this.SupportsEmit = SupportsExpression = true;
             this.PlatformName = Platforms.NetStandard;
-#if NETSTANDARD2_0
             this.DirSep = Path.DirectorySeparatorChar;
-#else 
-            this.DirSep = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? '\\' : '/';
-#endif
-            var req = HttpWebRequest.Create("http://servicestack.net");
-            try
-            {
-                req.Headers[HttpRequestHeader.UserAgent] = "ServiceStack";
-                allowToChangeRestrictedHeaders = true;
-            } catch (ArgumentException)
-            {
-                allowToChangeRestrictedHeaders = false;
-            }
+            //var req = HttpWebRequest.Create("http://servicestack.net");
+            //try
+            //{
+            //    req.Headers[HttpRequestHeader.UserAgent] = "ServiceStack";
+            //    allowToChangeRestrictedHeaders = true;
+            //} catch (ArgumentException)
+            //{
+            //    allowToChangeRestrictedHeaders = false;
+            //}
         }
 
         public override string ReadAllText(string filePath)
         {
-            //NET Standard 1.1 does not supported Stream Reader with string constructor
-#if NETSTANDARD2_0
             using (StreamReader rdr = File.OpenText(filePath))
             {
                 return rdr.ReadToEnd();
             }
-#else            
-            return String.Empty;
-#endif
         }
 
-#if NETSTANDARD2_0
         public override bool FileExists(string filePath)
         {
             return File.Exists(filePath);
@@ -175,54 +165,32 @@ namespace ServiceStack
             }
             return relativePath;
         }
-#endif
         public static PclExport Configure()
         {
             Configure(Provider);
             return Provider;
         }
 
-        public override string GetEnvironmentVariable(string name)
-        {
-#if NETSTANDARD2_0
-            return Environment.GetEnvironmentVariable(name);
-#else
-            return null;
-#endif
-        }
+        public override string GetEnvironmentVariable(string name) => Environment.GetEnvironmentVariable(name);
 
-//        public override void WriteLine(string line)
-//        {
-//#if NETSTANDARD2_0
-//            Console.WriteLine(line);
-//#else
-//            System.Diagnostics.Debug.WriteLine(line);
-//#endif
-//        }
-
-//        public override void WriteLine(string format, params object[] args)
-//        {
-//#if NETSTANDARD2_0
-//            Console.WriteLine(format, args);
-//#else
-//            System.Diagnostics.Debug.WriteLine(format, args);
-//#endif
-//        }
-
-#if NETSTANDARD2_0
         public override void AddCompression(WebRequest webReq)
         {
-            var httpReq = (HttpWebRequest)webReq;
-            //TODO: Restore when AutomaticDecompression added to WebRequest
-            //httpReq.Headers[HttpRequestHeader.AcceptEncoding] = "gzip,deflate";
-            //httpReq.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+            try
+            {
+                var httpReq = (HttpWebRequest)webReq;
+                httpReq.Headers[HttpRequestHeader.AcceptEncoding] = "gzip,deflate";
+                httpReq.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+            }
+            catch (Exception ex)
+            {
+                Tracer.Instance.WriteError(ex);
+            }
         }
 
         public override void AddHeader(WebRequest webReq, string name, string value)
         {
             webReq.Headers[name] = value;
         }
-#endif
 
         public override Assembly[] GetAllAssemblies()
         {
@@ -237,7 +205,6 @@ namespace ServiceStack
             return codeBase;
         }
 
-#if NETSTANDARD2_0
         public override string GetAssemblyPath(Type source)
         {
             var codeBase = GetAssemblyCodeBase(source.GetTypeInfo().Assembly);
@@ -257,7 +224,6 @@ namespace ServiceStack
         {
             return System.Text.Encoding.ASCII.GetBytes(str);
         }
-#endif
 
         public override bool InSameAssembly(Type t1, Type t2)
         {
@@ -274,9 +240,7 @@ namespace ServiceStack
         public override MemberGetter CreateGetter(PropertyInfo propertyInfo)
         {
             return
-#if NETSTANDARD2_0
                 SupportsEmit ? PropertyInvoker.CreateEmitGetter(propertyInfo) :
-#endif
                 SupportsExpression
                     ? PropertyInvoker.CreateExpressionGetter(propertyInfo)
                     : base.CreateGetter(propertyInfo);
@@ -285,9 +249,7 @@ namespace ServiceStack
         public override MemberGetter<T> CreateGetter<T>(PropertyInfo propertyInfo)
         {
             return
-#if NETSTANDARD2_0
                 SupportsEmit ? PropertyInvoker<T>.CreateEmitGetter(propertyInfo) :
-#endif
                 SupportsExpression
                     ? PropertyInvoker<T>.CreateExpressionGetter(propertyInfo)
                     : base.CreateGetter<T>(propertyInfo);
@@ -296,9 +258,7 @@ namespace ServiceStack
         public override MemberSetter CreateSetter(PropertyInfo propertyInfo)
         {
             return
-#if NETSTANDARD2_0
                 SupportsEmit ? PropertyInvoker.CreateEmitSetter(propertyInfo) :
-#endif
                 SupportsExpression
                     ? PropertyInvoker.CreateExpressionSetter(propertyInfo)
                     : base.CreateSetter(propertyInfo);
@@ -314,9 +274,7 @@ namespace ServiceStack
         public override MemberGetter CreateGetter(FieldInfo fieldInfo)
         {
             return
-#if NETSTANDARD2_0
                 SupportsEmit ? FieldInvoker.CreateEmitGetter(fieldInfo) :
-#endif
                 SupportsExpression
                     ? FieldInvoker.CreateExpressionGetter(fieldInfo)
                     : base.CreateGetter(fieldInfo);
@@ -325,9 +283,7 @@ namespace ServiceStack
         public override MemberGetter<T> CreateGetter<T>(FieldInfo fieldInfo)
         {
             return
-#if NETSTANDARD2_0
                 SupportsEmit ? FieldInvoker<T>.CreateEmitGetter(fieldInfo) :
-#endif
                 SupportsExpression
                     ? FieldInvoker<T>.CreateExpressionGetter(fieldInfo)
                     : base.CreateGetter<T>(fieldInfo);
@@ -336,9 +292,7 @@ namespace ServiceStack
         public override MemberSetter CreateSetter(FieldInfo fieldInfo)
         {
             return
-#if NETSTANDARD2_0
                 SupportsEmit ? FieldInvoker.CreateEmitSetter(fieldInfo) :
-#endif
                 SupportsExpression
                     ? FieldInvoker.CreateExpressionSetter(fieldInfo)
                     : base.CreateSetter(fieldInfo);
@@ -353,7 +307,7 @@ namespace ServiceStack
 
         public override DateTime ParseXsdDateTimeAsUtc(string dateTimeStr)
         {
-            return DateTime.ParseExact(dateTimeStr, allDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AllowLeadingWhite|DateTimeStyles.AllowTrailingWhite|DateTimeStyles.AdjustToUniversal)
+            return DateTime.ParseExact(dateTimeStr, allDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AllowLeadingWhite | DateTimeStyles.AllowTrailingWhite | DateTimeStyles.AdjustToUniversal)
                      .Prepare(parsedAsUtc: true);
         }
 
@@ -364,7 +318,6 @@ namespace ServiceStack
         //    return TimeZoneInfo.ConvertTimeToUtc(dateTime);
         //}
 
-#if NETSTANDARD2_0
         public override ParseStringDelegate GetSpecializedCollectionParseMethod<TSerializer>(Type type)
         {
             if (type == typeof(StringCollection))
@@ -399,7 +352,7 @@ namespace ServiceStack
 
             return result;
         }
-#endif
+
         public override ParseStringDelegate GetJsReaderParseMethod<TSerializer>(Type type)
         {
             if (type.IsAssignableFrom(typeof(System.Dynamic.IDynamicMetaObjectProvider)) ||
@@ -418,7 +371,7 @@ namespace ServiceStack
             {
                 return DeserializeDynamic<TSerializer>.ParseStringSegment;
             }
-            
+
             return null;
         }
 
@@ -427,7 +380,8 @@ namespace ServiceStack
             if (SetUserAgentDelegate != null)
             {
                 SetUserAgentDelegate(httpReq, value);
-            } else 
+            }
+            else
             {
                 if (allowToChangeRestrictedHeaders)
                     httpReq.Headers[HttpRequestHeader.UserAgent] = value;
@@ -439,7 +393,8 @@ namespace ServiceStack
             if (SetContentLengthDelegate != null)
             {
                 SetContentLengthDelegate(httpReq, value);
-            } else 
+            }
+            else
             {
                 if (allowToChangeRestrictedHeaders)
                     httpReq.Headers[HttpRequestHeader.ContentLength] = value.ToString();
@@ -459,9 +414,9 @@ namespace ServiceStack
         public override void InitHttpWebRequest(HttpWebRequest httpReq,
             long? contentLength = null, bool allowAutoRedirect = true, bool keepAlive = true)
         {
-            SetUserAgent(httpReq, Env.ServerUserAgent);
-            SetAllowAutoRedirect(httpReq, allowAutoRedirect);
-            SetKeepAlive(httpReq, keepAlive);
+            httpReq.UserAgent = Env.ServerUserAgent;
+            httpReq.AllowAutoRedirect = allowAutoRedirect;
+            httpReq.KeepAlive = keepAlive;
 
             if (contentLength != null)
             {
@@ -476,20 +431,28 @@ namespace ServiceStack
             string userAgent = null,
             bool? preAuthenticate = null)
         {
-            //req.MaximumResponseHeadersLength = int.MaxValue; //throws "The message length limit was exceeded" exception
-            if (allowAutoRedirect.HasValue) SetAllowAutoRedirect(req, allowAutoRedirect.Value);
-            //if (readWriteTimeout.HasValue) req.ReadWriteTimeout = (int)readWriteTimeout.Value.TotalMilliseconds;
-            //if (timeout.HasValue) req.Timeout = (int)timeout.Value.TotalMilliseconds;
-            if (userAgent != null) SetUserAgent(req, userAgent);
-            //if (preAuthenticate.HasValue) req.PreAuthenticate = preAuthenticate.Value;
+            try
+            {
+                //req.MaximumResponseHeadersLength = int.MaxValue; //throws "The message length limit was exceeded" exception
+                if (allowAutoRedirect.HasValue)
+                    req.AllowAutoRedirect = allowAutoRedirect.Value;
+
+                if (userAgent != null)
+                    req.UserAgent = userAgent;
+
+                if (readWriteTimeout.HasValue) req.ReadWriteTimeout = (int)readWriteTimeout.Value.TotalMilliseconds;
+                if (timeout.HasValue) req.Timeout = (int)timeout.Value.TotalMilliseconds;
+
+                if (preAuthenticate.HasValue)
+                    req.PreAuthenticate = preAuthenticate.Value;
+            }
+            catch (Exception ex)
+            {
+                Tracer.Instance.WriteError(ex);
+            }
         }
-        
-#if NETSTANDARD2_0
-        public override string GetStackTrace()
-        {
-            return Environment.StackTrace;
-        }
-#endif
+
+        public override string GetStackTrace() => Environment.StackTrace;
 
         public override Type UseType(Type type)
         {
