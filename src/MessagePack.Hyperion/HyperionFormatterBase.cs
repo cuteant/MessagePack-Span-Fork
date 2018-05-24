@@ -127,7 +127,7 @@ namespace MessagePack.Formatters
                     foreach (var (field, getter, setter) in fields)
                     {
                         var fieldType = field.FieldType;
-                        var v = getter(value);
+                        var v = GetFieldValue(value, field, getter);
                         if (s_primitiveTypes.Contains(fieldType))
                         {
                             var valueSerializer = _serializer.GetSerializerByType(fieldType);

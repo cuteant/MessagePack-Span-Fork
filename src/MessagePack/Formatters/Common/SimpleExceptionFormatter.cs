@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using CuteAnt;
+using CuteAnt.Reflection;
 
 namespace MessagePack.Formatters
 {
@@ -14,6 +15,20 @@ namespace MessagePack.Formatters
         where TException : Exception
     {
         public SimpleExceptionFormatter() : base(ExceptionFieldFilter, ExceptionFieldInfoComparer.Instance) { }
+
+        /// <inheritdoc />
+        protected override object GetFieldValue(object obj, FieldInfo field, MemberGetter getter)
+        {
+            switch (field.Name)
+            {
+                case "_source":
+                    return ((Exception)obj).Source;
+                case "_stackTraceString":
+                    return ((Exception)obj).StackTrace;
+                default:
+                    return base.GetFieldValue(obj, field, getter);
+            }
+        }
 
         /// <summary>Exceptions are a special type in .NET because of the way they are handled by the runtime.
         /// Only certain fields can be safely serialized.</summary>

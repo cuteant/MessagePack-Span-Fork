@@ -15,6 +15,9 @@ namespace CuteAnt.Extensions.Serialization.Tests
 
       var actual = MessagePackMessageFormatter.DefaultInstance.DeepCopy(expected);
       Assert.Equal(expected.Message, actual.Message);
+      Assert.Equal(expected.Source, actual.Source);
+      Assert.Equal(expected.HelpLink, actual.HelpLink);
+      Assert.Equal(expected.StackTrace, actual.StackTrace);
       Assert.Equal(expected.InnerException.Message, actual.InnerException.Message);
       Assert.Equal(expected.BaseField.Value, actual.BaseField.Value, StringComparer.Ordinal);
       Assert.Equal(expected.SubClassField, actual.SubClassField, StringComparer.Ordinal);
@@ -22,6 +25,9 @@ namespace CuteAnt.Extensions.Serialization.Tests
 
       actual = (TestException)TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopyObject(expected);
       Assert.Equal(expected.Message, actual.Message);
+      Assert.Equal(expected.Source, actual.Source);
+      Assert.Equal(expected.HelpLink, actual.HelpLink);
+      Assert.Equal(expected.StackTrace, actual.StackTrace);
       Assert.Equal(expected.InnerException.Message, actual.InnerException.Message);
       Assert.Equal(expected.BaseField.Value, actual.BaseField.Value, StringComparer.Ordinal);
       Assert.Equal(expected.SubClassField, actual.SubClassField, StringComparer.Ordinal);
@@ -30,6 +36,9 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var bytes = MessagePackSerializer.Serialize(expected, ContractlessStandardResolverAllowPrivate.Instance);
       actual = MessagePackSerializer.Deserialize<TestException>(bytes, ContractlessStandardResolverAllowPrivate.Instance);
       Assert.Equal(expected.Message, actual.Message);
+      Assert.Equal(expected.Source, actual.Source);
+      Assert.Equal(expected.HelpLink, actual.HelpLink);
+      Assert.Equal(expected.StackTrace, actual.StackTrace);
       Assert.Equal(expected.InnerException.Message, actual.InnerException.Message);
       Assert.Equal(expected.BaseField.Value, actual.BaseField.Value, StringComparer.Ordinal);
       Assert.Equal(expected.SubClassField, actual.SubClassField, StringComparer.Ordinal);
@@ -46,6 +55,9 @@ namespace CuteAnt.Extensions.Serialization.Tests
       var actual = MessagePackSerializer.Deserialize<TestException>(bytes, WithExceptionResolver.Instance);
 
       Assert.Equal(expected.Message, actual.Message);
+      Assert.Equal(expected.Source, actual.Source);
+      Assert.Equal(expected.HelpLink, actual.HelpLink);
+      Assert.Equal(expected.StackTrace, actual.StackTrace);
       Assert.Equal(expected.InnerException.Message, actual.InnerException.Message);
       Assert.Equal(expected.BaseField.Value, actual.BaseField.Value, StringComparer.Ordinal);
       Assert.Equal(expected.SubClassField, actual.SubClassField, StringComparer.Ordinal);

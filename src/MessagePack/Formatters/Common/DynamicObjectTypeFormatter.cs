@@ -104,7 +104,7 @@ namespace MessagePack.Formatters
             foreach (var (field, getter, setter) in fields)
             {
                 var fieldType = field.FieldType;
-                var v = getter(value);
+                var v = GetFieldValue(value, field, getter);
                 if (fieldType != TypeConstants.ObjectType)
                 {
                     var fieldFormatter = DynamicObjectTypeFormatter.GetObjectTypeFormatter(fieldType);
@@ -117,6 +117,16 @@ namespace MessagePack.Formatters
             }
 
             return offset - startOffset;
+        }
+
+        /// <summary>GetFieldValue</summary>
+        /// <param name="obj"></param>
+        /// <param name="field"></param>
+        /// <param name="getter"></param>
+        /// <returns></returns>
+        protected virtual object GetFieldValue(object obj, FieldInfo field, MemberGetter getter)
+        {
+            return getter(obj);
         }
 
         [MethodImpl(InlineMethod.Value)]
