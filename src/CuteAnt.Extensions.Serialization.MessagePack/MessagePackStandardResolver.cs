@@ -1,4 +1,6 @@
-﻿using CuteAnt.Extensions.Serialization.Internal;
+﻿using System.Runtime.CompilerServices;
+using System.Threading;
+using CuteAnt.Extensions.Serialization.Internal;
 using MessagePack;
 using MessagePack.Formatters;
 
@@ -9,6 +11,17 @@ namespace CuteAnt.Extensions.Serialization
     public static readonly IFormatterResolver Default = DefaultResolver.Instance;
     public static readonly IFormatterResolver Typeless = TypelessDefaultResolver.Instance;
 
+    private static IFormatterResolver s_typelessObjectResolver;
+    public static IFormatterResolver TypelessObjectResolver
+    {
+      [MethodImpl(InlineMethod.Value)]
+      get => Volatile.Read(ref s_typelessObjectResolver) ?? MessagePack.Resolvers.TypelessObjectResolver.Instance;
+    }
+
+    public static void RegisterTypelessObjectResolver(IFormatterResolver typelessObjectResolver)
+    {
+      Interlocked.CompareExchange(ref s_typelessObjectResolver, typelessObjectResolver, null);
+    }
 
     public static void Register(params IFormatterResolver[] resolvers)
     {

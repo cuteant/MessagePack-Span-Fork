@@ -30,7 +30,7 @@ namespace CuteAnt.Extensions.Serialization.Internal
       DynamicObjectResolverAllowPrivate.Instance, // Try Object
       DynamicContractlessObjectResolverAllowPrivate.Instance, // Serializes keys as strings
 
-      TypelessObjectResolver.Instance
+      //TypelessObjectResolver.Instance
     };
 
     private const int Locked = 1;
@@ -111,6 +111,15 @@ namespace CuteAnt.Extensions.Serialization.Internal
         foreach (var item in s_resolvers)
         {
           var f = item.GetFormatter<T>();
+          if (f != null)
+          {
+            formatter = f;
+            return;
+          }
+        }
+
+        {
+          var f = MessagePackStandardResolver.TypelessObjectResolver.GetFormatter<T>();
           if (f != null)
           {
             formatter = f;
