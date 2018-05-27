@@ -36,7 +36,7 @@ namespace MessagePack.Resolvers
             static FormatterCache()
             {
                 formatter = (typeof(T) == typeof(object))
-                    ? (IMessagePackFormatter<T>)(object)TypelessFormatter.Instance
+                    ? (IMessagePackFormatter<T>)MessagePackSerializer.Typeless.TypelessFormatter
                     : null;
             }
         }

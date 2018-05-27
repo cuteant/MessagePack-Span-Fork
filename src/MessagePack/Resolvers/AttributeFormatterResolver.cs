@@ -26,7 +26,6 @@ namespace MessagePack.Resolvers
         static class FormatterCache<T>
         {
             public static readonly IMessagePackFormatter<T> formatter;
-            private static readonly Type TypelessFormatterType = typeof(TypelessFormatter);
 
             static FormatterCache()
             {
@@ -37,9 +36,9 @@ namespace MessagePack.Resolvers
 #endif
                 if (attr == null) { return; }
 
-                if (attr.FormatterType == TypelessFormatterType)
+                if (attr.FormatterType == MessagePackSerializer.Typeless.TypelessFormatterType)
                 {
-                    formatter = (IMessagePackFormatter<T>)TypelessFormatter.Instance;
+                    formatter = (IMessagePackFormatter<T>)MessagePackSerializer.Typeless.TypelessFormatter;
                 }
                 else
                 {

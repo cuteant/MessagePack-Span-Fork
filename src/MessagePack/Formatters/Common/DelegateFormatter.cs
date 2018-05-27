@@ -21,7 +21,7 @@ namespace MessagePack.Formatters
                 return default;
             }
 
-            var delegateShim = (IDelegateShim)TypelessFormatter.Instance.Deserialize(bytes, offset, formatterResolver, out readSize);
+            var delegateShim = (IDelegateShim)MessagePackSerializer.Typeless.TypelessFormatter.Deserialize(bytes, offset, formatterResolver, out readSize);
             return (TDelegate)(object)delegateShim.Method.CreateDelegate(delegateShim.DelegateType, delegateShim.GetTarget());
 
         }
@@ -47,7 +47,7 @@ namespace MessagePack.Formatters
             delegateShim.DelegateType = value.GetType();
             delegateShim.SetTarget(target);
             delegateShim.Method = d.GetMethodInfo();
-            return TypelessFormatter.Instance.Serialize(ref bytes, offset, delegateShim, formatterResolver);
+            return MessagePackSerializer.Typeless.TypelessFormatter.Serialize(ref bytes, offset, delegateShim, formatterResolver);
         }
     }
 }

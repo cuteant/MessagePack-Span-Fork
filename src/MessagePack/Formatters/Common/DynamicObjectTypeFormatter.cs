@@ -73,7 +73,7 @@ namespace MessagePack.Formatters
                 }
                 else
                 {
-                    fieldValue = TypelessFormatter.Instance.Deserialize(bytes, offset, formatterResolver, out readSize);
+                    fieldValue = MessagePackSerializer.Typeless.TypelessFormatter.Deserialize(bytes, offset, formatterResolver, out readSize);
                 }
                 offset += readSize;
                 setter(obj, fieldValue);
@@ -112,7 +112,7 @@ namespace MessagePack.Formatters
                 }
                 else
                 {
-                    offset += TypelessFormatter.Instance.Serialize(ref bytes, offset, v, formatterResolver);
+                    offset += MessagePackSerializer.Typeless.TypelessFormatter.Serialize(ref bytes, offset, v, formatterResolver);
                 }
             }
 

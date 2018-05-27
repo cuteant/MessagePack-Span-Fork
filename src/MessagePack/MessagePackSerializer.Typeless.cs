@@ -2,7 +2,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading;
+using System.Runtime.CompilerServices;
 using MessagePack.Resolvers;
 using MessagePack.Formatters;
 using System.IO;
@@ -20,6 +21,30 @@ namespace MessagePack
             {
                 CompositeResolver.Register(resolvers);
                 defaultResolver = CompositeResolver.Instance;
+            }
+
+            private static readonly Type s_defaultTypelessFormatterType = typeof(TypelessFormatter);
+            private static readonly IMessagePackFormatter<object> s_defaultTypelessFormatter = MessagePack.Formatters.TypelessFormatter.Instance;
+            private static IMessagePackFormatter<object> s_typelessFormatter;
+            private static Type s_typelessFormatterType;
+            internal static IMessagePackFormatter<object> TypelessFormatter
+            {
+                [MethodImpl(InlineMethod.Value)]
+                get => Volatile.Read(ref s_typelessFormatter) ?? s_defaultTypelessFormatter;
+            }
+            internal static Type TypelessFormatterType
+            {
+                [MethodImpl(InlineMethod.Value)]
+                get => Volatile.Read(ref s_typelessFormatterType) ?? s_defaultTypelessFormatterType;
+            }
+            public static void RegisterTypelessFormatter(IMessagePackFormatter<object> typelessFormatter)
+            {
+                if (null == typelessFormatter) { throw new ArgumentNullException(nameof(typelessFormatter)); }
+
+                if (Interlocked.CompareExchange(ref s_typelessFormatter, typelessFormatter, null) == null)
+                {
+                    s_typelessFormatterType = typelessFormatter.GetType();
+                }
             }
 
             public static byte[] Serialize(object obj)
