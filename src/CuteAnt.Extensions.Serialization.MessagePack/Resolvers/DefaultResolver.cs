@@ -29,7 +29,7 @@ namespace MessagePack.Resolvers
 
     public DefaultResolver() { }
 
-    public override IDictionary<string, object> Context => new Dictionary<string, object>(StringComparer.Ordinal);
+    public override IDictionary<string, object> Context { get; } = new Dictionary<string, object>(StringComparer.Ordinal);
 
     public override IMessagePackFormatter<T> GetFormatter<T>()
     {

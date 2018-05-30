@@ -334,6 +334,17 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.IsType<SerializerPocoSerializable>(copy.Foo);
       Helper.ComparePoco((SerializerPocoSerializable)b.Foo, (SerializerPocoSerializable)copy.Foo);
     }
+
+    [Fact]
+    public void FormatterResolverTest()
+    {
+      var resolver = new DefaultResolver();
+      resolver.Context.Add("A", 1);
+      Assert.Equal(1, resolver.Context.Count);
+      var resolver1 = new TypelessDefaultResolver();
+      resolver1.Context.Add("A", 1);
+      Assert.Equal(1, resolver.Context.Count);
+    }
   }
 
   public class WithImmutableDefaultResolver : FormatterResolver
