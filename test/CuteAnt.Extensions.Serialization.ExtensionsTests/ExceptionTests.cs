@@ -186,11 +186,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
     }
   }
 
-  public class WithExceptionResolver : IFormatterResolver
+  public class WithExceptionResolver : FormatterResolver
   {
     public static readonly WithExceptionResolver Instance = new WithExceptionResolver();
 
-    public IMessagePackFormatter<T> GetFormatter<T>()
+    public override IMessagePackFormatter<T> GetFormatter<T>()
     {
       return (HyperionExceptionResolver.Instance.GetFormatter<T>()
            ?? HyperionResolver.Instance.GetFormatter<T>()

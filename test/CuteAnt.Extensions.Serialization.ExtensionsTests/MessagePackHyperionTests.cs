@@ -86,15 +86,15 @@ namespace CuteAnt.Extensions.Serialization.Tests
         { }
     }
 
-    internal sealed class TestMessageResolver : IFormatterResolver
-    {
+    internal sealed class TestMessageResolver : FormatterResolver
+  {
         public static readonly IFormatterResolver Instance = new TestMessageResolver();
 
         TestMessageResolver()
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -123,11 +123,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
         }
     }
 
-    public class WithTestMessageResolver : IFormatterResolver
-    {
+    public class WithTestMessageResolver : FormatterResolver
+  {
         public static readonly WithTestMessageResolver Instance = new WithTestMessageResolver();
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return (TestMessageResolver.Instance.GetFormatter<T>()
                  ?? ContractlessStandardResolverAllowPrivate.Instance.GetFormatter<T>());
@@ -152,8 +152,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
         }
     }
 
-    public sealed class TestMessageTypelessObjectResolver : IFormatterResolver
-    {
+    public sealed class TestMessageTypelessObjectResolver : FormatterResolver
+  {
         public static readonly IFormatterResolver Instance = new TestMessageTypelessObjectResolver();
 
         TestMessageTypelessObjectResolver()
@@ -161,7 +161,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -179,8 +179,8 @@ namespace CuteAnt.Extensions.Serialization.Tests
         }
     }
 
-    public sealed class TestMessageTypelessContractlessStandardResolver : IFormatterResolver
-    {
+    public sealed class TestMessageTypelessContractlessStandardResolver : FormatterResolver
+  {
         public static readonly IFormatterResolver Instance = new TestMessageTypelessContractlessStandardResolver();
 
         static readonly IFormatterResolver[] resolvers = new[]
@@ -202,7 +202,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -226,11 +226,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
         }
     }
 
-    public class WithTestMessageTypelessResolver : IFormatterResolver
-    {
+    public class WithTestMessageTypelessResolver : FormatterResolver
+  {
         public static readonly WithTestMessageTypelessResolver Instance = new WithTestMessageTypelessResolver();
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return (TestMessageResolver.Instance.GetFormatter<T>()
                  ?? TestMessageTypelessContractlessStandardResolver.Instance.GetFormatter<T>());

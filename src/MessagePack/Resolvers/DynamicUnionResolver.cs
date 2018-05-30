@@ -16,7 +16,7 @@ namespace MessagePack.Resolvers
     /// <summary>
     /// UnionResolver by dynamic code generation.
     /// </summary>
-    public sealed class DynamicUnionResolver : IFormatterResolver
+    public sealed class DynamicUnionResolver : FormatterResolver
     {
         public static readonly DynamicUnionResolver Instance = new DynamicUnionResolver();
 
@@ -48,7 +48,7 @@ namespace MessagePack.Resolvers
         }
 #endif
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

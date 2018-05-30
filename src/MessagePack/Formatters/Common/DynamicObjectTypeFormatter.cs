@@ -37,22 +37,12 @@ namespace MessagePack.Formatters
             _isSupportedFieldType = isSupportedFieldType ?? IsSupportedFieldType;
         }
 
-        public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
-        {
-            return (T)DeserializeObject(bytes, offset, formatterResolver, out readSize);
-        }
-
-        public int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
-        {
-            return SerializeObject(ref bytes, offset, value, formatterResolver);
-        }
-
-        protected virtual object DeserializeObject(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public virtual T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
             if (MessagePackBinary.IsNil(bytes, offset))
             {
                 readSize = 1;
-                return null;
+                return default;
             }
 
             var startOffset = offset;
@@ -80,10 +70,10 @@ namespace MessagePack.Formatters
             }
 
             readSize = offset - startOffset;
-            return obj;
+            return (T)obj;
         }
 
-        protected virtual int SerializeObject(ref byte[] bytes, int offset, object value, IFormatterResolver formatterResolver)
+        public virtual int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
         {
             if (value == null)
             {

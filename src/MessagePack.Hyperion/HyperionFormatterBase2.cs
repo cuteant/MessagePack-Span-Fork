@@ -10,7 +10,7 @@ using Hyperion.Extensions;
 
 namespace MessagePack.Formatters
 {
-    public abstract class HyperionFormatterBase<T> : DynamicObjectTypeFormatterBase<T>
+    public abstract class HyperionFormatterBase2<T> : DynamicObjectTypeFormatterBase<T>
     {
         private const int c_initialBufferSize = 1024 * 64;
         private static readonly HashSet<Type> s_primitiveTypes = new HashSet<Type>(new[]
@@ -21,25 +21,10 @@ namespace MessagePack.Formatters
             typeof(Guid), typeof(CombGuid)
         });
 
-        private readonly Serializer _serializer;
-        //private readonly bool _preserveObjectReferences;
-
-        protected HyperionFormatterBase(Func<FieldInfo, bool> fieldFilter = null,
+        protected HyperionFormatterBase2(Func<FieldInfo, bool> fieldFilter = null,
             IComparer<FieldInfo> fieldInfoComparer = null, Func<Type, bool> isSupportedFieldType = null)
             : base(fieldFilter, fieldInfoComparer, isSupportedFieldType)
         {
-            _serializer = new Serializer(new SerializerOptions(versionTolerance: false, preserveObjectReferences: true));
-            //_preserveObjectReferences = true;
-        }
-
-        protected HyperionFormatterBase(SerializerOptions options, Func<FieldInfo, bool> fieldFilter = null,
-            IComparer<FieldInfo> fieldInfoComparer = null, Func<Type, bool> isSupportedFieldType = null)
-            : base(fieldFilter, fieldInfoComparer, isSupportedFieldType)
-        {
-            if (null == options) { throw new ArgumentNullException(nameof(options)); }
-
-            _serializer = new Serializer(options.Clone(false, true));
-            //_preserveObjectReferences = _serializer.Options.PreserveObjectReferences;
         }
 
         public override T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
@@ -57,8 +42,8 @@ namespace MessagePack.Formatters
             readSize += typeSize;
 
             var obj = ActivatorUtils.FastCreateInstance(actualType);
-
-            using (var pooledSession = DeserializerSessionManager.Create(_serializer))
+            var serializer = formatterResolver.GetContextValue<Serializer>(HyperionConstants.HyperionSerializer);
+            using (var pooledSession = DeserializerSessionManager.Create(serializer))
             {
                 var session = pooledSession.Object;
                 session.TrackDeserializedObject(obj);
@@ -73,7 +58,7 @@ namespace MessagePack.Formatters
                         object fieldValue;
                         if (s_primitiveTypes.Contains(fieldType))
                         {
-                            var valueSerializer = _serializer.GetSerializerByType(fieldType);
+                            var valueSerializer = serializer.GetSerializerByType(fieldType);
                             fieldValue = valueSerializer.ReadValue(ms, session);
                         }
                         else
@@ -83,7 +68,7 @@ namespace MessagePack.Formatters
                             {
                                 valueType = Nullable.GetUnderlyingType(fieldType);
                             }
-                            var valueSerializer = _serializer.GetSerializerByType(valueType);
+                            var valueSerializer = serializer.GetSerializerByType(valueType);
                             fieldValue = ms.ReadObject(session);
                         }
                         setter(obj, fieldValue);
@@ -111,8 +96,8 @@ namespace MessagePack.Formatters
 
             var bufferPool = BufferManager.Shared;
             byte[] buffer; int bufferSize;
-
-            using (var pooledSession = SerializerSessionManager.Create(_serializer))
+            var serializer = formatterResolver.GetContextValue<Serializer>(HyperionConstants.HyperionSerializer);
+            using (var pooledSession = SerializerSessionManager.Create(serializer))
             {
                 var session = pooledSession.Object;
                 session.TrackSerializedType(actualType);
@@ -130,7 +115,7 @@ namespace MessagePack.Formatters
                         var v = GetFieldValue(value, field, getter);
                         if (s_primitiveTypes.Contains(fieldType))
                         {
-                            var valueSerializer = _serializer.GetSerializerByType(fieldType);
+                            var valueSerializer = serializer.GetSerializerByType(fieldType);
                             valueSerializer.WriteValue(outputStream, v, session);
                         }
                         else
@@ -140,7 +125,7 @@ namespace MessagePack.Formatters
                             {
                                 valueType = Nullable.GetUnderlyingType(fieldType);
                             }
-                            var valueSerializer = _serializer.GetSerializerByType(valueType);
+                            var valueSerializer = serializer.GetSerializerByType(valueType);
                             outputStream.WriteObject(v, valueType, valueSerializer, true, session);
                         }
                     }

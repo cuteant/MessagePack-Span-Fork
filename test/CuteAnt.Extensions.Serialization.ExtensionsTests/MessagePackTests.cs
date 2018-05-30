@@ -336,11 +336,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
     }
   }
 
-  public class WithImmutableDefaultResolver : IFormatterResolver
+  public class WithImmutableDefaultResolver : FormatterResolver
   {
     public static readonly WithImmutableDefaultResolver Instance = new WithImmutableDefaultResolver();
 
-    public IMessagePackFormatter<T> GetFormatter<T>()
+    public override IMessagePackFormatter<T> GetFormatter<T>()
     {
       return (ImmutableCollectionResolver.Instance.GetFormatter<T>()
            ?? StandardResolver.Instance.GetFormatter<T>());

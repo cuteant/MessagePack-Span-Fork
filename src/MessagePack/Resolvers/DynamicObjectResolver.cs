@@ -19,7 +19,7 @@ namespace MessagePack.Resolvers
     /// <summary>
     /// ObjectResolver by dynamic code generation.
     /// </summary>
-    public sealed class DynamicObjectResolver : IFormatterResolver
+    public sealed class DynamicObjectResolver : FormatterResolver
     {
         public static readonly DynamicObjectResolver Instance = new DynamicObjectResolver();
 
@@ -44,7 +44,7 @@ namespace MessagePack.Resolvers
         }
 #endif
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -92,7 +92,7 @@ namespace MessagePack.Resolvers
     /// <summary>
     /// ObjectResolver by dynamic code generation, allow private member.
     /// </summary>
-    public sealed class DynamicObjectResolverAllowPrivate : IFormatterResolver
+    public sealed class DynamicObjectResolverAllowPrivate : FormatterResolver
     {
         public static readonly DynamicObjectResolverAllowPrivate Instance = new DynamicObjectResolverAllowPrivate();
 
@@ -101,7 +101,7 @@ namespace MessagePack.Resolvers
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -147,7 +147,7 @@ namespace MessagePack.Resolvers
     /// <summary>
     /// ObjectResolver by dynamic code generation, no needs MessagePackObject attribute and serialized key as string.
     /// </summary>
-    public sealed class DynamicContractlessObjectResolver : IFormatterResolver
+    public sealed class DynamicContractlessObjectResolver : FormatterResolver
     {
         public static readonly DynamicContractlessObjectResolver Instance = new DynamicContractlessObjectResolver();
 
@@ -172,7 +172,7 @@ namespace MessagePack.Resolvers
         }
 #endif
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -225,11 +225,11 @@ namespace MessagePack.Resolvers
     /// <summary>
     /// ObjectResolver by dynamic code generation, no needs MessagePackObject attribute and serialized key as string, allow private member.
     /// </summary>
-    public sealed class DynamicContractlessObjectResolverAllowPrivate : IFormatterResolver
+    public sealed class DynamicContractlessObjectResolverAllowPrivate : FormatterResolver
     {
         public static readonly DynamicContractlessObjectResolverAllowPrivate Instance = new DynamicContractlessObjectResolverAllowPrivate();
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace MessagePack.Resolvers
 {
-    public sealed class DynamicGenericResolver : IFormatterResolver
+    public sealed class DynamicGenericResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new DynamicGenericResolver();
 
@@ -25,7 +25,7 @@ namespace MessagePack.Resolvers
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

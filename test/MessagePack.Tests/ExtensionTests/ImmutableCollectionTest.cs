@@ -11,9 +11,9 @@ using Xunit;
 
 namespace MessagePack.Tests.ExtensionTests
 {
-    public class WithImmutableDefaultResolver : IFormatterResolver
+    public class WithImmutableDefaultResolver : FormatterResolver
     {
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return (ImmutableCollectionResolver.Instance.GetFormatter<T>()
                  ?? StandardResolver.Instance.GetFormatter<T>());

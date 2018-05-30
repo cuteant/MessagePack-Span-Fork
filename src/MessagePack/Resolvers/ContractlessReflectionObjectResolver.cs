@@ -15,13 +15,13 @@ namespace MessagePack.Resolvers
         public static readonly IFormatterResolver Contractless = new ContractlessResolver();
         public static readonly IFormatterResolver ContractlessForceStringKey = new ContractlessForceStringResolver();
 
-        class DefaultResolver : IFormatterResolver
+        class DefaultResolver : FormatterResolver
         {
             const bool ForceStringKey = false;
             const bool Contractless = false;
             const bool AllowPrivate = false;
 
-            public IMessagePackFormatter<T> GetFormatter<T>()
+            public override IMessagePackFormatter<T> GetFormatter<T>()
             {
                 return Cache<T>.formatter;
             }
@@ -41,13 +41,13 @@ namespace MessagePack.Resolvers
             }
         }
 
-        class ContractlessResolver : IFormatterResolver
+        class ContractlessResolver : FormatterResolver
         {
             const bool ForceStringKey = false;
             const bool Contractless = true;
             const bool AllowPrivate = false;
 
-            public IMessagePackFormatter<T> GetFormatter<T>()
+            public override IMessagePackFormatter<T> GetFormatter<T>()
             {
                 return Cache<T>.formatter;
             }
@@ -67,13 +67,13 @@ namespace MessagePack.Resolvers
             }
         }
 
-        class ContractlessForceStringResolver : IFormatterResolver
+        class ContractlessForceStringResolver : FormatterResolver
         {
             const bool ForceStringKey = true;
             const bool Contractless = true;
             const bool AllowPrivate = false;
 
-            public IMessagePackFormatter<T> GetFormatter<T>()
+            public override IMessagePackFormatter<T> GetFormatter<T>()
             {
                 return Cache<T>.formatter;
             }

@@ -5,7 +5,7 @@ using MessagePack.Formatters;
 
 namespace MessagePack
 {
-    public sealed class HyperionExceptionResolver : IFormatterResolver
+    public sealed class HyperionExceptionResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new HyperionExceptionResolver();
 
@@ -13,7 +13,7 @@ namespace MessagePack
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -35,7 +35,6 @@ namespace MessagePack
         {
             if (typeof(Exception).GetTypeInfo().IsAssignableFrom(t.GetTypeInfo()))
             {
-                //return ActivatorUtils.FastCreateInstance(typeof(SimpleHyperionFormatter<>).GetCachedGenericType(t));
                 return ActivatorUtils.FastCreateInstance(typeof(HyperionExceptionFormatter<>).GetCachedGenericType(t));
             }
 

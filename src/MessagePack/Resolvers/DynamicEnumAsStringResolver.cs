@@ -8,7 +8,7 @@ using CuteAnt.Reflection;
 
 namespace MessagePack.Resolvers
 {
-    public sealed class DynamicEnumAsStringResolver : IFormatterResolver
+    public sealed class DynamicEnumAsStringResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new DynamicEnumAsStringResolver();
 
@@ -17,7 +17,7 @@ namespace MessagePack.Resolvers
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

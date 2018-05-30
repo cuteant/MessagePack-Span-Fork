@@ -6,7 +6,7 @@ using System;
 
 namespace MessagePack.Resolvers
 {
-    public sealed class UnsafeBinaryResolver : IFormatterResolver
+    public sealed class UnsafeBinaryResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new UnsafeBinaryResolver();
 
@@ -15,7 +15,7 @@ namespace MessagePack.Resolvers
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

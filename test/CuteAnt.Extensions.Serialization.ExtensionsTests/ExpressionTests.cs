@@ -1023,11 +1023,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public static object ConstantValue(this Expression expr) => ((ConstantExpression)expr).Value;
   }
 
-  public class WithExpressionResolver : IFormatterResolver
+  public class WithExpressionResolver : FormatterResolver
   {
     public static readonly WithExpressionResolver Instance = new WithExpressionResolver();
 
-    public IMessagePackFormatter<T> GetFormatter<T>()
+    public override IMessagePackFormatter<T> GetFormatter<T>()
     {
       return (HyperionExpressionResolver.Instance.GetFormatter<T>()
            ?? StandardResolver.Instance.GetFormatter<T>());

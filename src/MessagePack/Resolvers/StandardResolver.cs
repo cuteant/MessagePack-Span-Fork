@@ -8,7 +8,7 @@ namespace MessagePack.Resolvers
     /// <summary>
     /// Default composited resolver, builtin -> attribute -> dynamic enum -> dynamic generic -> dynamic union -> dynamic object -> primitive.
     /// </summary>
-    public sealed class StandardResolver : IFormatterResolver
+    public sealed class StandardResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new StandardResolver();
 
@@ -20,7 +20,7 @@ namespace MessagePack.Resolvers
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -48,7 +48,7 @@ namespace MessagePack.Resolvers
         }
     }
 
-    public sealed class ContractlessStandardResolver : IFormatterResolver
+    public sealed class ContractlessStandardResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new ContractlessStandardResolver();
 
@@ -60,7 +60,7 @@ namespace MessagePack.Resolvers
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -88,7 +88,7 @@ namespace MessagePack.Resolvers
         }
     }
 
-    public sealed class StandardResolverAllowPrivate : IFormatterResolver
+    public sealed class StandardResolverAllowPrivate : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new StandardResolverAllowPrivate();
 
@@ -100,7 +100,7 @@ namespace MessagePack.Resolvers
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -128,7 +128,7 @@ namespace MessagePack.Resolvers
         }
     }
 
-    public sealed class ContractlessStandardResolverAllowPrivate : IFormatterResolver
+    public sealed class ContractlessStandardResolverAllowPrivate : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new ContractlessStandardResolverAllowPrivate();
 
@@ -140,7 +140,7 @@ namespace MessagePack.Resolvers
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -191,7 +191,7 @@ namespace MessagePack.Internal
         };
     }
 
-    internal sealed class StandardResolverCore : IFormatterResolver
+    internal sealed class StandardResolverCore : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new StandardResolverCore();
 
@@ -206,7 +206,7 @@ namespace MessagePack.Internal
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -230,7 +230,7 @@ namespace MessagePack.Internal
         }
     }
 
-    internal sealed class ContractlessStandardResolverCore : IFormatterResolver
+    internal sealed class ContractlessStandardResolverCore : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new ContractlessStandardResolverCore();
 
@@ -247,7 +247,7 @@ namespace MessagePack.Internal
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -271,7 +271,7 @@ namespace MessagePack.Internal
         }
     }
 
-    internal sealed class StandardResolverAllowPrivateCore : IFormatterResolver
+    internal sealed class StandardResolverAllowPrivateCore : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new StandardResolverAllowPrivateCore();
 
@@ -286,7 +286,7 @@ namespace MessagePack.Internal
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -310,7 +310,7 @@ namespace MessagePack.Internal
         }
     }
 
-    internal sealed class ContractlessStandardResolverAllowPrivateCore : IFormatterResolver
+    internal sealed class ContractlessStandardResolverAllowPrivateCore : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new ContractlessStandardResolverAllowPrivateCore();
 
@@ -327,7 +327,7 @@ namespace MessagePack.Internal
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

@@ -1,15 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.ImmutableCollection;
-using MessagePack.Resolvers;
 
-namespace CuteAnt.Extensions.Serialization.Internal
+namespace MessagePack.Resolvers
 {
-  internal sealed class TypelessDefaultResolver : IFormatterResolver
+  public sealed class TypelessDefaultResolver : FormatterResolver
   {
     public static readonly IFormatterResolver Instance = new TypelessDefaultResolver();
 
@@ -39,9 +38,7 @@ namespace CuteAnt.Extensions.Serialization.Internal
     private static IMessagePackFormatter[] s_formatters = new IMessagePackFormatter[0];
     private static IFormatterResolver[] s_resolvers = s_defaultResolvers;
 
-    TypelessDefaultResolver()
-    {
-    }
+    public TypelessDefaultResolver() { }
 
     public static void Register(params IFormatterResolver[] resolvers)
     {
@@ -82,7 +79,9 @@ namespace CuteAnt.Extensions.Serialization.Internal
       }
     }
 
-    public IMessagePackFormatter<T> GetFormatter<T>()
+    public override IDictionary<string, object> Context => new Dictionary<string, object>(StringComparer.Ordinal);
+
+    public override IMessagePackFormatter<T> GetFormatter<T>()
     {
       return FormatterCache<T>.formatter;
     }

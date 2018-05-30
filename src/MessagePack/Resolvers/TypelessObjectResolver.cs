@@ -15,7 +15,7 @@ namespace MessagePack.Resolvers
     /// Serialized binary is valid MessagePack binary used ext-format and custom typecode(100).
     /// Inside ext - assembly qualified type name, and serialized object
     /// </summary>
-    public sealed class TypelessObjectResolver : IFormatterResolver
+    public sealed class TypelessObjectResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new TypelessObjectResolver();
 
@@ -24,7 +24,7 @@ namespace MessagePack.Resolvers
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -44,7 +44,7 @@ namespace MessagePack.Resolvers
 
     // helpers for TypelessFormatter
 
-    internal sealed class ForceSizePrimitiveObjectResolver : IFormatterResolver
+    internal sealed class ForceSizePrimitiveObjectResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new ForceSizePrimitiveObjectResolver();
 
@@ -53,7 +53,7 @@ namespace MessagePack.Resolvers
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -112,7 +112,7 @@ namespace MessagePack.Resolvers
         }
     }
 
-    internal sealed class TypelessFormatterFallbackResolver : IFormatterResolver
+    internal sealed class TypelessFormatterFallbackResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new TypelessFormatterFallbackResolver();
 
@@ -125,7 +125,7 @@ namespace MessagePack.Resolvers
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

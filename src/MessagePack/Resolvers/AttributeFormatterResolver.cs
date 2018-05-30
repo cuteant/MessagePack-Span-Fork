@@ -9,7 +9,7 @@ namespace MessagePack.Resolvers
     /// <summary>
     /// Get formatter from [MessaegPackFromatter] attribute.
     /// </summary>
-    public sealed class AttributeFormatterResolver : IFormatterResolver
+    public sealed class AttributeFormatterResolver : FormatterResolver
     {
         public static IFormatterResolver Instance = new AttributeFormatterResolver();
 
@@ -18,7 +18,7 @@ namespace MessagePack.Resolvers
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

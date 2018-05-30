@@ -5,11 +5,11 @@ using MessagePack.Formatters;
 
 namespace MessagePack
 {
-    public sealed class HyperionResolver : FormatterResolver
+    public sealed class HyperionExceptionResolver2 : FormatterResolver
     {
-        public static readonly IFormatterResolver Instance = new HyperionResolver();
+        public static readonly IFormatterResolver Instance = new HyperionExceptionResolver2();
 
-        HyperionResolver()
+        HyperionExceptionResolver2()
         {
         }
 
@@ -24,18 +24,18 @@ namespace MessagePack
 
             static FormatterCache()
             {
-                formatter = (IMessagePackFormatter<T>)HyperionGetFormatterHelper.GetFormatter(typeof(T));
+                formatter = (IMessagePackFormatter<T>)HyperionExceptionGetFormatterHelper2.GetFormatter(typeof(T));
             }
         }
     }
 
-    internal static class HyperionGetFormatterHelper
+    internal static class HyperionExceptionGetFormatterHelper2
     {
         internal static object GetFormatter(Type t)
         {
-            if (typeof(IObjectReferences).GetTypeInfo().IsAssignableFrom(t.GetTypeInfo()))
+            if (typeof(Exception).GetTypeInfo().IsAssignableFrom(t.GetTypeInfo()))
             {
-                return ActivatorUtils.FastCreateInstance(typeof(HyperionFormatter<>).GetCachedGenericType(t));
+                return ActivatorUtils.FastCreateInstance(typeof(HyperionExceptionFormatter2<>).GetCachedGenericType(t));
             }
 
             return null;

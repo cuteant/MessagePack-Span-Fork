@@ -7,7 +7,7 @@ using MessagePack.Formatters;
 
 namespace MessagePack.ImmutableCollection
 {
-    public sealed class ImmutableCollectionResolver : IFormatterResolver
+    public sealed class ImmutableCollectionResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new ImmutableCollectionResolver();
 
@@ -16,7 +16,7 @@ namespace MessagePack.ImmutableCollection
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

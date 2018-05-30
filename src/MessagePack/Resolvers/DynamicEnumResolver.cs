@@ -13,7 +13,7 @@ namespace MessagePack.Resolvers
     /// <summary>
     /// EnumResolver by dynamic code generation, serialized underlying type.
     /// </summary>
-    public sealed class DynamicEnumResolver : IFormatterResolver
+    public sealed class DynamicEnumResolver : FormatterResolver
     {
         public static readonly DynamicEnumResolver Instance = new DynamicEnumResolver();
 
@@ -41,7 +41,7 @@ namespace MessagePack.Resolvers
         }
 #endif
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

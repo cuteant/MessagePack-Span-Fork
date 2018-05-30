@@ -7,7 +7,7 @@ namespace MessagePack.Resolvers
     /// Embed c# type names for `object` typed fields/collection items
     /// Preserve c# DateTime timezone
     /// </summary>
-    public sealed class TypelessContractlessStandardResolver : IFormatterResolver
+    public sealed class TypelessContractlessStandardResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new TypelessContractlessStandardResolver();
 
@@ -30,7 +30,7 @@ namespace MessagePack.Resolvers
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

@@ -1,10 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Threading;
-using CuteAnt.Extensions.Serialization.Internal;
-using MessagePack;
+using CuteAnt;
 using MessagePack.Formatters;
 
-namespace CuteAnt.Extensions.Serialization
+namespace MessagePack.Resolvers
 {
   public static class MessagePackStandardResolver
   {

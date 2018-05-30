@@ -1,16 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using MessagePack;
+using CuteAnt;
 using MessagePack.Formatters;
 using MessagePack.ImmutableCollection;
-using MessagePack.Resolvers;
 
-namespace CuteAnt.Extensions.Serialization.Internal
+namespace MessagePack.Resolvers
 {
-  internal sealed class DefaultResolver : IFormatterResolver
+  public sealed class DefaultResolver : FormatterResolver
   {
     public static readonly DefaultResolver Instance = new DefaultResolver();
 
@@ -27,11 +27,11 @@ namespace CuteAnt.Extensions.Serialization.Internal
       return s_objectFallbackFormatter;
     }
 
-    DefaultResolver()
-    {
-    }
+    public DefaultResolver() { }
 
-    public IMessagePackFormatter<T> GetFormatter<T>()
+    public override IDictionary<string, object> Context => new Dictionary<string, object>(StringComparer.Ordinal);
+
+    public override IMessagePackFormatter<T> GetFormatter<T>()
     {
       return FormatterCache<T>.formatter;
     }
@@ -55,7 +55,7 @@ namespace CuteAnt.Extensions.Serialization.Internal
     }
   }
 
-  internal sealed class DefaultResolverCore : IFormatterResolver
+  internal sealed class DefaultResolverCore : FormatterResolver
   {
     public static readonly IFormatterResolver Instance = new DefaultResolverCore();
 
@@ -126,7 +126,7 @@ namespace CuteAnt.Extensions.Serialization.Internal
       }
     }
 
-    public IMessagePackFormatter<T> GetFormatter<T>()
+    public override IMessagePackFormatter<T> GetFormatter<T>()
     {
       return FormatterCache<T>.formatter;
     }

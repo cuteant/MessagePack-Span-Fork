@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace MessagePack.Resolvers
 {
-    public sealed class CompositeResolver : IFormatterResolver
+    public sealed class CompositeResolver : FormatterResolver
     {
         public static readonly CompositeResolver Instance = new CompositeResolver();
 
@@ -66,7 +66,7 @@ namespace MessagePack.Resolvers
             MessagePack.MessagePackSerializer.SetDefaultResolver(CompositeResolver.Instance);
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

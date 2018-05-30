@@ -2,7 +2,7 @@
 
 namespace MessagePack.Resolvers
 {
-    public sealed class PrimitiveObjectResolver : IFormatterResolver
+    public sealed class PrimitiveObjectResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new PrimitiveObjectResolver();
 
@@ -11,7 +11,7 @@ namespace MessagePack.Resolvers
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

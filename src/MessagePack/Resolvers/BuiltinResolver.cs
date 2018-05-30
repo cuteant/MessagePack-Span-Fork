@@ -13,7 +13,7 @@ using CuteAnt;
 
 namespace MessagePack.Resolvers
 {
-    public sealed class BuiltinResolver : IFormatterResolver
+    public sealed class BuiltinResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new BuiltinResolver();
 
@@ -22,7 +22,7 @@ namespace MessagePack.Resolvers
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

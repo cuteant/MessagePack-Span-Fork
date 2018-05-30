@@ -6,7 +6,7 @@ using MessagePack.Formatters;
 
 namespace MessagePack
 {
-    public sealed class HyperionExpressionResolver : IFormatterResolver
+    public sealed class HyperionExpressionResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new HyperionExpressionResolver();
 
@@ -14,7 +14,7 @@ namespace MessagePack
         {
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }
@@ -37,7 +37,6 @@ namespace MessagePack
             var ti = t.GetTypeInfo();
             if (ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(Expression<>))
             {
-                //return ActivatorUtils.FastCreateInstance(typeof(SimpleHyperionFormatter<>).GetCachedGenericType(t));
                 return ActivatorUtils.FastCreateInstance(typeof(HyperionExpressionFormatter<>).GetCachedGenericType(t));
             }
 

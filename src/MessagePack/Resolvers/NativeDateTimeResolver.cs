@@ -4,7 +4,7 @@ using System;
 
 namespace MessagePack.Resolvers
 {
-    public sealed class NativeDateTimeResolver : IFormatterResolver
+    public sealed class NativeDateTimeResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new NativeDateTimeResolver();
 
@@ -13,7 +13,7 @@ namespace MessagePack.Resolvers
 
         }
 
-        public IMessagePackFormatter<T> GetFormatter<T>()
+        public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return FormatterCache<T>.formatter;
         }

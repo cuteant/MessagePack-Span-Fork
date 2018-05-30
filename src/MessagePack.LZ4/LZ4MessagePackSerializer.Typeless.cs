@@ -47,7 +47,7 @@ namespace MessagePack
                 return LZ4MessagePackSerializer.Deserialize<object>(stream, defaultResolver, readStrict);
             }
 
-            class CompositeResolver : IFormatterResolver
+            class CompositeResolver : FormatterResolver
             {
                 public static readonly CompositeResolver Instance = new CompositeResolver();
 
@@ -68,7 +68,7 @@ namespace MessagePack
                     CompositeResolver.resolvers = resolvers;
                 }
 
-                public IMessagePackFormatter<T> GetFormatter<T>()
+                public override IMessagePackFormatter<T> GetFormatter<T>()
                 {
                     return FormatterCache<T>.formatter;
                 }
