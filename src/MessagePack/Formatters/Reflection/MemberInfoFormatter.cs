@@ -57,26 +57,32 @@ namespace MessagePack.Formatters
             }
 
             var shim = new MemberinfoShim();
-            if (value is EventInfo ei)
+            switch (value)
             {
-                shim.MemberType = MemberinfoType.EventInfo;
-                shim.Event = ei;
+                case EventInfo ei:
+                    shim.MemberType = MemberinfoType.EventInfo;
+                    shim.Event = ei;
+                    break;
+
+                case FieldInfo fi:
+                    shim.MemberType = MemberinfoType.FieldInfo;
+                    shim.Field = fi;
+                    break;
+
+                case MethodInfo mi:
+                    shim.MemberType = MemberinfoType.MethodInfo;
+                    shim.Method = mi;
+                    break;
+
+                case PropertyInfo pi:
+                    shim.MemberType = MemberinfoType.PropertyInfo;
+                    shim.Property = pi;
+                    break;
+
+                default:
+                    return MessagePackBinary.WriteNil(ref bytes, offset);
             }
-            else if (value is FieldInfo fi)
-            {
-                shim.MemberType = MemberinfoType.FieldInfo;
-                shim.Field = fi;
-            }
-            else if (value is MethodInfo mi)
-            {
-                shim.MemberType = MemberinfoType.MethodInfo;
-                shim.Method = mi;
-            }
-            else if (value is PropertyInfo pi)
-            {
-                shim.MemberType = MemberinfoType.PropertyInfo;
-                shim.Property = pi;
-            }
+
             var formatter = formatterResolver.GetFormatter<MemberinfoShim>();
             return formatter.Serialize(ref bytes, offset, shim, formatterResolver);
         }

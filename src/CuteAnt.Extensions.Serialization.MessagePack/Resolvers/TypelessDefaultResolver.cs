@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using CuteAnt.Reflection;
 using MessagePack.Formatters;
 using MessagePack.ImmutableCollection;
 
@@ -125,6 +126,8 @@ namespace MessagePack.Resolvers
             return;
           }
         }
+
+        formatter = ActivatorUtils.FastCreateInstance<IMessagePackFormatter<T>>(typeof(DynamicProxyFormatter<>).GetCachedGenericType(typeof(T)));
       }
     }
   }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Net;
@@ -345,6 +346,95 @@ namespace CuteAnt.Extensions.Serialization.Tests
       resolver1.Context.Add("A", 1);
       Assert.Equal(1, resolver.Context.Count);
     }
+
+    [Fact]
+    public void CanSerializeCMD()
+    {
+      var cmd = new Cmd("a");
+      var copy = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(cmd);
+      Assert.NotNull(copy);
+      Assert.Equal("a", (string)copy.Data);
+
+      var trans = new Transition<string>("a", "b", "c");
+      var trans1 = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(trans);
+      Assert.NotNull(trans1);
+      Assert.Equal("a", trans1.FsmRef);
+      Assert.Equal("b", trans1.From);
+      Assert.Equal("c", trans1.To);
+    }
+
+    [Fact]
+    public void CanSerializeGenericInterface()
+    {
+      var trans = new Transition<ITestMessage>("a", new MessageA("b"), new MessageB("c"));
+      var trans1 = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(trans);
+      Assert.NotNull(trans1);
+      Assert.Equal("a", trans1.FsmRef);
+      Assert.Equal("b", trans1.From.Data);
+      Assert.Equal("c", trans1.To.Data);
+
+      var wrappedTrans = new WrappedTransition<Transition<ITestMessage>>
+      {
+        Payload = trans
+      };
+      var wrappedTrans1 = TypelessMessagePackMessageFormatter.DefaultInstance.DeepCopy(wrappedTrans);
+      Assert.NotNull(wrappedTrans1);
+      Assert.Equal("a", wrappedTrans1.Payload.FsmRef);
+      Assert.Equal("b", wrappedTrans1.Payload.From.Data);
+      Assert.Equal("c", wrappedTrans1.Payload.To.Data);
+    }
+  }
+
+
+  internal class Cmd
+  {
+    public Cmd(object data)
+    {
+      Data = data;
+    }
+
+    public object Data { get; private set; }
+
+    public override string ToString()
+    {
+      return "Cmd(" + Data + ")";
+    }
+  }
+
+  public sealed class WrappedTransition<T>
+  {
+    public T Payload { get; set; }
+  }
+
+  public sealed class Transition<TS>
+  {
+    /// <summary>
+    /// Initializes a new instance of the Transition
+    /// </summary>
+    /// <param name="fsmRef">TBD</param>
+    /// <param name="from">TBD</param>
+    /// <param name="to">TBD</param>
+    public Transition(string fsmRef, TS from, TS to)
+    {
+      To = to;
+      From = from;
+      FsmRef = fsmRef;
+    }
+
+    /// <summary>
+    /// TBD
+    /// </summary>
+    public string FsmRef { get; }
+
+    /// <summary>
+    /// TBD
+    /// </summary>
+    public TS From { get; }
+
+    /// <summary>
+    /// TBD
+    /// </summary>
+    public TS To { get; }
   }
 
   public class WithImmutableDefaultResolver : FormatterResolver
