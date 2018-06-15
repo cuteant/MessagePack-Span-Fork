@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace ServiceStack.Text.Common
 {
@@ -75,6 +76,20 @@ namespace ServiceStack.Text.Common
         {
             return InDeserializerFns != null && InDeserializerFns.Contains(typeof(T));
         }
+
+        [MethodImpl(InlineMethod.Value)]
+        internal static bool Traverse(object value)
+        {
+            if (++Depth <= JsConfig.MaxDepth)
+                return true;
+
+            Tracer.Instance.WriteError(
+                $"Exceeded MaxDepth limit of {JsConfig.MaxDepth} attempting to serialize {value.GetType().Name}");
+            return false;
+        }
+
+        [MethodImpl(InlineMethod.Value)]
+        internal static void UnTraverse() => --Depth;
 
         internal static void Reset()
         {

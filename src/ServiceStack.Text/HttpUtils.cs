@@ -541,15 +541,12 @@ namespace ServiceStack
 
             using (var webRes = PclExport.Instance.GetResponse(webReq))
             using (var stream = webRes.GetResponseStream())
-            using (var reader = new StreamReader(stream, UseEncoding))
             {
-                responseFilter?.Invoke((HttpWebResponse)webRes);
-
-                return reader.ReadToEnd();
+                return stream.ReadToEnd(UseEncoding);
             }
         }
 
-        public static Task<string> SendStringToUrlAsync(this string url, string method = null, string requestBody = null,
+        public static async Task<string> SendStringToUrlAsync(this string url, string method = null, string requestBody = null,
             string contentType = null, string accept = "*/*", Action<HttpWebRequest> requestFilter = null,
             Action<HttpWebResponse> responseFilter = null)
         {
@@ -567,9 +564,7 @@ namespace ServiceStack
             if (ResultsFilter != null)
             {
                 var result = ResultsFilter.GetString(webReq, requestBody);
-                var tcsResult = new TaskCompletionSource<string>();
-                tcsResult.SetResult(result);
-                return tcsResult.Task;
+                return result;
             }
 
             if (requestBody != null)
@@ -581,33 +576,13 @@ namespace ServiceStack
                 }
             }
 
-            var taskWebRes = webReq.GetResponseAsync();
-            var tcs = new TaskCompletionSource<string>();
+            var webRes = await webReq.GetResponseAsync();
+            responseFilter?.Invoke((HttpWebResponse)webRes);
 
-            taskWebRes.ContinueWith(task =>
+            using (var stream = webRes.GetResponseStream())
             {
-                if (task.Exception != null)
-                {
-                    tcs.SetException(task.Exception);
-                    return;
-                }
-                if (task.IsCanceled)
-                {
-                    tcs.SetCanceled();
-                    return;
-                }
-
-                var webRes = task.Result;
-                responseFilter?.Invoke((HttpWebResponse)webRes);
-
-                using (var stream = webRes.GetResponseStream())
-                using (var reader = new StreamReader(stream, UseEncoding))
-                {
-                    tcs.SetResult(reader.ReadToEnd());
-                }
-            });
-
-            return tcs.Task;
+                return await stream.ReadToEndAsync();
+            }
         }
 
         public static byte[] GetBytesFromUrl(this string url, string accept = "*/*",
@@ -694,7 +669,7 @@ namespace ServiceStack
             }
         }
 
-        public static Task<byte[]> SendBytesToUrlAsync(this string url, string method = null,
+        public static async Task<byte[]> SendBytesToUrlAsync(this string url, string method = null,
             byte[] requestBody = null, string contentType = null, string accept = "*/*",
             Action<HttpWebRequest> requestFilter = null, Action<HttpWebResponse> responseFilter = null)
         {
@@ -712,9 +687,7 @@ namespace ServiceStack
             if (ResultsFilter != null)
             {
                 var result = ResultsFilter.GetBytes(webReq, requestBody);
-                var tcsResult = new TaskCompletionSource<byte[]>();
-                tcsResult.SetResult(result);
-                return tcsResult.Task;
+                return result;
             }
 
             if (requestBody != null)
@@ -725,32 +698,13 @@ namespace ServiceStack
                 }
             }
 
-            var taskWebRes = webReq.GetResponseAsync();
-            var tcs = new TaskCompletionSource<byte[]>();
+            var webRes = await webReq.GetResponseAsync();
+            responseFilter?.Invoke((HttpWebResponse)webRes);
 
-            taskWebRes.ContinueWith(task =>
+            using (var stream = webRes.GetResponseStream())
             {
-                if (task.Exception != null)
-                {
-                    tcs.SetException(task.Exception);
-                    return;
-                }
-                if (task.IsCanceled)
-                {
-                    tcs.SetCanceled();
-                    return;
-                }
-
-                var webRes = task.Result;
-                responseFilter?.Invoke((HttpWebResponse)webRes);
-
-                using (var stream = webRes.GetResponseStream())
-                {
-                    tcs.SetResult(stream.ReadFully());
-                }
-            });
-
-            return tcs.Task;
+                return stream.ReadFully();
+            }
         }
 
         public static bool IsAny300(this Exception ex)
@@ -849,25 +803,21 @@ namespace ServiceStack
                 return null;
 
             var errorResponse = (HttpWebResponse)webEx.Response;
-            using (var reader = new StreamReader(errorResponse.GetResponseStream(), UseEncoding))
-            {
-                return reader.ReadToEnd();
-            }
+            return errorResponse.GetResponseStream().ReadToEnd(UseEncoding);
         }
 
         public static string ReadToEnd(this WebResponse webRes)
         {
             using (var stream = webRes.GetResponseStream())
-            using (var reader = new StreamReader(stream, UseEncoding))
             {
-                return reader.ReadToEnd();
+                return stream.ReadToEnd(UseEncoding);
             }
         }
 
         public static IEnumerable<string> ReadLines(this WebResponse webRes)
         {
             using (var stream = webRes.GetResponseStream())
-            using (var reader = new StreamReader(stream, UseEncoding))
+            using (var reader = new StreamReaderX(stream, UseEncoding, true, 1024, leaveOpen:true))
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
@@ -1131,6 +1081,7 @@ namespace ServiceStack
         public const string Csv = "text/csv";
         public const string ProtoBuf = "application/x-protobuf";
         public const string JavaScript = "text/javascript";
+        public const string WebAssembly = "application/wasm";
 
         public const string FormUrlEncoded = "application/x-www-form-urlencoded";
         public const string MultiPartFormData = "multipart/form-data";
@@ -1172,13 +1123,12 @@ namespace ServiceStack
         public static string GetMimeType(string fileNameOrExt)
         {
             if (string.IsNullOrEmpty(fileNameOrExt))
-                throw new ArgumentNullException("fileNameOrExt");
+                throw new ArgumentNullException(nameof(fileNameOrExt));
 
             var parts = fileNameOrExt.Split('.');
             var fileExt = parts[parts.Length - 1];
 
-            string mimeType;
-            if (ExtensionMimeTypes.TryGetValue(fileExt, out mimeType))
+            if (ExtensionMimeTypes.TryGetValue(fileExt, out var mimeType))
             {
                 return mimeType;
             }
@@ -1253,13 +1203,39 @@ namespace ServiceStack
                     return "application/" + fileExt;
 
                 case "xls":
+                case "xlt":
+                case "xla":
                     return "application/x-excel";
 
+                case "xlsx":
+                    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                case "xltx":
+                    return "application/vnd.openxmlformats-officedocument.spreadsheetml.template";
+
                 case "doc":
+                case "dot":
                     return "application/msword";
 
+                case "docx":
+                    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                case "dotx":
+                    return "application/vnd.openxmlformats-officedocument.wordprocessingml.template";
+
                 case "ppt":
-                    return "application/powerpoint";
+                case "oit":
+                case "pps":
+                case "ppa":
+                    return "application/vnd.ms-powerpoint";
+
+                case "pptx":
+                    return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+                case "potx":
+                    return "application/vnd.openxmlformats-officedocument.presentationml.template";
+                case "ppsx":
+                    return "application/vnd.openxmlformats-officedocument.presentationml.slideshow";
+
+                case "mdb":
+                    return "application/vnd.ms-access";
 
                 case "gz":
                 case "tgz":
@@ -1275,6 +1251,12 @@ namespace ServiceStack
                     return "application/font-woff";
                 case "woff2":
                     return "application/font-woff2";
+                    
+                case "dll":
+                    return "application/octet-stream";
+                    
+                case "wasm":
+                    return "application/wasm";
 
                 default:
                     return "application/" + fileExt;

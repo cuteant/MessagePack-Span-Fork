@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CuteAnt.IO;
@@ -18,8 +19,7 @@ namespace ServiceStack
     {
         public static long WriteTo(this Stream inStream, Stream outStream)
         {
-            var memoryStream = inStream as MemoryStream;
-            if (memoryStream != null)
+            if (inStream is MemoryStream memoryStream)
             {
                 memoryStream.WriteTo(outStream);
                 return memoryStream.Position;
@@ -301,6 +301,131 @@ namespace ServiceStack
             }
             return StringBuilderManager.ReturnAndFree(sb);
         }
-        
+
+        public static string ReadToEnd(this MemoryStream ms) => ReadToEnd(ms, JsConfig.UTF8Encoding);
+        public static string ReadToEnd(this MemoryStream ms, Encoding encoding)
+        {
+            ms.Position = 0;
+            try
+            {
+                var ret = encoding.GetString(ms.GetBuffer(), 0, (int)ms.Length);
+                return ret;
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                Tracer.Instance.WriteWarning("MemoryStream wasn't created with a publiclyVisible:true byte[] bufffer, falling back to slow impl");
+
+                using (var reader = new StreamReaderX(ms, encoding, true, DefaultBufferSize, leaveOpen: true))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+        }
+
+        public static Task<string> ReadToEndAsync(this MemoryStream ms) => ReadToEndAsync(ms, JsConfig.UTF8Encoding);
+        public static Task<string> ReadToEndAsync(this MemoryStream ms, Encoding encoding)
+        {
+            ms.Position = 0;
+            try
+            {
+                var ret = encoding.GetString(ms.GetBuffer(), 0, (int)ms.Length);
+                return ret.InTask();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                Tracer.Instance.WriteWarning("MemoryStream in ReadToEndAsync() wasn't created with a publiclyVisible:true byte[] bufffer, falling back to slow impl");
+
+                using (var reader = new StreamReaderX(ms, encoding, true, DefaultBufferSize, leaveOpen: true))
+                {
+                    return reader.ReadToEndAsync();
+                }
+            }
+        }
+
+        public static string ReadToEnd(this Stream stream) => ReadToEnd(stream, JsConfig.UTF8Encoding);
+        public static string ReadToEnd(this Stream stream, Encoding encoding)
+        {
+            if (stream is MemoryStream ms)
+                return ms.ReadToEnd();
+
+            if (stream.CanSeek)
+            {
+                stream.Position = 0;
+            }
+
+            using (var reader = new StreamReaderX(stream, encoding, true, DefaultBufferSize, leaveOpen: true))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
+        public static Task<string> ReadToEndAsync(this Stream stream) => ReadToEndAsync(stream, JsConfig.UTF8Encoding);
+        public static Task<string> ReadToEndAsync(this Stream stream, Encoding encoding)
+        {
+            if (stream is MemoryStream ms)
+                return ms.ReadToEndAsync();
+
+            if (stream.CanSeek)
+            {
+                stream.Position = 0;
+            }
+
+            using (var reader = new StreamReaderX(stream, encoding, true, DefaultBufferSize, leaveOpen: true))
+            {
+                return reader.ReadToEndAsync();
+            }
+        }
+
+
+        public static Task WriteToAsync(this MemoryStream stream, Stream output, CancellationToken token = default(CancellationToken)) =>
+            WriteToAsync(stream, output, JsConfig.UTF8Encoding, token);
+
+        public static async Task WriteToAsync(this MemoryStream stream, Stream output, Encoding encoding, CancellationToken token)
+        {
+            try
+            {
+                await output.WriteAsync(stream.GetBuffer(), 0, (int)stream.Length, token);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                Tracer.Instance.WriteWarning("MemoryStream in WriteToAsync() wasn't created with a publiclyVisible:true byte[] bufffer, falling back to slow impl");
+
+                var bytes = stream.ToArray();
+                await output.WriteAsync(bytes, 0, bytes.Length, token);
+            }
+        }
+
+        public static Task WriteToAsync(this Stream stream, Stream output, CancellationToken token = default(CancellationToken)) =>
+            WriteToAsync(stream, output, JsConfig.UTF8Encoding, token);
+
+
+        public static Task WriteToAsync(this Stream stream, Stream output, Encoding encoding, CancellationToken token)
+        {
+            if (stream is MemoryStream ms)
+                return ms.WriteToAsync(output, encoding, token);
+
+#if NET40
+            stream.CopyTo(output);
+            return CuteAnt.AsyncEx.TaskConstants.Completed;
+#else
+            return stream.CopyToAsync(output, token);
+#endif
+        }
+
+        public static MemoryStream CopyToNewMemoryStream(this Stream stream)
+        {
+            var ms = MemoryStreamManager.GetStream();
+            stream.CopyTo(ms);
+            ms.Position = 0;
+            return ms;
+        }
+
+        public static async Task<MemoryStream> CopyToNewMemoryStreamAsync(this Stream stream)
+        {
+            var ms = MemoryStreamManager.GetStream();
+            await stream.CopyToAsync(ms);
+            ms.Position = 0;
+            return ms;
+        }
     }
 }

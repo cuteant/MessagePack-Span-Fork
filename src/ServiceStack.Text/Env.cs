@@ -138,7 +138,7 @@ namespace ServiceStack.Text
                         {
                             var winPath = PclExport.Instance.GetEnvironmentVariable("SYSTEMROOT") ?? @"C:\Windows";
                             var gacPath = winPath + @"\Microsoft.NET\Framework\";
-                            v4Dirs = PclExport.Instance.GetDirectoryNames(gacPath, "v4*");                            
+                            v4Dirs = PclExport.Instance.GetDirectoryNames(gacPath, "v4*");
                         }
                         if (v4Dirs.Length > 0)
                         {
@@ -154,7 +154,7 @@ namespace ServiceStack.Text
                 }
                 return referenceAssembyPath;
             }
-            set { referenceAssembyPath = value; }
+            set => referenceAssembyPath = value;
         }
     }
 }

@@ -30,7 +30,12 @@ namespace ServiceStack.Text
             JsConfig.InitStatics();
         }
 
-        public static Encoding UTF8Encoding = PclExport.Instance.GetUTF8Encoding(false);
+        [Obsolete("Use JsConfig.UTF8Encoding")]
+        public static UTF8Encoding UTF8Encoding
+        {
+            get => JsConfig.UTF8Encoding;
+            set => JsConfig.UTF8Encoding = value;
+        }
 
         public static T DeserializeFromString<T>(string value)
         {
@@ -148,7 +153,7 @@ namespace ServiceStack.Text
             }
             else
             {
-                using (var writer = new StreamWriterX(stream, UTF8Encoding))
+                using (var writer = new StreamWriterX(stream, JsConfig.UTF8Encoding))
                 {
                     JsonWriter<T>.WriteRootObject(writer, value);
                     writer.Flush();
@@ -158,7 +163,7 @@ namespace ServiceStack.Text
 
         public static void SerializeToStream(object value, Type type, Stream stream)
         {
-            using (var writer = new StreamWriterX(stream, UTF8Encoding))
+            using (var writer = new StreamWriterX(stream, JsConfig.UTF8Encoding))
             {
                 JsonWriter.GetWriteFn(type)(writer, value);
                 writer.Flush();
@@ -167,18 +172,12 @@ namespace ServiceStack.Text
 
         public static T DeserializeFromStream<T>(Stream stream)
         {
-            using (var reader = new StreamReaderX(stream, UTF8Encoding))
-            {
-                return DeserializeFromString<T>(reader.ReadToEnd());
-            }
+            return DeserializeFromString<T>(stream.ReadToEnd());
         }
 
         public static object DeserializeFromStream(Type type, Stream stream)
         {
-            using (var reader = new StreamReaderX(stream, UTF8Encoding))
-            {
-                return DeserializeFromString(reader.ReadToEnd(), type);
-            }
+            return DeserializeFromString(stream.ReadToEnd(), type);
         }
 
         public static T DeserializeResponse<T>(WebRequest webRequest)

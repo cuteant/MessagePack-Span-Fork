@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using CuteAnt.Pool;
+using System.Runtime.Serialization;
+using System.Text;
 using NUnit.Framework;
 
 namespace ServiceStack.Text.Tests.JsonTests
@@ -168,12 +169,12 @@ namespace ServiceStack.Text.Tests.JsonTests
 
         static string DictStr(IDictionary d)
         {
-            var sb = StringBuilderManager.Allocate();
+            var sb = StringBuilderCache.Allocate();
             foreach (var key in d.Keys)
             {
                 sb.AppendLine(key + " = " + d[key]);
             }
-            return StringBuilderManager.ReturnAndFree(sb);
+            return StringBuilderCache.ReturnAndFree(sb);
         }
 
         public class ModelWithHashSet
@@ -184,7 +185,7 @@ namespace ServiceStack.Text.Tests.JsonTests
         [Test]
         public void Can_deserialize_null_Nested_HashSet()
         {
-            JsConfig.ThrowOnDeserializationError = true;
+            JsConfig.ThrowOnError = true;
             string json = @"{""set"":null}";
             var o = json.FromJson<ModelWithHashSet>();
             Assert.That(o.Set, Is.Null);

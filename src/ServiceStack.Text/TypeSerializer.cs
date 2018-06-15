@@ -33,7 +33,13 @@ namespace ServiceStack.Text
             JsConfig.InitStatics();
         }
 
-        public static Encoding UTF8Encoding = PclExport.Instance.GetUTF8Encoding(false);
+
+        [Obsolete("Use JsConfig.UTF8Encoding")]
+        public static UTF8Encoding UTF8Encoding
+        {
+            get => JsConfig.UTF8Encoding;
+            set => JsConfig.UTF8Encoding = value;
+        }
 
         public const string DoubleQuoteString = "\"\"";
 
@@ -164,7 +170,7 @@ namespace ServiceStack.Text
             }
             else
             {
-                using (var writer = new StreamWriterX(stream, UTF8Encoding))
+                using (var writer = new StreamWriterX(stream, JsConfig.UTF8Encoding))
                 {
                     JsvWriter<T>.WriteRootObject(writer, value);
                     writer.Flush();
@@ -174,7 +180,7 @@ namespace ServiceStack.Text
 
         public static void SerializeToStream(object value, Type type, Stream stream)
         {
-            using (var writer = new StreamWriterX(stream, UTF8Encoding))
+            using (var writer = new StreamWriterX(stream, JsConfig.UTF8Encoding))
             {
                 JsvWriter.GetWriteFn(type)(writer, value);
                 writer.Flush();
@@ -190,18 +196,12 @@ namespace ServiceStack.Text
 
         public static T DeserializeFromStream<T>(Stream stream)
         {
-            using (var reader = new StreamReaderX(stream, UTF8Encoding))
-            {
-                return DeserializeFromString<T>(reader.ReadToEnd());
-            }
+            return DeserializeFromString<T>(stream.ReadToEnd());
         }
 
         public static object DeserializeFromStream(Type type, Stream stream)
         {
-            using (var reader = new StreamReaderX(stream, UTF8Encoding))
-            {
-                return DeserializeFromString(reader.ReadToEnd(), type);
-            }
+            return DeserializeFromString(stream.ReadToEnd(), type);
         }
 
         /// <summary>
@@ -327,11 +327,43 @@ namespace ServiceStack.Text
                 parentValues.Push(value);
             }
 
+            bool CheckValue(object key)
+            {
+                if (parentValues.Contains(key))
+                    return true;
+
+                parentValues.Push(key);
+
+                if (HasCircularReferences(key, parentValues))
+                    return true;
+
+                parentValues.Pop();
+                return false;
+            }
+
             if (value is IEnumerable valueEnumerable)
             {
                 foreach (var item in valueEnumerable)
                 {
-                    if (HasCircularReferences(item, parentValues))
+                    if (item == null)
+                        continue;
+
+                    var itemType = item.GetType();
+                    if (itemType.IsGenericType && itemType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
+                    {
+                        var props = TypeProperties.Get(itemType);
+                        var key = props.GetPublicGetter("Key")(item);
+
+                        if (CheckValue(key))
+                            return true;
+
+                        var val = props.GetPublicGetter("Value")(item);
+
+                        if (CheckValue(val))
+                            return true;
+                    }
+
+                    if (CheckValue(item))
                         return true;
                 }
             }
@@ -349,15 +381,8 @@ namespace ServiceStack.Text
                     if (pValue == null)
                         continue;
 
-                    if (parentValues.Contains(pValue))
+                    if (CheckValue(pValue))
                         return true;
-
-                    parentValues.Push(pValue);
-
-                    if (HasCircularReferences(pValue, parentValues))
-                        return true;
-
-                    parentValues.Pop();
                 }
             }
 

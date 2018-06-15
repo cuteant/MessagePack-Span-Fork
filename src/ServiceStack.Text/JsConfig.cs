@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Threading;
 using CuteAnt.Reflection;
 using ServiceStack.Text.Common;
@@ -203,6 +204,8 @@ namespace ServiceStack.Text
             return scope;
         }
 
+        public static UTF8Encoding UTF8Encoding { get; set; } = new UTF8Encoding(false);
+
         public static JsConfigScope With(
             bool? convertObjectTypesIntoStringDictionary = null,
             bool? tryToParsePrimitiveTypeValues = null,
@@ -259,7 +262,7 @@ namespace ServiceStack.Text
                 TimeSpanHandler = timeSpanHandler ?? sTimeSpanHandler,
                 PropertyConvention = propertyConvention ?? sPropertyConvention,
                 PreferInterfaces = preferInterfaces ?? sPreferInterfaces,
-                ThrowOnDeserializationError = throwOnDeserializationError ?? sThrowOnDeserializationError,
+                ThrowOnDeserializationError = throwOnDeserializationError ?? sThrowOnError,
                 DateTimeFormat = dateTimeFormat ?? sDateTimeFormat,
                 TypeAttr = typeAttr ?? sTypeAttr,
                 TypeWriter = typeWriter ?? sTypeWriter,
@@ -602,20 +605,27 @@ namespace ServiceStack.Text
 
         /// <summary>
         /// Gets or sets a value indicating if the framework should throw serialization exceptions
-        /// or continue regardless of deserialization errors. If <see langword="true"/>  the framework
+        /// or continue regardless of serialization errors. If <see langword="true"/>  the framework
         /// will throw; otherwise, it will parse as many fields as possible. The default is <see langword="false"/>.
         /// </summary>
-        private static bool? sThrowOnDeserializationError;
-        public static bool ThrowOnDeserializationError
+        private static bool? sThrowOnError;
+        public static bool ThrowOnError
         {
             // obeying the use of ThreadStatic, but allowing for setting JsConfig once as is the normal case
             get => (JsConfigScope.Current != null ? JsConfigScope.Current.ThrowOnDeserializationError : null)
-                   ?? sThrowOnDeserializationError
-                   ?? false;
+                   ?? sThrowOnError
+                   ?? Env.StrictMode;
             set
             {
-                if (!sThrowOnDeserializationError.HasValue) sThrowOnDeserializationError = value;
+                if (!sThrowOnError.HasValue) sThrowOnError = value;
             }
+        }
+
+        [Obsolete("Renamed to ThrowOnError")]
+        public static bool ThrowOnDeserializationError
+        {
+            get => ThrowOnError;
+            set => ThrowOnError = value;
         }
 
         /// <summary>
@@ -781,7 +791,7 @@ namespace ServiceStack.Text
         {
             get => (JsConfigScope.Current != null ? JsConfigScope.Current.MaxDepth : null)
                    ?? sMaxDepth
-                   ?? int.MaxValue;
+                   ?? 50;
             set
             {
                 if (!sMaxDepth.HasValue) sMaxDepth = value;
@@ -873,7 +883,7 @@ namespace ServiceStack.Text
             sDateHandler = null;
             sTimeSpanHandler = null;
             sPreferInterfaces = null;
-            sThrowOnDeserializationError = null;
+            sThrowOnError = null;
             sTypeAttr = null;
             sDateTimeFormat = null;
             sJsonTypeAttrInObject = null;
@@ -897,7 +907,7 @@ namespace ServiceStack.Text
             sExcludePropertyReferences = null;
             sExcludeTypes = new HashSet<Type> { typeof(Stream) };
             __uniqueTypes = new HashSet<Type>();
-            sMaxDepth = 50;
+            sMaxDepth = null;
             sParsePrimitiveIntegerTypes = null;
             sParsePrimitiveFloatingPointTypes = null;
             AllowRuntimeType = null;
