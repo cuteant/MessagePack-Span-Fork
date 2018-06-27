@@ -11,13 +11,17 @@ namespace CuteAnt.Extensions.Serialization.Json
   {
     private readonly ArrayPool<T> _inner;
 
-    public JsonArrayPool(ArrayPool<T> inner) => _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+    public JsonArrayPool(ArrayPool<T> inner)
+    {
+      if (null == inner) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.inner); }
+      _inner = inner;
+    }
 
     public T[] Rent(int minimumLength) => _inner.Rent(minimumLength);
 
     public void Return(T[] array)
     {
-      if (array == null) { throw new ArgumentNullException(nameof(array)); }
+      if (null == array) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array); }
 
       _inner.Return(array);
     }

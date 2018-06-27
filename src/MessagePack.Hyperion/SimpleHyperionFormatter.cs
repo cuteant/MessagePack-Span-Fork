@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using CuteAnt.Buffers;
 using Hyperion;
 
@@ -20,7 +21,7 @@ namespace MessagePack.Formatters
 
         public SimpleHyperionFormatter(SerializerOptions options)
         {
-            if (null == options) { throw new ArgumentNullException(nameof(options)); }
+            if (null == options) { ThrowArgumentNullException(); }
 
             _serializer = new Serializer(options.Clone(false, true));
         }
@@ -65,6 +66,16 @@ namespace MessagePack.Formatters
                 return MessagePackBinary.WriteBytes(ref bytes, offset, buffer, 0, bufferSize);
             }
             finally { bufferPool.Return(buffer); }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowArgumentNullException()
+        {
+            throw GetArgumentNullException();
+            ArgumentNullException GetArgumentNullException()
+            {
+                return new ArgumentNullException("options");
+            }
         }
     }
 }

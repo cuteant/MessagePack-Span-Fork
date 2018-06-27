@@ -3,6 +3,7 @@ using MessagePack.Formatters;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace MessagePack
 {
@@ -31,12 +32,29 @@ namespace MessagePack
     {
         public static IMessagePackFormatter<T> GetFormatterWithVerify<T>(this IFormatterResolver resolver)
         {
-            IMessagePackFormatter<T> formatter;
+            IMessagePackFormatter<T> formatter = null;
             try
             {
                 formatter = resolver.GetFormatter<T>();
             }
             catch (TypeInitializationException ex)
+            {
+                ThrowTypeInitializationException(ex);
+            }
+
+            if (null == formatter)
+            {
+                ThrowFormatterNotRegisteredException<T>(resolver);
+            }
+
+            return formatter;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowTypeInitializationException(TypeInitializationException ex)
+        {
+            throw GetException();
+            Exception GetException()
             {
                 Exception inner = ex;
                 while (inner.InnerException != null)
@@ -44,30 +62,31 @@ namespace MessagePack
                     inner = inner.InnerException;
                 }
 
-                throw inner;
+                return inner;
             }
+        }
 
-            if (formatter == null)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowFormatterNotRegisteredException<T>(IFormatterResolver resolver)
+        {
+            throw GetException();
+            FormatterNotRegisteredException GetException()
             {
-                throw new FormatterNotRegisteredException(typeof(T).FullName + " is not registered in this resolver. resolver:" + resolver.GetType().Name);
+                return new FormatterNotRegisteredException(typeof(T).FullName + " is not registered in this resolver. resolver:" + resolver.GetType().Name);
             }
-
-            return formatter;
         }
 
 #if !UNITY_WSA
-
-        public static object GetFormatterDynamic(this IFormatterResolver resolver, Type type)
-        {
-            var methodInfo = typeof(IFormatterResolver)
+        private static readonly MethodInfo s_getFormatterMethod = typeof(IFormatterResolver)
 #if NET40
                 .GetMethod
 #else
                 .GetRuntimeMethod
 #endif
                 ("GetFormatter", Type.EmptyTypes);
-
-            var formatter = methodInfo.MakeGenericMethod(type).Invoke(resolver, null);
+        public static object GetFormatterDynamic(this IFormatterResolver resolver, Type type)
+        {
+            var formatter = s_getFormatterMethod.MakeGenericMethod(type).Invoke(resolver, null);
             return formatter;
         }
 

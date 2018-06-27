@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using CuteAnt.Extensions.Serialization;
 using Utf8Json;
 using Utf8Json.Formatters;
 using Utf8Json.ImmutableCollection;
@@ -118,7 +119,7 @@ namespace CuteAnt.Extensions.Serialization
       if (null == resolvers || resolvers.Length == 0) { return; }
       if (Locked == s_isFreezed)
       {
-        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
       Interlocked.Exchange(ref s_resolvers, resolvers.Concat(s_defaultResolvers).ToArray());
@@ -129,7 +130,7 @@ namespace CuteAnt.Extensions.Serialization
       if (null == formatters || formatters.Length == 0) { return; }
       if (Locked == s_isFreezed)
       {
-        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
       Interlocked.Exchange(ref s_formatters, formatters);
@@ -139,7 +140,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (Locked == s_isFreezed)
       {
-        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
       if (formatters != null && formatters.Length > 0)
@@ -255,7 +256,7 @@ namespace CuteAnt.Extensions.Serialization
       if (null == resolvers || resolvers.Length == 0) { return; }
       if (Locked == s_isFreezed)
       {
-        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
       Interlocked.Exchange(ref s_resolvers, resolvers.Concat(s_defaultResolvers).ToArray());
@@ -266,7 +267,7 @@ namespace CuteAnt.Extensions.Serialization
       if (null == formatters || formatters.Length == 0) { return; }
       if (Locked == s_isFreezed)
       {
-        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
       Interlocked.Exchange(ref s_formatters, formatters);
@@ -276,7 +277,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (Locked == s_isFreezed)
       {
-        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
       if (formatters != null && formatters.Length > 0)
@@ -392,7 +393,7 @@ namespace CuteAnt.Extensions.Serialization
       if (null == resolvers || resolvers.Length == 0) { return; }
       if (Locked == s_isFreezed)
       {
-        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
       Interlocked.Exchange(ref s_resolvers, resolvers.Concat(s_defaultResolvers).ToArray());
@@ -403,7 +404,7 @@ namespace CuteAnt.Extensions.Serialization
       if (null == formatters || formatters.Length == 0) { return; }
       if (Locked == s_isFreezed)
       {
-        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
       Interlocked.Exchange(ref s_formatters, formatters);
@@ -413,7 +414,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (Locked == s_isFreezed)
       {
-        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
       if (formatters != null && formatters.Length > 0)

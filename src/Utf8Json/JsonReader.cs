@@ -1199,8 +1199,7 @@ namespace Utf8Json
                         return i;
                     }
                 }
-
-                throw new JsonParsingException("Can not find end token of single line comment(\r or \n).");
+                ThrowHelper.ThrowJsonParsingException_Single();
             }
             else if (bytes[offset + 1] == '*')
             {
@@ -1213,7 +1212,7 @@ namespace Utf8Json
                         return i + 1;
                     }
                 }
-                throw new JsonParsingException("Can not find end token of multi line comment(*/).");
+                ThrowHelper.ThrowJsonParsingException_Multi();
             }
 
             return offset;

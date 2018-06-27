@@ -355,7 +355,7 @@ namespace Utf8Json.Formatters
             return new DateTime(year, month, day, hour, minute, second, kind).AddTicks(ticks);
 
             ERROR:
-            throw new InvalidOperationException("invalid datetime format. value:" + StringEncoding.UTF8.GetString(str.Array, str.Offset, str.Count));
+            ThrowHelper.ThrowInvalidOperationException_Datetime(str); return default;
         }
     }
 
@@ -700,7 +700,7 @@ namespace Utf8Json.Formatters
             return new DateTimeOffset(year, month, day, hour, minute, second, TimeSpan.Zero).AddTicks(ticks);
 
             ERROR:
-            throw new InvalidOperationException("invalid datetime format. value:" + StringEncoding.UTF8.GetString(str.Array, str.Offset, str.Count));
+            ThrowHelper.ThrowInvalidOperationException_Datetime(str); return default;
         }
     }
 
@@ -967,7 +967,7 @@ namespace Utf8Json.Formatters
                 : ts.Add(tk);
 
             ERROR:
-            throw new InvalidOperationException("invalid datetime format. value:" + StringEncoding.UTF8.GetString(str.Array, str.Offset, str.Count));
+            ThrowHelper.ThrowInvalidOperationException_Datetime(str); return default;
         }
     }
 }

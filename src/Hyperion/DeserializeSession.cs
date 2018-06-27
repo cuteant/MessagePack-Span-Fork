@@ -108,7 +108,7 @@ namespace Hyperion
                 return Serializer.Options.KnownTypes[typeId];
             }
             if (_identifierToType == null)
-                throw new ArgumentException(nameof(typeId));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.typeId);
 
             return _identifierToType[typeId - _offset];
         }
@@ -188,7 +188,7 @@ namespace Hyperion
             }
             set
             {
-                if (null == value) { throw new ArgumentNullException(nameof(value)); }
+                if (null == value) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value); }
                 Interlocked.CompareExchange(ref _innerPool, value, null);
             }
         }

@@ -1608,13 +1608,13 @@ namespace Utf8Json.Resolvers.Internal
 
         public void Serialize(ref JsonWriter writer, T value, IJsonFormatterResolver formatterResolver)
         {
-            if (serialize == null) throw new InvalidOperationException(this.GetType().Name + " does not support Serialize.");
+            if (serialize == null) ThrowHelper.ThrowInvalidOperationException_NotSupport_Serialize(this.GetType());
             serialize(stringByteKeysField, serializeCustomFormatters, ref writer, value, formatterResolver);
         }
 
         public T Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
-            if (deserialize == null) throw new InvalidOperationException(this.GetType().Name + " does not support Deserialize.");
+            if (deserialize == null) ThrowHelper.ThrowInvalidOperationException_NotSupport_Deserialize(this.GetType());
             return deserialize(deserializeCustomFormatters, ref reader, formatterResolver);
         }
     }

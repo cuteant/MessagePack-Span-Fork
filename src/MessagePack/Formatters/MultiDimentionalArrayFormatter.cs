@@ -52,7 +52,7 @@ namespace MessagePack.Formatters
 
                 var len = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
                 offset += readSize;
-                if (len != ArrayLength) throw new InvalidOperationException("Invalid T[,] format");
+                if (len != ArrayLength) ThrowHelper.ThrowInvalidOperationException_T_Format1();
 
                 var iLength = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
                 offset += readSize;
@@ -137,7 +137,7 @@ namespace MessagePack.Formatters
 
                 var len = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
                 offset += readSize;
-                if (len != ArrayLength) throw new InvalidOperationException("Invalid T[,,] format");
+                if (len != ArrayLength) ThrowHelper.ThrowInvalidOperationException_T_Format2();
 
                 var iLength = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
                 offset += readSize;
@@ -234,7 +234,7 @@ namespace MessagePack.Formatters
 
                 var len = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
                 offset += readSize;
-                if (len != ArrayLength) throw new InvalidOperationException("Invalid T[,,,] format");
+                if (len != ArrayLength) ThrowHelper.ThrowInvalidOperationException_T_Format3();
 
                 var iLength = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
                 offset += readSize;

@@ -83,7 +83,7 @@ namespace MessagePack.Formatters
             var actualType = value.GetType();
             if (!IsSupportedType(actualType))
             {
-                throw new InvalidOperationException($"Type '{actualType}' is an interface or abstract class and cannot be serialized.");
+                ThrowHelper.ThrowInvalidOperationException_InterfaceOrAbstract(actualType);
             }
 
             var startOffset = offset;
@@ -228,7 +228,7 @@ namespace MessagePack.Formatters.Internal
 
         private static IDynamicObjectTypeFormatter CreateObjectTypeFormatter(Type type)
         {
-            if (null == type) { throw new ArgumentNullException(nameof(type)); }
+            if (null == type) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.type); }
 
             var formatterType = typeof(DynamicObjectTypeFormatter<>).GetCachedGenericType(type);
             return ActivatorUtils.FastCreateInstance<IDynamicObjectTypeFormatter>(formatterType);
@@ -236,7 +236,7 @@ namespace MessagePack.Formatters.Internal
 
         public static IDynamicObjectTypeFormatter GetObjectTypeFormatter(Type type)
         {
-            if (null == type) { throw new ArgumentNullException(nameof(type)); }
+            if (null == type) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.type); }
 
             return s_objectFormatterCache.GetOrAdd(type, s_createObjectTypeFormatterFunc);
         }

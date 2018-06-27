@@ -72,7 +72,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="props"></param>
     public JsonLimitPropsContractResolver(ICollection<string> props)
     {
-      if (null == props) { throw new ArgumentNullException(nameof(props)); }
+      if (null == props) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.props); }
       _props = new HashSet<string>(props, StringComparer.Ordinal);
     }
 
@@ -126,7 +126,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="props"></param>
     public JsonCamelCasePropertyNamesLimitPropsContractResolver(ICollection<string> props)
     {
-      if (null == props) { throw new ArgumentNullException(nameof(props)); }
+      if (null == props) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.props); }
       _props = new HashSet<string>(props, StringComparer.Ordinal);
     }
 
@@ -161,7 +161,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="limitProps"></param>
     public JsonPropertyMappingContractResolver(IDictionary<string, string> propertyMappings, bool limitProps)
     {
-      if (null == propertyMappings) { throw new ArgumentNullException(nameof(propertyMappings)); }
+      if (null == propertyMappings) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.propertyMappings); }
       m_propertyMappings = new Dictionary<string, string>(propertyMappings, StringComparer.Ordinal);
       m_limitProps = limitProps;
       m_limitProperties = new HashSet<string>(propertyMappings.Values, StringComparer.Ordinal);

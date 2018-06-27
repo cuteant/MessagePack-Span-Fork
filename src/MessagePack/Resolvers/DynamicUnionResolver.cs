@@ -89,15 +89,15 @@ namespace MessagePack.Resolvers
             if (unionAttrs.Length == 0) return null;
             if (!ti.IsInterface && !ti.IsAbstract)
             {
-                throw new MessagePackDynamicUnionResolverException("Union can only be interface or abstract class. Type:" + type.Name);
+                ThrowHelper.ThrowDynamicUnionResolverException_InterfaceOrAbstract(type);
             }
 
             var checker1 = new HashSet<int>();
             var checker2 = new HashSet<Type>();
             foreach (var item in unionAttrs)
             {
-                if (!checker1.Add(item.Key)) throw new MessagePackDynamicUnionResolverException("Same union key has found. Type:" + type.Name + " Key:" + item.Key);
-                if (!checker2.Add(item.SubType)) throw new MessagePackDynamicUnionResolverException("Same union subType has found. Type:" + type.Name + " SubType: " + item.SubType);
+                if (!checker1.Add(item.Key)) ThrowHelper.ThrowDynamicUnionResolverException_Key(type, item);
+                if (!checker2.Add(item.SubType)) ThrowHelper.ThrowDynamicUnionResolverException_Subtype(type, item);
             }
 
             var formatterType = typeof(IMessagePackFormatter<>).GetCachedGenericType(type);

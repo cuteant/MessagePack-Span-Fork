@@ -303,7 +303,7 @@ namespace Utf8Json.Internal.DoubleConversion
                 case 6: return new DiyFp(0xf424000000000000, -44);
                 case 7: return new DiyFp(0x9896800000000000, -40);
                 default:
-                    throw new Exception("unreached code.");
+                    ThrowHelper.ThrowException_UnreachedCode(); return default;
             }
         }
 

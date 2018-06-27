@@ -64,7 +64,7 @@ namespace Hyperion.Compilation
                 }
             }
 
-            throw new Exception("Variable not found.");
+            ThrowHelper.ThrowException_Variable(); return default;
         }
 
         public int Constant(object value)

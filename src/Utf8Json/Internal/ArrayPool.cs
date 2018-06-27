@@ -52,7 +52,7 @@ namespace Utf8Json.Internal
         {
             if (array.Length != bufferLength)
             {
-                throw new InvalidOperationException("return buffer is not from pool");
+                ThrowHelper.ThrowInvalidOperationException_Buffer();
             }
 
             lock (gate)

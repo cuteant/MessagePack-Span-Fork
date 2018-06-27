@@ -29,24 +29,18 @@ namespace MessagePack.Formatters
                 var valueFormatter = formatterResolver.GetFormatterWithVerify<TValue>();
 
                 int count;
+                switch (value)
                 {
-                    var col = value as ICollection<KeyValuePair<TKey, TValue>>;
-                    if (col != null)
-                    {
+                    case ICollection<KeyValuePair<TKey, TValue>> col:
                         count = col.Count;
-                    }
-                    else
-                    {
-                        var col2 = value as IReadOnlyCollection<KeyValuePair<TKey, TValue>>;
-                        if (col2 != null)
-                        {
-                            count = col2.Count;
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("DictionaryFormatterBase's TDictionary supports only ICollection<KVP> or IReadOnlyCollection<KVP>");
-                        }
-                    }
+                        break;
+                    case IReadOnlyCollection<KeyValuePair<TKey, TValue>> col2:
+                        count = col2.Count;
+                        break;
+                    default:
+                        ThrowHelper.ThrowInvalidOperationException_Dict();
+                        count = 0;
+                        break;
                 }
 
                 offset += MessagePackBinary.WriteMapHeader(ref bytes, offset, count);

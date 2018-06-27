@@ -62,7 +62,7 @@ namespace MessagePack
                 {
                     if (isFreezed)
                     {
-                        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+                        ThrowHelper.ThrowInvalidOperationException_Register_Resolvers();
                     }
 
                     CompositeResolver.resolvers = resolvers;

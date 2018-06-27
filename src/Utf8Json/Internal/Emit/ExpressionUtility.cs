@@ -10,10 +10,7 @@ namespace Utf8Json.Internal.Emit
 
         static MethodInfo GetMethodInfoCore(LambdaExpression expression)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException("expression");
-            }
+            if (expression == null) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.expression); }
 
             return (expression.Body as MethodCallExpression).Method;
         }
@@ -72,10 +69,7 @@ namespace Utf8Json.Internal.Emit
 
         static MemberInfo GetMemberInfoCore<T>(Expression<T> source)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException("source");
-            }
+            if (source == null) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source); }
 
             var memberExpression = source.Body as MemberExpression;
             return memberExpression.Member;

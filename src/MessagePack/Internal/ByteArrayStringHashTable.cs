@@ -31,7 +31,7 @@ namespace MessagePack.Internal
         {
             if (!TryAddInternal(Encoding.UTF8.GetBytes(key), value))
             {
-                throw new ArgumentException("Key was already exists. Key:" + key);
+                ThrowHelper.ThrowArgumentException_Key(key);
             }
         }
 
@@ -39,7 +39,7 @@ namespace MessagePack.Internal
         {
             if (!TryAddInternal(key, value))
             {
-                throw new ArgumentException("Key was already exists. Key:" + key);
+                ThrowHelper.ThrowArgumentException_Key(key);
             }
         }
 

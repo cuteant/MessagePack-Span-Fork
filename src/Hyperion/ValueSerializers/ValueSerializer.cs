@@ -84,12 +84,12 @@ namespace Hyperion.ValueSerializers
 
       if (method.IsStatic == false)
       {
-        throw new ArgumentException($"Method {method.Name} should be static.");
+        ThrowHelper.ThrowException_Method(method);
       }
 
       if (method.ReturnType != expectedReturnType)
       {
-        throw new ArgumentException($"Method {method.Name} should return {expectedReturnType.Name}.");
+        ThrowHelper.ThrowException_Method(method, expectedReturnType);
       }
 
       return method;

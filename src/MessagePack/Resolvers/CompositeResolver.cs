@@ -20,7 +20,7 @@ namespace MessagePack.Resolvers
         {
             if (isFreezed)
             {
-                throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+                ThrowHelper.ThrowInvalidOperationException_Register_Resolvers();
             }
 
             CompositeResolver.resolvers = resolvers;
@@ -30,7 +30,7 @@ namespace MessagePack.Resolvers
         {
             if (isFreezed)
             {
-                throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+                ThrowHelper.ThrowInvalidOperationException_Register_Resolvers();
             }
 
             CompositeResolver.formatters = formatters;
@@ -40,7 +40,7 @@ namespace MessagePack.Resolvers
         {
             if (isFreezed)
             {
-                throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+                ThrowHelper.ThrowInvalidOperationException_Register_Resolvers();
             }
 
             CompositeResolver.resolvers = resolvers;
@@ -50,20 +50,20 @@ namespace MessagePack.Resolvers
         public static void RegisterAndSetAsDefault(params IFormatterResolver[] resolvers)
         {
             Register(resolvers);
-            MessagePack.MessagePackSerializer.SetDefaultResolver(CompositeResolver.Instance);
+            MessagePack.MessagePackSerializer.SetDefaultResolver(Instance);
         }
 
         public static void RegisterAndSetAsDefault(params IMessagePackFormatter[] formatters)
         {
             Register(formatters);
-            MessagePack.MessagePackSerializer.SetDefaultResolver(CompositeResolver.Instance);
+            MessagePack.MessagePackSerializer.SetDefaultResolver(Instance);
         }
 
         public static void RegisterAndSetAsDefault(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
         {
             Register(formatters);
             Register(resolvers);
-            MessagePack.MessagePackSerializer.SetDefaultResolver(CompositeResolver.Instance);
+            MessagePack.MessagePackSerializer.SetDefaultResolver(Instance);
         }
 
         public override IMessagePackFormatter<T> GetFormatter<T>()

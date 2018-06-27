@@ -277,7 +277,7 @@ namespace MessagePack
 
                 if (current == ArrayMaxSize)
                 {
-                    throw new InvalidOperationException("byte[] size reached maximum size of array(0x7FFFFFC7), can not write to single byte[]. Details: https://msdn.microsoft.com/en-us/library/system.array");
+                    ThrowHelper.ThrowInvalidOperationException_Reached_MaximumSize();
                 }
 
                 var newSize = unchecked((current * 2));
@@ -303,7 +303,7 @@ namespace MessagePack
 #endif
         public static void FastResize(ref byte[] array, int newSize)
         {
-            if (newSize < 0) throw new ArgumentOutOfRangeException("newSize");
+            if (newSize < 0) ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.newSize);
 
             byte[] array2 = array;
             if (array2 == null)
@@ -329,7 +329,7 @@ namespace MessagePack
 #endif
             static byte[] FastCloneWithResize(byte[] array, int newSize)
         {
-            if (newSize < 0) throw new ArgumentOutOfRangeException("newSize");
+            if (newSize < 0) ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.newSize);
             if (newSize == 0) { return CuteAnt.EmptyArray<byte>.Instance; }
 
             byte[] array2 = array;
@@ -440,7 +440,9 @@ namespace MessagePack
             }
             else
             {
-                throw new InvalidOperationException(string.Format("code is invalid. code:{0} format:{1}", bytes[offset], MessagePackCode.ToFormatName(bytes[offset])));
+                ThrowHelper.ThrowInvalidOperationException_Code(bytes[offset]);
+                readSize = default;
+                return default;
             }
         }
 
@@ -2346,7 +2348,7 @@ namespace MessagePack
             var byteCode = stream.ReadByte();
             if (byteCode < 0 || byte.MaxValue < byteCode)
             {
-                throw new InvalidOperationException("Invalid MessagePack code was detected, code:" + byteCode);
+                ThrowHelper.ThrowInvalidOperationException_Code_Detected(byteCode);
             }
 
             var code = (byte)byteCode;
@@ -5677,7 +5679,7 @@ namespace MessagePack.Decoders
             var typeCode = unchecked((sbyte)bytes[offset + 1]);
             if (typeCode != ReservedMessagePackExtensionTypeCode.DateTime)
             {
-                throw new InvalidOperationException(string.Format("typeCode is invalid. typeCode:{0}", typeCode));
+                ThrowHelper.ThrowInvalidOperationException_TypeCode(typeCode);
             }
 
             unchecked
@@ -5704,7 +5706,7 @@ namespace MessagePack.Decoders
             var typeCode = unchecked((sbyte)bytes[offset + 1]);
             if (typeCode != ReservedMessagePackExtensionTypeCode.DateTime)
             {
-                throw new InvalidOperationException(string.Format("typeCode is invalid. typeCode:{0}", typeCode));
+                ThrowHelper.ThrowInvalidOperationException_TypeCode(typeCode);
             }
 
             var data64 = (UInt64)bytes[offset + 2] << 56 | (UInt64)bytes[offset + 3] << 48 | (UInt64)bytes[offset + 4] << 40 | (UInt64)bytes[offset + 5] << 32
@@ -5733,7 +5735,7 @@ namespace MessagePack.Decoders
             var typeCode = unchecked((sbyte)bytes[offset + 2]);
             if (length != 12 || typeCode != ReservedMessagePackExtensionTypeCode.DateTime)
             {
-                throw new InvalidOperationException(string.Format("typeCode is invalid. typeCode:{0}", typeCode));
+                ThrowHelper.ThrowInvalidOperationException_TypeCode(typeCode);
             }
 
             var nanoseconds = (UInt32)((UInt32)(bytes[offset + 3] << 24) | (UInt32)(bytes[offset + 4] << 16) | (UInt32)(bytes[offset + 5] << 8) | (UInt32)bytes[offset + 6]);

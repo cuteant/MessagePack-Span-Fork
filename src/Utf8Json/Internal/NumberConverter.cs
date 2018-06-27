@@ -508,30 +508,26 @@ namespace Utf8Json.Internal
         {
             if (bytes[offset] == 't')
             {
-                if (bytes[offset + 1] != 'r') goto ERROR_TRUE;
-                if (bytes[offset + 2] != 'u') goto ERROR_TRUE;
-                if (bytes[offset + 3] != 'e') goto ERROR_TRUE;
+                if (bytes[offset + 1] != 'r') ThrowHelper.ThrowInvalidOperationException_Bool_T();
+                if (bytes[offset + 2] != 'u') ThrowHelper.ThrowInvalidOperationException_Bool_T();
+                if (bytes[offset + 3] != 'e') ThrowHelper.ThrowInvalidOperationException_Bool_T();
                 readCount = 4;
                 return true;
             }
             else if (bytes[offset] == 'f')
             {
-                if (bytes[offset + 1] != 'a') goto ERROR_FALSE;
-                if (bytes[offset + 2] != 'l') goto ERROR_FALSE;
-                if (bytes[offset + 3] != 's') goto ERROR_FALSE;
-                if (bytes[offset + 4] != 'e') goto ERROR_FALSE;
+                if (bytes[offset + 1] != 'a') ThrowHelper.ThrowInvalidOperationException_Bool_F();
+                if (bytes[offset + 2] != 'l') ThrowHelper.ThrowInvalidOperationException_Bool_F();
+                if (bytes[offset + 3] != 's') ThrowHelper.ThrowInvalidOperationException_Bool_F();
+                if (bytes[offset + 4] != 'e') ThrowHelper.ThrowInvalidOperationException_Bool_F();
                 readCount = 5;
                 return false;
             }
             else
             {
-                throw new InvalidOperationException("value is not boolean.");
+                ThrowHelper.ThrowInvalidOperationException_Bool();
+                readCount = default; return default;
             }
-
-            ERROR_TRUE:
-            throw new InvalidOperationException("value is not boolean(true).");
-            ERROR_FALSE:
-            throw new InvalidOperationException("value is not boolean(false).");
         }
     }
 }

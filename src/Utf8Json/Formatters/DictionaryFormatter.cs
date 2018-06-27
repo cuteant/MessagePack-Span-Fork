@@ -96,7 +96,7 @@ namespace Utf8Json.Formatters
             else
             {
                 var keyFormatter = formatterResolver.GetFormatterWithVerify<TKey>() as IObjectPropertyNameFormatter<TKey>;
-                if (keyFormatter == null) throw new InvalidOperationException(typeof(TKey) + " does not support dictionary key deserialize.");
+                if (keyFormatter == null) ThrowHelper.ThrowInvalidOperationException_Dict_Key<TKey>();
                 var valueFormatter = formatterResolver.GetFormatterWithVerify<TValue>();
 
                 reader.ReadIsBeginObjectWithVerify();

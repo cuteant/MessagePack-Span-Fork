@@ -97,7 +97,7 @@ namespace Utf8Json.Formatters
                 return;
             }
 
-            throw new InvalidOperationException("Not supported primitive object resolver. type:" + t.Name);
+            ThrowHelper.ThrowInvalidOperationException_NotSupported(t);
         }
 
         public object Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
@@ -141,7 +141,8 @@ namespace Utf8Json.Formatters
                 case JsonToken.NameSeparator:
                 case JsonToken.EndArray:
                 case JsonToken.EndObject:
-                    throw new InvalidOperationException("Invalid Json Token:" + token);
+                    ThrowHelper.ThrowInvalidOperationException_JsonToken(token);
+                    return null;
                 case JsonToken.Null:
                     reader.ReadIsNull();
                     return null;

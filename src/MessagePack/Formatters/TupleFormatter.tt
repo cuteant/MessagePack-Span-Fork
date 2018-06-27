@@ -49,7 +49,7 @@ namespace MessagePack.Formatters
             {
                 var startOffset = offset;
                 var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                if (count != <#= i #>) throw new InvalidOperationException("Invalid Tuple count");
+                if (count != <#= i #>) ThrowHelper.ThrowInvalidOperationException_Tuple_Count();
                 offset += readSize;
 
 <# for(var j = 1; j <= i; j++) { #>

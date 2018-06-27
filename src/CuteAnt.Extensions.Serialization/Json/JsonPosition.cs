@@ -69,7 +69,7 @@ namespace CuteAnt.Extensions.Serialization.Json
                 case JsonContainerType.Constructor:
                     return MathUtils.IntLength((ulong)Position) + 2;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(Type));
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.type); return default;
             }
         }
 

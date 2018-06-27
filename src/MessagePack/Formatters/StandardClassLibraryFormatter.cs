@@ -171,7 +171,7 @@ namespace MessagePack.Formatters
             var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
             offset += readSize;
 
-            if (count != 2) throw new InvalidOperationException("Invalid DateTimeOffset format.");
+            if (count != 2) ThrowHelper.ThrowInvalidOperationException_DateTimeOffset_Format();
 
             var utc = MessagePackBinary.ReadDateTime(bytes, offset, out readSize);
             offset += readSize;
@@ -300,7 +300,7 @@ namespace MessagePack.Formatters
             var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
             offset += readSize;
 
-            if (count != 2) throw new InvalidOperationException("Invalid KeyValuePair format.");
+            if (count != 2) ThrowHelper.ThrowInvalidOperationException_KeyValuePair_Format();
 
             var key = formatterResolver.GetFormatterWithVerify<TKey>().Deserialize(bytes, offset, formatterResolver, out readSize);
             offset += readSize;
@@ -450,7 +450,7 @@ namespace MessagePack.Formatters
             var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
             offset += readSize;
 
-            if (count != 2) throw new InvalidOperationException("Invalid Complex format.");
+            if (count != 2) ThrowHelper.ThrowInvalidOperationException_Complex_Format();
 
             var real = MessagePackBinary.ReadDouble(bytes, offset, out readSize);
             offset += readSize;
@@ -521,13 +521,10 @@ namespace MessagePack.Formatters
         {
             if (!MessagePackBinary.IsNil(bytes, offset))
             {
-                throw new InvalidOperationException("Invalid input");
+                ThrowHelper.ThrowInvalidOperationException_Input();
             }
-            else
-            {
-                readSize = 1;
-                return CompletedTask;
-            }
+            readSize = 1;
+            return CompletedTask;
         }
     }
 

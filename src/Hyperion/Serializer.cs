@@ -149,7 +149,7 @@ namespace Hyperion
 
         public void Serialize(object obj, [NotNull] Stream stream, SerializerSession session)
         {
-            if (obj == null) { throw new ArgumentNullException(nameof(obj)); }
+            if (null == obj) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.obj); }
 
             var type = obj.GetType();
             var s = GetSerializerByType(type);
@@ -159,7 +159,7 @@ namespace Hyperion
 
         public void Serialize(object obj, [NotNull] Stream stream)
         {
-            if (obj == null) { throw new ArgumentNullException(nameof(obj)); }
+            if (null == obj) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.obj); }
 
             using (var pooledSession = SerializerSessionManager.Create(this))
             {

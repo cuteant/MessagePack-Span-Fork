@@ -31,6 +31,7 @@ using System.Xml;
 using System.Xml.Linq;
 using CuteAnt;
 using CuteAnt.Extensions.Serialization.Json.Utilities;
+using CuteAnt.Extensions.Serialization;
 using CuteAnt.Pool;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Utilities;
@@ -391,7 +392,7 @@ namespace Newtonsoft.Json
     {
       if (delimiter != '"' && delimiter != '\'')
       {
-        throw new ArgumentException("Delimiter must be a single or double quote.", nameof(delimiter));
+        ThrowHelper.ThrowArgumentException(ExceptionResource.Json_Delimiter_Err, ExceptionArgument.delimiter);
       }
 
       return JavaScriptUtils.ToEscapedJavaScriptString(value, delimiter, true, stringEscapeHandling);

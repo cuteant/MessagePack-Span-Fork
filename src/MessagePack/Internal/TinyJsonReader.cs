@@ -169,7 +169,7 @@ namespace MessagePack
                     ReadNextToken();
                     return;
                 default:
-                    throw new TinyJsonException("Invalid String:" + c);
+                    ThrowHelper.ThrowTinyJsonException_String(c); return;
             }
         }
 
@@ -194,25 +194,25 @@ namespace MessagePack
                     ReadString();
                     break;
                 case TinyJsonToken.True:
-                    if (ReadChar() != 't') throw new TinyJsonException("Invalid Token");
-                    if (ReadChar() != 'r') throw new TinyJsonException("Invalid Token");
-                    if (ReadChar() != 'u') throw new TinyJsonException("Invalid Token");
-                    if (ReadChar() != 'e') throw new TinyJsonException("Invalid Token");
+                    if (ReadChar() != 't') ThrowHelper.ThrowTinyJsonException_Token();
+                    if (ReadChar() != 'r') ThrowHelper.ThrowTinyJsonException_Token();
+                    if (ReadChar() != 'u') ThrowHelper.ThrowTinyJsonException_Token();
+                    if (ReadChar() != 'e') ThrowHelper.ThrowTinyJsonException_Token();
                     ValueType = ValueType.True;
                     break;
                 case TinyJsonToken.False:
-                    if (ReadChar() != 'f') throw new TinyJsonException("Invalid Token");
-                    if (ReadChar() != 'a') throw new TinyJsonException("Invalid Token");
-                    if (ReadChar() != 'l') throw new TinyJsonException("Invalid Token");
-                    if (ReadChar() != 's') throw new TinyJsonException("Invalid Token");
-                    if (ReadChar() != 'e') throw new TinyJsonException("Invalid Token");
+                    if (ReadChar() != 'f') ThrowHelper.ThrowTinyJsonException_Token();
+                    if (ReadChar() != 'a') ThrowHelper.ThrowTinyJsonException_Token();
+                    if (ReadChar() != 'l') ThrowHelper.ThrowTinyJsonException_Token();
+                    if (ReadChar() != 's') ThrowHelper.ThrowTinyJsonException_Token();
+                    if (ReadChar() != 'e') ThrowHelper.ThrowTinyJsonException_Token();
                     ValueType = ValueType.False;
                     break;
                 case TinyJsonToken.Null:
-                    if (ReadChar() != 'n') throw new TinyJsonException("Invalid Token");
-                    if (ReadChar() != 'u') throw new TinyJsonException("Invalid Token");
-                    if (ReadChar() != 'l') throw new TinyJsonException("Invalid Token");
-                    if (ReadChar() != 'l') throw new TinyJsonException("Invalid Token");
+                    if (ReadChar() != 'n') ThrowHelper.ThrowTinyJsonException_Token();
+                    if (ReadChar() != 'u') ThrowHelper.ThrowTinyJsonException_Token();
+                    if (ReadChar() != 'l') ThrowHelper.ThrowTinyJsonException_Token();
+                    if (ReadChar() != 'l') ThrowHelper.ThrowTinyJsonException_Token();
                     ValueType = ValueType.Null;
                     break;
                 default:
@@ -298,7 +298,7 @@ namespace MessagePack
 
             while (true)
             {
-                if (reader.Peek() == -1) throw new TinyJsonException("Invalid Json String");
+                if (reader.Peek() == -1) ThrowHelper.ThrowTinyJsonException_Json();
 
                 var c = ReadChar();
                 switch (c)
@@ -306,7 +306,7 @@ namespace MessagePack
                     case '"': // endtoken
                         goto END;
                     case '\\': // escape character
-                        if (reader.Peek() == -1) throw new TinyJsonException("Invalid Json String");
+                        if (reader.Peek() == -1) ThrowHelper.ThrowTinyJsonException_Json();
 
                         c = ReadChar();
                         switch (c)

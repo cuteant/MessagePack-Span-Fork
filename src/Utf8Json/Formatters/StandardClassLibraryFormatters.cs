@@ -303,18 +303,17 @@ namespace Utf8Json.Formatters
         public decimal Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
             var token = reader.GetCurrentJsonToken();
-            if (token == JsonToken.Number)
+            switch (token)
             {
-                var number = reader.ReadNumberSegment();
-                return decimal.Parse(StringEncoding.UTF8.GetString(number.Array, number.Offset, number.Count), NumberStyles.Float, CultureInfo.InvariantCulture);
-            }
-            else if (token == JsonToken.String)
-            {
-                return decimal.Parse(reader.ReadString(), NumberStyles.Float, CultureInfo.InvariantCulture);
-            }
-            else
-            {
-                throw new InvalidOperationException("Invalid Json Token for DecimalFormatter:" + token);
+                case JsonToken.Number:
+                    var number = reader.ReadNumberSegment();
+                    return decimal.Parse(StringEncoding.UTF8.GetString(number.Array, number.Offset, number.Count), NumberStyles.Float, CultureInfo.InvariantCulture);
+
+                case JsonToken.String:
+                    return decimal.Parse(reader.ReadString(), NumberStyles.Float, CultureInfo.InvariantCulture);
+
+                default:
+                    ThrowHelper.ThrowInvalidOperationException_JsonToken_Dec(token); return default;
             }
         }
     }
@@ -391,7 +390,7 @@ namespace Utf8Json.Formatters
 
         public KeyValuePair<TKey, TValue> Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
-            if (reader.ReadIsNull()) throw new InvalidOperationException("Data is Nil, KeyValuePair can not be null.");
+            if (reader.ReadIsNull()) ThrowHelper.ThrowInvalidOperationException_KeyValuePair();
 
             TKey resultKey = default(TKey);
             TValue resultValue = default(TValue);
@@ -645,7 +644,7 @@ namespace Utf8Json.Formatters
 
         public Task Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
-            if (!reader.ReadIsNull()) throw new InvalidOperationException("Invalid input");
+            if (!reader.ReadIsNull()) ThrowHelper.ThrowInvalidOperationException_Input();
 
             return CompletedTask;
         }

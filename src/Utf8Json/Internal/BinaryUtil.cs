@@ -39,7 +39,7 @@ namespace Utf8Json.Internal
 
                 if (current == ArrayMaxSize)
                 {
-                    throw new InvalidOperationException("byte[] size reached maximum size of array(0x7FFFFFC7), can not write to single byte[]. Details: https://msdn.microsoft.com/en-us/library/system.array");
+                    ThrowHelper.ThrowInvalidOperationException_Reached_MaximumSize();
                 }
 
                 var newSize = unchecked((current * 2));
@@ -65,7 +65,7 @@ namespace Utf8Json.Internal
 #endif
         public static void FastResize(ref byte[] array, int newSize)
         {
-            if (newSize < 0) throw new ArgumentOutOfRangeException("newSize");
+            if (newSize < 0) ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.newSize);
 
             byte[] array2 = array;
             if (array2 == null)
@@ -92,9 +92,9 @@ namespace Utf8Json.Internal
 #endif
             byte[] FastCloneWithResize(byte[] src, int newSize)
         {
-            if (newSize < 0) throw new ArgumentOutOfRangeException("newSize");
+            if (newSize < 0) ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.newSize);
             if (src == null) return new byte[newSize];
-            if (src.Length < newSize) throw new ArgumentException("length < newSize");
+            if (src.Length < newSize) ThrowHelper.ThrowException_Length();
 
             byte[] dst = new byte[newSize];
 

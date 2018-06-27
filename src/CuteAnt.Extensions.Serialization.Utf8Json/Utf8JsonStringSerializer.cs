@@ -11,7 +11,8 @@ namespace CuteAnt.Extensions.Serialization
     public Utf8JsonStringSerializer() { }
     public Utf8JsonStringSerializer(IJsonFormatterResolver resolver)
     {
-      _defaultResolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+      if (null == resolver) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.resolver); }
+      _defaultResolver = resolver;
     }
 
     /// <inheritdoc />
@@ -21,7 +22,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public object DeserializeFromString(string serializedText, Type expectedType)
     {
-      if (null == expectedType) { throw new ArgumentNullException(nameof(expectedType)); }
+      if (null == expectedType) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.expectedType); }
 
       return JsonSerializer.NonGeneric.Deserialize(expectedType, serializedText, _defaultResolver);
     }
@@ -29,7 +30,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public T DeserializeFromString<T>(string serializedText, Type expectedType)
     {
-      if (null == expectedType) { throw new ArgumentNullException(nameof(expectedType)); }
+      if (null == expectedType) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.expectedType); }
 
       return (T)JsonSerializer.NonGeneric.Deserialize(expectedType, serializedText, _defaultResolver);
     }

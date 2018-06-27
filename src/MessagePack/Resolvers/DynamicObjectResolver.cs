@@ -1316,13 +1316,13 @@ typeof(int), typeof(int) });
 
         public int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
         {
-            if (serialize == null) throw new InvalidOperationException(this.GetType().Name + " does not support Serialize.");
+            if (serialize == null) ThrowHelper.ThrowInvalidOperationException_NotSupport_Serialize(this.GetType());
             return serialize(stringByteKeysField, serializeCustomFormatters, ref bytes, offset, value, formatterResolver);
         }
 
         public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
-            if (deserialize == null) throw new InvalidOperationException(this.GetType().Name + " does not support Deserialize.");
+            if (deserialize == null) ThrowHelper.ThrowInvalidOperationException_NotSupport_Deserialize(this.GetType());
             return deserialize(deserializeCustomFormatters, bytes, offset, formatterResolver, out readSize);
         }
     }
@@ -1448,10 +1448,10 @@ typeof(int), typeof(int) });
                         key = item.GetCustomAttributeX<KeyAttribute>(true);
                         if (key == null)
                         {
-                            throw new MessagePackDynamicObjectResolverException("all public members must mark KeyAttribute or IgnoreMemberAttribute." + " type: " + type.FullName + " member:" + item.Name);
+                            ThrowHelper.ThrowDynamicObjectResolverException_Property_Key(type, item);
                         }
 
-                        if (key.IntKey == null && key.StringKey == null) throw new MessagePackDynamicObjectResolverException("both IntKey and StringKey are null." + " type: " + type.FullName + " member:" + item.Name);
+                        if (key.IntKey == null && key.StringKey == null) ThrowHelper.ThrowDynamicObjectResolverException_Property_KeyAreNull(type, item);
                     }
                     else
                     {
@@ -1459,7 +1459,7 @@ typeof(int), typeof(int) });
                         var pseudokey = item.GetCustomAttributeX<DataMemberAttribute>(true);
                         if (pseudokey == null)
                         {
-                            throw new MessagePackDynamicObjectResolverException("all public members must mark DataMemberAttribute or IgnoreMemberAttribute." + " type: " + type.FullName + " member:" + item.Name);
+                            ThrowHelper.ThrowDynamicObjectResolverException_Property_DataMem(type, item);
                         }
 
                         // use Order first
@@ -1486,21 +1486,21 @@ typeof(int), typeof(int) });
                     {
                         if ((isIntKey && key.IntKey == null) || (!isIntKey && key.StringKey == null))
                         {
-                            throw new MessagePackDynamicObjectResolverException("all members key type must be same." + " type: " + type.FullName + " member:" + item.Name);
+                            ThrowHelper.ThrowDynamicObjectResolverException_Property_Same(type, item);
                         }
                     }
 
                     if (isIntKey)
                     {
                         member.IntKey = key.IntKey.Value;
-                        if (intMembers.ContainsKey(member.IntKey)) throw new MessagePackDynamicObjectResolverException("key is duplicated, all members key must be unique." + " type: " + type.FullName + " member:" + item.Name);
+                        if (intMembers.ContainsKey(member.IntKey)) ThrowHelper.ThrowDynamicObjectResolverException_Property_Duplicated(type, item);
 
                         intMembers.Add(member.IntKey, member);
                     }
                     else
                     {
                         member.StringKey = key.StringKey;
-                        if (stringMembers.ContainsKey(member.StringKey)) throw new MessagePackDynamicObjectResolverException("key is duplicated, all members key must be unique." + " type: " + type.FullName + " member:" + item.Name);
+                        if (stringMembers.ContainsKey(member.StringKey)) ThrowHelper.ThrowDynamicObjectResolverException_Property_Duplicated(type, item);
 
                         member.IntKey = hiddenIntKey++;
                         stringMembers.Add(member.StringKey, member);
@@ -1529,10 +1529,10 @@ typeof(int), typeof(int) });
                         key = item.GetCustomAttributeX<KeyAttribute>(true);
                         if (key == null)
                         {
-                            throw new MessagePackDynamicObjectResolverException("all public members must mark KeyAttribute or IgnoreMemberAttribute." + " type: " + type.FullName + " member:" + item.Name);
+                            ThrowHelper.ThrowDynamicObjectResolverException_Field_Key(type, item);
                         }
 
-                        if (key.IntKey == null && key.StringKey == null) throw new MessagePackDynamicObjectResolverException("both IntKey and StringKey are null." + " type: " + type.FullName + " member:" + item.Name);
+                        if (key.IntKey == null && key.StringKey == null) ThrowHelper.ThrowDynamicObjectResolverException_Field_KeyAreNull(type, item);
                     }
                     else
                     {
@@ -1540,7 +1540,7 @@ typeof(int), typeof(int) });
                         var pseudokey = item.GetCustomAttributeX<DataMemberAttribute>(true);
                         if (pseudokey == null)
                         {
-                            throw new MessagePackDynamicObjectResolverException("all public members must mark DataMemberAttribute or IgnoreMemberAttribute." + " type: " + type.FullName + " member:" + item.Name);
+                            ThrowHelper.ThrowDynamicObjectResolverException_Field_DataMem(type, item);
                         }
 
                         // use Order first
@@ -1567,21 +1567,21 @@ typeof(int), typeof(int) });
                     {
                         if ((isIntKey && key.IntKey == null) || (!isIntKey && key.StringKey == null))
                         {
-                            throw new MessagePackDynamicObjectResolverException("all members key type must be same." + " type: " + type.FullName + " member:" + item.Name);
+                            ThrowHelper.ThrowDynamicObjectResolverException_Field_Same(type, item);
                         }
                     }
 
                     if (isIntKey)
                     {
                         member.IntKey = key.IntKey.Value;
-                        if (intMembers.ContainsKey(member.IntKey)) throw new MessagePackDynamicObjectResolverException("key is duplicated, all members key must be unique." + " type: " + type.FullName + " member:" + item.Name);
+                        if (intMembers.ContainsKey(member.IntKey)) ThrowHelper.ThrowDynamicObjectResolverException_Field_Duplicated(type, item);
 
                         intMembers.Add(member.IntKey, member);
                     }
                     else
                     {
                         member.StringKey = key.StringKey;
-                        if (stringMembers.ContainsKey(member.StringKey)) throw new MessagePackDynamicObjectResolverException("key is duplicated, all members key must be unique." + " type: " + type.FullName + " member:" + item.Name);
+                        if (stringMembers.ContainsKey(member.StringKey)) ThrowHelper.ThrowDynamicObjectResolverException_Field_Duplicated(type, item);
 
                         member.IntKey = hiddenIntKey++;
                         stringMembers.Add(member.StringKey, member);
@@ -1604,7 +1604,7 @@ typeof(int), typeof(int) });
                 }
             }
             // struct allows null ctor
-            if (ctor == null && isClass) throw new MessagePackDynamicObjectResolverException("can't find public constructor. type:" + type.FullName);
+            if (ctor == null && isClass) ThrowHelper.ThrowDynamicObjectResolverException_Ctor_None(type);
 
             var constructorParameters = new List<EmittableMember>();
             if (ctor != null)
@@ -1634,7 +1634,7 @@ typeof(int), typeof(int) });
                                     }
                                     else
                                     {
-                                        throw new MessagePackDynamicObjectResolverException("can't find matched constructor parameter, parameterType mismatch. type:" + type.FullName + " parameterIndex:" + ctorParamIndex + " paramterType:" + item.ParameterType.Name);
+                                        ThrowHelper.ThrowDynamicObjectResolverException_Ctor_ParamType_Mismatch(type, ctorParamIndex, item);
                                     }
                                 }
                             }
@@ -1647,7 +1647,7 @@ typeof(int), typeof(int) });
                                 }
                                 else
                                 {
-                                    throw new MessagePackDynamicObjectResolverException("can't find matched constructor parameter, index not found. type:" + type.FullName + " parameterIndex:" + ctorParamIndex);
+                                    ThrowHelper.ThrowDynamicObjectResolverException_Ctor_Index_NotFound(type, ctorParamIndex);
                                 }
                             }
                         }
@@ -1666,7 +1666,7 @@ typeof(int), typeof(int) });
                                     }
                                     else
                                     {
-                                        throw new MessagePackDynamicObjectResolverException("duplicate matched constructor parameter name:" + type.FullName + " parameterName:" + item.Name + " paramterType:" + item.ParameterType.Name);
+                                        ThrowHelper.ThrowDynamicObjectResolverException_Ctor_Duplicate_Matched(type, item);
                                     }
                                 }
 
@@ -1684,7 +1684,7 @@ typeof(int), typeof(int) });
                                     }
                                     else
                                     {
-                                        throw new MessagePackDynamicObjectResolverException("can't find matched constructor parameter, parameterType mismatch. type:" + type.FullName + " parameterName:" + item.Name + " paramterType:" + item.ParameterType.Name);
+                                        ThrowHelper.ThrowDynamicObjectResolverException_Ctor_NonMatched_Param(type, item);
                                     }
                                 }
                             }
@@ -1697,7 +1697,7 @@ typeof(int), typeof(int) });
                                 }
                                 else
                                 {
-                                    throw new MessagePackDynamicObjectResolverException("can't find matched constructor parameter, index not found. type:" + type.FullName + " parameterName:" + item.Name);
+                                    ThrowHelper.ThrowDynamicObjectResolverException_Ctor_Index_NotFound(type, item);
                                 }
                             }
                         }
@@ -1707,7 +1707,7 @@ typeof(int), typeof(int) });
 
                 if (ctor == null)
                 {
-                    throw new MessagePackDynamicObjectResolverException("can't find matched constructor. type:" + type.FullName);
+                    ThrowHelper.ThrowDynamicObjectResolverException_Ctor_NonMatched(type);
                 }
             }
 

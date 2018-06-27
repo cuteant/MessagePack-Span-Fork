@@ -69,7 +69,7 @@ namespace Utf8Json.Formatters
 
         public <#= t #> Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
-            if (reader.ReadIsNull()) throw new InvalidOperationException("Data is Nil, ValueTuple can not be null.");
+            if (reader.ReadIsNull()) ThrowHelper.ThrowInvalidOperationException_ValueTuple_Nil();
 
 <# for(var j = 1; j <= i; j++) { #>
             <#= toT(j) #> item<#= j #> = default(<#= toT(j) #>);

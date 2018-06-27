@@ -271,7 +271,7 @@ namespace CuteAnt.Extensions.Serialization
     public static object Deserialize(this IJsonMessageFormatter formatter, Type type, byte[] serializedObject,
       JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null)
     {
-      if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
+      if (null == serializedObject) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.serializedObject); }
 
       using (var ms = new MemoryStream(serializedObject))
       {
@@ -305,7 +305,7 @@ namespace CuteAnt.Extensions.Serialization
     public static object Deserialize(this IJsonMessageFormatter formatter, Type type, byte[] serializedObject,
       int offset, int count, JsonSerializerSettings serializerSettings, Encoding effectiveEncoding = null)
     {
-      if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
+      if (null == serializedObject) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.serializedObject); }
 
       using (var ms = new MemoryStream(serializedObject, offset, count))
       {

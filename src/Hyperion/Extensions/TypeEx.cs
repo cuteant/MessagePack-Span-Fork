@@ -216,7 +216,7 @@ namespace Hyperion.Extensions
             if (type == CharType)
                 return sizeof(char);
 
-            throw new NotSupportedException();
+            ThrowHelper.ThrowNotSupportedException(); return default;
         }
 
         private static readonly string CoreAssemblyName = GetCoreAssemblyName();
@@ -309,7 +309,7 @@ namespace Hyperion.Extensions
                         }
                         else
                         {
-                            throw new AmbiguousMatchException("More than one matching method found!");
+                            ThrowHelper.ThrowAmbiguousMatchException();
                         }
                     }
                 }

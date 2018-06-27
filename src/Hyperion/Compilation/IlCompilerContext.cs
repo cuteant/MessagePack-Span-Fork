@@ -36,7 +36,7 @@ namespace Hyperion.Compilation
                 _stackDepth = value;
                 if (value < 0)
                 {
-                    throw new NotSupportedException("Stack depth can not be less than 0");
+                    ThrowHelper.ThrowNotSupportedException_StackDepth();
                 }
             }
         }

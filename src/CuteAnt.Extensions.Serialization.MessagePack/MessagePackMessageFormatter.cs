@@ -23,7 +23,11 @@ namespace CuteAnt.Extensions.Serialization
     public MessagePackMessageFormatter() => _defaultResolver = MessagePackStandardResolver.Default;
 
     /// <summary>Constructor</summary>
-    public MessagePackMessageFormatter(IFormatterResolver resolver) => _defaultResolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+    public MessagePackMessageFormatter(IFormatterResolver resolver)
+    {
+      if (null == resolver) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.resolver); }
+      _defaultResolver = resolver;
+    }
 
     #region -- IsSupportedType --
 
@@ -144,7 +148,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public override T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
     {
-      if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
+      if (null == readStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.readStream); }
 
       try
       {
@@ -160,7 +164,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
-      if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
+      if (null == readStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.readStream); }
 
       // 不是 Stream 都会实现 Position、Length 这两个属性
       //if (readStream.Position == readStream.Length) { return GetDefaultValueForType(type); }
@@ -271,7 +275,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (null == value) { return; }
 
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+      if (null == writeStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writeStream); }
 
       MessagePackSerializer.Serialize<object>(writeStream, value, _defaultResolver);
     }
@@ -281,7 +285,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (null == value) { return; }
 
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+      if (null == writeStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writeStream); }
 
       MessagePackSerializer.Serialize(writeStream, value, _defaultResolver);
     }
@@ -291,7 +295,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (null == value) { return; }
 
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+      if (null == writeStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writeStream); }
 
       MessagePackSerializer.Serialize(writeStream, value, _defaultResolver);
     }

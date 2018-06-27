@@ -245,25 +245,24 @@ namespace Utf8Json.Formatters
         {
             var token = reader.GetCurrentJsonToken();
 
-            if (token == JsonToken.String)
+            switch (token)
             {
-                // avoid string decoding if possible.
-                var key = reader.ReadStringSegmentUnsafe();
+                case JsonToken.String:
+                    // avoid string decoding if possible.
+                    var key = reader.ReadStringSegmentUnsafe();
 
-                T value;
-                if (!nameValueMapping.TryGetValue(key, out value))
-                {
-                    var str = StringEncoding.UTF8.GetString(key.Array, key.Offset, key.Count);
-                    value = (T)Enum.Parse(typeof(T), str); // Enum.Parse is slow
-                }
-                return value;
+                    T value;
+                    if (!nameValueMapping.TryGetValue(key, out value))
+                    {
+                        var str = StringEncoding.UTF8.GetString(key.Array, key.Offset, key.Count);
+                        value = (T)Enum.Parse(typeof(T), str); // Enum.Parse is slow
+                    }
+                    return value;
+                case JsonToken.Number:
+                    return deserializeByUnderlyingValue(ref reader, formatterResolver);
+                default:
+                    ThrowHelper.ThrowInvalidOperationException_ParseJSON(); return default;
             }
-            else if (token == JsonToken.Number)
-            {
-                return deserializeByUnderlyingValue(ref reader, formatterResolver);
-            }
-
-            throw new InvalidOperationException("Can't parse JSON to Enum format.");
         }
 
         public void SerializeToPropertyName(ref JsonWriter writer, T value, IJsonFormatterResolver formatterResolver)
@@ -289,7 +288,7 @@ namespace Utf8Json.Formatters
             else
             {
                 var token = reader.GetCurrentJsonToken();
-                if (token != JsonToken.String) throw new InvalidOperationException("Can't parse JSON to Enum format.");
+                if (token != JsonToken.String) ThrowHelper.ThrowInvalidOperationException_ParseJSON();
                 reader.AdvanceOffset(1); // skip \""
                 var t = Deserialize(ref reader, formatterResolver); // token is Number
                 reader.SkipWhiteSpace();

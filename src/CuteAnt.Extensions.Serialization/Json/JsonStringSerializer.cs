@@ -17,8 +17,10 @@ namespace CuteAnt.Extensions.Serialization
     }
     public JsonStringSerializer(JsonSerializerSettings serializerSettings, JsonSerializerSettings deserializerSettings)
     {
-      _serializerSettings = serializerSettings ?? throw new ArgumentNullException(nameof(serializerSettings));
-      _deserializerSettings = deserializerSettings ?? throw new ArgumentNullException(nameof(deserializerSettings));
+      if (null == serializerSettings) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.serializerSettings); }
+      if (null == deserializerSettings) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.deserializerSettings); }
+      _serializerSettings = serializerSettings;
+      _deserializerSettings = deserializerSettings;
     }
 
     /// <inheritdoc />

@@ -74,14 +74,22 @@ namespace CuteAnt.Extensions.Serialization
     public JsonSerializerSettings DefaultSerializerSettings
     {
       get => _defaultSerializerSettings;
-      set => _defaultSerializerSettings = value ?? throw new ArgumentNullException(nameof(value));
+      set
+      {
+        if (null == value) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value); }
+        _defaultSerializerSettings = value;
+      }
     }
 
     /// <summary>Gets or sets the default <see cref="JsonSerializerSettings"/> used to configure the <see cref="JsonSerializer"/>.</summary>
     public JsonSerializerSettings DefaultDeserializerSettings
     {
       get => _defaultDeserializerSettings;
-      set => _defaultDeserializerSettings = value ?? throw new ArgumentNullException(nameof(value));
+      set
+      {
+        if (null == value) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value); }
+        _defaultDeserializerSettings = value;
+      }
     }
 
     /// <summary>Gets or sets a value indicating whether to indent elements when writing data.</summary>
@@ -192,7 +200,7 @@ namespace CuteAnt.Extensions.Serialization
     ///// <returns><c>true</c> if objects of this <paramref name="type"/> can be read, otherwise <c>false</c>.</returns>
     //public override Boolean CanReadType(Type type)
     //{
-    //  if (type == null) { throw new ArgumentNullException(nameof(type)); }
+    //  if (null == type) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.type); }
 
     //  return true;
     //}
@@ -203,7 +211,7 @@ namespace CuteAnt.Extensions.Serialization
     ///// <returns><c>true</c> if objects of this <paramref name="type"/> can be written, otherwise <c>false</c>.</returns>
     //public override Boolean CanWriteType(Type type)
     //{
-    //  if (type == null) { throw new ArgumentNullException(nameof(type)); }
+    //  if (null == type) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.type); }
 
     //  return true;
     //}
@@ -266,7 +274,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns>The <see cref="object"/> instance that has been read.</returns>
     public virtual Object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding, JsonSerializerSettings serializerSettings)
     {
-      if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
+      if (null == readStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.readStream); }
 
       if (null == effectiveEncoding) { effectiveEncoding = Encoding.UTF8; }
 
@@ -408,7 +416,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="serializerSettings">The <see cref="JsonSerializerSettings"/> used to configure the <see cref="JsonSerializer"/>.</param>
     public virtual void WriteToStream(Type type, Object value, Stream writeStream, Encoding effectiveEncoding, JsonSerializerSettings serializerSettings)
     {
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+      if (null == writeStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writeStream); }
 
       using (JsonWriter jsonWriter = CreateJsonWriter(writeStream, effectiveEncoding, _charPool, JsonFormatting))
       {

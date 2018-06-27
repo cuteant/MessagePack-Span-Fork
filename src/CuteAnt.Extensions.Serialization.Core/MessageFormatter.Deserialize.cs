@@ -12,7 +12,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns></returns>
     public virtual object Deserialize(Type type, byte[] serializedObject)
     {
-      if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
+      if (null == serializedObject) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.serializedObject); }
 
       using (var ms = new MemoryStream(serializedObject))
       {
@@ -26,7 +26,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns></returns>
     public virtual object Deserialize(Type type, in ArraySegment<byte> serializedObject)
     {
-      if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
+      if (null == serializedObject) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.serializedObject); }
 
       using (var ms = new MemoryStream(serializedObject.Array, serializedObject.Offset, serializedObject.Count))
       {
@@ -42,7 +42,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns></returns>
     public virtual object Deserialize(Type type, byte[] serializedObject, int offset, int count)
     {
-      if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
+      if (null == serializedObject) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.serializedObject); }
 
       using (var ms = new MemoryStream(serializedObject, offset, count))
       {
@@ -59,7 +59,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns></returns>
     public virtual T Deserialize<T>(byte[] serializedObject)
     {
-      if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
+      if (null == serializedObject) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.serializedObject); }
 
       using (var ms = new MemoryStream(serializedObject))
       {
@@ -73,7 +73,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns></returns>
     public virtual T Deserialize<T>(in ArraySegment<byte> serializedObject)
     {
-      if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
+      if (null == serializedObject) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.serializedObject); }
 
       using (var ms = new MemoryStream(serializedObject.Array, serializedObject.Offset, serializedObject.Count))
       {
@@ -89,7 +89,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <returns></returns>
     public virtual T Deserialize<T>(byte[] serializedObject, int offset, int count)
     {
-      if (serializedObject == null) { throw new ArgumentNullException(nameof(serializedObject)); }
+      if (null == serializedObject) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.serializedObject); }
 
       using (var ms = new MemoryStream(serializedObject, offset, count))
       {

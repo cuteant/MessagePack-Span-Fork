@@ -32,8 +32,7 @@ namespace Hyperion.ValueSerializers
 
         public ObjectSerializer(Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            if (null == type) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.type); }
 
             Type = type;
             //TODO: remove version info

@@ -48,7 +48,7 @@ namespace Hyperion.SerializerFactories
             typeMapping.TryAdd(type, ser);
             var elementSerializer = serializer.GetSerializerByType(typeof(DictionaryEntry));
 
-            ObjectReader reader = (stream, session) =>
+            object reader(System.IO.Stream stream, DeserializerSession session)
             {
                 throw new NotSupportedException("Generic IDictionary<TKey,TValue> are not yet supported");
 #pragma warning disable CS0162 // Unreachable code detected
@@ -67,9 +67,9 @@ namespace Hyperion.SerializerFactories
                 }
                 //TODO: populate dictionary
                 return instance;
-            };
+            }
 
-            ObjectWriter writer = (stream, obj, session) =>
+            void writer(System.IO.Stream stream, object obj, SerializerSession session)
             {
                 if (preserveObjectReferences)
                 {
@@ -84,7 +84,7 @@ namespace Hyperion.SerializerFactories
                         serializer.Options.PreserveObjectReferences, session);
                     // elementSerializer.WriteValue(stream,item,session);
                 }
-            };
+            }
             ser.Initialize(reader, writer);
 
             return ser;

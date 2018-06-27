@@ -169,7 +169,7 @@ namespace Utf8Json.Formatters
 
         public ValueTuple<T1> Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
-            if (reader.ReadIsNull()) throw new InvalidOperationException("Data is Nil, ValueTuple can not be null.");
+            if (reader.ReadIsNull()) ThrowHelper.ThrowInvalidOperationException_ValueTuple_Nil();
 
             T1 item1 = default(T1);
             
@@ -217,7 +217,7 @@ namespace Utf8Json.Formatters
 
         public ValueTuple<T1, T2> Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
-            if (reader.ReadIsNull()) throw new InvalidOperationException("Data is Nil, ValueTuple can not be null.");
+            if (reader.ReadIsNull()) ThrowHelper.ThrowInvalidOperationException_ValueTuple_Nil();
 
             T1 item1 = default(T1);
             T2 item2 = default(T2);
@@ -271,7 +271,7 @@ namespace Utf8Json.Formatters
 
         public ValueTuple<T1, T2, T3> Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
-            if (reader.ReadIsNull()) throw new InvalidOperationException("Data is Nil, ValueTuple can not be null.");
+            if (reader.ReadIsNull()) ThrowHelper.ThrowInvalidOperationException_ValueTuple_Nil();
 
             T1 item1 = default(T1);
             T2 item2 = default(T2);
@@ -331,7 +331,7 @@ namespace Utf8Json.Formatters
 
         public ValueTuple<T1, T2, T3, T4> Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
-            if (reader.ReadIsNull()) throw new InvalidOperationException("Data is Nil, ValueTuple can not be null.");
+            if (reader.ReadIsNull()) ThrowHelper.ThrowInvalidOperationException_ValueTuple_Nil();
 
             T1 item1 = default(T1);
             T2 item2 = default(T2);
@@ -397,7 +397,7 @@ namespace Utf8Json.Formatters
 
         public ValueTuple<T1, T2, T3, T4, T5> Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
-            if (reader.ReadIsNull()) throw new InvalidOperationException("Data is Nil, ValueTuple can not be null.");
+            if (reader.ReadIsNull()) ThrowHelper.ThrowInvalidOperationException_ValueTuple_Nil();
 
             T1 item1 = default(T1);
             T2 item2 = default(T2);
@@ -469,7 +469,7 @@ namespace Utf8Json.Formatters
 
         public ValueTuple<T1, T2, T3, T4, T5, T6> Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
-            if (reader.ReadIsNull()) throw new InvalidOperationException("Data is Nil, ValueTuple can not be null.");
+            if (reader.ReadIsNull()) ThrowHelper.ThrowInvalidOperationException_ValueTuple_Nil();
 
             T1 item1 = default(T1);
             T2 item2 = default(T2);
@@ -547,7 +547,7 @@ namespace Utf8Json.Formatters
 
         public ValueTuple<T1, T2, T3, T4, T5, T6, T7> Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
-            if (reader.ReadIsNull()) throw new InvalidOperationException("Data is Nil, ValueTuple can not be null.");
+            if (reader.ReadIsNull()) ThrowHelper.ThrowInvalidOperationException_ValueTuple_Nil();
 
             T1 item1 = default(T1);
             T2 item2 = default(T2);
@@ -631,7 +631,7 @@ namespace Utf8Json.Formatters
 
         public ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
         {
-            if (reader.ReadIsNull()) throw new InvalidOperationException("Data is Nil, ValueTuple can not be null.");
+            if (reader.ReadIsNull()) ThrowHelper.ThrowInvalidOperationException_ValueTuple_Nil();
 
             T1 item1 = default(T1);
             T2 item2 = default(T2);

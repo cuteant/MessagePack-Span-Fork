@@ -14,7 +14,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public object DeserializeFromString(string serializedText, Type expectedType)
     {
-      if (null == expectedType) { throw new ArgumentNullException(nameof(expectedType)); }
+      if (null == expectedType) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.expectedType); }
 
       return TypeSerializer.DeserializeFromString(serializedText, expectedType);
     }
@@ -22,7 +22,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public T DeserializeFromString<T>(string serializedText, Type expectedType)
     {
-      if (null == expectedType) { throw new ArgumentNullException(nameof(expectedType)); }
+      if (null == expectedType) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.expectedType); }
 
       return (T)TypeSerializer.DeserializeFromString(serializedText, expectedType);
     }

@@ -268,7 +268,7 @@ namespace Hyperion.Compilation
         public IlCall(IlExpression target, MethodInfo method, params IlExpression[] args)
         {
             if (args.Length != method.GetParameters().Length)
-                throw new ArgumentException("Parameter count mismatch", nameof(args));
+                ThrowHelper.ThrowArgumentException(ExceptionResource.Parameter_Count_Mismatch, ExceptionArgument.args);
 
             _target = target;
             _method = method;
@@ -303,7 +303,7 @@ namespace Hyperion.Compilation
         public IlCallStatic(MethodInfo method, params IlExpression[] args)
         {
             if (args.Length != method.GetParameters().Length)
-                throw new ArgumentException("Parameter count mismatch", nameof(args));
+                ThrowHelper.ThrowArgumentException(ExceptionResource.Parameter_Count_Mismatch, ExceptionArgument.args);
 
             _method = method;
             _args = args;

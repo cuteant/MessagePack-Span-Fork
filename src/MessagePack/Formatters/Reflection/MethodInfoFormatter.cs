@@ -165,7 +165,7 @@ namespace MessagePack.Formatters
                         }
                         else
                         {
-                            throw new AmbiguousMatchException("More than one matching method found!");
+                            ThrowHelper.ThrowAmbiguousMatchException();
                         }
                     }
                 }

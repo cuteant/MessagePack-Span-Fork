@@ -599,7 +599,7 @@ namespace MessagePack.Formatters
                 var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
                 offset += readSize;
 
-                if (count != 2) throw new InvalidOperationException("Invalid Grouping format.");
+                if (count != 2) ThrowHelper.ThrowInvalidOperationException_Grouping_Format();
 
                 var key = formatterResolver.GetFormatterWithVerify<TKey>().Deserialize(bytes, offset, formatterResolver, out readSize);
                 offset += readSize;

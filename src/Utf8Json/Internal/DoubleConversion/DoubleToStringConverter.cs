@@ -115,7 +115,7 @@ namespace Utf8Json.Internal.DoubleConversion
             var sb = new StringBuilder(buffer, offset);
             if (!ToShortestIeeeNumber(value, ref sb, DtoaMode.SHORTEST_SINGLE))
             {
-                throw new InvalidOperationException("not support float value:" + value);
+                ThrowHelper.ThrowInvalidOperationException_NotSupport_Value(value);
             }
 
             buffer = sb.buffer;
@@ -127,7 +127,7 @@ namespace Utf8Json.Internal.DoubleConversion
             var sb = new StringBuilder(buffer, offset);
             if (!ToShortestIeeeNumber(value, ref sb, DtoaMode.SHORTEST))
             {
-                throw new InvalidOperationException("not support double value:" + value);
+                ThrowHelper.ThrowInvalidOperationException_NotSupport_Value(value);
             }
 
             buffer = sb.buffer;
@@ -527,18 +527,18 @@ namespace Utf8Json.Internal.DoubleConversion
             // boundary_minus and boundary_plus will round to v when convert to a double.
             // Grisu3 will never output representations that lie exactly on a boundary.
             DiyFp boundary_minus, boundary_plus;
-            if (mode == FastDtoaMode.FAST_DTOA_SHORTEST)
+            switch (mode)
             {
-                new Double(v).NormalizedBoundaries(out boundary_minus, out boundary_plus);
-            }
-            else if (mode == FastDtoaMode.FAST_DTOA_SHORTEST_SINGLE)
-            {
-                float single_v = (float)(v);
-                new Single(single_v).NormalizedBoundaries(out boundary_minus, out boundary_plus);
-            }
-            else
-            {
-                throw new Exception("Invalid Mode.");
+                case FastDtoaMode.FAST_DTOA_SHORTEST:
+                    new Double(v).NormalizedBoundaries(out boundary_minus, out boundary_plus);
+                    break;
+                case FastDtoaMode.FAST_DTOA_SHORTEST_SINGLE:
+                    float single_v = (float)(v);
+                    new Single(single_v).NormalizedBoundaries(out boundary_minus, out boundary_plus);
+                    break;
+                default:
+                    ThrowHelper.ThrowException_InvalidMode(); boundary_minus = default; boundary_plus = default;
+                    break;
             }
 
             DiyFp ten_mk;  // Cached power of ten: 10^-k
@@ -602,7 +602,7 @@ namespace Utf8Json.Internal.DoubleConversion
                 // case FastDtoaMode.FAST_DTOA_PRECISION:
                 //result = Grisu3Counted(v, requested_digits, buffer, length, &decimal_exponent);
                 default:
-                    throw new Exception("unreachable code.");
+                    ThrowHelper.ThrowException_UnreachedCode(); length = 0; break;
             }
             if (result)
             {
@@ -843,7 +843,7 @@ namespace Utf8Json.Internal.DoubleConversion
                 //    break;
                 default:
                     fast_worked = false;
-                    throw new Exception("Unreachable code.");
+                    ThrowHelper.ThrowException_UnreachableCode(); length = default; point = default; break;
             }
             // if (fast_worked) return;
 

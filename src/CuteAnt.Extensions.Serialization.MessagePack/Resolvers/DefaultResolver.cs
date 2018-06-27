@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using CuteAnt;
+using CuteAnt.Extensions.Serialization;
 using MessagePack.Formatters;
 using MessagePack.ImmutableCollection;
 
@@ -92,7 +93,7 @@ namespace MessagePack.Resolvers
       if (null == resolvers || resolvers.Length == 0) { return; }
       if (Locked == s_isFreezed)
       {
-        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
       Interlocked.Exchange(ref s_resolvers, resolvers.Concat(s_defaultResolvers).ToArray());
@@ -103,7 +104,7 @@ namespace MessagePack.Resolvers
       if (null == formatters || formatters.Length == 0) { return; }
       if (Locked == s_isFreezed)
       {
-        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
       Interlocked.Exchange(ref s_formatters, formatters);
@@ -113,7 +114,7 @@ namespace MessagePack.Resolvers
     {
       if (Locked == s_isFreezed)
       {
-        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
       if (formatters != null && formatters.Length > 0)

@@ -115,7 +115,7 @@ namespace MessagePack.Formatters
                         }
                         if (formatter == null)
                         {
-                            throw new FormatterNotRegisteredException(type.FullName + " is not registered in this resolver. resolvers:" + string.Join(", ", innerResolvers.Select(x => x.GetType().Name).ToArray()));
+                            ThrowHelper.ThrowFormatterNotRegisteredException(type, innerResolvers);
                         }
 
                         var t = aliasType;

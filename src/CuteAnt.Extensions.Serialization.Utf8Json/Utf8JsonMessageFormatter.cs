@@ -25,7 +25,8 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>Constructor</summary>
     public Utf8JsonMessageFormatter(IJsonFormatterResolver resolver)
     {
-      _defaultResolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+      if (null == resolver) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.resolver); }
+      _defaultResolver = resolver;
     }
 
     #region -- IsSupportedType --
@@ -147,7 +148,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public sealed override T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
     {
-      if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
+      if (null == readStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.readStream); }
 
       try
       {
@@ -163,7 +164,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public sealed override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
-      if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
+      if (null == readStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.readStream); }
 
       // 不是 Stream 都会实现 Position、Length 这两个属性
       //if (readStream.Position == readStream.Length) { return GetDefaultValueForType(type); }
@@ -264,7 +265,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (null == value) { return; }
 
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+      if (null == writeStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writeStream); }
 
       JsonSerializer.Serialize<object>(writeStream, value, _defaultResolver);
     }
@@ -274,7 +275,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (null == value) { return; }
 
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+      if (null == writeStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writeStream); }
 
       JsonSerializer.Serialize(writeStream, value, _defaultResolver);
     }
@@ -284,7 +285,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (null == value) { return; }
 
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+      if (null == writeStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writeStream); }
 
       JsonSerializer.Serialize(writeStream, value, _defaultResolver);
     }

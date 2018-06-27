@@ -29,8 +29,7 @@ namespace Hyperion.Extensions
             Func<FieldInfo, bool> serializationFieldsFilter = null,
             IComparer<FieldInfo> fieldInfoComparer = null)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            if (null == type) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.type); }
 
             //            var fieldInfos = new List<FieldInfo>();
             //            var current = type;

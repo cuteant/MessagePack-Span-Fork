@@ -157,7 +157,7 @@ namespace MessagePack.Internal
             }
 
             ERROR:
-            throw new ArgumentException("Invalid Guid Pattern.");
+            ThrowHelper.ThrowArgumentException_Guid_Pattern(); ;
         }
 
 #if NETSTANDARD || DESKTOPCLR
@@ -285,7 +285,7 @@ namespace MessagePack.Internal
                 case 95:
                 case 96:
                 default:
-                    throw new ArgumentException("Invalid Guid Pattern.");
+                    ThrowHelper.ThrowArgumentException_Guid_Pattern(); return default;
             }
         }
 

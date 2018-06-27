@@ -34,13 +34,11 @@ namespace MessagePack.Formatters
         {
             if (MessagePackBinary.IsNil(bytes, offset))
             {
-                throw new InvalidOperationException("Data is Nil, ValueTuple can not be null.");
+                ThrowHelper.ThrowInvalidOperationException_ValueTuple_Nil();
             }
-            else
-            {
                 var startOffset = offset;
                 var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                if (count != <#= i #>) throw new InvalidOperationException("Invalid ValueTuple count");
+                if (count != <#= i #>) ThrowHelper.ThrowInvalidOperationException_ValueTuple_Count();
                 offset += readSize;
 
 <# for(var j = 1; j <= i; j++) { #>
@@ -50,7 +48,6 @@ namespace MessagePack.Formatters
             
                 readSize = offset - startOffset;
                 return new ValueTuple<<#= ts #>>(<#= string.Join(", ", Enumerable.Range(1, i).Select(x => "item" + x)) #>);
-            }
         }
     }
 

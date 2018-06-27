@@ -35,7 +35,7 @@ namespace MessagePack.Formatters
             {
                 var startOffset = offset;
                 var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                if (count != 1) throw new InvalidOperationException("Invalid Tuple count");
+                if (count != 1) ThrowHelper.ThrowInvalidOperationException_Tuple_Count();
                 offset += readSize;
 
                 var item1 = formatterResolver.GetFormatterWithVerify<T1>().Deserialize(bytes, offset, formatterResolver, out readSize);
@@ -79,7 +79,7 @@ namespace MessagePack.Formatters
             {
                 var startOffset = offset;
                 var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                if (count != 2) throw new InvalidOperationException("Invalid Tuple count");
+                if (count != 2) ThrowHelper.ThrowInvalidOperationException_Tuple_Count();
                 offset += readSize;
 
                 var item1 = formatterResolver.GetFormatterWithVerify<T1>().Deserialize(bytes, offset, formatterResolver, out readSize);
@@ -126,7 +126,7 @@ namespace MessagePack.Formatters
             {
                 var startOffset = offset;
                 var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                if (count != 3) throw new InvalidOperationException("Invalid Tuple count");
+                if (count != 3) ThrowHelper.ThrowInvalidOperationException_Tuple_Count();
                 offset += readSize;
 
                 var item1 = formatterResolver.GetFormatterWithVerify<T1>().Deserialize(bytes, offset, formatterResolver, out readSize);
@@ -176,7 +176,7 @@ namespace MessagePack.Formatters
             {
                 var startOffset = offset;
                 var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                if (count != 4) throw new InvalidOperationException("Invalid Tuple count");
+                if (count != 4) ThrowHelper.ThrowInvalidOperationException_Tuple_Count();
                 offset += readSize;
 
                 var item1 = formatterResolver.GetFormatterWithVerify<T1>().Deserialize(bytes, offset, formatterResolver, out readSize);
@@ -229,7 +229,7 @@ namespace MessagePack.Formatters
             {
                 var startOffset = offset;
                 var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                if (count != 5) throw new InvalidOperationException("Invalid Tuple count");
+                if (count != 5) ThrowHelper.ThrowInvalidOperationException_Tuple_Count();
                 offset += readSize;
 
                 var item1 = formatterResolver.GetFormatterWithVerify<T1>().Deserialize(bytes, offset, formatterResolver, out readSize);
@@ -285,7 +285,7 @@ namespace MessagePack.Formatters
             {
                 var startOffset = offset;
                 var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                if (count != 6) throw new InvalidOperationException("Invalid Tuple count");
+                if (count != 6) ThrowHelper.ThrowInvalidOperationException_Tuple_Count();
                 offset += readSize;
 
                 var item1 = formatterResolver.GetFormatterWithVerify<T1>().Deserialize(bytes, offset, formatterResolver, out readSize);
@@ -344,7 +344,7 @@ namespace MessagePack.Formatters
             {
                 var startOffset = offset;
                 var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                if (count != 7) throw new InvalidOperationException("Invalid Tuple count");
+                if (count != 7) ThrowHelper.ThrowInvalidOperationException_Tuple_Count();
                 offset += readSize;
 
                 var item1 = formatterResolver.GetFormatterWithVerify<T1>().Deserialize(bytes, offset, formatterResolver, out readSize);
@@ -406,7 +406,7 @@ namespace MessagePack.Formatters
             {
                 var startOffset = offset;
                 var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                if (count != 8) throw new InvalidOperationException("Invalid Tuple count");
+                if (count != 8) ThrowHelper.ThrowInvalidOperationException_Tuple_Count();
                 offset += readSize;
 
                 var item1 = formatterResolver.GetFormatterWithVerify<T1>().Deserialize(bytes, offset, formatterResolver, out readSize);

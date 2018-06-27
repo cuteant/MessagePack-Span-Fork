@@ -469,8 +469,8 @@ namespace Utf8Json.Internal
 
         public static unsafe ulong GetKey(ref byte* p, ref int rest)
         {
-            int readSize;
-            ulong key;
+            int readSize = 0;
+            ulong key = 0;
 
             unchecked
             {
@@ -535,7 +535,7 @@ namespace Utf8Json.Internal
                                 break;
                             }
                         default:
-                            throw new InvalidOperationException("Not Supported Length");
+                            ThrowHelper.ThrowInvalidOperationException_Not_Supported_Length(); break;
                     }
                 }
 
@@ -547,8 +547,8 @@ namespace Utf8Json.Internal
 
         public static ulong GetKeySafe(byte[] bytes, ref int offset, ref int rest)
         {
-            int readSize;
-            ulong key;
+            int readSize = 0;
+            ulong key = 0;
 
             if (BitConverter.IsLittleEndian)
             {
@@ -610,7 +610,7 @@ namespace Utf8Json.Internal
                                     break;
                                 }
                             default:
-                                throw new InvalidOperationException("Not Supported Length");
+                                ThrowHelper.ThrowInvalidOperationException_Not_Supported_Length(); break;
                         }
                     }
 
@@ -679,7 +679,7 @@ namespace Utf8Json.Internal
                                     break;
                                 }
                             default:
-                                throw new InvalidOperationException("Not Supported Length");
+                                ThrowHelper.ThrowInvalidOperationException_Not_Supported_Length(); break;
                         }
                     }
 

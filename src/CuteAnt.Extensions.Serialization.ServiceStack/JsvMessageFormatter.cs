@@ -49,7 +49,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public sealed override object ReadFromStream(Type type, Stream readStream, Encoding effectiveEncoding)
     {
-      if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
+      if (null == readStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.readStream); }
 
       // 不是 Stream 都会实现 Position、Length 这两个属性
       //if (readStream.Position == readStream.Length) { return GetDefaultValueForType(type); }
@@ -68,7 +68,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <inheritdoc />
     public sealed override T ReadFromStream<T>(Stream readStream, Encoding effectiveEncoding)
     {
-      if (readStream == null) { throw new ArgumentNullException(nameof(readStream)); }
+      if (null == readStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.readStream); }
 
       // 不是 Stream 都会实现 Position、Length 这两个属性
       //if (readStream.Position == readStream.Length) { return default; }
@@ -92,7 +92,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (null == value) { return; }
 
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+      if (null == writeStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writeStream); }
 
       TypeSerializer.SerializeToStream(value, value.GetType(), writeStream);
     }
@@ -102,7 +102,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (null == value) { return; }
 
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+      if (null == writeStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writeStream); }
 
       if (null == type) { type = value.GetType(); }
       TypeSerializer.SerializeToStream(value, type, writeStream);
@@ -113,7 +113,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (null == value) { return; }
 
-      if (writeStream == null) { throw new ArgumentNullException(nameof(writeStream)); }
+      if (null == writeStream) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writeStream); }
 
       TypeSerializer.SerializeToStream<T>(value, writeStream);
     }

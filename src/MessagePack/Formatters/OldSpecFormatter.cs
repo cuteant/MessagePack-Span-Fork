@@ -205,56 +205,58 @@ namespace MessagePack.Formatters
         public byte[] Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
             var type = MessagePackBinary.GetMessagePackType(bytes, offset);
-            if (type == MessagePackType.Nil)
+            switch (type)
             {
-                readSize = 1;
-                return null;
+                case MessagePackType.Nil:
+                    readSize = 1;
+                    return null;
+                case MessagePackType.Binary:
+                    return MessagePackBinary.ReadBytes(bytes, offset, out readSize);
+                case MessagePackType.String:
+                    var code = bytes[offset];
+                    unchecked
+                    {
+                        if (MessagePackCode.MinFixStr <= code && code <= MessagePackCode.MaxFixStr)
+                        {
+                            var length = bytes[offset] & 0x1F;
+                            readSize = length + 1;
+                            var result = new byte[length];
+                            Buffer.BlockCopy(bytes, offset + 1, result, 0, result.Length);
+                            return result;
+                        }
+                        else
+                        {
+                            switch (code)
+                            {
+                                case MessagePackCode.Str8:
+                                    var length0 = (int)bytes[offset + 1];
+                                    readSize = length0 + 2;
+                                    var result0 = new byte[length0];
+                                    Buffer.BlockCopy(bytes, offset + 2, result0, 0, result0.Length);
+                                    return result0;
+                                case MessagePackCode.Str16:
+                                    var length1 = (bytes[offset + 1] << 8) + (bytes[offset + 2]);
+                                    readSize = length1 + 3;
+                                    var result1 = new byte[length1];
+                                    Buffer.BlockCopy(bytes, offset + 3, result1, 0, result1.Length);
+                                    return result1;
+                                case MessagePackCode.Str32:
+                                    var length2 = (int)((uint)(bytes[offset + 1] << 24) | (uint)(bytes[offset + 2] << 16) | (uint)(bytes[offset + 3] << 8) | (uint)bytes[offset + 4]);
+                                    readSize = length2 + 5;
+                                    var result2 = new byte[length2];
+                                    Buffer.BlockCopy(bytes, offset + 5, result2, 0, result2.Length);
+                                    return result2;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
-            else if (type == MessagePackType.Binary)
-            {
-                return MessagePackBinary.ReadBytes(bytes, offset, out readSize);
-            }
-            else if (type == MessagePackType.String)
-            {
-                var code = bytes[offset];
-                unchecked
-                {
-                    if (MessagePackCode.MinFixStr <= code && code <= MessagePackCode.MaxFixStr)
-                    {
-                        var length = bytes[offset] & 0x1F;
-                        readSize = length + 1;
-                        var result = new byte[length];
-                        Buffer.BlockCopy(bytes, offset + 1, result, 0, result.Length);
-                        return result;
-                    }
-                    else if (code == MessagePackCode.Str8)
-                    {
-                        var length = (int)bytes[offset + 1];
-                        readSize = length + 2;
-                        var result = new byte[length];
-                        Buffer.BlockCopy(bytes, offset + 2, result, 0, result.Length);
-                        return result;
-                    }
-                    else if (code == MessagePackCode.Str16)
-                    {
-                        var length = (bytes[offset + 1] << 8) + (bytes[offset + 2]);
-                        readSize = length + 3;
-                        var result = new byte[length];
-                        Buffer.BlockCopy(bytes, offset + 3, result, 0, result.Length);
-                        return result;
-                    }
-                    else if (code == MessagePackCode.Str32)
-                    {
-                        var length = (int)((uint)(bytes[offset + 1] << 24) | (uint)(bytes[offset + 2] << 16) | (uint)(bytes[offset + 3] << 8) | (uint)bytes[offset + 4]);
-                        readSize = length + 5;
-                        var result = new byte[length];
-                        Buffer.BlockCopy(bytes, offset + 5, result, 0, result.Length);
-                        return result;
-                    }
-                }
-            }
-
-            throw new InvalidOperationException(string.Format("code is invalid. code:{0} format:{1}", bytes[offset], MessagePackCode.ToFormatName(bytes[offset])));
+            ThrowHelper.ThrowInvalidOperationException_Code(bytes[offset]);
+            readSize = default; return null;
         }
     }
 }

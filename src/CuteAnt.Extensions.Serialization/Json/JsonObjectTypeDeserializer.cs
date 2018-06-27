@@ -31,7 +31,7 @@ namespace CuteAnt.Extensions.Serialization
 
     public JsonObjectTypeDeserializer(JsonSerializerSettings jsonSettings)
     {
-      if (null == jsonSettings) { throw new ArgumentNullException(nameof(jsonSettings)); }
+      if (null == jsonSettings) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.jsonSettings); }
 
       _jsonSerializerPool = JsonConvertX.GetJsonSerializerPool(jsonSettings);
     }
@@ -40,7 +40,7 @@ namespace CuteAnt.Extensions.Serialization
 
     TValue IObjectTypeDeserializer.Deserialize<TValue>(IDictionary<string, object> dictionary)
     {
-      if (null == dictionary) { throw new ArgumentNullException(nameof(dictionary)); }
+      if (null == dictionary) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.dictionary); }
 
       var objDictionary = JObject.FromObject(dictionary ?? new Dictionary<string, object>());
 
@@ -61,7 +61,7 @@ namespace CuteAnt.Extensions.Serialization
 
     TValue IObjectTypeDeserializer.Deserialize<TValue>(IDictionary<string, object> dictionary, string key)
     {
-      if (null == dictionary) { throw new ArgumentNullException(nameof(dictionary)); }
+      if (null == dictionary) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.dictionary); }
 
       if (dictionary.TryGetValue(key, out object value) || TryGetValueCamelCase(key, dictionary, out value))
       {
@@ -72,7 +72,7 @@ namespace CuteAnt.Extensions.Serialization
 
     TValue IObjectTypeDeserializer.Deserialize<TValue>(IDictionary<string, object> dictionary, string key, TValue defaultValue)
     {
-      if (null == dictionary) { throw new ArgumentNullException(nameof(dictionary)); }
+      if (null == dictionary) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.dictionary); }
 
       if (dictionary.TryGetValue(key, out object value) || TryGetValueCamelCase(key, dictionary, out value))
       {

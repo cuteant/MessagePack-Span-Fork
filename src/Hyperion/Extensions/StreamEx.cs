@@ -25,8 +25,7 @@ namespace Hyperion.Extensions
             for (; offset < 32; offset += 7)
             {
                 int b = stream.ReadByte();
-                if (b == -1)
-                    throw new EndOfStreamException();
+                if (b == -1) ThrowHelper.ThrowEndOfStreamException();
 
                 result |= (b & 0x7f) << offset;
 
@@ -34,7 +33,7 @@ namespace Hyperion.Extensions
                     return (uint)result;
             }
 
-            throw new InvalidDataException();
+            ThrowHelper.ThrowInvalidDataException(); return default;
         }
 
         public static void WriteVarint32(this Stream stream, uint value)
@@ -53,8 +52,7 @@ namespace Hyperion.Extensions
             for (; offset < 64; offset += 7)
             {
                 int b = stream.ReadByte();
-                if (b == -1)
-                    throw new EndOfStreamException();
+                if (b == -1) ThrowHelper.ThrowEndOfStreamException();
 
                 result |= ((long)(b & 0x7f)) << offset;
 
@@ -62,7 +60,7 @@ namespace Hyperion.Extensions
                     return (ulong)result;
             }
 
-            throw new InvalidDataException();
+            ThrowHelper.ThrowInvalidDataException(); return default;
         }
 
         public static void WriteVarint64(this Stream stream, ulong value)

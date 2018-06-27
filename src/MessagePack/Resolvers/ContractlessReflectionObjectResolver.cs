@@ -264,7 +264,7 @@ namespace MessagePack.Resolvers
             }
             else
             {
-                throw new InvalidOperationException("Invalid MessagePackType:" + MessagePackCode.ToFormatName(bytes[offset]));
+                ThrowHelper.ThrowInvalidOperationException_MessagePackType(bytes[offset]);
             }
 
             // CreateObject

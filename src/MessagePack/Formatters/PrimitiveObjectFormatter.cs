@@ -61,8 +61,7 @@ namespace MessagePack.Formatters
 
             var t = value.GetType();
 
-            int code;
-            if (typeToJumpCode.TryGetValue(t, out code))
+            if (typeToJumpCode.TryGetValue(t, out var code))
             {
                 switch (code)
                 {
@@ -97,7 +96,7 @@ namespace MessagePack.Formatters
                     case 14:
                         return MessagePackBinary.WriteBytes(ref bytes, offset, (byte[])value);
                     default:
-                        throw new InvalidOperationException("Not supported primitive object resolver. type:" + t.Name);
+                        ThrowHelper.ThrowInvalidOperationException_NotSupported(t); return default;
                 }
             }
             else
@@ -157,7 +156,7 @@ namespace MessagePack.Formatters
                 }
             }
 
-            throw new InvalidOperationException("Not supported primitive object resolver. type:" + t.Name);
+            ThrowHelper.ThrowInvalidOperationException_NotSupported(t); return default;
         }
 
         public object Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
@@ -167,17 +166,29 @@ namespace MessagePack.Formatters
             {
                 case MessagePackType.Integer:
                     var code = bytes[offset];
-                    if (MessagePackCode.MinNegativeFixInt <= code && code <= MessagePackCode.MaxNegativeFixInt) return MessagePackBinary.ReadSByte(bytes, offset, out readSize);
-                    else if (MessagePackCode.MinFixInt <= code && code <= MessagePackCode.MaxFixInt) return MessagePackBinary.ReadByte(bytes, offset, out readSize);
-                    else if (code == MessagePackCode.Int8) return MessagePackBinary.ReadSByte(bytes, offset, out readSize);
-                    else if (code == MessagePackCode.Int16) return MessagePackBinary.ReadInt16(bytes, offset, out readSize);
-                    else if (code == MessagePackCode.Int32) return MessagePackBinary.ReadInt32(bytes, offset, out readSize);
-                    else if (code == MessagePackCode.Int64) return MessagePackBinary.ReadInt64(bytes, offset, out readSize);
-                    else if (code == MessagePackCode.UInt8) return MessagePackBinary.ReadByte(bytes, offset, out readSize);
-                    else if (code == MessagePackCode.UInt16) return MessagePackBinary.ReadUInt16(bytes, offset, out readSize);
-                    else if (code == MessagePackCode.UInt32) return MessagePackBinary.ReadUInt32(bytes, offset, out readSize);
-                    else if (code == MessagePackCode.UInt64) return MessagePackBinary.ReadUInt64(bytes, offset, out readSize);
-                    throw new InvalidOperationException("Invalid primitive bytes.");
+                    if (MessagePackCode.MinNegativeFixInt <= code && code <= MessagePackCode.MaxNegativeFixInt)
+                    {
+                        return MessagePackBinary.ReadSByte(bytes, offset, out readSize);
+                    }
+                    else if (MessagePackCode.MinFixInt <= code && code <= MessagePackCode.MaxFixInt)
+                    {
+                        return MessagePackBinary.ReadByte(bytes, offset, out readSize);
+                    }
+                    else
+                    {
+                        switch (code)
+                        {
+                            case MessagePackCode.Int8: return MessagePackBinary.ReadSByte(bytes, offset, out readSize);
+                            case MessagePackCode.Int16: return MessagePackBinary.ReadInt16(bytes, offset, out readSize);
+                            case MessagePackCode.Int32: return MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+                            case MessagePackCode.Int64: return MessagePackBinary.ReadInt64(bytes, offset, out readSize);
+                            case MessagePackCode.UInt8: return MessagePackBinary.ReadByte(bytes, offset, out readSize);
+                            case MessagePackCode.UInt16: return MessagePackBinary.ReadUInt16(bytes, offset, out readSize);
+                            case MessagePackCode.UInt32: return MessagePackBinary.ReadUInt32(bytes, offset, out readSize);
+                            case MessagePackCode.UInt64: return MessagePackBinary.ReadUInt64(bytes, offset, out readSize);
+                            default: ThrowHelper.ThrowInvalidOperationException_Primitive_Bytes(); readSize = default; return null;
+                        }
+                    }
                 case MessagePackType.Boolean:
                     return MessagePackBinary.ReadBoolean(bytes, offset, out readSize);
                 case MessagePackType.Float:
@@ -195,11 +206,11 @@ namespace MessagePack.Formatters
                     return MessagePackBinary.ReadBytes(bytes, offset, out readSize);
                 case MessagePackType.Extension:
                     var ext = MessagePackBinary.ReadExtensionFormatHeader(bytes, offset, out readSize);
-                    if (ext.TypeCode == ReservedMessagePackExtensionTypeCode.DateTime)
+                    if (ext.TypeCode != ReservedMessagePackExtensionTypeCode.DateTime)
                     {
-                        return MessagePackBinary.ReadDateTime(bytes, offset, out readSize);
+                        ThrowHelper.ThrowInvalidOperationException_Primitive_Bytes();
                     }
-                    throw new InvalidOperationException("Invalid primitive bytes.");
+                    return MessagePackBinary.ReadDateTime(bytes, offset, out readSize);
                 case MessagePackType.Array:
                     {
                         var length = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
@@ -243,7 +254,7 @@ namespace MessagePack.Formatters
                     readSize = 1;
                     return null;
                 default:
-                    throw new InvalidOperationException("Invalid primitive bytes.");
+                    ThrowHelper.ThrowInvalidOperationException_Primitive_Bytes(); readSize = default; return null;
             }
         }
     }

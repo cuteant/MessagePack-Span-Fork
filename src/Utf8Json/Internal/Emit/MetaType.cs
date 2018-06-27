@@ -39,7 +39,7 @@ namespace Utf8Json.Internal.Emit
 
                     if (stringMembers.ContainsKey(member.Name))
                     {
-                        throw new InvalidOperationException("same (custom)name is in type. Type:" + type.Name + " Name:" + member.Name);
+                        ThrowHelper.ThrowInvalidOperationException_Same(type, member);
                     }
                     stringMembers.Add(member.Name, member);
                 }
@@ -58,7 +58,7 @@ namespace Utf8Json.Internal.Emit
 
                     if (stringMembers.ContainsKey(member.Name))
                     {
-                        throw new InvalidOperationException("same (custom)name is in type. Type:" + type.Name + " Name:" + member.Name);
+                        ThrowHelper.ThrowInvalidOperationException_Same(type, member);
                     }
                     stringMembers.Add(member.Name, member);
                 }
@@ -104,7 +104,7 @@ namespace Utf8Json.Internal.Emit
                                     }
                                     else
                                     {
-                                        throw new InvalidOperationException("duplicate matched constructor parameter name:" + type.FullName + " parameterName:" + item.Name + " paramterType:" + item.ParameterType.Name);
+                                        ThrowHelper.ThrowInvalidOperationException_Ctor_DuplicateMatched(type, item);
                                     }
                                 }
 

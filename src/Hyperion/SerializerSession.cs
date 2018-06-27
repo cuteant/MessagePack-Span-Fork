@@ -66,7 +66,7 @@ namespace Hyperion
             }
             catch (Exception x)
             {
-                throw new Exception("Error tracking object ", x);
+                ThrowHelper.ThrowException_Tracking(x);
             }
         }
 
@@ -189,7 +189,7 @@ namespace Hyperion
             }
             set
             {
-                if (null == value) { throw new ArgumentNullException(nameof(value)); }
+                if (null == value) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value); }
                 Interlocked.CompareExchange(ref _innerPool, value, null);
             }
         }

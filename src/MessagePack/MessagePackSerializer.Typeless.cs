@@ -39,7 +39,7 @@ namespace MessagePack
             }
             public static void RegisterTypelessFormatter(IMessagePackFormatter<object> typelessFormatter)
             {
-                if (null == typelessFormatter) { throw new ArgumentNullException(nameof(typelessFormatter)); }
+                if (null == typelessFormatter) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.typelessFormatter); }
 
                 if (Interlocked.CompareExchange(ref s_typelessFormatter, typelessFormatter, null) == null)
                 {
@@ -101,7 +101,7 @@ namespace MessagePack
                 {
                     if (isFreezed)
                     {
-                        throw new InvalidOperationException("Register must call on startup(before use GetFormatter<T>).");
+                        ThrowHelper.ThrowInvalidOperationException_Register_Resolvers();
                     }
 
                     CompositeResolver.resolvers = resolvers;

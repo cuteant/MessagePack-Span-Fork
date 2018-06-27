@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using CuteAnt;
 using CuteAnt.Buffers;
 using CuteAnt.Reflection;
@@ -89,7 +90,7 @@ namespace MessagePack.Formatters
             var actualType = value.GetType();
             if (!IsSupportedType(actualType))
             {
-                throw new InvalidOperationException($"Type '{actualType}' is an interface or abstract class and cannot be serialized.");
+                ThrowInvalidOperationException(actualType);
             }
 
             var typeSize = MessagePackBinary.WriteNamedType(ref bytes, offset, actualType);
@@ -139,6 +140,16 @@ namespace MessagePack.Formatters
                 return MessagePackBinary.WriteBytes(ref bytes, offset + typeSize, buffer, 0, bufferSize) + typeSize;
             }
             finally { bufferPool.Return(buffer); }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowInvalidOperationException(Type type)
+        {
+            throw GetInvalidOperationException();
+            InvalidOperationException GetInvalidOperationException()
+            {
+                return new InvalidOperationException($"Type '{type}' is an interface or abstract class and cannot be serialized.");
+            }
         }
     }
 }

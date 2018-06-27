@@ -259,21 +259,21 @@ namespace Newtonsoft.Json
     [MethodImpl(InlineMethod.Value)]
     public static bool IsCheckAdditionalContentSetX(this JsonSerializer jsonSerializer)
     {
-      if (null == jsonSerializer) { throw new ArgumentNullException(nameof(jsonSerializer)); }
+      if (null == jsonSerializer) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.jsonSerializer); }
       return s_checkAdditionalContentGetter(jsonSerializer) != null;
     }
 
     [MethodImpl(InlineMethod.Value)]
     public static bool? GetCheckAdditionalContent(this JsonSerializer jsonSerializer)
     {
-      if (null == jsonSerializer) { throw new ArgumentNullException(nameof(jsonSerializer)); }
+      if (null == jsonSerializer) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.jsonSerializer); }
       return (bool?)s_checkAdditionalContentGetter(jsonSerializer);
     }
 
     [MethodImpl(InlineMethod.Value)]
     public static void SetCheckAdditionalContent(this JsonSerializer jsonSerializer, bool? checkAdditionalContent = null)
     {
-      if (null == jsonSerializer) { throw new ArgumentNullException(nameof(jsonSerializer)); }
+      if (null == jsonSerializer) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.jsonSerializer); }
       s_checkAdditionalContentSetter(jsonSerializer, checkAdditionalContent);
     }
 
@@ -284,14 +284,14 @@ namespace Newtonsoft.Json
     [MethodImpl(InlineMethod.Value)]
     public static Formatting? GetFormatting(this JsonSerializer jsonSerializer)
     {
-      if (null == jsonSerializer) { throw new ArgumentNullException(nameof(jsonSerializer)); }
+      if (null == jsonSerializer) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.jsonSerializer); }
       return (Formatting?)s_formattingGetter(jsonSerializer);
     }
 
     [MethodImpl(InlineMethod.Value)]
     public static void SetFormatting(this JsonSerializer jsonSerializer, Formatting? formatting = null)
     {
-      if (null == jsonSerializer) { throw new ArgumentNullException(nameof(jsonSerializer)); }
+      if (null == jsonSerializer) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.jsonSerializer); }
       s_formattingSetter(jsonSerializer, formatting);
     }
 
@@ -1372,7 +1372,7 @@ namespace Newtonsoft.Json
 
     private static void SerializeToWriterInternal(TextWriter textWriter, object value, Type type, JsonSerializer jsonSerializer)
     {
-      if (null == textWriter) { throw new ArgumentNullException(nameof(textWriter)); }
+      if (null == textWriter) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.textWriter); }
 
       using (JsonTextWriter jsonWriter = new JsonTextWriter(textWriter))
       {

@@ -20,7 +20,7 @@ namespace MessagePack.Formatters
 
         public unsafe int Serialize(ref byte[] bytes, int offset, Guid value, IFormatterResolver formatterResolver)
         {
-            if (!BitConverter.IsLittleEndian) throw new Exception("BinaryGuidFormatter only allows on little endian env.");
+            if (!BitConverter.IsLittleEndian) ThrowHelper.ThrowException_Guid_Little_Endian();
 
             MessagePackBinary.EnsureCapacity(ref bytes, offset, 18);
             fixed (byte* dst = &bytes[offset])
@@ -38,22 +38,22 @@ namespace MessagePack.Formatters
 
         public unsafe Guid Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
-            if (!BitConverter.IsLittleEndian) throw new Exception("BinaryGuidFormatter only allows on little endian env.");
+            if (!BitConverter.IsLittleEndian) ThrowHelper.ThrowException_Guid_Little_Endian();
 
             if (!(offset + 18 <= bytes.Length))
             {
-                throw new ArgumentOutOfRangeException();
+                ThrowHelper.ThrowArgumentOutOfRangeException();
             }
 
             fixed (byte* src = &bytes[offset])
             {
                 if (src[0] != MessagePackCode.Bin8)
                 {
-                    throw new InvalidOperationException(string.Format("code is invalid. code:{0} format:{1}", bytes[offset], MessagePackCode.ToFormatName(bytes[offset])));
+                    ThrowHelper.ThrowInvalidOperationException_Code(bytes[offset]);
                 }
                 if (src[1] != 16)
                 {
-                    throw new InvalidOperationException("Invalid Guid Size.");
+                    ThrowHelper.ThrowInvalidOperationException_Guid_Size();
                 }
 
                 var target = *(Guid*)(src + 2);
@@ -79,7 +79,7 @@ namespace MessagePack.Formatters
 
         public unsafe int Serialize(ref byte[] bytes, int offset, Decimal value, IFormatterResolver formatterResolver)
         {
-            if (!BitConverter.IsLittleEndian) throw new Exception("BinaryGuidFormatter only allows on little endian env.");
+            if (!BitConverter.IsLittleEndian) ThrowHelper.ThrowException_Decimal_Little_Endian();
 
             MessagePackBinary.EnsureCapacity(ref bytes, offset, 18);
             fixed (byte* dst = &bytes[offset])
@@ -97,22 +97,22 @@ namespace MessagePack.Formatters
 
         public unsafe Decimal Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
-            if (!BitConverter.IsLittleEndian) throw new Exception("BinaryDecimalFormatter only allows on little endian env.");
+            if (!BitConverter.IsLittleEndian) ThrowHelper.ThrowException_Decimal_Little_Endian();
 
             if (!(offset + 18 <= bytes.Length))
             {
-                throw new ArgumentOutOfRangeException();
+                ThrowHelper.ThrowArgumentOutOfRangeException();
             }
 
             fixed (byte* src = &bytes[offset])
             {
                 if (src[0] != MessagePackCode.Bin8)
                 {
-                    throw new InvalidOperationException(string.Format("code is invalid. code:{0} format:{1}", bytes[offset], MessagePackCode.ToFormatName(bytes[offset])));
+                    ThrowHelper.ThrowInvalidOperationException_Code(bytes[offset]);
                 }
                 if (src[1] != 16)
                 {
-                    throw new InvalidOperationException("Invalid Guid Size.");
+                    ThrowHelper.ThrowInvalidOperationException_Guid_Size();
                 }
 
                 var target = *(Decimal*)(src + 2);

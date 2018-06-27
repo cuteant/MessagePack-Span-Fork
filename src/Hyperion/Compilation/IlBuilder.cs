@@ -78,7 +78,7 @@ namespace Hyperion.Compilation
                 _expressions.OfType<IlVariable>().FirstOrDefault(v => v.Name == name && v.VarType == typeof(T));
             if (existing == null)
             {
-                throw new Exception("Variable not found");
+                ThrowHelper.ThrowException_Variable();
             }
 
             return _expressions.IndexOf(existing);
