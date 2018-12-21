@@ -14,6 +14,8 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using CuteAnt.Pool;
 using ServiceStack.Text.Common;
 using ServiceStack.Text.Json;
@@ -30,6 +32,8 @@ namespace ServiceStack.Text
             JsConfig.InitStatics();
         }
 
+        public static int BufferSize = 1024;
+
         [Obsolete("Use JsConfig.UTF8Encoding")]
         public static UTF8Encoding UTF8Encoding
         {
@@ -39,13 +43,24 @@ namespace ServiceStack.Text
 
         public static T DeserializeFromString<T>(string value)
         {
-            if (string.IsNullOrEmpty(value)) return default(T);
-            return (T)JsonReader<T>.Parse(value);
+            return JsonReader<T>.Parse(value) is T obj ? obj : default(T);
+        }
+
+        public static T DeserializeFromSpan<T>(ReadOnlySpan<char> value)
+        {
+            return JsonReader<T>.Parse(value) is T obj ? obj : default(T);
         }
 
         public static T DeserializeFromReader<T>(TextReader reader)
         {
             return DeserializeFromString<T>(reader.ReadToEnd());
+        }
+
+        public static object DeserializeFromSpan(Type type, ReadOnlySpan<char> value)
+        {
+            return value.IsEmpty
+                ? null
+                : JsonReader.GetParseSpanFn(type)(value);
         }
 
         public static object DeserializeFromString(string value, Type type)
@@ -153,52 +168,55 @@ namespace ServiceStack.Text
             }
             else
             {
-                using (var writer = new StreamWriterX(stream, JsConfig.UTF8Encoding))
-                {
-                    JsonWriter<T>.WriteRootObject(writer, value);
-                    writer.Flush();
-                }
+                var writer = new StreamWriter(stream, JsConfig.UTF8Encoding, BufferSize, leaveOpen:true);
+                JsonWriter<T>.WriteRootObject(writer, value);
+                writer.Flush();
             }
         }
 
         public static void SerializeToStream(object value, Type type, Stream stream)
         {
-            using (var writer = new StreamWriterX(stream, JsConfig.UTF8Encoding))
-            {
-                JsonWriter.GetWriteFn(type)(writer, value);
-                writer.Flush();
-            }
+            var writer = new StreamWriter(stream, JsConfig.UTF8Encoding, BufferSize, leaveOpen:true);
+            JsonWriter.GetWriteFn(type)(writer, value);
+            writer.Flush();
         }
 
         public static T DeserializeFromStream<T>(Stream stream)
         {
-            return DeserializeFromString<T>(stream.ReadToEnd());
+            return (T)MemoryProvider.Instance.Deserialize(stream, typeof(T), DeserializeFromSpan);
         }
 
         public static object DeserializeFromStream(Type type, Stream stream)
         {
-            return DeserializeFromString(stream.ReadToEnd(), type);
+            return MemoryProvider.Instance.Deserialize(stream, type, DeserializeFromSpan);
+        }
+
+        public static Task<object> DeserializeFromStreamAsync(Type type, Stream stream)
+        {
+            return MemoryProvider.Instance.DeserializeAsync(stream, type, DeserializeFromSpan);
+        }
+
+        public static async Task<T> DeserializeFromStreamAsync<T>(Stream stream)
+        {
+            var obj = await MemoryProvider.Instance.DeserializeAsync(stream, typeof(T), DeserializeFromSpan);
+            return (T)obj;
         }
 
         public static T DeserializeResponse<T>(WebRequest webRequest)
         {
             using (var webRes = PclExport.Instance.GetResponse(webRequest))
+            using (var stream = webRes.GetResponseStream())
             {
-                using (var stream = webRes.GetResponseStream())
-                {
-                    return DeserializeFromStream<T>(stream);
-                }
+                return DeserializeFromStream<T>(stream);
             }
         }
 
         public static object DeserializeResponse<T>(Type type, WebRequest webRequest)
         {
             using (var webRes = PclExport.Instance.GetResponse(webRequest))
+            using (var stream = webRes.GetResponseStream())
             {
-                using (var stream = webRes.GetResponseStream())
-                {
-                    return DeserializeFromStream(type, stream);
-                }
+                return DeserializeFromStream(type, stream);
             }
         }
 

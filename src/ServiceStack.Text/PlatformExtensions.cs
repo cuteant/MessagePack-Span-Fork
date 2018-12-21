@@ -122,45 +122,81 @@ namespace ServiceStack
         [Obsolete("Use fn.Method")]
         public static MethodInfo Method(this Delegate fn) => fn.Method;
 
+#if DEBUG
         [MethodImpl(InlineMethod.Value)]
-        public static bool HasAttribute<T>(this Type type) => type.AllAttributes().Any(x => x.GetType() == typeof(T));
+        public static bool HasAttribute<T>(this Type type) => AttributeX.HasAttribute(type, typeof(T), true); //type.AllAttributes().Any(x => x.GetType() == typeof(T));
 
         [MethodImpl(InlineMethod.Value)]
-        public static bool HasAttribute<T>(this PropertyInfo pi) => pi.AllAttributes().Any(x => x.GetType() == typeof(T));
+        public static bool HasAttribute<T>(this PropertyInfo pi) => AttributeX.HasAttribute(pi, typeof(T), true); //pi.AllAttributes().Any(x => x.GetType() == typeof(T));
+#endif
 
-        [MethodImpl(InlineMethod.Value)]
-        public static bool HasAttribute<T>(this FieldInfo fi) => fi.AllAttributes().Any(x => x.GetType() == typeof(T));
+        //[MethodImpl(InlineMethod.Value)]
+        //public static bool HasAttribute<T>(this FieldInfo fi) => fi.AllAttributes().Any(x => x.GetType() == typeof(T));
 
-        [MethodImpl(InlineMethod.Value)]
-        public static bool HasAttribute<T>(this MethodInfo mi) => mi.AllAttributes().Any(x => x.GetType() == typeof(T));
+        //[MethodImpl(InlineMethod.Value)]
+        //public static bool HasAttribute<T>(this MethodInfo mi) => mi.AllAttributes().Any(x => x.GetType() == typeof(T));
 
+        //private static Dictionary<MemberInfo, bool> hasAttributeCache = new Dictionary<MemberInfo, bool>();
+        //public static bool HasAttributeCached<T>(this MemberInfo memberInfo)
+        //{
+        //    if (hasAttributeCache.TryGetValue(memberInfo, out var hasAttr))
+        //        return hasAttr;
+
+        //    hasAttr = memberInfo is Type t
+        //        ? t.AllAttributes().Any(x => x.GetType() == typeof(T))
+        //        : memberInfo is PropertyInfo pi
+        //        ? pi.AllAttributes().Any(x => x.GetType() == typeof(T))
+        //        : memberInfo is FieldInfo fi
+        //        ? fi.AllAttributes().Any(x => x.GetType() == typeof(T))
+        //        : memberInfo is MethodInfo mi
+        //        ? mi.AllAttributes().Any(x => x.GetType() == typeof(T))
+        //        : throw new NotSupportedException(memberInfo.GetType().Name);
+
+        //    Dictionary<MemberInfo, bool> snapshot, newCache;
+        //    do
+        //    {
+        //        snapshot = hasAttributeCache;
+        //        newCache = new Dictionary<MemberInfo, bool>(hasAttributeCache)
+        //        {
+        //            [memberInfo] = hasAttr
+        //        };
+
+        //    } while (!ReferenceEquals(
+        //        Interlocked.CompareExchange(ref hasAttributeCache, newCache, snapshot), snapshot));
+
+        //    return hasAttr;
+        //}
+
+#if DEBUG
         [MethodImpl(InlineMethod.Value)]
         public static bool HasAttributeNamed(this Type type, string name)
         {
-            var normalizedAttr = name.Replace("Attribute", "").ToLower();
-            return type.AllAttributes().Any(x => x.GetType().Name.Replace("Attribute", "").ToLower() == normalizedAttr);
+            return AttributeX.HasAttributeNamed(type, name, true);
+            //var normalizedAttr = name.Replace("Attribute", "").ToLower();
+            //return type.AllAttributes().Any(x => x.GetType().Name.Replace("Attribute", "").ToLower() == normalizedAttr);
         }
+#endif
 
-        [MethodImpl(InlineMethod.Value)]
-        public static bool HasAttributeNamed(this PropertyInfo pi, string name)
-        {
-            var normalizedAttr = name.Replace("Attribute", "").ToLower();
-            return pi.AllAttributes().Any(x => x.GetType().Name.Replace("Attribute", "").ToLower() == normalizedAttr);
-        }
+        //[MethodImpl(InlineMethod.Value)]
+        //public static bool HasAttributeNamed(this PropertyInfo pi, string name)
+        //{
+        //    var normalizedAttr = name.Replace("Attribute", "").ToLower();
+        //    return pi.AllAttributes().Any(x => x.GetType().Name.Replace("Attribute", "").ToLower() == normalizedAttr);
+        //}
 
-        [MethodImpl(InlineMethod.Value)]
-        public static bool HasAttributeNamed(this FieldInfo fi, string name)
-        {
-            var normalizedAttr = name.Replace("Attribute", "").ToLower();
-            return fi.AllAttributes().Any(x => x.GetType().Name.Replace("Attribute", "").ToLower() == normalizedAttr);
-        }
+        //[MethodImpl(InlineMethod.Value)]
+        //public static bool HasAttributeNamed(this FieldInfo fi, string name)
+        //{
+        //    var normalizedAttr = name.Replace("Attribute", "").ToLower();
+        //    return fi.AllAttributes().Any(x => x.GetType().Name.Replace("Attribute", "").ToLower() == normalizedAttr);
+        //}
 
-        [MethodImpl(InlineMethod.Value)]
-        public static bool HasAttributeNamed(this MemberInfo mi, string name)
-        {
-            var normalizedAttr = name.Replace("Attribute", "").ToLower();
-            return mi.AllAttributes().Any(x => x.GetType().Name.Replace("Attribute", "").ToLower() == normalizedAttr);
-        }
+        //[MethodImpl(InlineMethod.Value)]
+        //public static bool HasAttributeNamed(this MemberInfo mi, string name)
+        //{
+        //    var normalizedAttr = name.Replace("Attribute", "").ToLower();
+        //    return mi.AllAttributes().Any(x => x.GetType().Name.Replace("Attribute", "").ToLower() == normalizedAttr);
+        //}
 
         const string DataContract = "DataContractAttribute";
 
@@ -185,202 +221,211 @@ namespace ServiceStack
         public static PropertyInfo[] AllProperties(this Type type) => 
             type.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
-        //Should only register Runtime Attributes on StartUp, So using non-ThreadSafe Dictionary is OK
-        static Dictionary<string, List<Attribute>> propertyAttributesMap
-            = new Dictionary<string, List<Attribute>>();
+        ////Should only register Runtime Attributes on StartUp, So using non-ThreadSafe Dictionary is OK
+        //static Dictionary<string, List<Attribute>> propertyAttributesMap
+        //    = new Dictionary<string, List<Attribute>>();
 
-        static Dictionary<Type, List<Attribute>> typeAttributesMap
-            = new Dictionary<Type, List<Attribute>>();
+        //static Dictionary<Type, List<Attribute>> typeAttributesMap
+        //    = new Dictionary<Type, List<Attribute>>();
 
-        public static void ClearRuntimeAttributes()
-        {
-            propertyAttributesMap = new Dictionary<string, List<Attribute>>();
-            typeAttributesMap = new Dictionary<Type, List<Attribute>>();
-        }
+        //public static void ClearRuntimeAttributes()
+        //{
+        //    propertyAttributesMap = new Dictionary<string, List<Attribute>>();
+        //    typeAttributesMap = new Dictionary<Type, List<Attribute>>();
+        //}
 
-        internal static string UniqueKey(this PropertyInfo pi)
-        {
-            if (pi.DeclaringType == null)
-                throw new ArgumentException("Property '{0}' has no DeclaringType".Fmt(pi.Name));
+        //internal static string UniqueKey(this PropertyInfo pi)
+        //{
+        //    if (pi.DeclaringType == null)
+        //        throw new ArgumentException("Property '{0}' has no DeclaringType".Fmt(pi.Name));
 
-            return pi.DeclaringType.Namespace + "." + pi.DeclaringType.Name + "." + pi.Name;
-        }
+        //    return pi.DeclaringType.Namespace + "." + pi.DeclaringType.Name + "." + pi.Name;
+        //}
 
-        public static Type AddAttributes(this Type type, params Attribute[] attrs)
-        {
-            if (!typeAttributesMap.TryGetValue(type, out var typeAttrs))
-                typeAttributesMap[type] = typeAttrs = new List<Attribute>();
+        //public static Type AddAttributes(this Type type, params Attribute[] attrs)
+        //{
+        //    if (!typeAttributesMap.TryGetValue(type, out var typeAttrs))
+        //        typeAttributesMap[type] = typeAttrs = new List<Attribute>();
 
-            typeAttrs.AddRange(attrs);
-            return type;
-        }
+        //    typeAttrs.AddRange(attrs);
+        //    return type;
+        //}
 
-        /// <summary>
-        /// Add a Property attribute at runtime. 
-        /// <para>Not threadsafe, should only add attributes on Startup.</para>
-        /// </summary>
-        public static PropertyInfo AddAttributes(this PropertyInfo propertyInfo, params Attribute[] attrs)
-        {
-            var key = propertyInfo.UniqueKey();
-            if (!propertyAttributesMap.TryGetValue(key, out var propertyAttrs))
-                propertyAttributesMap[key] = propertyAttrs = new List<Attribute>();
+        ///// <summary>
+        ///// Add a Property attribute at runtime. 
+        ///// <para>Not threadsafe, should only add attributes on Startup.</para>
+        ///// </summary>
+        //public static PropertyInfo AddAttributes(this PropertyInfo propertyInfo, params Attribute[] attrs)
+        //{
+        //    var key = propertyInfo.UniqueKey();
+        //    if (!propertyAttributesMap.TryGetValue(key, out var propertyAttrs))
+        //        propertyAttributesMap[key] = propertyAttrs = new List<Attribute>();
 
-            propertyAttrs.AddRange(attrs);
+        //    propertyAttrs.AddRange(attrs);
 
-            return propertyInfo;
-        }
+        //    return propertyInfo;
+        //}
 
-        /// <summary>
-        /// Add a Property attribute at runtime. 
-        /// <para>Not threadsafe, should only add attributes on Startup.</para>
-        /// </summary>
-        public static PropertyInfo ReplaceAttribute(this PropertyInfo propertyInfo, Attribute attr)
-        {
-            var key = propertyInfo.UniqueKey();
+        ///// <summary>
+        ///// Add a Property attribute at runtime. 
+        ///// <para>Not threadsafe, should only add attributes on Startup.</para>
+        ///// </summary>
+        //public static PropertyInfo ReplaceAttribute(this PropertyInfo propertyInfo, Attribute attr)
+        //{
+        //    var key = propertyInfo.UniqueKey();
 
-            if (!propertyAttributesMap.TryGetValue(key, out var propertyAttrs))
-                propertyAttributesMap[key] = propertyAttrs = new List<Attribute>();
+        //    if (!propertyAttributesMap.TryGetValue(key, out var propertyAttrs))
+        //        propertyAttributesMap[key] = propertyAttrs = new List<Attribute>();
 
-            propertyAttrs.RemoveAll(x => x.GetType() == attr.GetType());
+        //    propertyAttrs.RemoveAll(x => x.GetType() == attr.GetType());
 
-            propertyAttrs.Add(attr);
+        //    propertyAttrs.Add(attr);
 
-            return propertyInfo;
-        }
+        //    return propertyInfo;
+        //}
 
-        public static List<TAttr> GetAttributes<TAttr>(this PropertyInfo propertyInfo)
-        {
-            return !propertyAttributesMap.TryGetValue(propertyInfo.UniqueKey(), out var propertyAttrs)
-                ? new List<TAttr>()
-                : propertyAttrs.OfType<TAttr>().ToList();
-        }
+        //public static List<TAttr> GetAttributes<TAttr>(this PropertyInfo propertyInfo)
+        //{
+        //    return !propertyAttributesMap.TryGetValue(propertyInfo.UniqueKey(), out var propertyAttrs)
+        //        ? new List<TAttr>()
+        //        : propertyAttrs.OfType<TAttr>().ToList();
+        //}
 
-        public static List<Attribute> GetAttributes(this PropertyInfo propertyInfo)
-        {
-            return !propertyAttributesMap.TryGetValue(propertyInfo.UniqueKey(), out var propertyAttrs)
-                ? new List<Attribute>()
-                : propertyAttrs.ToList();
-        }
+        //public static List<Attribute> GetAttributes(this PropertyInfo propertyInfo)
+        //{
+        //    return !propertyAttributesMap.TryGetValue(propertyInfo.UniqueKey(), out var propertyAttrs)
+        //        ? new List<Attribute>()
+        //        : propertyAttrs.ToList();
+        //}
 
-        public static List<Attribute> GetAttributes(this PropertyInfo propertyInfo, Type attrType)
-        {
-            return !propertyAttributesMap.TryGetValue(propertyInfo.UniqueKey(), out var propertyAttrs)
-                ? new List<Attribute>()
-                : propertyAttrs.Where(x => attrType.IsInstanceOf(x.GetType())).ToList();
-        }
+        //public static List<Attribute> GetAttributes(this PropertyInfo propertyInfo, Type attrType)
+        //{
+        //    return !propertyAttributesMap.TryGetValue(propertyInfo.UniqueKey(), out var propertyAttrs)
+        //        ? new List<Attribute>()
+        //        : propertyAttrs.Where(x => attrType.IsInstanceOf(x.GetType())).ToList();
+        //}
 
-        public static object[] AllAttributes(this PropertyInfo propertyInfo)
-        {
-            var attrs = propertyInfo.GetCustomAttributes(true);
-            var runtimeAttrs = propertyInfo.GetAttributes();
-            if (runtimeAttrs.Count == 0)
-                return attrs;
+        //public static object[] AllAttributes(this PropertyInfo propertyInfo)
+        //{
+        //    var attrs = propertyInfo.GetCustomAttributes(true);
+        //    var runtimeAttrs = propertyInfo.GetAttributes();
+        //    if (runtimeAttrs.Count == 0)
+        //        return attrs;
 
-            runtimeAttrs.AddRange(attrs.Cast<Attribute>());
-            return runtimeAttrs.Cast<object>().ToArray();
-        }
+        //    runtimeAttrs.AddRange(attrs.Cast<Attribute>());
+        //    return runtimeAttrs.Cast<object>().ToArray();
+        //}
 
-        public static object[] AllAttributes(this PropertyInfo propertyInfo, Type attrType)
-        {
-            var attrs = propertyInfo.GetCustomAttributes(attrType, true);
-            var runtimeAttrs = propertyInfo.GetAttributes(attrType);
-            if (runtimeAttrs.Count == 0)
-                return attrs;
+        //public static object[] AllAttributes(this PropertyInfo propertyInfo, Type attrType)
+        //{
+        //    var attrs = propertyInfo.GetCustomAttributes(attrType, true);
+        //    var runtimeAttrs = propertyInfo.GetAttributes(attrType);
+        //    if (runtimeAttrs.Count == 0)
+        //        return attrs;
 
-            runtimeAttrs.AddRange(attrs.Cast<Attribute>());
-            return runtimeAttrs.Cast<object>().ToArray();
-        }
+        //    runtimeAttrs.AddRange(attrs.Cast<Attribute>());
+        //    return runtimeAttrs.Cast<object>().ToArray();
+        //}
 
-        [MethodImpl(InlineMethod.Value)]
-        public static object[] AllAttributes(this ParameterInfo paramInfo) => paramInfo.GetCustomAttributes(true);
+        //[MethodImpl(InlineMethod.Value)]
+        //public static object[] AllAttributes(this ParameterInfo paramInfo) => paramInfo.GetCustomAttributes(true);
 
-        [MethodImpl(InlineMethod.Value)]
-        public static object[] AllAttributes(this FieldInfo fieldInfo) => fieldInfo.GetCustomAttributes(true);
+        //[MethodImpl(InlineMethod.Value)]
+        //public static object[] AllAttributes(this FieldInfo fieldInfo) => fieldInfo.GetCustomAttributes(true);
 
-        [MethodImpl(InlineMethod.Value)]
-        public static object[] AllAttributes(this MemberInfo memberInfo) => memberInfo.GetCustomAttributes(true);
+        //[MethodImpl(InlineMethod.Value)]
+        //public static object[] AllAttributes(this MemberInfo memberInfo) => memberInfo.GetCustomAttributes(true);
 
-        [MethodImpl(InlineMethod.Value)]
-        public static object[] AllAttributes(this ParameterInfo paramInfo, Type attrType) => paramInfo.GetCustomAttributes(attrType, true);
+        //[MethodImpl(InlineMethod.Value)]
+        //public static object[] AllAttributes(this ParameterInfo paramInfo, Type attrType) => paramInfo.GetCustomAttributes(attrType, true);
 
-        [MethodImpl(InlineMethod.Value)]
-        public static object[] AllAttributes(this MemberInfo memberInfo, Type attrType)
-        {
-            var prop = memberInfo as PropertyInfo;
-            return prop != null 
-                ? prop.AllAttributes(attrType) 
-                : memberInfo.GetCustomAttributes(attrType, true);
-        }
+        //[MethodImpl(InlineMethod.Value)]
+        //public static object[] AllAttributes(this MemberInfo memberInfo, Type attrType)
+        //{
+        //    var prop = memberInfo as PropertyInfo;
+        //    return prop != null 
+        //        ? prop.AllAttributes(attrType) 
+        //        : memberInfo.GetCustomAttributes(attrType, true);
+        //}
 
-        [MethodImpl(InlineMethod.Value)]
-        public static object[] AllAttributes(this FieldInfo fieldInfo, Type attrType) => fieldInfo.GetCustomAttributes(attrType, true);
+        //[MethodImpl(InlineMethod.Value)]
+        //public static object[] AllAttributes(this FieldInfo fieldInfo, Type attrType) => fieldInfo.GetCustomAttributes(attrType, true);
 
-        [MethodImpl(InlineMethod.Value)]
-        public static object[] AllAttributes(this Type type) => type.GetCustomAttributes(true).Union(type.GetRuntimeAttributes()).ToArray();
+        //[MethodImpl(InlineMethod.Value)]
+        //public static object[] AllAttributes(this Type type) => type.GetCustomAttributes(true).Union(type.GetRuntimeAttributes()).ToArray();
 
-        [MethodImpl(InlineMethod.Value)]
-        public static object[] AllAttributes(this Type type, Type attrType) => 
-            type.GetCustomAttributes(attrType, true).Union(type.GetRuntimeAttributes(attrType)).ToArray();
+        //[MethodImpl(InlineMethod.Value)]
+        //public static object[] AllAttributes(this Type type, Type attrType) => 
+        //    type.GetCustomAttributes(attrType, true).Union(type.GetRuntimeAttributes(attrType)).ToArray();
 
         [MethodImpl(InlineMethod.Value)]
         public static object[] AllAttributes(this Assembly assembly) => assembly.GetCustomAttributes(true).ToArray();
 
-        [MethodImpl(InlineMethod.Value)]
-        public static TAttr[] AllAttributes<TAttr>(this ParameterInfo pi) => pi.AllAttributes(typeof(TAttr)).Cast<TAttr>().ToArray();
+        //[MethodImpl(InlineMethod.Value)]
+        //public static TAttr[] AllAttributes<TAttr>(this ParameterInfo pi) => pi.AllAttributes(typeof(TAttr)).Cast<TAttr>().ToArray();
 
-        [MethodImpl(InlineMethod.Value)]
-        public static TAttr[] AllAttributes<TAttr>(this MemberInfo mi) => mi.AllAttributes(typeof(TAttr)).Cast<TAttr>().ToArray();
+        //[MethodImpl(InlineMethod.Value)]
+        //public static TAttr[] AllAttributes<TAttr>(this MemberInfo mi) => mi.AllAttributes(typeof(TAttr)).Cast<TAttr>().ToArray();
 
-        [MethodImpl(InlineMethod.Value)]
-        public static TAttr[] AllAttributes<TAttr>(this FieldInfo fi) => fi.AllAttributes(typeof(TAttr)).Cast<TAttr>().ToArray();
+        //[MethodImpl(InlineMethod.Value)]
+        //public static TAttr[] AllAttributes<TAttr>(this FieldInfo fi) => fi.AllAttributes(typeof(TAttr)).Cast<TAttr>().ToArray();
 
-        [MethodImpl(InlineMethod.Value)]
-        public static TAttr[] AllAttributes<TAttr>(this PropertyInfo pi) => pi.AllAttributes(typeof(TAttr)).Cast<TAttr>().ToArray();
+        //[MethodImpl(InlineMethod.Value)]
+        //public static TAttr[] AllAttributes<TAttr>(this PropertyInfo pi) => pi.AllAttributes(typeof(TAttr)).Cast<TAttr>().ToArray();
 
-        [MethodImpl(InlineMethod.Value)]
-        static IEnumerable<T> GetRuntimeAttributes<T>(this Type type) => typeAttributesMap.TryGetValue(type, out var attrs)
-            ? attrs.OfType<T>()
-            : new List<T>();
+        //[MethodImpl(InlineMethod.Value)]
+        //static IEnumerable<T> GetRuntimeAttributes<T>(this Type type) => typeAttributesMap.TryGetValue(type, out var attrs)
+        //    ? attrs.OfType<T>()
+        //    : new List<T>();
 
-        [MethodImpl(InlineMethod.Value)]
-        static IEnumerable<Attribute> GetRuntimeAttributes(this Type type, Type attrType = null) => typeAttributesMap.TryGetValue(type, out var attrs)
-            ? attrs.Where(x => attrType == null || attrType.IsInstanceOf(x.GetType()))
-            : new List<Attribute>();
+        //[MethodImpl(InlineMethod.Value)]
+        //static IEnumerable<Attribute> GetRuntimeAttributes(this Type type, Type attrType = null) => typeAttributesMap.TryGetValue(type, out var attrs)
+        //    ? attrs.Where(x => attrType == null || attrType.IsInstanceOf(x.GetType()))
+        //    : new List<Attribute>();
 
         [MethodImpl(InlineMethod.Value)]
         public static TAttr[] AllAttributes<TAttr>(this Type type)
         {
-            return type.GetCustomAttributes(typeof(TAttr), true)
-                .OfType<TAttr>()
-                .Union(type.GetRuntimeAttributes<TAttr>())
-                .ToArray();
+            return AttributeX.GetAllAttributes(type, typeof(TAttr), true).OfType<TAttr>().ToArray();
+            //return type.GetCustomAttributes(typeof(TAttr), true)
+            //    .OfType<TAttr>()
+            //    .Union(type.GetRuntimeAttributes<TAttr>())
+            //    .ToArray();
         }
 
+#if DEBUG
         [MethodImpl(InlineMethod.Value)]
         public static TAttr FirstAttribute<TAttr>(this Type type) where TAttr : class
         {
-            return (TAttr)type.GetCustomAttributes(typeof(TAttr), true)
-                       .FirstOrDefault()
-                   ?? type.GetRuntimeAttributes<TAttr>().FirstOrDefault();
+            var attr = AttributeX.FirstAttribute(type, typeof(TAttr), true);
+            return attr != null ? (TAttr)(object)attr : default(TAttr);
+            //return (TAttr)type.GetCustomAttributes(typeof(TAttr), true)
+            //           .FirstOrDefault()
+            //       ?? type.GetRuntimeAttributes<TAttr>().FirstOrDefault();
         }
 
         [MethodImpl(InlineMethod.Value)]
         public static TAttribute FirstAttribute<TAttribute>(this MemberInfo memberInfo)
         {
-            return memberInfo.AllAttributes<TAttribute>().FirstOrDefault();
+            var attr = AttributeX.FirstAttribute(memberInfo, typeof(TAttribute), true);
+            return attr != null ? (TAttribute)(object)attr : default(TAttribute);
+            //return memberInfo.AllAttributes<TAttribute>().FirstOrDefault();
         }
 
-        [MethodImpl(InlineMethod.Value)]
-        public static TAttribute FirstAttribute<TAttribute>(this ParameterInfo paramInfo)
-        {
-            return paramInfo.AllAttributes<TAttribute>().FirstOrDefault();
-        }
+        //[MethodImpl(InlineMethod.Value)]
+        //public static TAttribute FirstAttribute<TAttribute>(this ParameterInfo paramInfo)
+        //{
+        //    return paramInfo.AllAttributes<TAttribute>().FirstOrDefault();
+        //}
 
         [MethodImpl(InlineMethod.Value)]
         public static TAttribute FirstAttribute<TAttribute>(this PropertyInfo propertyInfo)
         {
-            return propertyInfo.AllAttributes<TAttribute>().FirstOrDefault();
+            var attr = AttributeX.FirstAttribute(propertyInfo, typeof(TAttribute), true);
+            return attr != null ? (TAttribute)(object)attr : default(TAttribute);
+            //return propertyInfo.AllAttributes<TAttribute>().FirstOrDefault();
         }
+#endif
 
         [MethodImpl(InlineMethod.Value)]
         public static Type FirstGenericTypeDefinition(this Type type)
@@ -390,20 +435,7 @@ namespace ServiceStack
         }
 
         [MethodImpl(InlineMethod.Value)]
-        public static bool IsDynamic(this Assembly assembly)
-        {
-            try
-            {
-                var isDyanmic = assembly is System.Reflection.Emit.AssemblyBuilder
-                                || string.IsNullOrEmpty(assembly.Location);
-                return isDyanmic;
-            }
-            catch (NotSupportedException)
-            {
-                //Ignore assembly.Location not supported in a dynamic assembly.
-                return true;
-            }
-        }
+        public static bool IsDynamic(this Assembly assembly) => ReflectionOptimizer.Instance.IsDynamic(assembly);
 
         [MethodImpl(InlineMethod.Value)]
         public static MethodInfo GetStaticMethod(this Type type, string methodName, Type[] types)
@@ -566,14 +598,16 @@ namespace ServiceStack
         //    if (GenericTypeCache.TryGetValue(key, out var genericType))
         //        return genericType;
 
-        //    genericType = type.MakeGenericType(argTypes);
+        //    genericType = type.GetCachedGenericType(argTypes);
 
         //    Dictionary<string, Type> snapshot, newCache;
         //    do
         //    {
         //        snapshot = GenericTypeCache;
-        //        newCache = new Dictionary<string, Type>(GenericTypeCache);
-        //        newCache[key] = genericType;
+        //        newCache = new Dictionary<string, Type>(GenericTypeCache)
+        //        {
+        //            [key] = genericType
+        //        };
 
         //    } while (!ReferenceEquals(
         //        Interlocked.CompareExchange(ref GenericTypeCache, newCache, snapshot), snapshot));
@@ -676,22 +710,36 @@ namespace ServiceStack
             return dict;
         }
 
-#if NET40
-        public static object FromObjectDictionary(this IDictionary<string, object> values, Type type)
-        {
-            var alreadyDict = type == typeof(IDictionary<string, object>);
-#else
+
         public static object FromObjectDictionary(this IReadOnlyDictionary<string, object> values, Type type)
         {
-            var alreadyDict = type == typeof(IReadOnlyDictionary<string, object>);
-#endif
-            if (alreadyDict)
-                return true;
+            if (values == null)
+                return null;
 
+            var alreadyDict = typeof(IReadOnlyDictionary<string, object>).IsAssignableFrom(type);
+            if (alreadyDict)
+                return values;
+
+            var to = ActivatorUtils.FastCreateInstance(type);
+
+            PopulateInstanceInternal(values, to, type);
+
+            return to;
+        }
+
+        public static void PopulateInstance(this IReadOnlyDictionary<string, object> values, object instance)
+        {
+            if (values == null || instance == null)
+                return;
+
+            PopulateInstanceInternal(values, instance, instance.GetType());
+        }
+
+        private static void PopulateInstanceInternal(IReadOnlyDictionary<string, object> values, object to, Type type)
+        {
             if (!toObjectMapCache.TryGetValue(type, out var def))
                 toObjectMapCache[type] = def = CreateObjectDictionaryDefinition(type);
 
-            var to = ActivatorUtils.FastCreateInstance(type); //type.CreateInstance();
             foreach (var entry in values)
             {
                 if (!def.FieldsMap.TryGetValue(entry.Key, out var fieldDef) &&
@@ -701,14 +749,9 @@ namespace ServiceStack
 
                 fieldDef.SetValue(to, entry.Value);
             }
-            return to;
         }
 
-#if NET40
-        public static T FromObjectDictionary<T>(this IDictionary<string, object> values)
-#else
         public static T FromObjectDictionary<T>(this IReadOnlyDictionary<string, object> values)
-#endif
         {
             return (T)values.FromObjectDictionary(typeof(T));
         }
@@ -797,6 +840,27 @@ namespace ServiceStack
                 {
                     to[entry.Key] = entry.Value;
                 }
+            return to;
+        }
+
+        public static Dictionary<string, string> ToStringDictionary(this IReadOnlyDictionary<string, object> from) => ToStringDictionary(from, null);
+
+        public static Dictionary<string, string> ToStringDictionary(this IReadOnlyDictionary<string, object> from, IEqualityComparer<string> comparer)
+        {
+            var to = comparer != null
+                ? new Dictionary<string, string>(comparer)
+                : new Dictionary<string, string>();
+
+            if (from != null)
+            {
+                foreach (var entry in from)
+                {
+                    to[entry.Key] = entry.Value is string s
+                        ? s
+                        : entry.Value.ConvertTo<string>();
+                }
+            }
+
             return to;
         }
     }

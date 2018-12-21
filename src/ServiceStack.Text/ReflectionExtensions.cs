@@ -378,11 +378,9 @@ namespace ServiceStack
 
         public static EmptyCtorDelegate GetConstructorMethodToCache(Type type)
         {
-            if (type == typeof(string))
-            {
-                return () => String.Empty;
-            }
-            else if (type.IsInterface)
+            if (type == typeof(string)) { return () => String.Empty; }
+
+            if (type.IsInterface)
             {
                 if (type.HasGenericType())
                 {
@@ -424,26 +422,7 @@ namespace ServiceStack
                 return realizedType.CreateInstance;
             }
 
-            var emptyCtor = type.GetConstructor(Type.EmptyTypes);
-            if (emptyCtor != null)
-            {
-                if (PclExport.Instance.SupportsEmit)
-                {
-                    var dm = new System.Reflection.Emit.DynamicMethod("MyCtor", type, Type.EmptyTypes,
-                        typeof(ReflectionExtensions).Module, true);
-                    var ilgen = dm.GetILGenerator();
-                    ilgen.Emit(System.Reflection.Emit.OpCodes.Nop);
-                    ilgen.Emit(System.Reflection.Emit.OpCodes.Newobj, emptyCtor);
-                    ilgen.Emit(System.Reflection.Emit.OpCodes.Ret);
-
-                    return (EmptyCtorDelegate)dm.CreateDelegate(typeof(EmptyCtorDelegate));
-                }
-
-                return () => Activator.CreateInstance(type);
-            }
-
-            //Anonymous types don't have empty constructors
-            return () => FormatterServices.GetUninitializedObject(type);
+            return ReflectionOptimizer.Instance.CreateConstructor(type);
         }
 
         private static class TypeMeta<T>
@@ -642,7 +621,7 @@ namespace ServiceStack
 
             // else return those properties that are not decorated with IgnoreDataMember
             return readableProperties
-                .Where(prop => prop.AllAttributes()
+                .Where(prop => prop.GetAllAttributes()
                     .All(attr =>
                     {
                         var name = attr.GetType().Name;
@@ -669,16 +648,18 @@ namespace ServiceStack
                     f.HasAttribute<DataMemberAttribute>()).ToArray();
             }
 
-            if (!JsConfig.IncludePublicFields)
+            var config = JsConfig.GetConfig();
+
+            if (!config.IncludePublicFields)
                 return TypeConstants.EmptyFieldInfoArray;
 
             var publicFields = type.GetPublicFields();
 
             // else return those properties that are not decorated with IgnoreDataMember
             return publicFields
-                .Where(prop => prop.AllAttributes()
+                .Where(prop => prop.GetAllAttributes()
                     .All(attr => !IgnoreAttributesNamed.Contains(attr.GetType().Name)))
-                .Where(prop => !JsConfig.ExcludeTypes.Contains(prop.FieldType))
+                .Where(prop => !config.ExcludeTypes.Contains(prop.FieldType))
                 .ToArray();
         }
 
@@ -694,7 +675,7 @@ namespace ServiceStack
 
         public static DataMemberAttribute GetDataMember(this PropertyInfo pi)
         {
-            var dataMember = pi.AllAttributes(typeof(DataMemberAttribute))
+            var dataMember = pi.GetAllAttributes(typeof(DataMemberAttribute))
                 .FirstOrDefault() as DataMemberAttribute;
 
             if (dataMember == null && Env.IsMono)
@@ -705,7 +686,7 @@ namespace ServiceStack
 
         public static DataMemberAttribute GetDataMember(this FieldInfo pi)
         {
-            var dataMember = pi.AllAttributes(typeof(DataMemberAttribute))
+            var dataMember = pi.GetAllAttributes(typeof(DataMemberAttribute))
                 .FirstOrDefault() as DataMemberAttribute;
 
             if (dataMember == null && Env.IsMono)

@@ -133,7 +133,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(dict["float"], JsonObjectTypeDeserializer.Deserialize<float>(newDict, "float"));
       Assert.Equal(dict["decimal"], JsonObjectTypeDeserializer.Deserialize<decimal>(newDict, "decimal"));
       Assert.Equal(dict["bytes"], JsonObjectTypeDeserializer.Deserialize<byte[]>(newDict, "bytes"));
-      Assert.Null(JsonObjectTypeDeserializer.Deserialize<byte[]>(newDict, "emptybytes"));
+      Assert.Equal(dict["emptybytes"], JsonObjectTypeDeserializer.Deserialize<byte[]>(newDict, "emptybytes"));
 
       Assert.Equal(dict["name"], newDict.Deserialize<string>("name"));
       Assert.Equal(dict["Age"], newDict.Deserialize<int>("Age"));
@@ -146,7 +146,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(dict["float"], newDict.Deserialize<float>("float"));
       Assert.Equal(dict["decimal"], newDict.Deserialize<decimal>("decimal"));
       Assert.Equal(dict["bytes"], newDict.Deserialize<byte[]>("bytes"));
-      Assert.Null(newDict.Deserialize<byte[]>("emptybytes"));
+      Assert.Equal(dict["emptybytes"], newDict.Deserialize<byte[]>("emptybytes"));
 
       Assert.Equal(dict["name"], dict.Deserialize<string>("name"));
       Assert.Equal(dict["Age"], dict.Deserialize<int>("Age"));

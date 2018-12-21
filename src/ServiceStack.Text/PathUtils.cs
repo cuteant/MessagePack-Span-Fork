@@ -1,14 +1,14 @@
 ﻿// Copyright (c) ServiceStack, Inc. All Rights Reserved.
 // License: https://raw.github.com/ServiceStack/ServiceStack/master/license.txt
 
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
-using ServiceStack.Text;
 using CuteAnt.Pool;
+using ServiceStack.Text;
 
 namespace ServiceStack
 {
@@ -66,7 +66,7 @@ namespace ServiceStack
         public static string MapHostAbsolutePath(this string relativePath)
         {
             var sep = PclExport.Instance.DirSep;
-#if !NETSTANDARD2_0
+#if !NETSTANDARD
             return PclExport.Instance.MapAbsolutePath(relativePath, $"{sep}..");
 #else
             return PclExport.Instance.MapAbsolutePath(relativePath, $"{sep}..{sep}..{sep}..");
@@ -107,13 +107,40 @@ namespace ServiceStack
             return dirPath;
         }
 
+        private static readonly char[] Slashes = { '/', '\\' };
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //only trim/allocate if need to
+        private static string TrimEndIf(this string path, char[] chars)
+        {
+            if (string.IsNullOrEmpty(path) || chars == null || chars.Length == 0)
+                return path;
+                
+            var lastChar = path[path.Length - 1];
+            foreach (var c in chars)
+            {
+                if (c == lastChar)
+                    return path.TrimEnd(chars);
+            }
+            return path;
+        }
+
+        public static string CombineWith(this string path, string withPath)
+        {
+            if (path == null)
+                path = "";
+            if (string.IsNullOrEmpty(withPath))
+                return path;
+            var startPath = path.TrimEndIf(Slashes);
+            return startPath + (withPath[0] == '/' ? withPath : "/" + withPath);
+        }
+        
         public static string CombineWith(this string path, params string[] thesePaths)
         {
             if (path == null)
                 path = "";
 
             if (thesePaths.Length == 1 && thesePaths[0] == null) return path;
-            var startPath = path.Length > 1 ? path.TrimEnd('/', '\\') : path;
+            var startPath = path.TrimEndIf(Slashes);
 
             var sb = StringBuilderManager.Allocate();
             sb.Append(startPath);
@@ -126,7 +153,7 @@ namespace ServiceStack
             if (thesePaths.Length == 1 && thesePaths[0] == null) return path;
 
             var sb = StringBuilderManager.Allocate();
-            sb.Append(path.TrimEnd('/', '\\'));
+            sb.Append(path.TrimEndIf(Slashes));
             AppendPaths(sb, ToStrings(thesePaths));
             return StringBuilderManager.ReturnAndFree(sb);
         }
@@ -156,10 +183,10 @@ namespace ServiceStack
 
             var resolvedPath = string.Join("/", combinedPaths);
             if (path[0] == '/' && prefix.Length == 0)
-                resolvedPath = '/' + resolvedPath;
+                resolvedPath = "/" + resolvedPath;
 
             return path[path.Length - 1] == '/' && resolvedPath.Length > 0
-                ? prefix + resolvedPath + '/'
+                ? prefix + resolvedPath + "/"
                 : prefix + resolvedPath;
         }
 

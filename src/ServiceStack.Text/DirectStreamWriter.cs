@@ -41,7 +41,7 @@ namespace ServiceStack.Text
             } else 
             {
                 if (writer == null)
-                    writer = new StreamWriter(stream, Encoding, s.Length < maxBufferLength ? s.Length : maxBufferLength);
+                    writer = new StreamWriter(stream, Encoding, s.Length < maxBufferLength ? s.Length : maxBufferLength, true);
                 
                 writer.Write(s);
                 needFlush = true;
@@ -63,7 +63,7 @@ namespace ServiceStack.Text
             } else
             {
                 if (writer == null)
-                    writer = new StreamWriter(stream, Encoding, optimizedBufferLength);
+                    writer = new StreamWriter(stream, Encoding, optimizedBufferLength, true);
                 
                 writer.Write(c);
                 needFlush = true;

@@ -6,7 +6,7 @@
     <Product>MessagePack</Product>
     <Copyright>neuecc 2018</Copyright>
     <PackageProjectUrl>https://github.com/neuecc/MessagePack-CSharp/</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/neuecc/MessagePack-CSharp/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicense>https://github.com/neuecc/MessagePack-CSharp/blob/master/LICENSE</PackageLicense>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/neuecc/MessagePack-CSharp.git</RepositoryUrl>
     <NeutralLanguage>en-US</NeutralLanguage>

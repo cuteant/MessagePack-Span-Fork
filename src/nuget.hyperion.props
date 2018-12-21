@@ -8,7 +8,7 @@
     <PackageReleaseNotes>Release notes are at https://github.com/akkadotnet/Hyperion/blob/dev/RELEASE_NOTES.md</PackageReleaseNotes>
     <PackageIconUrl></PackageIconUrl>
     <PackageProjectUrl>https://github.com/akkadotnet/Hyperion</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/akkadotnet/Wire/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicense>https://github.com/akkadotnet/Wire/blob/master/LICENSE</PackageLicense>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/akkadotnet/Hyperion.git</RepositoryUrl>
     <NeutralLanguage>en-US</NeutralLanguage>

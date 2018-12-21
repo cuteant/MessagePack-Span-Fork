@@ -129,7 +129,7 @@ namespace ServiceStack.Text
                         endsToEat--;
                 }
                 if (endsToEat > 0)
-                {
+                { 
                     //Unmatched start and end char, give up
                     i = tokenStartPos;
                     valueChar = value[i];
@@ -209,25 +209,21 @@ namespace ServiceStack.Text
             PropertyConverters = new List<ParseStringDelegate>();
             PropertyConvertersMap = new Dictionary<string, ParseStringDelegate>(PclExport.Instance.InvariantComparerIgnoreCase);
 
-            var isDataContract = typeof(T).IsDto();
             foreach (var propertyInfo in TypeConfig<T>.Properties)
             {
-                if (!propertyInfo.CanWrite || propertyInfo.GetSetMethod(nonPublic: true) == null) continue;
+                if (!propertyInfo.CanWrite || propertyInfo.GetSetMethod(nonPublic:true) == null) continue;
                 if (!TypeSerializer.CanCreateFromString(propertyInfo.PropertyType)) continue;
 
                 var propertyName = propertyInfo.Name;
-                var setter = propertyInfo.GetValueSetter<T>();
+                var setter = propertyInfo.CreateSetter<T>();
                 PropertySetters.Add(setter);
 
                 var converter = JsvReader.GetParseFn(propertyInfo.PropertyType);
                 PropertyConverters.Add(converter);
 
-                if (isDataContract)
-                {
-                    var dcsDataMemberName = propertyInfo.GetDataMemberName();
-                    if (dcsDataMemberName != null)
-                        propertyName = dcsDataMemberName;
-                }
+                var dcsDataMemberName = propertyInfo.GetDataMemberName();
+                if (dcsDataMemberName != null)
+                    propertyName = dcsDataMemberName;
 
                 Headers.Add(propertyName);
                 PropertySettersMap[propertyName] = setter;
@@ -254,7 +250,7 @@ namespace ServiceStack.Text
                     PropertySettersMap.TryGetValue(oldHeader, out var setter);
                     PropertySettersMap.Remove(oldHeader);
                     PropertySettersMap[newHeader] = setter;
-
+                    
                     PropertyConvertersMap.TryGetValue(oldHeader, out var converter);
                     PropertyConvertersMap.Remove(oldHeader);
                     PropertyConvertersMap[newHeader] = converter;
@@ -289,8 +285,7 @@ namespace ServiceStack.Text
 
             foreach (var record in records)
             {
-                //var to = typeof(T).CreateInstance<T>();
-                var to = ActivatorUtils.FastCreateInstance<T>();
+                var to = ActivatorUtils.FastCreateInstance<T>();// typeof(T).CreateInstance<T>();
                 foreach (var propertySetter in PropertySetters)
                 {
                     propertySetter(to, record);
@@ -371,8 +366,7 @@ namespace ServiceStack.Text
             for (var rowIndex = headers == null ? 0 : 1; rowIndex < rows.Count; rowIndex++)
             {
                 var row = rows[rowIndex];
-                //var o = typeof(T).CreateInstance<T>();
-                var o = ActivatorUtils.FastCreateInstance<T>();
+                var o = ActivatorUtils.FastCreateInstance<T>();// typeof(T).CreateInstance<T>();
 
                 var fields = CsvReader.ParseFields(row);
                 for (int i = 0; i < fields.Count; i++)

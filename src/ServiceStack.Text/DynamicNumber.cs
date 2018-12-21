@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Primitives;
 using ServiceStack.Text;
 using ServiceStack.Text.Common;
 
@@ -36,9 +35,9 @@ namespace ServiceStack
         public static readonly DynamicSByte Instance = new DynamicSByte();
         public Type Type => typeof(sbyte);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public sbyte Convert(object value) => System.Convert.ToSByte(this.ParseString(value) ?? value);
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object ConvertFrom(object value) => this.ParseString(value)
             ?? System.Convert.ToSByte(value);
 
@@ -76,9 +75,9 @@ namespace ServiceStack
         public static readonly DynamicByte Instance = new DynamicByte();
         public Type Type => typeof(byte);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte Convert(object value) => System.Convert.ToByte(this.ParseString(value) ?? value);
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object ConvertFrom(object value) => this.ParseString(value)
             ?? System.Convert.ToByte(value);
 
@@ -116,9 +115,9 @@ namespace ServiceStack
         public static readonly DynamicShort Instance = new DynamicShort();
         public Type Type => typeof(short);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public short Convert(object value) => System.Convert.ToInt16(this.ParseString(value) ?? value);
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object ConvertFrom(object value) => this.ParseString(value)
             ?? System.Convert.ToInt16(value);
 
@@ -156,9 +155,9 @@ namespace ServiceStack
         public static readonly DynamicUShort Instance = new DynamicUShort();
         public Type Type => typeof(ushort);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ushort Convert(object value) => System.Convert.ToUInt16(this.ParseString(value) ?? value);
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object ConvertFrom(object value) => this.ParseString(value)
             ?? System.Convert.ToUInt16(value);
 
@@ -196,9 +195,9 @@ namespace ServiceStack
         public static readonly DynamicInt Instance = new DynamicInt();
         public Type Type => typeof(int);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Convert(object value) => System.Convert.ToInt32(this.ParseString(value) ?? value);
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object ConvertFrom(object value) => this.ParseString(value) 
             ?? System.Convert.ToInt32(value);
 
@@ -236,9 +235,9 @@ namespace ServiceStack
         public static readonly DynamicUInt Instance = new DynamicUInt();
         public Type Type => typeof(uint);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint Convert(object value) => System.Convert.ToUInt32(this.ParseString(value) ?? value);
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object ConvertFrom(object value) => this.ParseString(value)
             ?? System.Convert.ToUInt32(value);
 
@@ -276,9 +275,9 @@ namespace ServiceStack
         public static readonly DynamicLong Instance = new DynamicLong();
         public Type Type => typeof(long);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public long Convert(object value) => System.Convert.ToInt64(this.ParseString(value) ?? value);
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object ConvertFrom(object value) => this.ParseString(value)
             ?? System.Convert.ToInt64(value);
 
@@ -316,9 +315,9 @@ namespace ServiceStack
         public static readonly DynamicULong Instance = new DynamicULong();
         public Type Type => typeof(ulong);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong Convert(object value) => System.Convert.ToUInt64(this.ParseString(value) ?? value);
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object ConvertFrom(object value) => this.ParseString(value)
             ?? System.Convert.ToUInt64(value);
 
@@ -356,15 +355,15 @@ namespace ServiceStack
         public static readonly DynamicFloat Instance = new DynamicFloat();
         public Type Type => typeof(float);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float Convert(object value) => System.Convert.ToSingle(this.ParseString(value) ?? value);
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object ConvertFrom(object value) => this.ParseString(value)
             ?? System.Convert.ToSingle(value);
 
         public bool TryParse(string str, out object result)
         {
-            if (new StringSegment(str).TryParseFloat(out float value))
+            if (str.AsSpan().TryParseFloat(out float value))
             {
                 result = value;
                 return true;
@@ -396,15 +395,15 @@ namespace ServiceStack
         public static readonly DynamicDouble Instance = new DynamicDouble();
         public Type Type => typeof(double);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double Convert(object value) => System.Convert.ToDouble(this.ParseString(value) ?? value);
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object ConvertFrom(object value) => this.ParseString(value)
             ?? System.Convert.ToDouble(value);
 
         public bool TryParse(string str, out object result)
         {
-            if (new StringSegment(str).TryParseDouble(out double value))
+            if (str.AsSpan().TryParseDouble(out double value))
             {
                 result = value;
                 return true;
@@ -436,15 +435,15 @@ namespace ServiceStack
         public static readonly DynamicDecimal Instance = new DynamicDecimal();
         public Type Type => typeof(decimal);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public decimal Convert(object value) => System.Convert.ToDecimal(this.ParseString(value) ?? value);
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object ConvertFrom(object value) => this.ParseString(value)
             ?? System.Convert.ToDecimal(value);
 
         public bool TryParse(string str, out object result)
         {
-            if (new StringSegment(str).TryParseDecimal(out decimal value))
+            if (str.AsSpan().TryParseDecimal(out decimal value))
             {
                 result = value;
                 return true;
@@ -581,59 +580,59 @@ namespace ServiceStack
             if (number == null)
             {
                 throw new ArgumentException($"Invalid numbers passed to {name}: " +
-                                            $"({lhs?.GetType().Name ?? "null"} '{lhs?.ToString().SubstringWithElipsis(0, 100)}', " +
-                                            $"{rhs?.GetType().Name ?? "null"} '{rhs?.ToString().SubstringWithElipsis(0, 100)}')");
+                                            $"({lhs?.GetType().Name ?? "null"} '{lhs?.ToString().SubstringWithEllipsis(0, 100)}', " +
+                                            $"{rhs?.GetType().Name ?? "null"} '{rhs?.ToString().SubstringWithEllipsis(0, 100)}')");
             }
 
             return number;
         }
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Add(object lhs, object rhs) => AssertNumbers(nameof(Add), lhs, rhs).add(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Sub(object lhs, object rhs) => AssertNumbers(nameof(Subtract), lhs, rhs).sub(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Subtract(object lhs, object rhs) => AssertNumbers(nameof(Subtract), lhs, rhs).sub(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Mul(object lhs, object rhs) => AssertNumbers(nameof(Multiply), lhs, rhs).mul(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Multiply(object lhs, object rhs) => AssertNumbers(nameof(Multiply), lhs, rhs).mul(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Div(object lhs, object rhs) => AssertNumbers(nameof(Divide), lhs, rhs).div(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Divide(object lhs, object rhs) => AssertNumbers(nameof(Divide), lhs, rhs).div(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Mod(object lhs, object rhs) => AssertNumbers(nameof(Mod), lhs, rhs).mod(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Pow(object lhs, object rhs) => AssertNumbers(nameof(Pow), lhs, rhs).pow(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object Log(object lhs, object rhs) => AssertNumbers(nameof(Log), lhs, rhs).log(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object BitwiseAnd(object lhs, object rhs) => AssertNumbers(nameof(BitwiseAnd), lhs, rhs).bitwiseAnd(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object BitwiseOr(object lhs, object rhs) => AssertNumbers(nameof(BitwiseOr), lhs, rhs).bitwiseOr(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object BitwiseXOr(object lhs, object rhs) => AssertNumbers(nameof(BitwiseXOr), lhs, rhs).bitwiseXOr(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object BitwiseLeftShift(object lhs, object rhs) => AssertNumbers(nameof(BitwiseLeftShift), lhs, rhs).bitwiseLeftShift(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object BitwiseRightShift(object lhs, object rhs) => AssertNumbers(nameof(BitwiseRightShift), lhs, rhs).bitwiseRightShift(lhs, rhs);
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static object BitwiseNot(object lhs) => Get(lhs).bitwiseNot(lhs);
 
         public static bool TryParse(string strValue, out object result)
@@ -675,14 +674,14 @@ namespace ServiceStack
                 }
             }
 
-            var segValue = new StringSegment(strValue);
-            if (segValue.TryParseDouble(out double doubleValue))
+            var spanValue = strValue.AsSpan();
+            if (spanValue.TryParseDouble(out double doubleValue))
             {
                 result = doubleValue;
                 return true;
             }
 
-            if (segValue.TryParseDecimal(out decimal decimalValue))
+            if (spanValue.TryParseDecimal(out decimal decimalValue))
             {
                 result = decimalValue;
                 return true;
@@ -697,7 +696,7 @@ namespace ServiceStack
             if (!(strValue?.Length > 0))
                 return false;
 
-            var segValue = new StringSegment(strValue);
+            var segValue = strValue.AsSpan();
             result = segValue.ParseNumber(bestFit:true);
             return result != null;
         }

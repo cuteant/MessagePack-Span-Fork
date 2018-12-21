@@ -27,26 +27,6 @@ namespace ServiceStack
 {
     public static class StringExtensions
     {
-        public static T To<T>(this string value)
-        {
-            return TypeSerializer.DeserializeFromString<T>(value);
-        }
-
-        public static T To<T>(this string value, T defaultValue)
-        {
-            return String.IsNullOrEmpty(value) ? defaultValue : TypeSerializer.DeserializeFromString<T>(value);
-        }
-
-        public static T ToOrDefaultValue<T>(this string value)
-        {
-            return String.IsNullOrEmpty(value) ? default(T) : TypeSerializer.DeserializeFromString<T>(value);
-        }
-
-        public static object To(this string value, Type type)
-        {
-            return TypeSerializer.DeserializeFromString(value, type);
-        }
-
         /// <summary>
         /// Converts from base: 0 - 62
         /// </summary>
@@ -532,6 +512,11 @@ namespace ServiceStack
             return TypeSerializer.DeserializeFromString<T>(jsv);
         }
 
+        public static T FromJsvSpan<T>(this ReadOnlySpan<char> jsv)
+        {
+            return TypeSerializer.DeserializeFromSpan<T>(jsv);
+        }
+
         public static string ToJson<T>(this T obj)
         {
             return JsConfig.PreferInterfaces
@@ -549,6 +534,11 @@ namespace ServiceStack
         public static T FromJson<T>(this string json)
         {
             return JsonSerializer.DeserializeFromString<T>(json);
+        }
+
+        public static T FromJsonSpan<T>(this ReadOnlySpan<char> json)
+        {
+            return JsonSerializer.DeserializeFromSpan<T>(json);
         }
 
         public static string ToCsv<T>(this T obj)
@@ -688,7 +678,7 @@ namespace ServiceStack
 
         public static string StripQuotes(this string text)
         {
-            return String.IsNullOrEmpty(text) || text.Length < 2
+            return string.IsNullOrEmpty(text) || text.Length < 2
                 ? text
                 : text[0] == '"' && text[text.Length - 1] == '"'
                     ? text.Substring(1, text.Length - 2)
@@ -780,7 +770,7 @@ namespace ServiceStack
                 else
                 {
                     sb.Append("_");
-                    sb.Append(char.ToLowerInvariant(t));
+                    sb.Append(char.ToLower(t));
                 }
             }
             return StringBuilderManager.ReturnAndFree(sb);
@@ -895,7 +885,7 @@ namespace ServiceStack
 
         public static bool EqualsIgnoreCase(this string value, string other)
         {
-            return String.Equals(value, other, StringComparison.CurrentCultureIgnoreCase);
+            return String.Equals(value, other, StringComparison.OrdinalIgnoreCase);
         }
 
         public static string ReplaceFirst(this string haystack, string needle, string replacement)
@@ -929,10 +919,21 @@ namespace ServiceStack
             return false;
         }
 
-        public static string SafeVarName(this string text) => !string.IsNullOrEmpty(text)
+        public static bool ContainsAny(this string text, string[] testMatches, StringComparison comparisonType)
+        {
+            foreach (var testMatch in testMatches)
+            {
+                if (text.IndexOf(testMatch, comparisonType) >= 0) return true;
+            }
+            return false;
+        }
+      
+        public static bool IsValidVarName(this string name) => InvalidVarCharsRegex.IsMatch(name);
+
+        public static string SafeVarName(this string text) => !string.IsNullOrEmpty(text) 
             ? InvalidVarCharsRegex.Replace(text, "_") : null;
 
-        public static string SafeVarRef(this string text) => !string.IsNullOrEmpty(text)
+        public static string SafeVarRef(this string text) => !string.IsNullOrEmpty(text) 
             ? InvalidVarRefCharsRegex.Replace(text, "_") : null;
 
         public static string Join(this List<string> items)
@@ -999,87 +1000,35 @@ namespace ServiceStack
 
         public static bool IsTuple(this Type type) => type.Name.StartsWith("Tuple`");
 
-        public static bool IsInt(this string text)
-        {
-            if (string.IsNullOrEmpty(text)) return false;
-            int ret;
-            return int.TryParse(text, out ret);
-        }
+        public static bool IsInt(this string text) => !string.IsNullOrEmpty(text) && int.TryParse(text, out _);
 
-        public static int ToInt(this string text)
-        {
-            return text == null ? default(int) : Int32.Parse(text);
-        }
+        public static int ToInt(this string text) => text == null ? default(int) : int.Parse(text);
 
-        public static int ToInt(this string text, int defaultValue)
-        {
-            int ret;
-            return int.TryParse(text, out ret) ? ret : defaultValue;
-        }
+        public static int ToInt(this string text, int defaultValue) => int.TryParse(text, out var ret) ? ret : defaultValue;
 
-        public static long ToInt64(this string text)
-        {
-            return long.Parse(text);
-        }
+        public static long ToInt64(this string text) => long.Parse(text);
 
-        public static long ToInt64(this string text, long defaultValue)
-        {
-            long ret;
-            return long.TryParse(text, out ret) ? ret : defaultValue;
-        }
+        public static long ToInt64(this string text, long defaultValue) => long.TryParse(text, out var ret) ? ret : defaultValue;
 
-        public static float ToFloat(this string text)
-        {
-            return text == null ? default(float) : float.Parse(text);
-        }
+        public static float ToFloat(this string text) => text == null ? default(float) : float.Parse(text);
 
-        public static float ToFloatInvariant(this string text)
-        {
-            return text == null ? default(float) : float.Parse(text, CultureInfo.InvariantCulture);
-        }
+        public static float ToFloatInvariant(this string text) => text == null ? default(float) : float.Parse(text, CultureInfo.InvariantCulture);
 
-        public static float ToFloat(this string text, float defaultValue)
-        {
-            float ret;
-            return float.TryParse(text, out ret) ? ret : defaultValue;
-        }
+        public static float ToFloat(this string text, float defaultValue) => float.TryParse(text, out var ret) ? ret : defaultValue;
 
-        public static double ToDouble(this string text)
-        {
-            return text == null ? default(double) : double.Parse(text);
-        }
+        public static double ToDouble(this string text) => text == null ? default(double) : double.Parse(text);
 
-        public static double ToDoubleInvariant(this string text)
-        {
-            return text == null ? default(double) : double.Parse(text, CultureInfo.InvariantCulture);
-        }
+        public static double ToDoubleInvariant(this string text) => text == null ? default(double) : double.Parse(text, CultureInfo.InvariantCulture);
 
-        public static double ToDouble(this string text, double defaultValue)
-        {
-            double ret;
-            return double.TryParse(text, out ret) ? ret : defaultValue;
-        }
+        public static double ToDouble(this string text, double defaultValue) => double.TryParse(text, out var ret) ? ret : defaultValue;
 
-        public static decimal ToDecimal(this string text)
-        {
-            return text == null ? default(decimal) : decimal.Parse(text);
-        }
+        public static decimal ToDecimal(this string text) => text == null ? default(decimal) : decimal.Parse(text);
 
-        public static decimal ToDecimalInvariant(this string text)
-        {
-            return text == null ? default(decimal) : decimal.Parse(text, CultureInfo.InvariantCulture);
-        }
+        public static decimal ToDecimalInvariant(this string text) => text == null ? default(decimal) : decimal.Parse(text, CultureInfo.InvariantCulture);
 
-        public static decimal ToDecimal(this string text, decimal defaultValue)
-        {
-            decimal ret;
-            return decimal.TryParse(text, out ret) ? ret : defaultValue;
-        }
+        public static decimal ToDecimal(this string text, decimal defaultValue) => decimal.TryParse(text, out var ret) ? ret : defaultValue;
 
-        public static bool Matches(this string value, string pattern)
-        {
-            return value.Glob(pattern);
-        }
+        public static bool Matches(this string value, string pattern) => value.Glob(pattern);
 
         public static bool Glob(this string value, string pattern)
         {
@@ -1211,18 +1160,8 @@ namespace ServiceStack
             }
         }
 
-        public static int CountOccurrencesOf(this string text, char needle)
-        {
-            var chars = text.ToCharArray();
-            var count = 0;
-            var length = chars.Length;
-            for (var n = length - 1; n >= 0; n--)
-            {
-                if (chars[n] == needle)
-                    count++;
-            }
-            return count;
-        }
+        public static int CountOccurrencesOf(this string text, char needle) =>
+            text.AsSpan().CountOccurrencesOf(needle);
 
         public static string NormalizeNewLines(this string text)
         {
@@ -1265,5 +1204,35 @@ namespace ServiceStack
         }
 #endif
 
+    }
+}
+
+namespace ServiceStack.Text
+{
+    public static class StringTextExtensions
+    {
+        [Obsolete("Use ConvertTo<T>")]
+        public static T To<T>(this string value)
+        {
+            return TypeSerializer.DeserializeFromString<T>(value);
+        }
+
+        [Obsolete("Use ConvertTo<T>")]
+        public static T To<T>(this string value, T defaultValue)
+        {
+            return String.IsNullOrEmpty(value) ? defaultValue : TypeSerializer.DeserializeFromString<T>(value);
+        }
+
+        [Obsolete("Use ConvertTo<T>")]
+        public static T ToOrDefaultValue<T>(this string value)
+        {
+            return String.IsNullOrEmpty(value) ? default(T) : TypeSerializer.DeserializeFromString<T>(value);
+        }
+
+        [Obsolete("Use ConvertTo<T>")]
+        public static object To(this string value, Type type)
+        {
+            return TypeSerializer.DeserializeFromString(value, type);
+        }
     }
 }

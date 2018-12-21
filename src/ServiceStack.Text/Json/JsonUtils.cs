@@ -1,10 +1,9 @@
 ﻿//Copyright (c) ServiceStack, Inc. All Rights Reserved.
 //License: https://raw.github.com/ServiceStack/ServiceStack/master/license.txt
 
+using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Primitives;
-
 
 namespace ServiceStack.Text.Json
 {
@@ -40,7 +39,7 @@ namespace ServiceStack.Text.Json
 
         public static readonly char[] WhiteSpaceChars = { ' ', TabChar, CarriageReturnChar, LineFeedChar };
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsWhiteSpace(char c)
         {
             return c == ' ' || (c >= '\x0009' && c <= '\x000d') || c == '\x00a0' || c == '\x0085';
@@ -54,8 +53,9 @@ namespace ServiceStack.Text.Json
                 return;
             }
 
-            var escapeHtmlChars = JsConfig.EscapeHtmlChars;
-            var escapeUnicode = JsConfig.EscapeUnicode;
+            var config = JsConfig.GetConfig();
+            var escapeHtmlChars = config.EscapeHtmlChars;
+            var escapeUnicode = config.EscapeUnicode;
 
             if (!HasAnyEscapeChars(value, escapeHtmlChars))
             {
@@ -149,7 +149,7 @@ namespace ServiceStack.Text.Json
             writer.Write(QuoteChar);
         }
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsPrintable(this char c)
         {
             return c >= 32 && c <= 126;
@@ -167,7 +167,7 @@ namespace ServiceStack.Text.Json
         /// Also slightly reduced code size by re-arranging conditions.
         /// TODO: Possible Linq-only solution requires profiling: return value.Any(c => !c.IsPrintable() || c == QuoteChar || c == EscapeChar);
         /// </remarks>
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool HasAnyEscapeChars(string value, bool escapeHtmlChars)
         {
             var len = value.Length;
@@ -187,7 +187,7 @@ namespace ServiceStack.Text.Json
         }
 
         // Micro optimized
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void IntToHex(int intValue, char[] hex)
         {
             // TODO: test if unrolling loop is faster
@@ -203,7 +203,7 @@ namespace ServiceStack.Text.Json
             }
         }
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsJsObject(string value)
         {
             return !string.IsNullOrEmpty(value)
@@ -211,16 +211,16 @@ namespace ServiceStack.Text.Json
                 && value[value.Length - 1] == '}';
         }
 
-        [MethodImpl(InlineMethod.Value)]
-        public static bool IsJsObject(StringSegment value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsJsObject(ReadOnlySpan<char> value)
         {
             return !value.IsNullOrEmpty()
-                   && value.GetChar(0) == '{'
-                   && value.GetChar(value.Length - 1) == '}';
+               && value[0] == '{'
+               && value[value.Length - 1] == '}';
         }
 
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsJsArray(string value)
         {
             return !string.IsNullOrEmpty(value)
@@ -228,12 +228,12 @@ namespace ServiceStack.Text.Json
                 && value[value.Length - 1] == ']';
         }
 
-        [MethodImpl(InlineMethod.Value)]
-        public static bool IsJsArray(StringSegment value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsJsArray(ReadOnlySpan<char> value)
         {
             return !value.IsNullOrEmpty()
-                   && value.GetChar(0) == '['
-                   && value.GetChar(value.Length - 1) == ']';
+               && value[0] == '['
+               && value[value.Length - 1] == ']';
         }
 
     }

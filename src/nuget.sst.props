@@ -7,7 +7,7 @@
     <Copyright>ServiceStack 2018 and contributors</Copyright>
     <PackageIconUrl></PackageIconUrl>
     <PackageProjectUrl>https://github.com/ServiceStack/ServiceStack.Text</PackageProjectUrl>
-    <PackageLicenseUrl>https://servicestack.net/terms</PackageLicenseUrl>
+    <PackageLicense>https://servicestack.net/terms</PackageLicense>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/ServiceStack/ServiceStack.Text</RepositoryUrl>
     <NeutralLanguage>en-US</NeutralLanguage>

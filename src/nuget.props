@@ -5,7 +5,7 @@
     <Company>CuteAnt Development Team(cuteant@outlook.com)</Company>
     <Product>CuteAnt</Product>
     <Copyright>Copyright © CuteAnt Development Team</Copyright>
-    <PackageLicenseUrl>https://github.com/cuteant/CuteAnt.Serialization/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicense>https://github.com/cuteant/CuteAnt.Serialization/blob/master/LICENSE</PackageLicense>
     <PackageProjectUrl>https://github.com/cuteant/CuteAnt.Serialization</PackageProjectUrl>
     <PackageIconUrl></PackageIconUrl>
     <RepositoryType>git</RepositoryType>

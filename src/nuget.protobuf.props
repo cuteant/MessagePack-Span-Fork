@@ -7,7 +7,7 @@
     <Copyright>Marc Gravell</Copyright>
     <PackageIconUrl></PackageIconUrl>
     <PackageProjectUrl>https://github.com/mgravell/protobuf-net</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/mgravell/protobuf-net/master/Licence.txt</PackageLicenseUrl>
+    <PackageLicense>https://raw.githubusercontent.com/mgravell/protobuf-net/master/Licence.txt</PackageLicense>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/mgravell/protobuf-net</RepositoryUrl>
     <NeutralLanguage>en-US</NeutralLanguage>

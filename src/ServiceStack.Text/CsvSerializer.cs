@@ -37,8 +37,7 @@ namespace ServiceStack.Text
                 do
                 {
                     snapshot = WriteFnCache;
-                    newCache = new Dictionary<Type, WriteObjectDelegate>(WriteFnCache);
-                    newCache[type] = writeFn;
+                    newCache = new Dictionary<Type, WriteObjectDelegate>(WriteFnCache) {[type] = writeFn};
 
                 } while (!ReferenceEquals(
                     Interlocked.CompareExchange(ref WriteFnCache, newCache, snapshot), snapshot));
@@ -70,8 +69,7 @@ namespace ServiceStack.Text
                 do
                 {
                     snapshot = ReadFnCache;
-                    newCache = new Dictionary<Type, ParseStringDelegate>(ReadFnCache);
-                    newCache[type] = writeFn;
+                    newCache = new Dictionary<Type, ParseStringDelegate>(ReadFnCache) {[type] = writeFn};
 
                 } while (!ReferenceEquals(
                     Interlocked.CompareExchange(ref ReadFnCache, newCache, snapshot), snapshot));
@@ -116,22 +114,18 @@ namespace ServiceStack.Text
         public static void SerializeToStream<T>(T value, Stream stream)
         {
             if (value == null) return;
-            using (var writer = new StreamWriterX(stream, UseEncoding))
-            {
-                CsvSerializer<T>.WriteObject(writer, value);
-                writer.Flush();
-            }
+            var writer = new StreamWriterX(stream, UseEncoding);
+            CsvSerializer<T>.WriteObject(writer, value);
+            writer.Flush();
         }
 
         public static void SerializeToStream(object obj, Stream stream)
         {
             if (obj == null) return;
-            using (var writer = new StreamWriterX(stream, UseEncoding))
-            {
-                var writeFn = GetWriteFn(obj.GetType());
-                writeFn(writer, obj);
-                writer.Flush();
-            }
+            var writer = new StreamWriterX(stream, UseEncoding);
+            var writeFn = GetWriteFn(obj.GetType());
+            writeFn(writer, obj);
+            writer.Flush();
         }
 
         public static T DeserializeFromStream<T>(Stream stream)
@@ -331,7 +325,7 @@ namespace ServiceStack.Text
             //If is DTO and has an enumerable property serialize that
             if (bestCandidateEnumerableType != null)
             {
-                valueGetter = bestCandidate.GetValueGetter();
+                valueGetter = bestCandidate.CreateGetter();
                 var elementType = bestCandidateEnumerableType.GetGenericArguments()[0];
                 writeElementFn = CreateWriteFn(elementType);
 
@@ -339,7 +333,7 @@ namespace ServiceStack.Text
             }
 
             //If is DTO and has non-enumerable, reference type property serialize that
-            valueGetter = firstCandidate.GetValueGetter();
+            valueGetter = firstCandidate.CreateGetter();
             writeElementFn = CreateWriteRowFn(firstCandidate.PropertyType);
 
             return WriteNonEnumerableType;
@@ -486,7 +480,7 @@ namespace ServiceStack.Text
             //If is DTO and has an enumerable property serialize that
             if (bestCandidateEnumerableType != null)
             {
-                valueSetter = bestCandidate.GetValueSetter();
+                valueSetter = bestCandidate.CreateSetter();
                 var elementType = bestCandidateEnumerableType.GetGenericArguments()[0];
                 readElementFn = CreateReadFn(elementType);
 
@@ -494,7 +488,7 @@ namespace ServiceStack.Text
             }
 
             //If is DTO and has non-enumerable, reference type property serialize that
-            valueSetter = firstCandidate.GetValueSetter();
+            valueSetter = firstCandidate.CreateSetter();
             readElementFn = CreateReadRowFn(firstCandidate.PropertyType);
 
             return ReadNonEnumerableType;
@@ -533,7 +527,7 @@ namespace ServiceStack.Text
             if (row == null) return null; //AOT
 
             var value = readElementFn(row);
-            var to = ActivatorUtils.FastCreateInstance<T>(); // typeof(T).CreateInstance();
+            var to = ActivatorUtils.FastCreateInstance<T>();
             valueSetter(to, value);
             return to;
         }
@@ -543,7 +537,7 @@ namespace ServiceStack.Text
             if (row == null) return null; //AOT
 
             var value = readElementFn(row);
-            var to = ActivatorUtils.FastCreateInstance<T>(); // typeof(T).CreateInstance();
+            var to = ActivatorUtils.FastCreateInstance<T>();
             valueSetter(to, value);
             return to;
         }

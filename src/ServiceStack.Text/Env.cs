@@ -14,69 +14,97 @@ namespace ServiceStack.Text
             if (PclExport.Instance == null)
                 throw new ArgumentException("PclExport.Instance needs to be initialized");
 
-            var platformName = PclExport.Instance.PlatformName;
-            if (platformName != PclExport.Platforms.Uwp)
-            {
-                IsMono = AssemblyUtils.FindType("Mono.Runtime") != null;
-
-                IsIOS = AssemblyUtils.FindType("MonoTouch.Foundation.NSObject") != null
-                    || AssemblyUtils.FindType("Foundation.NSObject") != null;
-
-                IsAndroid = AssemblyUtils.FindType("Android.Manifest") != null;
-
-                try
-                {
-                    IsOSX = AssemblyUtils.FindType("Mono.AppKit") != null;
-#if DESKTOPCLR
-                    IsWindows = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("windir"));
-                    if (File.Exists(@"/System/Library/CoreServices/SystemVersion.plist"))
-                        IsOSX = true;
-                    string osType = File.Exists(@"/proc/sys/kernel/ostype") ? File.ReadAllText(@"/proc/sys/kernel/ostype") : null;
-                    IsLinux = osType?.IndexOf("Linux", StringComparison.OrdinalIgnoreCase) >= 0;
-#endif
-                }
-                catch (Exception) {}
-            }
-            else
-            {
-                IsUWP = true;
-            }
-
-#if NETSTANDARD2_0
+#if NETSTANDARD || NETCOREAPP
             IsNetStandard = true;
             try
             {
                 IsLinux = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux);
                 IsWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows);
                 IsOSX  = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX);
+                
+                var fxDesc = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+                IsMono = fxDesc.Contains("Mono");
+                IsNetCore = fxDesc.StartsWith(".NET Core", StringComparison.OrdinalIgnoreCase);
             }
             catch (Exception) {} //throws PlatformNotSupportedException in AWS lambda
             IsUnix = IsOSX || IsLinux;
             HasMultiplePlatformTargets = true;
+            IsUWP = IsRunningAsUwp();
 #elif DESKTOPCLR
             IsNetFramework = true;
+            switch (Environment.OSVersion.Platform)
+            {
+                case PlatformID.Win32NT:
+                case PlatformID.Win32S:
+                case PlatformID.Win32Windows:
+                case PlatformID.WinCE:
+                    IsWindows = true;
+                break;
+            }
+            
             var platform = (int)Environment.OSVersion.Platform;
             IsUnix = platform == 4 || platform == 6 || platform == 128;
-            IsLinux = IsUnix;
-            if (Environment.GetEnvironmentVariable("OS")?.IndexOf("Windows", StringComparison.OrdinalIgnoreCase) >= 0)
-                IsWindows = true;
+
+            if (File.Exists(@"/System/Library/CoreServices/SystemVersion.plist"))
+                IsOSX = true;
+            var osType = File.Exists(@"/proc/sys/kernel/ostype") 
+                ? File.ReadAllText(@"/proc/sys/kernel/ostype") 
+                : null;
+            IsLinux = osType?.IndexOf("Linux", StringComparison.OrdinalIgnoreCase) >= 0;
+            try
+            {
+                IsMono = AssemblyUtils.FindType("Mono.Runtime") != null;
+            }
+            catch (Exception) {}
+
+            SupportsDynamic = true;
 #endif
+
+#if NETCOREAPP
+            IsNetStandard = false;
+            IsNetCore = true;
+            SupportsDynamic = true;
+#endif
+
+            if (!IsUWP)
+            {
+                try
+                {
+                    IsAndroid = AssemblyUtils.FindType("Android.Manifest") != null;
+                    if (IsOSX && IsMono)
+                    {
+                        var runtimeDir = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
+                        //iOS detection no longer trustworthy so assuming iOS based on some current heuristics. TODO: improve iOS detection
+                        IsIOS = runtimeDir.StartsWith("/private/var") ||
+                                runtimeDir.Contains("/CoreSimulator/Devices/"); 
+                    }
+                }
+                catch (Exception) {}
+            }
+            
             SupportsExpressions = true;
-            SupportsEmit = !IsIOS;
+            SupportsEmit = !(IsUWP || IsIOS);
+
+            if (!SupportsEmit)
+            {
+                ReflectionOptimizer.Instance = ExpressionReflectionOptimizer.Provider;
+            }
 
             ServerUserAgent = "ServiceStack/" +
                 ServiceStackVersion + " "
-                + platformName
-                + (IsMono ? "/Mono" : "/.NET");
+                + PclExport.Instance.PlatformName
+                + (IsMono ? "/Mono" : "")
+                + (IsLinux ? "/Linux" : IsOSX ? "/OSX" : IsUnix ? "/Unix" : IsWindows ? "/Windows" : "/UnknownOS")
+                + (IsIOS ? "/iOS" : IsAndroid ? "/Android" : IsUWP ? "/UWP" : "");
 
             VersionString = ServiceStackVersion.ToString(CultureInfo.InvariantCulture);
 
-            __releaseDate = new DateTime(2001,01,01);
+            __releaseDate = new DateTime(2018,12,16);
         }
 
         public static string VersionString { get; set; }
 
-        public static decimal ServiceStackVersion = 5.00m;
+        public static decimal ServiceStackVersion = 5.41m;
 
         public static bool IsLinux { get; set; }
 
@@ -92,17 +120,28 @@ namespace ServiceStack.Text
 
         public static bool IsAndroid { get; set; }
 
-        public static bool IsUWP { get; set; }
+        public static bool IsNetNative { get; set; }
+
+        public static bool IsUWP { get; private set; }
 
         public static bool IsNetStandard { get; set; }
 
         public static bool IsNetFramework { get; set; }
 
-        public static bool SupportsExpressions { get; set; }
+        public static bool IsNetCore { get; set; }
 
-        public static bool SupportsEmit { get; set; }
+        public static bool SupportsExpressions { get; private set; }
 
-        public static bool StrictMode { get; set; }
+        public static bool SupportsEmit { get; private set; }
+
+        public static bool SupportsDynamic { get; private set; }
+
+        private static bool strictMode;
+        public static bool StrictMode
+        {
+            get => strictMode;
+            set => Config.Instance.ThrowOnError = strictMode = value;
+        }
 
         public static string ServerUserAgent { get; set; }
 
@@ -114,23 +153,27 @@ namespace ServiceStack.Text
             return __releaseDate;
         }
 
-        private static string referenceAssembyPath;
-        public static string ReferenceAssembyPath
+        [Obsolete("Use ReferenceAssemblyPath")]
+        public static string ReferenceAssembyPath => ReferenceAssemblyPath; 
+        
+        private static string referenceAssemblyPath;
+
+        public static string ReferenceAssemblyPath
         {
             get
             {
-                if (!IsMono && referenceAssembyPath == null)
+                if (!IsMono && referenceAssemblyPath == null)
                 {
                     var programFilesPath = PclExport.Instance.GetEnvironmentVariable("ProgramFiles(x86)") ?? @"C:\Program Files (x86)";
                     var netFxReferenceBasePath = programFilesPath + @"\Reference Assemblies\Microsoft\Framework\.NETFramework\";
                     if ((netFxReferenceBasePath + @"v4.5.2\").DirectoryExists())
-                        referenceAssembyPath = netFxReferenceBasePath + @"v4.5.2\";
+                        referenceAssemblyPath = netFxReferenceBasePath + @"v4.5.2\";
                     else if ((netFxReferenceBasePath + @"v4.5.1\").DirectoryExists())
-                        referenceAssembyPath = netFxReferenceBasePath + @"v4.5.1\";
+                        referenceAssemblyPath = netFxReferenceBasePath + @"v4.5.1\";
                     else if ((netFxReferenceBasePath + @"v4.5\").DirectoryExists())
-                        referenceAssembyPath = netFxReferenceBasePath + @"v4.5\";
+                        referenceAssemblyPath = netFxReferenceBasePath + @"v4.5\";
                     else if ((netFxReferenceBasePath + @"v4.0\").DirectoryExists())
-                        referenceAssembyPath = netFxReferenceBasePath + @"v4.0\";
+                        referenceAssemblyPath = netFxReferenceBasePath + @"v4.0\";
                     else
                     {
                         var v4Dirs = PclExport.Instance.GetDirectoryNames(netFxReferenceBasePath, "v4*");
@@ -138,11 +181,11 @@ namespace ServiceStack.Text
                         {
                             var winPath = PclExport.Instance.GetEnvironmentVariable("SYSTEMROOT") ?? @"C:\Windows";
                             var gacPath = winPath + @"\Microsoft.NET\Framework\";
-                            v4Dirs = PclExport.Instance.GetDirectoryNames(gacPath, "v4*");
+                            v4Dirs = PclExport.Instance.GetDirectoryNames(gacPath, "v4*");                            
                         }
                         if (v4Dirs.Length > 0)
                         {
-                            referenceAssembyPath = v4Dirs[v4Dirs.Length - 1] + @"\"; //latest v4
+                            referenceAssemblyPath = v4Dirs[v4Dirs.Length - 1] + @"\"; //latest v4
                         }
                         else
                         {
@@ -152,9 +195,97 @@ namespace ServiceStack.Text
                         }
                     }
                 }
-                return referenceAssembyPath;
+                return referenceAssemblyPath;
             }
-            set => referenceAssembyPath = value;
+            set => referenceAssemblyPath = value;
         }
+
+#if NETSTANDARD || NETCOREAPP
+        private static bool IsRunningAsUwp()
+        {
+            try
+            {
+                IsNetNative = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription.StartsWith(".NET Native", StringComparison.OrdinalIgnoreCase);
+                return IsInAppContainer || IsNetNative;
+            }
+            catch (Exception) {}
+            return false;
+        }
+        
+        private static bool IsWindows7OrLower
+        {
+            get
+            {
+                int versionMajor = Environment.OSVersion.Version.Major;
+                int versionMinor = Environment.OSVersion.Version.Minor;
+                double version = versionMajor + (double)versionMinor / 10;
+                return version <= 6.1;
+            }
+        } 
+        
+        // From: https://github.com/dotnet/corefx/blob/master/src/CoreFx.Private.TestUtilities/src/System/PlatformDetection.Windows.cs
+        private static int s_isInAppContainer = -1;
+        private static bool IsInAppContainer
+        {
+            // This actually checks whether code is running in a modern app. 
+            // Currently this is the only situation where we run in app container.
+            // If we want to distinguish the two cases in future,
+            // EnvironmentHelpers.IsAppContainerProcess in desktop code shows how to check for the AC token.
+            get
+            {
+                if (s_isInAppContainer != -1)
+                    return s_isInAppContainer == 1;
+
+                if (!IsWindows || IsWindows7OrLower)
+                {
+                    s_isInAppContainer = 0;
+                    return false;
+                }
+
+                byte[] buffer = TypeConstants.EmptyByteArray;
+                uint bufferSize = 0;
+                try
+                {
+                    int result = GetCurrentApplicationUserModelId(ref bufferSize, buffer);
+                    switch (result)
+                    {
+                        case 15703: // APPMODEL_ERROR_NO_APPLICATION
+                            s_isInAppContainer = 0;
+                            break;
+                        case 0:     // ERROR_SUCCESS
+                        case 122:   // ERROR_INSUFFICIENT_BUFFER
+                                    // Success is actually insufficent buffer as we're really only looking for
+                                    // not NO_APPLICATION and we're not actually giving a buffer here. The
+                                    // API will always return NO_APPLICATION if we're not running under a
+                                    // WinRT process, no matter what size the buffer is.
+                            s_isInAppContainer = 1;
+                            break;
+                        default:
+                            throw new InvalidOperationException($"Failed to get AppId, result was {result}.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    // We could catch this here, being friendly with older portable surface area should we
+                    // desire to use this method elsewhere.
+                    if (e.GetType().FullName.Equals("System.EntryPointNotFoundException", StringComparison.Ordinal))
+                    {
+                        // API doesn't exist, likely pre Win8
+                        s_isInAppContainer = 0;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return s_isInAppContainer == 1;
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", ExactSpelling = true)]
+        private static extern int GetCurrentApplicationUserModelId(ref uint applicationUserModelIdLength, byte[] applicationUserModelId);
+#endif
+
     }
 }

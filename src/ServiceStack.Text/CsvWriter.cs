@@ -163,20 +163,16 @@ namespace ServiceStack.Text
             Headers = new List<string>();
 
             PropertyGetters = new List<MemberGetter<T>>();
-            var isDataContract = typeof(T).IsDto();
             foreach (var propertyInfo in TypeConfig<T>.Properties)
             {
                 if (!propertyInfo.CanRead || propertyInfo.GetGetMethod(nonPublic:true) == null) continue;
                 if (!TypeSerializer.CanCreateFromString(propertyInfo.PropertyType)) continue;
 
-                PropertyGetters.Add(propertyInfo.GetValueGetter<T>());
+                PropertyGetters.Add(propertyInfo.CreateGetter<T>());
                 var propertyName = propertyInfo.Name;
-                if (isDataContract)
-                {
-                    var dcsDataMemberName = propertyInfo.GetDataMemberName();
-                    if (dcsDataMemberName != null)
-                        propertyName = dcsDataMemberName;
-                }
+                var dcsDataMemberName = propertyInfo.GetDataMemberName();
+                if (dcsDataMemberName != null)
+                    propertyName = dcsDataMemberName;
                 Headers.Add(propertyName);
             }
         }

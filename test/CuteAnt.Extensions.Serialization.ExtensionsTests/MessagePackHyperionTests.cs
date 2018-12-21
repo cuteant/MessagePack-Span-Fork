@@ -114,7 +114,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
     {
         internal static object GetFormatter(Type t)
         {
+#if !TEST40
             if (typeof(ITestMessage).GetTypeInfo().IsAssignableFrom(t.GetTypeInfo()))
+#else
+            if (typeof(ITestMessage).IsAssignableFrom(t))
+#endif
             {
                 return ActivatorUtils.FastCreateInstance(typeof(TestMessageFormatter<>).GetCachedGenericType(t));
             }
@@ -140,7 +144,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
 
         protected override byte[] TranslateTypeName(Type actualType, out Type expectedType)
         {
+#if !TEST40
             if (typeof(ITestMessage).GetTypeInfo().IsAssignableFrom(actualType.GetTypeInfo()))
+#else
+            if (typeof(ITestMessage).IsAssignableFrom(actualType))
+#endif
             {
                 expectedType = typeof(ITestMessage);
             }

@@ -5,7 +5,7 @@
   <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.StreamReaderAndWriter.Sources\CuteAnt.Extensions.StreamReaderAndWriter.Sources.projitems" Label="Shared" />
 
   <PropertyGroup>
-    <TargetFrameworks>net471;net451;net40;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net471;net451;netstandard2.0;netcoreapp2.1</TargetFrameworks>
     <RootNamespace>ServiceStack.Text</RootNamespace>
     <AssemblyName>ServiceStack.Text</AssemblyName>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
@@ -23,15 +23,9 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' or '$(TargetFramework)' == 'net40' ">
-    <PackageReference Include="NetFx.Extensions.Primitives" Version="$(NetFxExtensionsPrimitivesPackageVersion)" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net471' ">
-    <PackageReference Include="Microsoft.Extensions.Primitives" Version="$(MicrosoftExtensionsPrimitivesPackageVersion)" />
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="CuteAnt.Runtime" Version="$(CuteAntRuntimePackageVersion)" />
+    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(ImportLibs)' == 'netcore' ">
