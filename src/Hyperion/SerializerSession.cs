@@ -17,6 +17,26 @@ using CuteAnt.Pool;
 
 namespace Hyperion
 {
+    internal class TypedEqualityComparer : IEqualityComparer<object>
+    {
+        public static readonly TypedEqualityComparer Instance = new TypedEqualityComparer();
+        public new bool Equals(object x, object y)
+        {
+            if (EqualityComparer<object>.Default.Equals(x, y))
+            {
+                if (x != null && y != null)
+                    return x.GetType().Equals(y.GetType());
+                return true;
+            }
+            return false;
+        }
+
+        public int GetHashCode(object obj)
+        {
+            return EqualityComparer<object>.Default.GetHashCode(obj);
+        }
+    }
+
     public class SerializerSession
     {
         public const int MinBufferSize = 9;
@@ -37,7 +57,7 @@ namespace Hyperion
         {
             if (serializer.Options.PreserveObjectReferences)
             {
-                _objects = new Dictionary<object, int>(ReferenceEqualsComparer.Instance);
+                _objects = new Dictionary<object, int>(TypedEqualityComparer.Instance);
             }
             Reinitialize(serializer);
         }
