@@ -389,9 +389,10 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
             Assert.AreEqual(3, errors.Count);
             var possibleErrs = new[]
             {
-#if !(NET20 || NET35)
+#if !(NET20 || NET35 || NET40)
                 "[1] - 1 - The string 'I am not a date and will error!' was not recognized as a valid DateTime. There is an unknown word starting at index '0'.",
-                "[1] - 1 - String was not recognized as a valid DateTime."
+                "[1] - 1 - String was not recognized as a valid DateTime.",
+                "[1] - 1 - The string 'I am not a date and will error!' was not recognized as a valid DateTime. There is an unknown word starting at index '0'."
 #else
     // handle typo fix in later versions of .NET
                 "[1] - 1 - The string was not recognized as a valid DateTime. There is an unknown word starting at index 0.",

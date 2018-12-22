@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 // Copyright (c) 2007 James Newton-King
 //
 // Permission is hereby granted, free of charge, to any person
@@ -276,6 +276,13 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
                 : t;
         }
 
+        public static Type EnsureNotByRefType(Type t)
+        {
+            return (t.IsByRef && t.HasElementType)
+                ? t.GetElementType()
+                : t;
+        }
+
         public static bool IsGenericDefinition(Type type, Type genericInterfaceDefinition)
         {
             if (!type.IsGenericType())
@@ -451,25 +458,24 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
             }
         }
 
-        /// <summary>
-        /// Determines whether the member is an indexed property.
-        /// </summary>
-        /// <param name="member">The member.</param>
-        /// <returns>
-        /// 	<c>true</c> if the member is an indexed property; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool IsIndexedProperty(MemberInfo member)
+        public static bool IsByRefLikeType(Type type)
         {
-            ValidationUtils.ArgumentNotNull(member, nameof(member));
-
-            if (member is PropertyInfo propertyInfo)
-            {
-                return IsIndexedProperty(propertyInfo);
-            }
-            else
+            if (!type.IsValueType())
             {
                 return false;
             }
+
+            // IsByRefLike flag on type is not available in netstandard2.0
+            Attribute[] attributes = GetAttributes(type, null, false);
+            for (int i = 0; i < attributes.Length; i++)
+            {
+                if (string.Equals(attributes[i].GetType().FullName, "System.Runtime.CompilerServices.IsByRefLikeAttribute", StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -737,8 +743,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
         {
             Attribute[] a = GetAttributes(attributeProvider, typeof(T), inherit);
 
-            T[] attributes = a as T[];
-            if (attributes != null)
+            if (a is T[] attributes)
             {
                 return attributes;
             }
@@ -755,57 +760,41 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
             // http://hyperthink.net/blog/getcustomattributes-gotcha/
             // ICustomAttributeProvider doesn't do inheritance
 
-            Type t = provider as Type;
-            if (t != null)
+            switch (provider)
             {
-                object[] array = attributeType != null ? t.GetCustomAttributes(attributeType, inherit) : t.GetCustomAttributes(inherit);
-                Attribute[] attributes = array.Cast<Attribute>().ToArray();
+                case Type t:
+                    object[] array = attributeType != null ? t.GetCustomAttributes(attributeType, inherit) : t.GetCustomAttributes(inherit);
+                    Attribute[] attributes = array.Cast<Attribute>().ToArray();
 
 #if (NET20 || NET35)
-                // ye olde .NET GetCustomAttributes doesn't respect the inherit argument
-                if (inherit && t.BaseType != null)
-                {
-                    attributes = attributes.Union(GetAttributes(t.BaseType, attributeType, inherit)).ToArray();
-                }
+                    // ye olde .NET GetCustomAttributes doesn't respect the inherit argument
+                    if (inherit && t.BaseType != null)
+                    {
+                        attributes = attributes.Union(GetAttributes(t.BaseType, attributeType, inherit)).ToArray();
+                    }
 #endif
 
-                return attributes;
-            }
-
-            Assembly a = provider as Assembly;
-            if (a != null)
-            {
-                return (attributeType != null) ? Attribute.GetCustomAttributes(a, attributeType) : Attribute.GetCustomAttributes(a);
-            }
-
-            MemberInfo mi = provider as MemberInfo;
-            if (mi != null)
-            {
-                return (attributeType != null) ? Attribute.GetCustomAttributes(mi, attributeType, inherit) : Attribute.GetCustomAttributes(mi, inherit);
-            }
-
+                    return attributes;
+                case Assembly a:
+                    return (attributeType != null) ? Attribute.GetCustomAttributes(a, attributeType) : Attribute.GetCustomAttributes(a);
+                case MemberInfo mi:
+                    return (attributeType != null) ? Attribute.GetCustomAttributes(mi, attributeType, inherit) : Attribute.GetCustomAttributes(mi, inherit);
 #if !PORTABLE40
-            Module m = provider as Module;
-            if (m != null)
-            {
-                return (attributeType != null) ? Attribute.GetCustomAttributes(m, attributeType, inherit) : Attribute.GetCustomAttributes(m, inherit);
-            }
+                case Module m:
+                    return (attributeType != null) ? Attribute.GetCustomAttributes(m, attributeType, inherit) : Attribute.GetCustomAttributes(m, inherit);
 #endif
-
-            ParameterInfo p = provider as ParameterInfo;
-            if (p != null)
-            {
-                return (attributeType != null) ? Attribute.GetCustomAttributes(p, attributeType, inherit) : Attribute.GetCustomAttributes(p, inherit);
-            }
-
+                case ParameterInfo p:
+                    return (attributeType != null) ? Attribute.GetCustomAttributes(p, attributeType, inherit) : Attribute.GetCustomAttributes(p, inherit);
+                default:
 #if !PORTABLE40
-            ICustomAttributeProvider customAttributeProvider = (ICustomAttributeProvider)attributeProvider;
-            object[] result = (attributeType != null) ? customAttributeProvider.GetCustomAttributes(attributeType, inherit) : customAttributeProvider.GetCustomAttributes(inherit);
+                    ICustomAttributeProvider customAttributeProvider = (ICustomAttributeProvider)attributeProvider;
+                    object[] result = (attributeType != null) ? customAttributeProvider.GetCustomAttributes(attributeType, inherit) : customAttributeProvider.GetCustomAttributes(inherit);
 
-            return (Attribute[])result;
+                    return (Attribute[])result;
 #else
-            throw new Exception("Cannot get attributes from '{0}'.".FormatWith(CultureInfo.InvariantCulture, provider));
+                    throw new Exception("Cannot get attributes from '{0}'.".FormatWith(CultureInfo.InvariantCulture, provider));
 #endif
+            }
         }
 #else
         public static T[] GetAttributes<T>(object attributeProvider, bool inherit) where T : Attribute
@@ -815,38 +804,27 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
 
         public static Attribute[] GetAttributes(object provider, Type attributeType, bool inherit)
         {
-            if (provider is Type t)
+            switch (provider)
             {
-                return (attributeType != null)
-                    ? t.GetTypeInfo().GetCustomAttributes(attributeType, inherit).ToArray()
-                    : t.GetTypeInfo().GetCustomAttributes(inherit).ToArray();
-            }
-
-            if (provider is Assembly a)
-            {
-                return (attributeType != null) ? a.GetCustomAttributes(attributeType).ToArray() : a.GetCustomAttributes().ToArray();
-            }
-
-            if (provider is MemberInfo memberInfo)
-            {
-                return (attributeType != null) ? memberInfo.GetCustomAttributes(attributeType, inherit).ToArray() : memberInfo.GetCustomAttributes(inherit).ToArray();
-            }
-
-            if (provider is Module module)
-            {
-                return (attributeType != null) ? module.GetCustomAttributes(attributeType).ToArray() : module.GetCustomAttributes().ToArray();
-            }
-
-            if (provider is ParameterInfo parameterInfo)
-            {
-                return (attributeType != null) ? parameterInfo.GetCustomAttributes(attributeType, inherit).ToArray() : parameterInfo.GetCustomAttributes(inherit).ToArray();
+                case Type t:
+                    return (attributeType != null)
+                        ? t.GetTypeInfo().GetCustomAttributes(attributeType, inherit).ToArray()
+                        : t.GetTypeInfo().GetCustomAttributes(inherit).ToArray();
+                case Assembly a:
+                    return (attributeType != null) ? a.GetCustomAttributes(attributeType).ToArray() : a.GetCustomAttributes().ToArray();
+                case MemberInfo memberInfo:
+                    return (attributeType != null) ? memberInfo.GetCustomAttributes(attributeType, inherit).ToArray() : memberInfo.GetCustomAttributes(inherit).ToArray();
+                case Module module:
+                    return (attributeType != null) ? module.GetCustomAttributes(attributeType).ToArray() : module.GetCustomAttributes().ToArray();
+                case ParameterInfo parameterInfo:
+                    return (attributeType != null) ? parameterInfo.GetCustomAttributes(attributeType, inherit).ToArray() : parameterInfo.GetCustomAttributes(inherit).ToArray();
             }
 
             throw new Exception("Cannot get attributes from '{0}'.".FormatWith(CultureInfo.InvariantCulture, provider));
         }
 #endif
 
-        public static TypeNameKey SplitFullyQualifiedTypeName(string fullyQualifiedTypeName)
+        public static StructMultiKey<string, string> SplitFullyQualifiedTypeName(string fullyQualifiedTypeName)
         {
             int? assemblyDelimiterIndex = GetAssemblyDelimiterIndex(fullyQualifiedTypeName);
 
@@ -864,7 +842,7 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
                 assemblyName = null;
             }
 
-            return new TypeNameKey(assemblyName, typeName);
+            return new StructMultiKey<string, string>(assemblyName, typeName);
         }
 
         private static int? GetAssemblyDelimiterIndex(string fullyQualifiedTypeName)
@@ -1114,38 +1092,6 @@ namespace CuteAnt.Extensions.Serialization.Json.Utilities
 
             // possibly use IL initobj for perf here?
             return Activator.CreateInstance(type);
-        }
-    }
-
-    internal readonly struct TypeNameKey : IEquatable<TypeNameKey>
-    {
-        internal readonly string AssemblyName;
-        internal readonly string TypeName;
-
-        public TypeNameKey(string assemblyName, string typeName)
-        {
-            AssemblyName = assemblyName;
-            TypeName = typeName;
-        }
-
-        public override int GetHashCode()
-        {
-            return (AssemblyName?.GetHashCode() ?? 0) ^ (TypeName?.GetHashCode() ?? 0);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is TypeNameKey))
-            {
-                return false;
-            }
-
-            return Equals((TypeNameKey)obj);
-        }
-
-        public bool Equals(TypeNameKey other)
-        {
-            return (AssemblyName == other.AssemblyName && TypeName == other.TypeName);
         }
     }
 }

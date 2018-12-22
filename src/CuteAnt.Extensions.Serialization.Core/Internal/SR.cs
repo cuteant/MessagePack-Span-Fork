@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Resources;
 
 namespace CuteAnt.Extensions.Serialization.Internal

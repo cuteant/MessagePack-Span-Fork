@@ -122,13 +122,17 @@ namespace CuteAnt.Extensions.Serialization.Tests
         [Test]
         public void PopulateObjectWithOnlyComment()
         {
-            ExceptionAssert.Throws<JsonSerializationException>(() =>
+            var ex = ExceptionAssert.Throws<JsonSerializationException>(() =>
             {
                 string json = @"// file header";
 
                 PopulateTestObject o = new PopulateTestObject();
-                JsonConvertX.PopulateObject(json, o);
+                JsonConvert.PopulateObject(json, o);
             }, "No JSON content found. Path '', line 1, position 14.");
+
+            Assert.AreEqual(1, ex.LineNumber);
+            Assert.AreEqual(14, ex.LinePosition);
+            Assert.AreEqual(string.Empty, ex.Path);
         }
 
         [Test]
@@ -176,11 +180,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
                 reader.Read();
 
                 JsonTextReader jsonTextReader = (JsonTextReader)reader;
-                //Assert.IsNotNull(jsonTextReader.NameTable);
+                Assert.IsNotNull(jsonTextReader.PropertyNameTable);
 
                 string s = serializer.Deserialize<string>(reader);
                 Assert.AreEqual("hi", s);
-                //Assert.IsNotNull(jsonTextReader.NameTable);
+                Assert.IsNotNull(jsonTextReader.PropertyNameTable);
 
                 NameTableTestClass o = new NameTableTestClass
                 {
@@ -196,21 +200,45 @@ namespace CuteAnt.Extensions.Serialization.Tests
             }
         }
 
-        //[Test]
-        //public void NameTableTest()
-        //{
-        //    StringReader sr = new StringReader("{'property':'hi'}");
-        //    JsonTextReader jsonTextReader = new JsonTextReader(sr);
+        [Test]
+        public void NameTableTest()
+        {
+            StringReader sr = new StringReader("{'property':'hi'}");
+            JsonTextReader jsonTextReader = new JsonTextReader(sr);
 
-        //    Assert.IsNull(jsonTextReader.NameTable);
+            Assert.IsNull(jsonTextReader.PropertyNameTable);
 
-        //    JsonSerializer serializer = new JsonSerializer();
-        //    serializer.Converters.Add(new NameTableTestClassConverter());
-        //    NameTableTestClass o = serializer.Deserialize<NameTableTestClass>(jsonTextReader);
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.Converters.Add(new NameTableTestClassConverter());
+            NameTableTestClass o = serializer.Deserialize<NameTableTestClass>(jsonTextReader);
 
-        //    Assert.IsNull(jsonTextReader.NameTable);
-        //    Assert.AreEqual("hi", o.Value);
-        //}
+            Assert.IsNull(jsonTextReader.PropertyNameTable);
+            Assert.AreEqual("hi", o.Value);
+        }
+
+        public class CustonNameTable : JsonNameTable
+        {
+            public override string Get(char[] key, int start, int length)
+            {
+                return "_" + new string(key, start, length);
+            }
+        }
+
+        [Test]
+        public void CustonNameTableTest()
+        {
+            StringReader sr = new StringReader("{'property':'hi'}");
+            JsonTextReader jsonTextReader = new JsonTextReader(sr);
+
+            Assert.IsNull(jsonTextReader.PropertyNameTable);
+            var nameTable = jsonTextReader.PropertyNameTable = new CustonNameTable();
+
+            JsonSerializer serializer = new JsonSerializer();
+            Dictionary<string, string> o = serializer.Deserialize<Dictionary<string, string>>(jsonTextReader);
+            Assert.AreEqual("hi", o["_property"]);
+
+            Assert.AreEqual(nameTable, jsonTextReader.PropertyNameTable);
+        }
 
         [Test]
         public void DefaultSettings_Example()

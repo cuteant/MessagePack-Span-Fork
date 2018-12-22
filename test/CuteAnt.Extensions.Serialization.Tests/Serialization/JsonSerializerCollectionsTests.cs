@@ -463,7 +463,7 @@ namespace CuteAnt.Extensions.Serialization.Tests.Serialization
 
       string json = JsonConvertX.SerializeObject(d, Formatting.Indented);
 
-      Assert.AreEqual(@"{
+      StringAssert.AreEqual(@"{
   ""key"": [
     {
       ""Text1"": ""value1""
