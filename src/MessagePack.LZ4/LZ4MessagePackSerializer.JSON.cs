@@ -1,10 +1,14 @@
 ﻿using MessagePack.Formatters;
 using MessagePack.Internal;
-using LZ4;
 using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
+#if NET451 || NET40
+using LZ4;
+#else
+using K4os.Compression.LZ4;
+#endif
 
 namespace MessagePack
 {

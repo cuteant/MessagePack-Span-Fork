@@ -17,11 +17,11 @@
     <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer, Unity, Xamarin</PackageTags>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' or '$(TargetFramework)' == 'net40' ">
     <PackageReference Include="lz4net" Version="$(Lz4netPackageVersion)" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="lz4net.netcore.signed" Version="$(Lz4netNETCoreSignedPackageVersion)" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net471' ">
+    <PackageReference Include="K4os.Compression.LZ4" Version="$(K4osCompressionLZ4PackageVersion)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MessagePack\MessagePack.csproj" />

@@ -98,7 +98,7 @@ namespace MessagePack.Tests.ExtensionTests
 
             var paddingOffset = 10;
             var paddedLz4Normal = new byte[lz4normal.Length + paddingOffset + paddingOffset];
-            Array.Copy(lz4normal,0, paddedLz4Normal, paddingOffset, lz4normal.Length);
+            Array.Copy(lz4normal, 0, paddedLz4Normal, paddingOffset, lz4normal.Length);
 
             var decompress1 = LZ4MessagePackSerializer.NonGeneric.Deserialize(typeof(FirstSimpleData[]), ms.ToArray());
             var decompress2 = LZ4MessagePackSerializer.NonGeneric.Deserialize(typeof(FirstSimpleData[]), lz4normal);
@@ -146,5 +146,31 @@ namespace MessagePack.Tests.ExtensionTests
             MessagePackSerializer.Deserialize<int>(msgpack1).Is(100);
             MessagePackSerializer.Deserialize<FirstSimpleData[]>(msgpack2).IsStructuralEqual(originalData);
         }
+
+#if NET471
+        [Fact]
+        public void LZ4NetEncodeAndK4osCompressionDecode()
+        {
+            var text = "this is a test";
+            var originalData = Encoding.UTF8.GetBytes(text);
+            var lz4Data = new byte[LZ4.LZ4Codec.MaximumOutputLength(originalData.Length)];
+            var lz4Size = LZ4.LZ4Codec.Encode(originalData, 0, originalData.Length, lz4Data, 0, lz4Data.Length);
+            var output = new byte[lz4Size * 255];
+            var dl = K4os.Compression.LZ4.LZ4Codec.Decode(lz4Data, 0, lz4Size, output, 0, output.Length);
+            Assert.Equal(text, Encoding.UTF8.GetString(output, 0, dl));
+        }
+
+        [Fact]
+        public void K4osCompressionEncodeAndLZ4NetDecode()
+        {
+            var text = "this is a test";
+            var originalData = Encoding.UTF8.GetBytes(text);
+            var lz4Data = new byte[K4os.Compression.LZ4.LZ4Codec.MaximumOutputSize(originalData.Length)];
+            var lz4Size = K4os.Compression.LZ4.LZ4Codec.Encode(originalData, 0, originalData.Length, lz4Data, 0, lz4Data.Length);
+            var output = new byte[lz4Size * 255];
+            var dl = LZ4.LZ4Codec.Decode(lz4Data, 0, lz4Size, output, 0, output.Length);
+            Assert.Equal(text, Encoding.UTF8.GetString(output, 0, dl));
+        }
+#endif
     }
 }

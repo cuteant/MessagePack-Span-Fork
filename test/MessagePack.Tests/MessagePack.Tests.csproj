@@ -10,6 +10,7 @@
   <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
+    <PackageReference Include="lz4net" Version="$(Lz4netPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
