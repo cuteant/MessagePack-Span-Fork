@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\version.sst.props" />
+  <Import Project="..\nuget.sst.props" />
+  <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Logging.Sources\CuteAnt.Extensions.Logging.Sources.projitems" Label="Shared" />
+  <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.StreamReaderAndWriter.Sources\CuteAnt.Extensions.StreamReaderAndWriter.Sources.projitems" Label="Shared" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net40</TargetFrameworks>
+    <RootNamespace>ServiceStack.Text</RootNamespace>
+    <AssemblyName>ServiceStack.Text</AssemblyName>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet">
+    <PackageId>ServiceStack.Text.Net40</PackageId>
+    <Title>ServiceStack.Text.Net40</Title>
+    <Description>This package includes a mostly complete port of the ServiceStack.Text(for more info see: https://github.com/ServiceStack/ServiceStack.Text) assembly to support .NET 4.0 and newer.</Description>
+    <PackageTags>JSON Text Serializer CSV JSV Dump PrettyPrint Fast</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NetFx.Extensions.Primitives" Version="$(NetFxExtensionsPrimitivesPackageVersion)" />
+    <PackageReference Include="CuteAnt.Runtime" Version="$(CuteAntRuntimePackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Internal\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Internal\Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

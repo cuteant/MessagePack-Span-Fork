@@ -212,9 +212,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
       byte[] serializedData = _formatter.Serialize(data);
       Assert.NotNull(serializedData);
       byte[] deserializedData = _formatter.Deserialize<byte[]>(serializedData);
-#if !TEST40
       if (!(_formatter is JsvMessageFormatter))
-#endif
       {
         Assert.NotNull(deserializedData);
         Assert.Equal(deserializedData.Length, data.Length);
@@ -443,7 +441,6 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public HyperioneMessageFormatterTest() : base(HyperionMessageFormatter.DefaultInstance) { }
   }
 
-#if !TEST40
   public class ServiceStackMessageFormatterTest : SerializeTestBase
   {
     public ServiceStackMessageFormatterTest() : base(ServiceStackMessageFormatter.DefaultInstance) { }
@@ -468,7 +465,6 @@ namespace CuteAnt.Extensions.Serialization.Tests
   {
     public JsvMessageFormatterTest() : base(JsvMessageFormatter.DefaultInstance) { }
   }
-#endif
 
   public class BinaryMessageFormatterTest : SerializeTestBase
   {
