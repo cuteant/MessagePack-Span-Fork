@@ -5,7 +5,7 @@
   <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.StreamReaderAndWriter.Sources\CuteAnt.Extensions.StreamReaderAndWriter.Sources.projitems" Label="Shared" />
 
   <PropertyGroup>
-    <TargetFrameworks>net471;net451;netstandard2.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net471;net451;netstandard2.0;netcoreapp2.2</TargetFrameworks>
     <RootNamespace>ServiceStack.Text</RootNamespace>
     <AssemblyName>ServiceStack.Text</AssemblyName>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
