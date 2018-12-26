@@ -32,6 +32,8 @@ namespace MessagePack.Resolvers
 
     public override IDictionary<string, object> Context { get; } = new Dictionary<string, object>(StringComparer.Ordinal);
 
+    public override IDictionary<int, object> Context2 { get; } = new Dictionary<int, object>();
+
     public override IMessagePackFormatter<T> GetFormatter<T>()
     {
       return FormatterCache<T>.formatter;
@@ -81,8 +83,14 @@ namespace MessagePack.Resolvers
     private const int Locked = 1;
     private const int Unlocked = 0;
     private static int s_isFreezed = Unlocked;
-    private static IMessagePackFormatter[] s_formatters = new IMessagePackFormatter[0];
-    private static IFormatterResolver[] s_resolvers = s_defaultResolvers;
+    private static List<IMessagePackFormatter> s_formatters;
+    private static List<IFormatterResolver> s_resolvers;
+
+    static DefaultResolverCore()
+    {
+      s_formatters = new List<IMessagePackFormatter>();
+      s_resolvers = s_defaultResolvers.ToList();
+    }
 
     DefaultResolverCore()
     {
@@ -96,7 +104,15 @@ namespace MessagePack.Resolvers
         ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
-      Interlocked.Exchange(ref s_resolvers, resolvers.Concat(s_defaultResolvers).ToArray());
+      List<IFormatterResolver> snapshot, newCache;
+      do
+      {
+        snapshot = Volatile.Read(ref s_resolvers);
+        newCache = new List<IFormatterResolver>();
+        newCache.AddRange(resolvers);
+        if (snapshot.Count > 0) { newCache.AddRange(snapshot); }
+      } while (!ReferenceEquals(
+          Interlocked.CompareExchange(ref s_resolvers, newCache, snapshot), snapshot));
     }
 
     public static void Register(params IMessagePackFormatter[] formatters)
@@ -107,24 +123,21 @@ namespace MessagePack.Resolvers
         ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
       }
 
-      Interlocked.Exchange(ref s_formatters, formatters);
+      List<IMessagePackFormatter> snapshot, newCache;
+      do
+      {
+        snapshot = Volatile.Read(ref s_formatters);
+        newCache = new List<IMessagePackFormatter>();
+        newCache.AddRange(formatters);
+        if (snapshot.Count > 0) { newCache.AddRange(snapshot); }
+      } while (!ReferenceEquals(
+          Interlocked.CompareExchange(ref s_formatters, newCache, snapshot), snapshot));
     }
 
     public static void Register(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
     {
-      if (Locked == s_isFreezed)
-      {
-        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
-      }
-
-      if (formatters != null && formatters.Length > 0)
-      {
-        Interlocked.Exchange(ref s_formatters, formatters);
-      }
-      if (resolvers != null && resolvers.Length > 0)
-      {
-        Interlocked.Exchange(ref s_resolvers, resolvers.Concat(s_defaultResolvers).ToArray());
-      }
+      Register(formatters);
+      Register(resolvers);
     }
 
     public override IMessagePackFormatter<T> GetFormatter<T>()
@@ -140,7 +153,8 @@ namespace MessagePack.Resolvers
       {
         Interlocked.CompareExchange(ref s_isFreezed, Locked, Unlocked);
 
-        foreach (var item in s_formatters)
+        var formatters = Volatile.Read(ref s_formatters);
+        foreach (var item in formatters)
         {
           foreach (var implInterface in item.GetType().GetTypeInfo().ImplementedInterfaces)
           {
@@ -153,7 +167,8 @@ namespace MessagePack.Resolvers
           }
         }
 
-        foreach (var item in s_resolvers)
+        var resolvers = Volatile.Read(ref s_resolvers);
+        foreach (var item in resolvers)
         {
           var f = item.GetFormatter<T>();
           if (f != null)

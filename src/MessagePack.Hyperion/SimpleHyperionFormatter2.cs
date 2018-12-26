@@ -21,7 +21,7 @@ namespace MessagePack.Formatters
                 return default;
             }
 
-            var serializer = formatterResolver.GetContextValue<Serializer>(HyperionConstants.HyperionSerializer);
+            var serializer = formatterResolver.GetHyperionSerializer();
             var serializedObject = MessagePackBinary.ReadBytesSegment(bytes, offset, out readSize);
             using (var ms = new MemoryStream(serializedObject.Array, serializedObject.Offset, serializedObject.Count, false))
             {
@@ -39,7 +39,7 @@ namespace MessagePack.Formatters
 
             var bufferPool = BufferManager.Shared;
             byte[] buffer; int bufferSize;
-            var serializer = formatterResolver.GetContextValue<Serializer>(HyperionConstants.HyperionSerializer);
+            var serializer = formatterResolver.GetHyperionSerializer();
             using (var pooledStream = BufferManagerOutputStreamManager.Create())
             {
                 var outputStream = pooledStream.Object;
