@@ -14,7 +14,7 @@ namespace MessagePack
     public static partial class MessagePackSerializer
     {
         private const int c_zeroSize = 0;
-        private const int c_defaultCopyBufferSize = 1024 * 64;
+        private const int c_defaultCopyBufferSize = 1024 * 80;
 #if !NET40
         private static readonly ArrayPool<byte> s_bufferPool = ArrayPool<byte>.Shared;
 #endif
@@ -361,7 +361,7 @@ namespace MessagePack.Internal
         {
             if (buffer == null)
             {
-                const int _bufferSize = 1024 * 64;
+                const int _bufferSize = 1024 * 80;
                 buffer = new byte[_bufferSize];
             }
             return buffer;

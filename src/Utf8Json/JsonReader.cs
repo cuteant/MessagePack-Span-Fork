@@ -1230,7 +1230,7 @@ namespace Utf8Json
             {
                 if (buffer == null)
                 {
-                    const int _bufferSize = 65535;// 1024 * 64;
+                    const int _bufferSize = 65535;// 1024 * 80;
                     buffer = new byte[_bufferSize];
                 }
                 return buffer;
@@ -1240,7 +1240,7 @@ namespace Utf8Json
             {
                 if (codePointStringBuffer == null)
                 {
-                    const int _bufferSize = 65535;// 1024 * 64;
+                    const int _bufferSize = 65535;// 1024 * 80;
                     codePointStringBuffer = new char[_bufferSize];
                 }
                 return codePointStringBuffer;

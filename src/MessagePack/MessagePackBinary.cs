@@ -2320,7 +2320,7 @@ namespace MessagePack
             {
                 if (buffer == null)
                 {
-                    const int _bufferSize = 1024 * 64;
+                    const int _bufferSize = 1024 * 80;
                     buffer = new byte[_bufferSize];
                 }
                 return buffer;

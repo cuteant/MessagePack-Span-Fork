@@ -4,7 +4,7 @@
     <AssemblyVersion>1.7.0.0</AssemblyVersion>
     <VersionPrefix Condition=" '$(VersionPrefix)'=='' ">1.7.3</VersionPrefix>
     <VersionSuffix Condition=" '$(VersionSuffix)'=='' ">rtm</VersionSuffix>
-    <VersionDateSuffix Condition=" '$(VersionDateSuffix)'=='' ">181220-01</VersionDateSuffix>
+    <VersionDateSuffix Condition=" '$(VersionDateSuffix)'=='' ">190106-01</VersionDateSuffix>
     <VersionSuffix Condition=" '$(VersionDateSuffix)'!='' ">$(VersionSuffix)-$(VersionDateSuffix)</VersionSuffix>
   </PropertyGroup>
   <Choose>

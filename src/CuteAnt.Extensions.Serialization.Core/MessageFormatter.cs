@@ -11,7 +11,7 @@ namespace CuteAnt.Extensions.Serialization
   /// <summary>Base class to handle serializing and deserializing strongly-typed objects.</summary>
   public abstract partial class MessageFormatter : IMessageFormatter
   {
-    private const int c_initialBufferSize = 1024 * 64;
+    private const int c_initialBufferSize = 1024 * 80;
     private const int c_zeroSize = 0;
 
     #region @@ Constructors @@

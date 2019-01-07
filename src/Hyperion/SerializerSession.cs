@@ -57,7 +57,7 @@ namespace Hyperion
         {
             if (serializer.Options.PreserveObjectReferences)
             {
-                _objects = new Dictionary<object, int>(TypedEqualityComparer.Instance);
+                _objects = new Dictionary<object, int>(ReferenceEqualsComparer.Instance); // TypedEqualityComparer.Instance
             }
             Reinitialize(serializer);
         }

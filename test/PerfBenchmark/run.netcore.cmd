@@ -1,0 +1,1 @@
+dotnet run -c Release -f netcoreapp2.2
