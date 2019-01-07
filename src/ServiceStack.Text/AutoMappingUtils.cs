@@ -29,23 +29,7 @@ namespace ServiceStack
             if (fromType == typeof(T))
                 return (T)from;
 
-
-            var toType = typeof(T);
-            if (fromType.IsValueType || toType.IsValueType)
-            {
-                return (T)ChangeValueType(from, toType);
-            }
-
-            if (typeof(IEnumerable).IsAssignableFrom(typeof(T)))
-            {
-                var listResult = TranslateListWithElements.TryTranslateCollections(
-                    fromType, typeof(T), from);
-
-                return (T)listResult;
-            }
-
-            var to = ActivatorUtils.FastCreateInstance<T>();// typeof(T).CreateInstance<T>();
-            return to.PopulateWith(from);
+            return (T)ConvertTo(from, typeof(T));
         }
 
         public static T CreateCopy<T>(this T from)
@@ -81,6 +65,11 @@ namespace ServiceStack
 
             if (from.GetType().IsValueType || type.IsValueType)
                 return ChangeValueType(from, type);
+
+            if (from is string str)
+                return SSTTypeSerializer.DeserializeFromString(str, type);
+            if (from is ReadOnlyMemory<char> rom)
+                return SSTTypeSerializer.DeserializeFromSpan(type, rom.Span);
 
             if (typeof(IEnumerable).IsAssignableFrom(type))
             {
