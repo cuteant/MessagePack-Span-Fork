@@ -76,5 +76,14 @@ namespace Utf8Json.Tests
             cd = null;
             Convert(cd).IsNull();
         }
+
+        [Fact]
+        public void DictionaryObjectValueTest()
+        {
+            var x = new Dictionary<string, object>() { { "a", 100 }, { "b", "str" }, { "c", Guid.NewGuid() } };
+
+            var conv = Convert(x);
+            Assert.NotNull(conv);
+        }
     }
 }

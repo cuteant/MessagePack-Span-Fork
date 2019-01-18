@@ -20,7 +20,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="protobuf-net" Version="$(ProtobufNetPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CuteAnt.Extensions.Serialization.Core\CuteAnt.Extensions.Serialization.Core.csproj" />
-    <ProjectReference Include="..\protobuf-net\protobuf-net.csproj" />
   </ItemGroup>
 </Project>
