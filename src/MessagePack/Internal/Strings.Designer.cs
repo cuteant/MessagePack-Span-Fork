@@ -47,7 +47,7 @@ namespace MessagePack.Internal {
         }
         
         /// <summary>
-        ///   使用此强类型资源类，为所有资源查找
+        ///   重写当前线程的 CurrentUICulture 属性
         ///   重写当前线程的 CurrentUICulture 属性。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -57,6 +57,15 @@ namespace MessagePack.Internal {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Register must call on startup(before use GetFormatter&lt;T&gt;). 的本地化字符串。
+        /// </summary>
+        internal static string MessagePack_Register_Err {
+            get {
+                return ResourceManager.GetString("MessagePack_Register_Err", resourceCulture);
             }
         }
     }

@@ -20,10 +20,10 @@ namespace MessagePack
             public static void RegisterDefaultResolver(params IFormatterResolver[] resolvers)
             {
                 CompositeResolver.Register(resolvers);
-                defaultResolver = CompositeResolver.Instance;
+                Interlocked.Exchange(ref defaultResolver, CompositeResolver.Instance);
             }
 
-            private static readonly Type s_defaultTypelessFormatterType = typeof(TypelessFormatter);
+            internal static readonly Type DefaultTypelessFormatterType = typeof(TypelessFormatter);
             private static readonly IMessagePackFormatter<object> s_defaultTypelessFormatter = MessagePack.Formatters.TypelessFormatter.Instance;
             private static IMessagePackFormatter<object> s_typelessFormatter;
             private static Type s_typelessFormatterType;
@@ -35,7 +35,7 @@ namespace MessagePack
             internal static Type TypelessFormatterType
             {
                 [MethodImpl(InlineMethod.Value)]
-                get => Volatile.Read(ref s_typelessFormatterType) ?? s_defaultTypelessFormatterType;
+                get => Volatile.Read(ref s_typelessFormatterType) ?? DefaultTypelessFormatterType;
             }
             public static void RegisterTypelessFormatter(IMessagePackFormatter<object> typelessFormatter)
             {

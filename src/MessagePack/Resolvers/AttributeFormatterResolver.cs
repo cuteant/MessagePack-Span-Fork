@@ -36,7 +36,8 @@ namespace MessagePack.Resolvers
 #endif
                 if (attr == null) { return; }
 
-                if (attr.FormatterType == MessagePackSerializer.Typeless.TypelessFormatterType)
+                if (attr.FormatterType == MessagePackSerializer.Typeless.TypelessFormatterType ||
+                    attr.FormatterType == MessagePackSerializer.Typeless.DefaultTypelessFormatterType)
                 {
                     formatter = (IMessagePackFormatter<T>)MessagePackSerializer.Typeless.TypelessFormatter;
                 }

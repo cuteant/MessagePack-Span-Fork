@@ -3,12 +3,10 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Utf8Json;
 using Utf8Json.Formatters;
-using Utf8Json.ImmutableCollection;
 using Utf8Json.Resolvers;
 
-namespace CuteAnt.Extensions.Serialization
+namespace Utf8Json
 {
     public static class Utf8JsonStandardResolver
     {
@@ -39,14 +37,36 @@ namespace CuteAnt.Extensions.Serialization
             AllowPrivateExcludeNullCamelCaseStandardResolverCore.Register(formatters, resolvers);
             AllowPrivateExcludeNullSnakeCaseStandardResolverCore.Register(formatters, resolvers);
         }
+
+        public static bool TryRegister(params IJsonFormatterResolver[] resolvers)
+        {
+            if (!AllowPrivateExcludeNullStandardResolverCore.TryRegister(resolvers)) { return false; }
+            if (!AllowPrivateExcludeNullCamelCaseStandardResolverCore.TryRegister(resolvers)) { return false; }
+            if (!AllowPrivateExcludeNullSnakeCaseStandardResolverCore.TryRegister(resolvers)) { return false; }
+            return true;
+        }
+
+        public static bool TryRegister(params IJsonFormatter[] formatters)
+        {
+            if (!AllowPrivateExcludeNullStandardResolverCore.TryRegister(formatters)) { return false; }
+            if (!AllowPrivateExcludeNullCamelCaseStandardResolverCore.TryRegister(formatters)) { return false; }
+            if (!AllowPrivateExcludeNullSnakeCaseStandardResolverCore.TryRegister(formatters)) { return false; }
+            return true;
+        }
+
+        public static bool TryRegister(IJsonFormatter[] formatters, IJsonFormatterResolver[] resolvers)
+        {
+            if (!AllowPrivateExcludeNullStandardResolverCore.TryRegister(formatters, resolvers)) { return false; }
+            if (!AllowPrivateExcludeNullCamelCaseStandardResolverCore.TryRegister(formatters, resolvers)) { return false; }
+            if (!AllowPrivateExcludeNullSnakeCaseStandardResolverCore.TryRegister(formatters, resolvers)) { return false; }
+            return true;
+        }
     }
 
     internal static class DefaultResolverHelper
     {
         internal static readonly IJsonFormatterResolver[] CompositeResolverBase = new[]
         {
-            ImmutableCollectionResolver.Instance,
-
             BuiltinResolver.Instance, // Builtin
             EnumResolver.Default,     // Enum(default => string)
             DynamicGenericResolver.Instance, // T[], List<T>, etc...
@@ -119,13 +139,10 @@ namespace CuteAnt.Extensions.Serialization
         {
         }
 
-        public static void Register(params IJsonFormatterResolver[] resolvers)
+        public static bool TryRegister(params IJsonFormatterResolver[] resolvers)
         {
-            if (null == resolvers || resolvers.Length == 0) { return; }
-            if (Locked == s_isFreezed)
-            {
-                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
-            }
+            if (null == resolvers || resolvers.Length == 0) { return false; }
+            if (Locked == Volatile.Read(ref s_isFreezed)) { return false; }
 
             List<IJsonFormatterResolver> snapshot, newCache;
             do
@@ -136,15 +153,21 @@ namespace CuteAnt.Extensions.Serialization
                 if (snapshot.Count > 0) { newCache.AddRange(snapshot); }
             } while (!ReferenceEquals(
                 Interlocked.CompareExchange(ref s_resolvers, newCache, snapshot), snapshot));
+            return true;
         }
 
-        public static void Register(params IJsonFormatter[] formatters)
+        public static void Register(params IJsonFormatterResolver[] resolvers)
         {
-            if (null == formatters || formatters.Length == 0) { return; }
-            if (Locked == s_isFreezed)
-            {
-                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
-            }
+            if (null == resolvers || resolvers.Length == 0) { return; }
+
+            if (TryRegister(resolvers)) { return; }
+            ThrowHelper.ThrowInvalidOperationException(ExceptionResource.Utf8Json_Register_Err);
+        }
+
+        public static bool TryRegister(params IJsonFormatter[] formatters)
+        {
+            if (null == formatters || formatters.Length == 0) { return false; }
+            if (Locked == Volatile.Read(ref s_isFreezed)) { return false; }
 
             List<IJsonFormatter> snapshot, newCache;
             do
@@ -155,12 +178,28 @@ namespace CuteAnt.Extensions.Serialization
                 if (snapshot.Count > 0) { newCache.AddRange(snapshot); }
             } while (!ReferenceEquals(
                 Interlocked.CompareExchange(ref s_formatters, newCache, snapshot), snapshot));
+            return true;
+        }
+
+        public static void Register(params IJsonFormatter[] formatters)
+        {
+            if (null == formatters || formatters.Length == 0) { return; }
+
+            if (TryRegister(formatters)) { return; }
+            ThrowHelper.ThrowInvalidOperationException(ExceptionResource.Utf8Json_Register_Err);
         }
 
         public static void Register(IJsonFormatter[] formatters, IJsonFormatterResolver[] resolvers)
         {
             Register(formatters);
             Register(resolvers);
+        }
+
+        public static bool TryRegister(IJsonFormatter[] formatters, IJsonFormatterResolver[] resolvers)
+        {
+            if (!TryRegister(formatters)) { return false; }
+            if (!TryRegister(resolvers)) { return false; }
+            return true;
         }
 
         public IJsonFormatter<T> GetFormatter<T>()
@@ -269,13 +308,10 @@ namespace CuteAnt.Extensions.Serialization
         {
         }
 
-        public static void Register(params IJsonFormatterResolver[] resolvers)
+        public static bool TryRegister(params IJsonFormatterResolver[] resolvers)
         {
-            if (null == resolvers || resolvers.Length == 0) { return; }
-            if (Locked == s_isFreezed)
-            {
-                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
-            }
+            if (null == resolvers || resolvers.Length == 0) { return false; }
+            if (Locked == Volatile.Read(ref s_isFreezed)) { return false; }
 
             List<IJsonFormatterResolver> snapshot, newCache;
             do
@@ -286,15 +322,21 @@ namespace CuteAnt.Extensions.Serialization
                 if (snapshot.Count > 0) { newCache.AddRange(snapshot); }
             } while (!ReferenceEquals(
                 Interlocked.CompareExchange(ref s_resolvers, newCache, snapshot), snapshot));
+            return true;
         }
 
-        public static void Register(params IJsonFormatter[] formatters)
+        public static void Register(params IJsonFormatterResolver[] resolvers)
         {
-            if (null == formatters || formatters.Length == 0) { return; }
-            if (Locked == s_isFreezed)
-            {
-                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
-            }
+            if (null == resolvers || resolvers.Length == 0) { return; }
+
+            if (TryRegister(resolvers)) { return; }
+            ThrowHelper.ThrowInvalidOperationException(ExceptionResource.Utf8Json_Register_Err);
+        }
+
+        public static bool TryRegister(params IJsonFormatter[] formatters)
+        {
+            if (null == formatters || formatters.Length == 0) { return false; }
+            if (Locked == Volatile.Read(ref s_isFreezed)) { return false; }
 
             List<IJsonFormatter> snapshot, newCache;
             do
@@ -305,12 +347,28 @@ namespace CuteAnt.Extensions.Serialization
                 if (snapshot.Count > 0) { newCache.AddRange(snapshot); }
             } while (!ReferenceEquals(
                 Interlocked.CompareExchange(ref s_formatters, newCache, snapshot), snapshot));
+            return true;
+        }
+
+        public static void Register(params IJsonFormatter[] formatters)
+        {
+            if (null == formatters || formatters.Length == 0) { return; }
+
+            if (TryRegister(formatters)) { return; }
+            ThrowHelper.ThrowInvalidOperationException(ExceptionResource.Utf8Json_Register_Err);
         }
 
         public static void Register(IJsonFormatter[] formatters, IJsonFormatterResolver[] resolvers)
         {
             Register(formatters);
             Register(resolvers);
+        }
+
+        public static bool TryRegister(IJsonFormatter[] formatters, IJsonFormatterResolver[] resolvers)
+        {
+            if (!TryRegister(formatters)) { return false; }
+            if (!TryRegister(resolvers)) { return false; }
+            return true;
         }
 
         public IJsonFormatter<T> GetFormatter<T>()
@@ -419,13 +477,10 @@ namespace CuteAnt.Extensions.Serialization
         {
         }
 
-        public static void Register(params IJsonFormatterResolver[] resolvers)
+        public static bool TryRegister(params IJsonFormatterResolver[] resolvers)
         {
-            if (null == resolvers || resolvers.Length == 0) { return; }
-            if (Locked == s_isFreezed)
-            {
-                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
-            }
+            if (null == resolvers || resolvers.Length == 0) { return false; }
+            if (Locked == Volatile.Read(ref s_isFreezed)) { return false; }
 
             List<IJsonFormatterResolver> snapshot, newCache;
             do
@@ -436,15 +491,21 @@ namespace CuteAnt.Extensions.Serialization
                 if (snapshot.Count > 0) { newCache.AddRange(snapshot); }
             } while (!ReferenceEquals(
                 Interlocked.CompareExchange(ref s_resolvers, newCache, snapshot), snapshot));
+            return true;
         }
 
-        public static void Register(params IJsonFormatter[] formatters)
+        public static void Register(params IJsonFormatterResolver[] resolvers)
         {
-            if (null == formatters || formatters.Length == 0) { return; }
-            if (Locked == s_isFreezed)
-            {
-                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
-            }
+            if (null == resolvers || resolvers.Length == 0) { return; }
+
+            if (TryRegister(resolvers)) { return; }
+            ThrowHelper.ThrowInvalidOperationException(ExceptionResource.Utf8Json_Register_Err);
+        }
+
+        public static bool TryRegister(params IJsonFormatter[] formatters)
+        {
+            if (null == formatters || formatters.Length == 0) { return false; }
+            if (Locked == Volatile.Read(ref s_isFreezed)) { return false; }
 
             List<IJsonFormatter> snapshot, newCache;
             do
@@ -455,12 +516,28 @@ namespace CuteAnt.Extensions.Serialization
                 if (snapshot.Count > 0) { newCache.AddRange(snapshot); }
             } while (!ReferenceEquals(
                 Interlocked.CompareExchange(ref s_formatters, newCache, snapshot), snapshot));
+            return true;
+        }
+
+        public static void Register(params IJsonFormatter[] formatters)
+        {
+            if (null == formatters || formatters.Length == 0) { return; }
+
+            if (TryRegister(formatters)) { return; }
+            ThrowHelper.ThrowInvalidOperationException(ExceptionResource.Utf8Json_Register_Err);
         }
 
         public static void Register(IJsonFormatter[] formatters, IJsonFormatterResolver[] resolvers)
         {
             Register(formatters);
             Register(resolvers);
+        }
+
+        public static bool TryRegister(IJsonFormatter[] formatters, IJsonFormatterResolver[] resolvers)
+        {
+            if (!TryRegister(formatters)) { return false; }
+            if (!TryRegister(resolvers)) { return false; }
+            return true;
         }
 
         public IJsonFormatter<T> GetFormatter<T>()

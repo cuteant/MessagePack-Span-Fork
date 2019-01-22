@@ -83,6 +83,7 @@ namespace Utf8Json
     /// <summary>The convention for this enum is using the resource name as the enum name</summary>
     internal enum ExceptionResource
     {
+        Utf8Json_Register_Err,
     }
 
     #endregion

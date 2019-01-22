@@ -4,7 +4,6 @@ using System.Text;
 using CuteAnt.Buffers;
 using CuteAnt.Extensions.Internal;
 using MessagePack;
-using MessagePack.Resolvers;
 using Microsoft.Extensions.Logging;
 
 namespace CuteAnt.Extensions.Serialization

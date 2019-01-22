@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using System.Threading;
 #if !NET40
 using System.Buffers;
 #endif
@@ -54,7 +55,7 @@ namespace MessagePack
         /// <param name="resolver"></param>
         public static void SetDefaultResolver(IFormatterResolver resolver)
         {
-            defaultResolver = resolver;
+            Interlocked.Exchange(ref defaultResolver, resolver);
         }
 
         /// <summary>

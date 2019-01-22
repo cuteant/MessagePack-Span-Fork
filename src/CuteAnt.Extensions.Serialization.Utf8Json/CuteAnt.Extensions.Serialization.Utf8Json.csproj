@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CuteAnt.Extensions.Serialization.Core\CuteAnt.Extensions.Serialization.Core.csproj" />
-    <ProjectReference Include="..\Utf8Json.ImmutableCollection\Utf8Json.ImmutableCollection.csproj" />
     <ProjectReference Include="..\Utf8Json\Utf8Json.csproj" />
   </ItemGroup>
 

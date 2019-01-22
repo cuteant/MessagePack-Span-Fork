@@ -83,6 +83,7 @@ namespace MessagePack
     /// <summary>The convention for this enum is using the resource name as the enum name</summary>
     internal enum ExceptionResource
     {
+        MessagePack_Register_Err,
     }
 
     #endregion

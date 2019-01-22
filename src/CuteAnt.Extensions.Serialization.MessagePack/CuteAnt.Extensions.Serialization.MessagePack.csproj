@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CuteAnt.Extensions.Serialization.Core\CuteAnt.Extensions.Serialization.Core.csproj" />
-    <ProjectReference Include="..\MessagePack.ImmutableCollection\MessagePack.ImmutableCollection.csproj" />
     <ProjectReference Include="..\MessagePack.LZ4\MessagePack.LZ4.csproj" />
     <ProjectReference Include="..\MessagePack\MessagePack.csproj" />
   </ItemGroup>
