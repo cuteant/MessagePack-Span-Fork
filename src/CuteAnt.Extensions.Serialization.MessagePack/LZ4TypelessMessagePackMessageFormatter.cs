@@ -36,7 +36,7 @@ namespace CuteAnt.Extensions.Serialization
       }
     }
     /// <inheritdoc />
-    public sealed override T Deserialize<T>(in ArraySegment<byte> serializedObject)
+    public sealed override T Deserialize<T>(ArraySegment<byte> serializedObject)
     {
       try
       {
@@ -75,7 +75,7 @@ namespace CuteAnt.Extensions.Serialization
       }
     }
     /// <inheritdoc />
-    public sealed override object Deserialize(Type type, in ArraySegment<byte> serializedObject)
+    public sealed override object Deserialize(Type type, ArraySegment<byte> serializedObject)
     {
       try
       {

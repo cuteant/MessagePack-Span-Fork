@@ -99,7 +99,7 @@ namespace MessagePack.Internal
 #endif
 
 
-        public bool TryGetValueSafe(in ArraySegment<byte> key, out int value)
+        public bool TryGetValueSafe(ArraySegment<byte> key, out int value)
         {
             var node = root;
             var bytes = key.Array;

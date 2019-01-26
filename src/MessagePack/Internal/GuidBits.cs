@@ -55,7 +55,7 @@ namespace MessagePack.Internal
         }
 
         // 4-pattern, lower/upper and '-' or no
-        public GuidBits(in ArraySegment<byte> utf8string)
+        public GuidBits(ArraySegment<byte> utf8string)
         {
             this = default(GuidBits);
 

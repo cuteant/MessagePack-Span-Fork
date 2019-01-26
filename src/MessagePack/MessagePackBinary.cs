@@ -3363,7 +3363,7 @@ namespace MessagePack
 #if NETSTANDARD || DESKTOPCLR
         [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
-        public static int WriteDateTime(Stream stream, in DateTime dateTime)
+        public static int WriteDateTime(Stream stream, DateTime dateTime)
         {
             var buffer = StreamDecodeMemoryPool.GetBuffer();
             var writeCount = WriteDateTime(ref buffer, 0, dateTime);

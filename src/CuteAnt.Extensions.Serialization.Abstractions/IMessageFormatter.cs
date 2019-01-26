@@ -94,7 +94,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    object Deserialize(Type type, in ArraySegment<byte> serializedObject);
+    object Deserialize(Type type, ArraySegment<byte> serializedObject);
 
     /// <summary>Deserializes the specified serialized object.</summary>
     /// <param name="type">The type of the object to deserialize.</param>
@@ -116,7 +116,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>Deserializes the specified serialized object.</summary>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    T Deserialize<T>(in ArraySegment<byte> serializedObject);
+    T Deserialize<T>(ArraySegment<byte> serializedObject);
 
     /// <summary>Deserializes the specified serialized object.</summary>
     /// <typeparam name="T"></typeparam>
@@ -140,7 +140,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    T Deserialize<T>(Type type, in ArraySegment<byte> serializedObject);
+    T Deserialize<T>(Type type, ArraySegment<byte> serializedObject);
 
     /// <summary>Deserializes the specified serialized object.</summary>
     /// <typeparam name="T"></typeparam>
@@ -164,7 +164,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    Task<object> DeserializeAsync(Type type, in ArraySegment<byte> serializedObject);
+    Task<object> DeserializeAsync(Type type, ArraySegment<byte> serializedObject);
 
     /// <summary>Deserializes the asynchronous.</summary>
     /// <param name="type">The type of the object to deserialize.</param>
@@ -187,7 +187,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <typeparam name="T"></typeparam>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    Task<T> DeserializeAsync<T>(in ArraySegment<byte> serializedObject);
+    Task<T> DeserializeAsync<T>(ArraySegment<byte> serializedObject);
 
     /// <summary>Deserializes the asynchronous.</summary>
     /// <typeparam name="T"></typeparam>
@@ -212,7 +212,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    Task<T> DeserializeAsync<T>(Type type, in ArraySegment<byte> serializedObject);
+    Task<T> DeserializeAsync<T>(Type type, ArraySegment<byte> serializedObject);
 
     /// <summary>Deserializes the asynchronous.</summary>
     /// <typeparam name="T"></typeparam>
