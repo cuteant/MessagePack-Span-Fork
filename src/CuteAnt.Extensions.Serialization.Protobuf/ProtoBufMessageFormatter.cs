@@ -69,6 +69,13 @@ namespace CuteAnt.Extensions.Serialization
 
         #endregion
 
+        #region -- IncludeManifest --
+
+        /// <summary>Returns whether this messageFormatter needs a manifest in the Deserialize method</summary>
+        public override bool IncludeManifest => false;
+
+        #endregion
+
         #region -- DeepCopy --
 
         public sealed override object DeepCopyObject(object source) => s_model.DeepClone(source);
