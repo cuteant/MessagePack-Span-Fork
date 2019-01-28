@@ -1459,7 +1459,10 @@ typeof(int), typeof(int) });
                         var pseudokey = item.GetCustomAttributeX<DataMemberAttribute>(true);
                         if (pseudokey == null)
                         {
-                            ThrowHelper.ThrowDynamicObjectResolverException_Property_DataMem(type, item);
+                            // This member has no DataMemberAttribute nor IgnoreMemberAttribute.
+                            // But the type *did* have a DataContractAttribute on it, so no attribute implies the member should not be serialized.
+                            continue;
+                            //ThrowHelper.ThrowDynamicObjectResolverException_Property_DataMem(type, item);
                         }
 
                         // use Order first
@@ -1540,7 +1543,10 @@ typeof(int), typeof(int) });
                         var pseudokey = item.GetCustomAttributeX<DataMemberAttribute>(true);
                         if (pseudokey == null)
                         {
-                            ThrowHelper.ThrowDynamicObjectResolverException_Field_DataMem(type, item);
+                            // This member has no DataMemberAttribute nor IgnoreMemberAttribute.
+                            // But the type *did* have a DataContractAttribute on it, so no attribute implies the member should not be serialized.
+                            continue;
+                            //ThrowHelper.ThrowDynamicObjectResolverException_Field_DataMem(type, item);
                         }
 
                         // use Order first
