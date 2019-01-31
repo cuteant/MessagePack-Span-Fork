@@ -15,13 +15,9 @@ namespace MessagePack.Formatters
 
         public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return default;
-            }
+            if (MessagePackBinary.IsNil(bytes, offset)) { readSize = 1; return default; }
 
-            var serializer = formatterResolver.GetHyperionSerializer();
+            var serializer = ((IFormatterResolverContext<Serializer>)formatterResolver).Value;
             var serializedObject = MessagePackBinary.ReadBytesSegment(bytes, offset, out readSize);
             using (var ms = new MemoryStream(serializedObject.Array, serializedObject.Offset, serializedObject.Count, false))
             {
@@ -32,28 +28,26 @@ namespace MessagePack.Formatters
 
         public int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
+            if (value == null) { return MessagePackBinary.WriteNil(ref bytes, offset); }
 
             var bufferPool = BufferManager.Shared;
-            byte[] buffer; int bufferSize;
-            var serializer = formatterResolver.GetHyperionSerializer();
-            using (var pooledStream = BufferManagerOutputStreamManager.Create())
-            {
-                var outputStream = pooledStream.Object;
-                outputStream.Reinitialize(c_initialBufferSize, bufferPool);
-
-                serializer.Serialize(value, outputStream);
-                buffer = outputStream.ToArray(out bufferSize);
-            }
+            byte[] buffer = null; int bufferSize;
 
             try
             {
+                var serializer = ((IFormatterResolverContext<Serializer>)formatterResolver).Value;
+                using (var pooledStream = BufferManagerOutputStreamManager.Create())
+                {
+                    var outputStream = pooledStream.Object;
+                    outputStream.Reinitialize(c_initialBufferSize, bufferPool);
+
+                    serializer.Serialize(value, outputStream);
+                    buffer = outputStream.ToArray(out bufferSize);
+                }
+
                 return MessagePackBinary.WriteBytes(ref bytes, offset, buffer, 0, bufferSize);
             }
-            finally { bufferPool.Return(buffer); }
+            finally { if (buffer != null) { bufferPool.Return(buffer); } }
         }
     }
 }

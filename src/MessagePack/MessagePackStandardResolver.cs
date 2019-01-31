@@ -31,39 +31,39 @@ namespace MessagePack
         public static void Register(params IFormatterResolver[] resolvers)
         {
             DefaultResolverCore.Register(resolvers);
-            TypelessDefaultResolver.Register(resolvers);
+            TypelessDefaultResolverCore.Register(resolvers);
         }
 
         public static void Register(params IMessagePackFormatter[] formatters)
         {
             DefaultResolverCore.Register(formatters);
-            TypelessDefaultResolver.Register(formatters);
+            TypelessDefaultResolverCore.Register(formatters);
         }
 
         public static void Register(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
         {
             DefaultResolverCore.Register(formatters, resolvers);
-            TypelessDefaultResolver.Register(formatters, resolvers);
+            TypelessDefaultResolverCore.Register(formatters, resolvers);
         }
 
         public static bool TryRegister(params IFormatterResolver[] resolvers)
         {
             if (!DefaultResolverCore.TryRegister(resolvers)) { return false; }
-            if (!TypelessDefaultResolver.TryRegister(resolvers)) { return false; }
+            if (!TypelessDefaultResolverCore.TryRegister(resolvers)) { return false; }
             return true;
         }
 
         public static bool TryRegister(params IMessagePackFormatter[] formatters)
         {
             if (!DefaultResolverCore.TryRegister(formatters)) { return false; }
-            if (!TypelessDefaultResolver.TryRegister(formatters)) { return false; }
+            if (!TypelessDefaultResolverCore.TryRegister(formatters)) { return false; }
             return true;
         }
 
         public static bool TryRegister(IMessagePackFormatter[] formatters, IFormatterResolver[] resolvers)
         {
             if (!DefaultResolverCore.TryRegister(formatters, resolvers)) { return false; }
-            if (!TypelessDefaultResolver.TryRegister(formatters, resolvers)) { return false; }
+            if (!TypelessDefaultResolverCore.TryRegister(formatters, resolvers)) { return false; }
             return true;
         }
     }

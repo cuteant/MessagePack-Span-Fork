@@ -23,14 +23,12 @@ namespace MessagePack.Formatters
         });
 
         private readonly Serializer _serializer;
-        //private readonly bool _preserveObjectReferences;
 
         protected HyperionFormatterBase(Func<FieldInfo, bool> fieldFilter = null,
             IComparer<FieldInfo> fieldInfoComparer = null, Func<Type, bool> isSupportedFieldType = null)
             : base(fieldFilter, fieldInfoComparer, isSupportedFieldType)
         {
             _serializer = new Serializer(new SerializerOptions(versionTolerance: false, preserveObjectReferences: true));
-            //_preserveObjectReferences = true;
         }
 
         protected HyperionFormatterBase(SerializerOptions options, Func<FieldInfo, bool> fieldFilter = null,
@@ -39,17 +37,12 @@ namespace MessagePack.Formatters
         {
             if (null == options) { ThrowArgumentNullException(); }
 
-            _serializer = new Serializer(options.Clone(false, true));
-            //_preserveObjectReferences = _serializer.Options.PreserveObjectReferences;
+            _serializer = new Serializer(options);
         }
 
         public override T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return default;
-            }
+            if (MessagePackBinary.IsNil(bytes, offset)) { readSize = 1; return default; }
 
             var startOffset = offset;
 
@@ -97,64 +90,58 @@ namespace MessagePack.Formatters
 
         public override int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
+            if (value == null) { return MessagePackBinary.WriteNil(ref bytes, offset); }
 
             var actualType = value.GetType();
-            if (!IsSupportedType(actualType))
-            {
-                ThrowInvalidOperationException(actualType);
-            }
+            if (!IsSupportedType(actualType)) { ThrowInvalidOperationException(actualType); }
 
             var typeSize = MessagePackBinary.WriteNamedType(ref bytes, offset, actualType);
 
             var bufferPool = BufferManager.Shared;
-            byte[] buffer; int bufferSize;
-
-            using (var pooledSession = SerializerSessionManager.Create(_serializer))
-            {
-                var session = pooledSession.Object;
-                session.TrackSerializedType(actualType);
-                session.TrackSerializedObject(value);
-
-                using (var pooledStream = BufferManagerOutputStreamManager.Create())
-                {
-                    var outputStream = pooledStream.Object;
-                    outputStream.Reinitialize(c_initialBufferSize, bufferPool);
-
-                    var fields = GetFieldsFromCache(actualType);
-                    foreach (var (field, getter, setter) in fields)
-                    {
-                        var fieldType = field.FieldType;
-                        var v = GetFieldValue(value, field, getter);
-                        if (s_primitiveTypes.Contains(fieldType))
-                        {
-                            var valueSerializer = _serializer.GetSerializerByType(fieldType);
-                            valueSerializer.WriteValue(outputStream, v, session);
-                        }
-                        else
-                        {
-                            var valueType = fieldType;
-                            if (fieldType.IsNullableType())
-                            {
-                                valueType = Nullable.GetUnderlyingType(fieldType);
-                            }
-                            var valueSerializer = _serializer.GetSerializerByType(valueType);
-                            outputStream.WriteObject(v, valueType, valueSerializer, true, session);
-                        }
-                    }
-
-                    buffer = outputStream.ToArray(out bufferSize);
-                }
-            }
+            byte[] buffer = null; int bufferSize;
 
             try
             {
+                using (var pooledSession = SerializerSessionManager.Create(_serializer))
+                {
+                    var session = pooledSession.Object;
+                    session.TrackSerializedType(actualType);
+                    session.TrackSerializedObject(value);
+
+                    using (var pooledStream = BufferManagerOutputStreamManager.Create())
+                    {
+                        var outputStream = pooledStream.Object;
+                        outputStream.Reinitialize(c_initialBufferSize, bufferPool);
+
+                        var fields = GetFieldsFromCache(actualType);
+                        foreach (var (field, getter, setter) in fields)
+                        {
+                            var fieldType = field.FieldType;
+                            var v = GetFieldValue(value, field, getter);
+                            if (s_primitiveTypes.Contains(fieldType))
+                            {
+                                var valueSerializer = _serializer.GetSerializerByType(fieldType);
+                                valueSerializer.WriteValue(outputStream, v, session);
+                            }
+                            else
+                            {
+                                var valueType = fieldType;
+                                if (fieldType.IsNullableType())
+                                {
+                                    valueType = Nullable.GetUnderlyingType(fieldType);
+                                }
+                                var valueSerializer = _serializer.GetSerializerByType(valueType);
+                                outputStream.WriteObject(v, valueType, valueSerializer, true, session);
+                            }
+                        }
+
+                        buffer = outputStream.ToArray(out bufferSize);
+                    }
+                }
+
                 return MessagePackBinary.WriteBytes(ref bytes, offset + typeSize, buffer, 0, bufferSize) + typeSize;
             }
-            finally { bufferPool.Return(buffer); }
+            finally { if (buffer != null) { bufferPool.Return(buffer); } }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

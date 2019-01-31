@@ -1,41 +1,22 @@
-﻿
-using MessagePack.Formatters;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using MessagePack.Formatters;
 
 namespace MessagePack
 {
     public interface IFormatterResolver
     {
-        IDictionary<string, object> Context { get; }
-        IDictionary<int, object> Context2 { get; }
-        T GetContextValue<T>(string key);
-        T GetContextValue<T>(int key);
         IMessagePackFormatter<T> GetFormatter<T>();
+    }
+
+    public interface IFormatterResolverContext<T>
+    {
+        T Value { get; }
     }
 
     public abstract class FormatterResolver : IFormatterResolver
     {
-        private IDictionary<string, object> _context;
-        public virtual IDictionary<string, object> Context => _context ?? (_context = new Dictionary<string, object>(StringComparer.Ordinal));
-
-        private IDictionary<int, object> _context2;
-        public virtual IDictionary<int, object> Context2 => _context2 ?? (_context2 = new Dictionary<int, object>());
-
-        public virtual T GetContextValue<T>(string key)
-        {
-            if (Context.TryGetValue(key, out var v)) { return (T)v; }
-            return default;
-        }
-
-        public virtual T GetContextValue<T>(int key)
-        {
-            if (Context2.TryGetValue(key, out var v)) { return (T)v; }
-            return default;
-        }
-
         public abstract IMessagePackFormatter<T> GetFormatter<T>();
     }
 

@@ -30,11 +30,7 @@ namespace MessagePack.Formatters
 
         public override T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return default;
-            }
+            if (MessagePackBinary.IsNil(bytes, offset)) { readSize = 1; return default; }
 
             var startOffset = offset;
 
@@ -43,7 +39,7 @@ namespace MessagePack.Formatters
             readSize += typeSize;
 
             var obj = ActivatorUtils.FastCreateInstance(actualType);
-            var serializer = formatterResolver.GetContextValue<Serializer>(HyperionConstants.HyperionSerializer);
+            var serializer = ((IFormatterResolverContext<Serializer>)formatterResolver).Value;
             using (var pooledSession = DeserializerSessionManager.Create(serializer))
             {
                 var session = pooledSession.Object;
@@ -82,64 +78,59 @@ namespace MessagePack.Formatters
 
         public override int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
+            if (value == null) { return MessagePackBinary.WriteNil(ref bytes, offset); }
 
             var actualType = value.GetType();
-            if (!IsSupportedType(actualType))
-            {
-                ThrowInvalidOperationException(actualType);
-            }
+            if (!IsSupportedType(actualType)) { ThrowInvalidOperationException(actualType); }
 
             var typeSize = MessagePackBinary.WriteNamedType(ref bytes, offset, actualType);
 
             var bufferPool = BufferManager.Shared;
-            byte[] buffer; int bufferSize;
-            var serializer = formatterResolver.GetContextValue<Serializer>(HyperionConstants.HyperionSerializer);
-            using (var pooledSession = SerializerSessionManager.Create(serializer))
-            {
-                var session = pooledSession.Object;
-                session.TrackSerializedType(actualType);
-                session.TrackSerializedObject(value);
-
-                using (var pooledStream = BufferManagerOutputStreamManager.Create())
-                {
-                    var outputStream = pooledStream.Object;
-                    outputStream.Reinitialize(c_initialBufferSize, bufferPool);
-
-                    var fields = GetFieldsFromCache(actualType);
-                    foreach (var (field, getter, setter) in fields)
-                    {
-                        var fieldType = field.FieldType;
-                        var v = GetFieldValue(value, field, getter);
-                        if (s_primitiveTypes.Contains(fieldType))
-                        {
-                            var valueSerializer = serializer.GetSerializerByType(fieldType);
-                            valueSerializer.WriteValue(outputStream, v, session);
-                        }
-                        else
-                        {
-                            var valueType = fieldType;
-                            if (fieldType.IsNullableType())
-                            {
-                                valueType = Nullable.GetUnderlyingType(fieldType);
-                            }
-                            var valueSerializer = serializer.GetSerializerByType(valueType);
-                            outputStream.WriteObject(v, valueType, valueSerializer, true, session);
-                        }
-                    }
-
-                    buffer = outputStream.ToArray(out bufferSize);
-                }
-            }
+            byte[] buffer = null; int bufferSize;
 
             try
             {
+                var serializer = ((IFormatterResolverContext<Serializer>)formatterResolver).Value;
+                using (var pooledSession = SerializerSessionManager.Create(serializer))
+                {
+                    var session = pooledSession.Object;
+                    session.TrackSerializedType(actualType);
+                    session.TrackSerializedObject(value);
+
+                    using (var pooledStream = BufferManagerOutputStreamManager.Create())
+                    {
+                        var outputStream = pooledStream.Object;
+                        outputStream.Reinitialize(c_initialBufferSize, bufferPool);
+
+                        var fields = GetFieldsFromCache(actualType);
+                        foreach (var (field, getter, setter) in fields)
+                        {
+                            var fieldType = field.FieldType;
+                            var v = GetFieldValue(value, field, getter);
+                            if (s_primitiveTypes.Contains(fieldType))
+                            {
+                                var valueSerializer = serializer.GetSerializerByType(fieldType);
+                                valueSerializer.WriteValue(outputStream, v, session);
+                            }
+                            else
+                            {
+                                var valueType = fieldType;
+                                if (fieldType.IsNullableType())
+                                {
+                                    valueType = Nullable.GetUnderlyingType(fieldType);
+                                }
+                                var valueSerializer = serializer.GetSerializerByType(valueType);
+                                outputStream.WriteObject(v, valueType, valueSerializer, true, session);
+                            }
+                        }
+
+                        buffer = outputStream.ToArray(out bufferSize);
+                    }
+                }
+
                 return MessagePackBinary.WriteBytes(ref bytes, offset + typeSize, buffer, 0, bufferSize) + typeSize;
             }
-            finally { bufferPool.Return(buffer); }
+            finally { if (buffer != null) { bufferPool.Return(buffer); } }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

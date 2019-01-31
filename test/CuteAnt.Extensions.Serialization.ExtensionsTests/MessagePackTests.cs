@@ -341,15 +341,27 @@ namespace CuteAnt.Extensions.Serialization.Tests
             Helper.ComparePoco((SerializerPocoSerializable)b.Foo, (SerializerPocoSerializable)copy.Foo);
         }
 
+        class TesttResolver : DefaultResolver, IFormatterResolverContext<int>, IFormatterResolverContext<string>
+        {
+            private readonly int _age;
+            private readonly string _name;
+            public TesttResolver(int age, string name) : base()
+            {
+                _age = age;
+                _name = name;
+            }
+
+            int IFormatterResolverContext<int>.Value => _age;
+
+            string IFormatterResolverContext<string>.Value => _name;
+        }
+
         [Fact]
         public void FormatterResolverTest()
         {
-            var resolver = new DefaultResolver();
-            resolver.Context.Add("A", 1);
-            Assert.Equal(1, resolver.Context.Count);
-            var resolver1 = new TypelessDefaultResolver();
-            resolver1.Context.Add("A", 1);
-            Assert.Equal(1, resolver.Context.Count);
+            var resolver = new TesttResolver(10, "蝉");
+            Assert.Equal(10, ((IFormatterResolverContext<int>)resolver).Value);
+            Assert.Equal("蝉", ((IFormatterResolverContext<string>)resolver).Value);
         }
 
         [Fact]
