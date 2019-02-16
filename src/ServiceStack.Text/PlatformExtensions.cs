@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -700,6 +701,26 @@ namespace ServiceStack
                 return to;
             }
 
+            if (obj is IDictionary d)
+            {
+                var to = new Dictionary<string, object>();
+                foreach (var key in d.Keys)
+                {
+                    to[key.ToString()] = d[key];
+                }
+                return to;
+            }
+
+            if (obj is NameValueCollection nvc)
+            {
+                var to = new Dictionary<string, object>();
+                for (var i = 0; i < nvc.Count; i++)
+                {
+                    to[nvc.GetKey(i)] = nvc.Get(i);
+                }
+                return to;
+            }
+
             var type = obj.GetType();
 
             if (!toObjectMapCache.TryGetValue(type, out var def))
@@ -715,6 +736,19 @@ namespace ServiceStack
             return dict;
         }
 
+        public static bool GetDictionaryEntryTypes(this Type dictType, out Type keyType, out Type valueType)
+        {
+            var genericDef = dictType.GetTypeWithGenericTypeDefinitionOf(typeof(IReadOnlyDictionary<,>));
+            if (genericDef != null)
+            {
+                var genericArgs = genericDef.GetGenericArguments();
+                keyType = genericArgs[0];
+                valueType = genericArgs[1];
+                return true;
+            }
+            keyType = valueType = null;
+            return false;
+        }
 
         public static object FromObjectDictionary(this IReadOnlyDictionary<string, object> values, Type type)
         {
@@ -727,7 +761,29 @@ namespace ServiceStack
 
             var to = ActivatorUtils.FastCreateInstance(type);
 
-            PopulateInstanceInternal(values, to, type);
+            if (to is IDictionary d)
+            {
+                if (type.GetDictionaryEntryTypes(out var toKeyType, out var toValueType))
+                {
+                    foreach (var entry in values)
+                    {
+                        var toKey = entry.Key.ConvertTo(toKeyType);
+                        var toValue = entry.Value.ConvertTo(toValueType);
+                        d[toKey] = toValue;
+                    }
+                }
+                else
+                {
+                    foreach (var entry in values)
+                    {
+                        d[entry.Key] = entry.Value;
+                    }
+                }
+            }
+            else
+            {
+                PopulateInstanceInternal(values, to, type);
+            }
 
             return to;
         }
@@ -749,7 +805,8 @@ namespace ServiceStack
             {
                 if (!def.FieldsMap.TryGetValue(entry.Key, out var fieldDef) &&
                     !def.FieldsMap.TryGetValue(entry.Key.ToPascalCase(), out fieldDef)
-                    || entry.Value == null)
+                    || entry.Value == null
+                    || entry.Value == DBNull.Value)
                     continue;
 
                 fieldDef.SetValue(to, entry.Value);

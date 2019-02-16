@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using CuteAnt.Reflection;
 
 namespace ServiceStack.Text.Common
@@ -235,16 +236,23 @@ namespace ServiceStack.Text.Common
     {
         internal static TypeAccessor Get(this KeyValuePair<string, TypeAccessor>[] accessors, ReadOnlySpan<char> propertyName, bool lenient)
         {
-            if (lenient)
-            {
-                //TODO: optimize
-                propertyName = propertyName.ToString().Replace("-", string.Empty).Replace("_", string.Empty).AsSpan();
-            }
+            var testValue = FindPropertyAccessor(accessors, propertyName);
+            if (testValue != null)
+                return testValue;
 
-            //Binary Search
+            if (lenient)
+                return FindPropertyAccessor(accessors,
+                    propertyName.ToString().Replace("-", string.Empty).Replace("_", string.Empty).AsSpan());
+
+            return null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] //Binary Search
+        private static TypeAccessor FindPropertyAccessor(KeyValuePair<string, TypeAccessor>[] accessors, ReadOnlySpan<char> propertyName)
+        {
             var lo = 0;
             var hi = accessors.Length - 1;
-            var mid = (lo + hi + 1) / 2; 
+            var mid = (lo + hi + 1) / 2;
 
             while (lo <= hi)
             {
@@ -258,12 +266,12 @@ namespace ServiceStack.Text.Common
                 else
                     lo = mid + 1;
 
-                mid = (lo + hi + 1) / 2;  
+                mid = (lo + hi + 1) / 2;
             }
             return null;
         }
     }
-    
+
     internal class TypeAccessor
     {
         internal ParseStringSpanDelegate GetProperty;

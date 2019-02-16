@@ -18,9 +18,69 @@ namespace ServiceStack
     [DataContract(Namespace = "http://schemas.servicestack.net/types")]
     public class CustomHttpResult { }
 
+    /// <summary>
+    /// Customize ServiceStack AutoMapping Behavior
+    /// </summary>
+    public static class AutoMapping
+    {
+        /// <summary>
+        /// Register Type to Type AutoMapping converter 
+        /// </summary>
+        public static void RegisterConverter<From, To>(Func<From, To> converter)
+        {
+            JsConfig.InitStatics();
+            AutoMappingUtils.converters[Tuple.Create(typeof(From), typeof(To))] = x => converter((From)x);
+        }
+
+        /// <summary>
+        /// Ignore Type to Type Mapping (including collections containing them) 
+        /// </summary>
+        public static void IgnoreMapping<From, To>() => IgnoreMapping(typeof(From), typeof(To));
+
+        /// <summary>
+        /// Ignore Type to Type Mapping (including collections containing them) 
+        /// </summary>
+        public static void IgnoreMapping(Type fromType, Type toType)
+        {
+            JsConfig.InitStatics();
+            AutoMappingUtils.ignoreMappings[Tuple.Create(fromType, toType)] = true;
+        }
+    }
+
     public static class AutoMappingUtils
     {
-        public static T ConvertTo<T>(this object from)
+        internal static readonly ConcurrentDictionary<Tuple<Type, Type>, MemberGetter> converters
+            = new ConcurrentDictionary<Tuple<Type, Type>, MemberGetter>();
+
+        internal static readonly ConcurrentDictionary<Tuple<Type, Type>, bool> ignoreMappings
+            = new ConcurrentDictionary<Tuple<Type, Type>, bool>();
+
+        public static void Reset()
+        {
+            converters.Clear();
+            ignoreMappings.Clear();
+            AssignmentDefinitionCache.Clear();
+        }
+
+        [Obsolete("Use AutoMapping.RegisterConverter")]
+        public static void RegisterConverter<From, To>(Func<From, To> converter) => throw new NotSupportedException("Deprecated: Use AutoMapping.RegisterConverter");
+
+        public static bool ShouldIgnoreMapping(Type fromType, Type toType) =>
+            ignoreMappings.ContainsKey(Tuple.Create(fromType, toType));
+
+        public static MemberGetter GetConverter(Type fromType, Type toType)
+        {
+            if (converters.IsEmpty)
+                return null;
+
+            var key = Tuple.Create(fromType, toType);
+            return converters.TryGetValue(key, out var converter)
+                ? converter
+                : null;
+        }
+
+        public static T ConvertTo<T>(this object from) => from.ConvertTo<T>(skipConverters: false);
+        public static T ConvertTo<T>(this object from, bool skipConverters)
         {
             if (from == null)
                 return default(T);
@@ -29,7 +89,7 @@ namespace ServiceStack
             if (fromType == typeof(T))
                 return (T)from;
 
-            return (T)ConvertTo(from, typeof(T));
+            return (T)ConvertTo(from, typeof(T), skipConverters);
         }
 
         public static T CreateCopy<T>(this T from)
@@ -37,15 +97,13 @@ namespace ServiceStack
             if (typeof(T).IsValueType)
                 return (T)ChangeValueType(from, typeof(T));
 
-            if (typeof(IEnumerable).IsAssignableFrom(typeof(T)))
+            if (typeof(IEnumerable).IsAssignableFrom(typeof(T)) && typeof(T) != typeof(string))
             {
-                var listResult = TranslateListWithElements.TryTranslateCollections(
-                    from.GetType(), typeof(T), from);
-
+                var listResult = TranslateListWithElements.TryTranslateCollections(from.GetType(), typeof(T), from);
                 return (T)listResult;
             }
 
-            var to = ActivatorUtils.FastCreateInstance<T>();// typeof(T).CreateInstance<T>();
+            var to = typeof(T).CreateInstance<T>();
             return to.PopulateWith(from);
         }
 
@@ -55,31 +113,44 @@ namespace ServiceStack
             return to;
         }
 
-        public static object ConvertTo(this object from, Type type)
+        public static object ConvertTo(this object from, Type toType) => from.ConvertTo(toType, skipConverters: false);
+        public static object ConvertTo(this object from, Type toType, bool skipConverters)
         {
             if (from == null)
                 return null;
 
-            if (from.GetType() == type)
+            var fromType = from.GetType();
+            if (fromType == toType)
                 return from;
 
-            if (from.GetType().IsValueType || type.IsValueType)
-                return ChangeValueType(from, type);
+            if (ShouldIgnoreMapping(fromType, toType))
+                return null;
+
+            if (!skipConverters)
+            {
+                var converter = GetConverter(fromType, toType);
+                if (converter != null)
+                    return converter(from);
+            }
+
+            if (fromType.IsValueType || toType.IsValueType)
+                return ChangeValueType(from, toType);
 
             if (from is string str)
-                return SSTTypeSerializer.DeserializeFromString(str, type);
+                return SSTTypeSerializer.DeserializeFromString(str, toType);
             if (from is ReadOnlyMemory<char> rom)
-                return SSTTypeSerializer.DeserializeFromSpan(type, rom.Span);
+                return SSTTypeSerializer.DeserializeFromSpan(toType, rom.Span);
 
-            if (typeof(IEnumerable).IsAssignableFrom(type))
+            if (toType == typeof(string))
+                return from.ToJsv();
+
+            if (typeof(IEnumerable).IsAssignableFrom(toType))
             {
-                var listResult = TranslateListWithElements.TryTranslateCollections(
-                    from.GetType(), type, from);
-
+                var listResult = TryConvertCollections(fromType, toType, from);
                 return listResult;
             }
 
-            var to = ActivatorUtils.FastCreateInstance(type);
+            var to = toType.CreateInstance();
             return to.PopulateWithNonDefaultValues(from);
         }
 
@@ -419,10 +490,10 @@ namespace ServiceStack
                 return;
             }
 
-            var propertySetMetodInfo = propertyInfo.GetSetMethod(nonPublic:true);
-            if (propertySetMetodInfo != null)
+            var propertySetMethodInfo = propertyInfo.GetSetMethod(nonPublic:true);
+            if (propertySetMethodInfo != null)
             {
-                propertySetMetodInfo.Invoke(obj, new[] { value });
+                propertySetMethodInfo.Invoke(obj, new[] { value });
             }
         }
 
@@ -547,17 +618,17 @@ namespace ServiceStack
             }
         }
 
-        public static void SetGenericCollection(Type realisedListType, object genericObj, Dictionary<Type, int> recursionInfo)
+        public static void SetGenericCollection(Type realizedListType, object genericObj, Dictionary<Type, int> recursionInfo)
         {
-            var args = realisedListType.GetGenericArguments();
+            var args = realizedListType.GetGenericArguments();
             if (args.Length != 1)
             {
-                Tracer.Instance.WriteError("Found a generic list that does not take one generic argument: {0}", realisedListType);
+                Tracer.Instance.WriteError("Found a generic list that does not take one generic argument: {0}", realizedListType);
 
                 return;
             }
 
-            var methodInfo = realisedListType.GetMethodInfo("Add");
+            var methodInfo = realizedListType.GetMethodInfo("Add");
             if (methodInfo != null)
             {
                 var argValues = CreateDefaultValues(args, recursionInfo);
@@ -617,6 +688,54 @@ namespace ServiceStack
                 }
             }
             while ((baseType = baseType.BaseType) != null);
+        }
+
+        public static object TryConvertCollections(Type fromType, Type toType, object fromValue)
+        {
+            if (fromValue is IEnumerable values)
+            {
+                if (fromValue is IDictionary d)
+                {
+                    if (toType.GetDictionaryEntryTypes(out var toKeyType, out var toValueType))
+                    {
+                        var to = (IDictionary)toType.CreateInstance();
+                        foreach (var key in d.Keys)
+                        {
+                            var toKey = key.ConvertTo(toKeyType);
+                            var toValue = d[key].ConvertTo(toValueType);
+                            to[toKey] = toValue;
+                        }
+                        return to;
+                    }
+                    else
+                    {
+                        var from = fromValue.ToObjectDictionary();
+                        var to = from.FromObjectDictionary(toType);
+                        return to;
+                    }
+                }
+                else
+                {
+                    var fromElementType = fromType.GetCollectionType();
+                    var toElementType = toType.GetCollectionType();
+
+                    if (fromElementType != null && toElementType != null && fromElementType != toElementType &&
+                        !(typeof(IDictionary).IsAssignableFrom(fromElementType) || typeof(IDictionary).IsAssignableFrom(toElementType)))
+                    {
+                        var to = new List<object>();
+                        foreach (var item in values)
+                        {
+                            var toItem = item.ConvertTo(toElementType);
+                            to.Add(toItem);
+                        }
+                        var ret = TranslateListWithElements.TryTranslateCollections(to.GetType(), toType, to);
+                        return ret ?? fromValue;
+                    }
+                }
+            }
+
+            var listResult = TranslateListWithElements.TryTranslateCollections(fromType, toType, fromValue);
+            return listResult ?? fromValue;
         }
     }
 
@@ -699,6 +818,34 @@ namespace ServiceStack
 
         public void AddMatch(string name, AssignmentMember readMember, AssignmentMember writeMember)
         {
+            if (AutoMappingUtils.ShouldIgnoreMapping(readMember.Type, writeMember.Type))
+                return;
+
+            // Ignore mapping collections if Element Types are ignored
+            if (typeof(IEnumerable).IsAssignableFrom(readMember.Type) && typeof(IEnumerable).IsAssignableFrom(writeMember.Type))
+            {
+                var fromGenericDef = readMember.Type.GetTypeWithGenericTypeDefinitionOf(typeof(IDictionary<,>));
+                var toGenericDef = writeMember.Type.GetTypeWithGenericTypeDefinitionOf(typeof(IDictionary<,>));
+                if (fromGenericDef != null && toGenericDef != null)
+                {
+                    // Check if to/from Key or Value Types are ignored   
+                    var fromArgs = fromGenericDef.GetGenericArguments();
+                    var toArgs = toGenericDef.GetGenericArguments();
+                    if (AutoMappingUtils.ShouldIgnoreMapping(fromArgs[0], toArgs[0]))
+                        return;
+                    if (AutoMappingUtils.ShouldIgnoreMapping(fromArgs[1], toArgs[1]))
+                        return;
+                }
+                else if (readMember.Type != typeof(string) && writeMember.Type != typeof(string))
+                {
+                    var elFromType = readMember.Type.GetCollectionType();
+                    var elToType = writeMember.Type.GetCollectionType();
+
+                    if (AutoMappingUtils.ShouldIgnoreMapping(elFromType, elToType))
+                        return;
+                }
+            }
+
             this.AssignmentMemberMap[name] = new AssignmentEntry(name, readMember, writeMember);
         }
 
@@ -742,7 +889,8 @@ namespace ServiceStack
 
                 if (fromMember.PropertyInfo != null && propertyInfoPredicate != null)
                 {
-                    if (!propertyInfoPredicate(fromMember.PropertyInfo)) continue;
+                    if (!propertyInfoPredicate(fromMember.PropertyInfo))
+                        continue;
                 }
 
                 var fromType = fromMember.Type;
@@ -751,9 +899,11 @@ namespace ServiceStack
                 {
                     var fromValue = assignmentEntry.GetValueFn(from);
 
-                    if (valuePredicate != null)
+                    if (valuePredicate != null
+                        && fromType == toType) // don't short-circuit nullable <-> non-null values
                     {
-                        if (!valuePredicate(fromValue, fromMember.PropertyInfo.PropertyType)) continue;
+                        if (!valuePredicate(fromValue, fromMember.PropertyInfo.PropertyType))
+                            continue;
                     }
 
                     if (assignmentEntry.ConvertValueFn != null)
@@ -789,6 +939,10 @@ namespace ServiceStack
             if (fromType == toType)
                 return null;
 
+            var converter = AutoMappingUtils.GetConverter(fromType, toType);
+            if (converter != null)
+                return converter;
+
             if (fromType == typeof(string))
                 return fromValue => SSTTypeSerializer.DeserializeFromString((string)fromValue, toType);
 
@@ -811,15 +965,9 @@ namespace ServiceStack
                 if (underlyingToType.IsIntegerType())
                     return fromValue => Convert.ChangeType(fromValue, underlyingToType, null);
             }
-            else if (typeof(IEnumerable).IsAssignableFrom(fromType))
+            else if (typeof(IEnumerable).IsAssignableFrom(fromType) && underlyingToType != typeof(string))
             {
-                return fromValue =>
-                {
-                    var listResult = TranslateListWithElements.TryTranslateCollections(
-                        fromType, underlyingToType, fromValue);
-
-                    return listResult ?? fromValue;
-                };
+                return fromValue => AutoMappingUtils.TryConvertCollections(fromType, underlyingToType, fromValue);
             }
             else if (underlyingToType.IsValueType)
             {
@@ -831,6 +979,8 @@ namespace ServiceStack
                 {
                     if (fromValue == null)
                         return fromValue;
+                    if (toType == typeof(string))
+                        return fromValue.ToJsv();
 
                     var toValue = ActivatorUtils.FastCreateInstance(toType);
                     toValue.PopulateWith(fromValue);
