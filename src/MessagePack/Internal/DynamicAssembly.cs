@@ -8,7 +8,7 @@ namespace MessagePack.Internal
 {
     internal class DynamicAssembly
     {
-#if NET_35
+#if NETFRAMEWORK
         readonly string moduleName;
 #endif
         readonly AssemblyBuilder assemblyBuilder;
@@ -21,7 +21,7 @@ namespace MessagePack.Internal
 
         public DynamicAssembly(string moduleName)
         {
-#if NET40
+#if NETFRAMEWORK
 
             var assemblyName = moduleName;
             moduleName = assemblyName + ".dll";
@@ -30,7 +30,7 @@ namespace MessagePack.Internal
             this.assemblyBuilder = System.AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
             this.moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName);
 #else
-#if NETSTANDARD || DESKTOPCLR
+#if NETSTANDARD || NETFRAMEWORK
             this.assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(moduleName), AssemblyBuilderAccess.Run);
 #else
             this.assemblyBuilder = System.AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(moduleName), AssemblyBuilderAccess.Run);
@@ -66,7 +66,7 @@ namespace MessagePack.Internal
             }
         }
 
-#if NET_35
+#if NETFRAMEWORK
 
         public AssemblyBuilder Save()
         {

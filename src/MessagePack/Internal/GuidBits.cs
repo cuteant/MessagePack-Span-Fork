@@ -160,7 +160,7 @@ namespace MessagePack.Internal
             ThrowHelper.ThrowArgumentException_Guid_Pattern(); ;
         }
 
-#if NETSTANDARD || DESKTOPCLR
+#if NETSTANDARD || NETFRAMEWORK
         [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         static byte Parse(byte[] bytes, int highOffset)
@@ -168,7 +168,7 @@ namespace MessagePack.Internal
             return unchecked((byte)(SwitchParse(bytes[highOffset]) * 16 + SwitchParse(bytes[highOffset + 1])));
         }
 
-#if NETSTANDARD || DESKTOPCLR
+#if NETSTANDARD || NETFRAMEWORK
         [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         static byte SwitchParse(byte b)

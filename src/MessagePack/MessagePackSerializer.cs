@@ -138,7 +138,7 @@ namespace MessagePack
             return resolver.GetFormatterWithVerify<T>().Serialize(ref bytes, offset, value, resolver);
         }
 
-#if NETSTANDARD || DESKTOPCLR
+#if NETSTANDARD || NETFRAMEWORK
 
 #if !NET40
         /// <summary>
@@ -295,7 +295,7 @@ namespace MessagePack
             return resolver.GetFormatterWithVerify<T>().Deserialize(bytes, offset, resolver, out readSize);
         }
 
-#if NETSTANDARD || DESKTOPCLR
+#if NETSTANDARD || NETFRAMEWORK
 
 #if !NET40
         public static System.Threading.Tasks.Task<T> DeserializeAsync<T>(Stream stream)

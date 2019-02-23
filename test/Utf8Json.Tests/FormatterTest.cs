@@ -1,10 +1,12 @@
-﻿using SharedData;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using SharedData;
 using Xunit;
 
 namespace Utf8Json.Tests
@@ -108,20 +110,23 @@ namespace Utf8Json.Tests
 
         [Theory]
         [MemberData(nameof(standardStructFormatterTestData))]
-        public void StandardClassLibraryStructFormatterTest<T>(T x, T? y, T? z)
-            where T : struct
+        public void StandardClassLibraryStructFormatterTest(object x, object y, object z)
         {
-            Convert(x).Is(x);
-            Convert(y).Is(y);
-            Convert(z).Is(z);
+            var helper = typeof(FormatterTest).GetTypeInfo().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Single(m => m.Name == nameof(StandardClassLibraryStructFormatterTest_Helper));
+            var helperClosedGeneric = helper.MakeGenericMethod(x.GetType());
+
+            helperClosedGeneric.Invoke(this, new object[] { x });
+            helperClosedGeneric.Invoke(this, new object[] { y });
+            helperClosedGeneric.Invoke(this, new object[] { z });
         }
+        private void StandardClassLibraryStructFormatterTest_Helper<T>(T? value) where T : struct => Convert(value).Is(value);
 
         public static IEnumerable<object[]> standardClassFormatterTestData = new []
         {
             new object[] { new byte[] { 1, 10, 100 }, new byte[0] { }, null },
             new object[] { "aaa", "", null },
             new object[] { new Uri("Http://hogehoge.com"), new Uri("Https://hugahuga.com"), null },
-            new object[] { new Version(), new Version(1,2,3), new Version(255,100,30) },
+            new object[] { new Version(0,0), new Version(1,2,3), new Version(255,100,30) },
             new object[] { new Version(1,2), new Version(100, 200,300,400), null },
             new object[] { new BitArray(new[] { true, false, true }), new BitArray(1), null },
         };

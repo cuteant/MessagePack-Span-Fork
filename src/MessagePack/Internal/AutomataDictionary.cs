@@ -19,7 +19,7 @@ namespace MessagePack.Internal
             root = new AutomataNode(0);
         }
 
-#if NETSTANDARD || DESKTOPCLR
+#if NETSTANDARD || NETFRAMEWORK
         public unsafe void Add(string str, int value)
         {
             var bytes = Encoding.UTF8.GetBytes(str);
@@ -235,7 +235,7 @@ namespace MessagePack.Internal
                 return v;
             }
 
-#if NETSTANDARD || DESKTOPCLR
+#if NETSTANDARD || NETFRAMEWORK
 
             public unsafe AutomataNode SearchNext(ref byte* p, ref int rest)
             {
@@ -340,7 +340,7 @@ namespace MessagePack.Internal
                 // key = AutomataKeyGen.GetKey(ref p, ref rest);
                 il.EmitLdloca(p);
                 il.EmitLdloca(rest);
-#if NETSTANDARD || DESKTOPCLR
+#if NETSTANDARD || NETFRAMEWORK
                 il.EmitCall(AutomataKeyGen.GetKeyMethod);
 #else
                 il.EmitCall(AutomataKeyGen.GetGetKeyMethod());
@@ -460,11 +460,11 @@ namespace MessagePack.Internal
     {
         public delegate ulong PointerDelegate<T>(ref T p, ref int rest);
 
-#if NETSTANDARD || DESKTOPCLR
+#if NETSTANDARD || NETFRAMEWORK
         public static readonly MethodInfo GetKeyMethod = typeof(AutomataKeyGen).GetRuntimeMethod("GetKey", new[] { typeof(byte).MakePointerType().MakeByRefType(), typeof(int).MakeByRefType() });
 #endif
 
-#if !(NETSTANDARD || DESKTOPCLR)
+#if !(NETSTANDARD)
 
         static MethodInfo dynamicGetKeyMethod;
         static readonly object gate = new object();
@@ -686,7 +686,7 @@ namespace MessagePack.Internal
         
 #endif
 
-#if NETSTANDARD || DESKTOPCLR
+#if NETSTANDARD || NETFRAMEWORK
 
         public static unsafe ulong GetKey(ref byte* p, ref int rest)
         {

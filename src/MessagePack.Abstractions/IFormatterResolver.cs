@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using MessagePack.Formatters;
 
 namespace MessagePack
@@ -45,17 +46,15 @@ namespace MessagePack
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowTypeInitializationException(TypeInitializationException ex)
         {
-            throw GetException();
-            Exception GetException()
-            {
-                Exception inner = ex;
-                while (inner.InnerException != null)
-                {
-                    inner = inner.InnerException;
-                }
-
-                return inner;
-            }
+            // The fact that we're using static constructors to initialize this is an internal detail.
+            // Rethrow the inner exception if there is one.
+            // Do it carefully so as to not stomp on the original callstack.
+#if NET40
+            throw ExceptionEnlightenment.PrepareForRethrow(ex.InnerException ?? ex);
+#else
+            ExceptionDispatchInfo.Capture(ex.InnerException ?? ex).Throw();
+#endif
+            throw new InvalidOperationException("Unreachable"); // keep the compiler happy
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

@@ -451,7 +451,7 @@ namespace CuteAnt.Extensions.Serialization
       {
         ArrayPool = charPool,
         CloseOutput = false,
-        AutoCompleteOnClose = false
+        //AutoCompleteOnClose = false
       };
       if (Formatting.Indented == jsonFormatting.GetValueOrDefault())
       {

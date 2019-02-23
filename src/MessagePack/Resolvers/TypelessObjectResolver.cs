@@ -5,7 +5,7 @@ using MessagePack.Internal;
 
 namespace MessagePack.Resolvers
 {
-#if NETSTANDARD || DESKTOPCLR
+#if NETSTANDARD || NETFRAMEWORK
 
     /// <summary>
     /// Used for `object` fields/collections, ex: var arr = new object[] { 1, "a", new Model() };
