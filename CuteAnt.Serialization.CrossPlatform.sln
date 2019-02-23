@@ -44,10 +44,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagePack.ImmutableCollec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagePack.LZ4", "src\MessagePack.LZ4\MessagePack.LZ4.csproj", "{B51B4031-D2FF-42F0-B507-CFB2B2483DAB}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "System.IO.Pipelines.Extensions", "..\CuteAnt.Extensions.Common\src\System.IO.Pipelines.Extensions\System.IO.Pipelines.Extensions.shproj", "{1FA24735-F7F1-4187-A5BB-CEA4BB2969D2}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "System.IO.Stream.Extensions", "..\CuteAnt.Extensions.Common\src\System.IO.Stream.Extensions\System.IO.Stream.Extensions.shproj", "{2208BF33-D4BE-4E32-846E-320FF307C0A4}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CuteAnt.Extensions.Serialization.MessagePack", "src\CuteAnt.Extensions.Serialization.MessagePack\CuteAnt.Extensions.Serialization.MessagePack.csproj", "{88B8F158-30ED-406E-9E88-E2B0F7A0ECFA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CuteAnt.Extensions.Serialization.Core", "src\CuteAnt.Extensions.Serialization.Core\CuteAnt.Extensions.Serialization.Core.csproj", "{20736D98-FF28-4C93-BB66-639E38DD7033}"
@@ -73,8 +69,6 @@ EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.StreamReaderAndWriter.Sources\CuteAnt.Extensions.StreamReaderAndWriter.Sources.projitems*{1ab88764-60ed-44f3-9e98-08391b5f5cdb}*SharedItemsImports = 13
-		..\CuteAnt.Extensions.Common\src\System.IO.Pipelines.Extensions\System.IO.Pipelines.Extensions.projitems*{1fa24735-f7f1-4187-a5bb-cea4bb2969d2}*SharedItemsImports = 13
-		..\CuteAnt.Extensions.Common\src\System.IO.Stream.Extensions\System.IO.Stream.Extensions.projitems*{2208bf33-d4be-4e32-846e-320ff307c0a4}*SharedItemsImports = 13
 		..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.IO.Sources\CuteAnt.Extensions.IO.Sources.projitems*{88b40b6f-fdbd-4384-9581-f53a140d4ffa}*SharedItemsImports = 13
 		..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Logging.Sources\CuteAnt.Extensions.Logging.Sources.projitems*{8dbb7dc8-2b90-4a8c-a60d-d41466174bde}*SharedItemsImports = 13
 		..\CuteAnt.Extensions.Common\src\Nito.AsyncEx.Tasks.Sources\Nito.AsyncEx.Tasks.Sources.projitems*{90bcc560-aa2b-4146-858a-9e524b696f75}*SharedItemsImports = 13
@@ -181,8 +175,6 @@ Global
 		{C82DFDED-7943-4F53-958F-7E281EDC6920} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{CE061F52-D9EF-4A99-A030-C3FFB2B7A56C} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{B51B4031-D2FF-42F0-B507-CFB2B2483DAB} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
-		{1FA24735-F7F1-4187-A5BB-CEA4BB2969D2} = {4744CD6C-82C3-4D38-A708-3D301A74397F}
-		{2208BF33-D4BE-4E32-846E-320FF307C0A4} = {4744CD6C-82C3-4D38-A708-3D301A74397F}
 		{88B8F158-30ED-406E-9E88-E2B0F7A0ECFA} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{20736D98-FF28-4C93-BB66-639E38DD7033} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{E2B1EAC3-CE29-44FE-889E-705CEE90E6B7} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}

@@ -24,7 +24,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    public virtual object Deserialize(Type type, ArraySegment<byte> serializedObject)
+    public virtual object Deserialize(Type type, in ArraySegment<byte> serializedObject)
     {
       if (null == serializedObject) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.serializedObject); }
 
@@ -71,7 +71,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <typeparam name="T"></typeparam>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    public virtual T Deserialize<T>(ArraySegment<byte> serializedObject)
+    public virtual T Deserialize<T>(in ArraySegment<byte> serializedObject)
     {
       if (null == serializedObject) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.serializedObject); }
 
@@ -115,7 +115,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    public T Deserialize<T>(Type type, ArraySegment<byte> serializedObject)
+    public T Deserialize<T>(Type type, in ArraySegment<byte> serializedObject)
     {
       return (T)Deserialize(type, serializedObject);
     }
@@ -154,7 +154,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    public Task<object> DeserializeAsync(Type type, ArraySegment<byte> serializedObject)
+    public Task<object> DeserializeAsync(Type type, in ArraySegment<byte> serializedObject)
     {
       return
 #if NET40
@@ -204,7 +204,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <typeparam name="T"></typeparam>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    public Task<T> DeserializeAsync<T>(ArraySegment<byte> serializedObject)
+    public Task<T> DeserializeAsync<T>(in ArraySegment<byte> serializedObject)
     {
       return
 #if NET40
@@ -256,7 +256,7 @@ namespace CuteAnt.Extensions.Serialization
     /// <param name="type">The type of the object to deserialize.</param>
     /// <param name="serializedObject">The serialized object.</param>
     /// <returns></returns>
-    public Task<T> DeserializeAsync<T>(Type type, ArraySegment<byte> serializedObject)
+    public Task<T> DeserializeAsync<T>(Type type, in ArraySegment<byte> serializedObject)
     {
       return
 #if NET40

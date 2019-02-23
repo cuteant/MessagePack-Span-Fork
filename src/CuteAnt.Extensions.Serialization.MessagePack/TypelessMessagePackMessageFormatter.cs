@@ -80,7 +80,7 @@ namespace CuteAnt.Extensions.Serialization
             }
         }
         /// <inheritdoc />
-        public override T Deserialize<T>(ArraySegment<byte> serializedObject)
+        public override T Deserialize<T>(in ArraySegment<byte> serializedObject)
         {
             try
             {
@@ -119,7 +119,7 @@ namespace CuteAnt.Extensions.Serialization
             }
         }
         /// <inheritdoc />
-        public override object Deserialize(Type type, ArraySegment<byte> serializedObject)
+        public override object Deserialize(Type type, in ArraySegment<byte> serializedObject)
         {
             try
             {

@@ -79,12 +79,12 @@ namespace MessagePack
                 return GetOrAdd(type).deserialize6.Invoke(stream, resolver, readStrict);
             }
 
-            public static object Deserialize(Type type, ArraySegment<byte> bytes)
+            public static object Deserialize(Type type, in ArraySegment<byte> bytes)
             {
                 return GetOrAdd(type).deserialize7.Invoke(bytes);
             }
 
-            public static object Deserialize(Type type, ArraySegment<byte> bytes, IFormatterResolver resolver)
+            public static object Deserialize(Type type, in ArraySegment<byte> bytes, IFormatterResolver resolver)
             {
                 return GetOrAdd(type).deserialize8.Invoke(bytes, resolver);
             }

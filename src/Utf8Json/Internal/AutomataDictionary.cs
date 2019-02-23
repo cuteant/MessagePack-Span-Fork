@@ -50,7 +50,7 @@ namespace Utf8Json.Internal
             }
         }
 
-        public unsafe bool TryGetValue(ArraySegment<byte> bytes, out int value)
+        public unsafe bool TryGetValue(in ArraySegment<byte> bytes, out int value)
         {
             return TryGetValue(bytes.Array, bytes.Offset, bytes.Count, out value);
         }
@@ -113,7 +113,7 @@ namespace Utf8Json.Internal
 #endif
 
 
-        public bool TryGetValueSafe(ArraySegment<byte> key, out int value)
+        public bool TryGetValueSafe(in ArraySegment<byte> key, out int value)
         {
             var node = root;
             var bytes = key.Array;

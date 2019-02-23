@@ -299,12 +299,13 @@ namespace Utf8Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowInvalidOperationException_Datetime(ArraySegment<byte> str)
+        internal static void ThrowInvalidOperationException_Datetime(in ArraySegment<byte> str)
         {
+            var msg = StringEncoding.UTF8.GetString(str.Array, str.Offset, str.Count);
             throw GetException();
             InvalidOperationException GetException()
             {
-                return new InvalidOperationException("invalid datetime format. value:" + StringEncoding.UTF8.GetString(str.Array, str.Offset, str.Count));
+                return new InvalidOperationException("invalid datetime format. value:" + msg);
             }
         }
 

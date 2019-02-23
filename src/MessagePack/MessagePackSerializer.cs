@@ -209,12 +209,12 @@ namespace MessagePack
             return formatter.Deserialize(bytes.Array, bytes.Offset, resolver, out int readSize);
         }
 
-        public static T Deserialize<T>(ArraySegment<byte> bytes)
+        public static T Deserialize<T>(in ArraySegment<byte> bytes)
         {
             return Deserialize<T>(bytes, defaultResolver);
         }
 
-        public static T Deserialize<T>(ArraySegment<byte> bytes, IFormatterResolver resolver)
+        public static T Deserialize<T>(in ArraySegment<byte> bytes, IFormatterResolver resolver)
         {
             if (c_zeroSize == bytes.Count) { return default; }
 

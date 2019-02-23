@@ -73,7 +73,7 @@ namespace Utf8Json.Internal
             return true;
         }
 
-        public bool TryGetValue(ArraySegment<byte> key, out T value)
+        public bool TryGetValue(in ArraySegment<byte> key, out T value)
         {
             var table = buckets;
             var hash = ByteArrayGetHashCode(key.Array, key.Offset, key.Count);

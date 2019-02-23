@@ -265,7 +265,7 @@ namespace MessagePack.Formatters
         /// Does not support deserializing of anonymous types
         /// Type should be covered by preceeding resolvers in complex/standard resolver
         /// </summary>
-        private object DeserializeByTypeName(ArraySegment<byte> typeName, byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        private object DeserializeByTypeName(in ArraySegment<byte> typeName, byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
             // try get type with assembly name, throw if not found
             if (!typeCache.TryGetValue(typeName, out var type))
