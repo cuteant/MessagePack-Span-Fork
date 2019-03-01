@@ -9,7 +9,7 @@ namespace Utf8Json
         [MethodImpl(InlineMethod.Value)]
         public static object CreateInstance(Type type, params object[] args)
         {
-            if (null == args || args.Length == 0)
+            if (null == args || 0u > (uint)args.Length)
             {
                 return ActivatorUtils.FastCreateInstance(type);
             }

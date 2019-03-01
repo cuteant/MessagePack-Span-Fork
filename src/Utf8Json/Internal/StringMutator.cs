@@ -1,69 +1,130 @@
-﻿using System;
-using System.Text;
+﻿using System.Globalization;
+using CuteAnt.Text;
 
 namespace Utf8Json.Internal
 {
     internal static class StringMutator
     {
-        /// <summary>
-        /// MyProperty -> MyProperty
-        /// </summary>
+        /// <summary>MyProperty -> MyProperty</summary>
         public static string Original(string s)
         {
             return s;
         }
 
-        /// <summary>
-        /// MyProperty -> myProperty
-        /// </summary>
+        /// <summary>MyProperty -> myProperty</summary>
         public static string ToCamelCase(string s)
         {
-            if (string.IsNullOrEmpty(s) || char.IsLower(s, 0))
+            if (string.IsNullOrEmpty(s) || !char.IsUpper(s[0]))
             {
                 return s;
             }
 
-            var array = s.ToCharArray();
-            array[0] = char.ToLowerInvariant(array[0]);
-            return new string(array);
+            char[] chars = s.ToCharArray();
+
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (i == 1 && !char.IsUpper(chars[i]))
+                {
+                    break;
+                }
+
+                bool hasNext = (i + 1 < chars.Length);
+                if (i > 0 && hasNext && !char.IsUpper(chars[i + 1]))
+                {
+                    // if the next character is a space, which is not considered uppercase 
+                    // (otherwise we wouldn't be here...)
+                    // we want to ensure that the following:
+                    // 'FOO bar' is rewritten as 'foo bar', and not as 'foO bar'
+                    // The code was written in such a way that the first word in uppercase
+                    // ends when if finds an uppercase letter followed by a lowercase letter.
+                    // now a ' ' (space, (char)32) is considered not upper
+                    // but in that case we still want our current character to become lowercase
+                    if (char.IsSeparator(chars[i + 1]))
+                    {
+                        chars[i] = char.ToLower(chars[i], CultureInfo.InvariantCulture);
+                    }
+
+                    break;
+                }
+
+                chars[i] = char.ToLower(chars[i], CultureInfo.InvariantCulture);
+            }
+
+            return new string(chars);
         }
 
-        /// <summary>
-        /// MyProperty -> my_property
-        /// </summary>
+        /// <summary>MyProperty -> my_property</summary>
         public static string ToSnakeCase(string s)
         {
-            if (string.IsNullOrEmpty(s)) return s;
+            if (string.IsNullOrEmpty(s))
+            {
+                return s;
+            }
 
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Acquire();
+            var state = SnakeCaseState.Start;
+
             for (int i = 0; i < s.Length; i++)
             {
-                var c = s[i];
-
-                if (Char.IsUpper(c))
+                if (s[i] == ' ')
                 {
-                    // first
-                    if (i == 0)
+                    if (state != SnakeCaseState.Start)
                     {
-                        sb.Append(char.ToLowerInvariant(c));
+                        state = SnakeCaseState.NewWord;
                     }
-                    else if (char.IsUpper(s[i - 1])) // WriteIO => write_io
+                }
+                else if (char.IsUpper(s[i]))
+                {
+                    switch (state)
                     {
-                        sb.Append(char.ToLowerInvariant(c));
+                        case SnakeCaseState.Upper:
+                            bool hasNext = (i + 1 < s.Length);
+                            if (i > 0 && hasNext)
+                            {
+                                char nextChar = s[i + 1];
+                                if (!char.IsUpper(nextChar) && nextChar != '_')
+                                {
+                                    sb.Append('_');
+                                }
+                            }
+                            break;
+                        case SnakeCaseState.Lower:
+                        case SnakeCaseState.NewWord:
+                            sb.Append('_');
+                            break;
                     }
-                    else
-                    {
-                        sb.Append("_");
-                        sb.Append(char.ToLowerInvariant(c));
-                    }
+
+                    var c = char.ToLower(s[i], CultureInfo.InvariantCulture);
+                    sb.Append(c);
+
+                    state = SnakeCaseState.Upper;
+                }
+                else if (s[i] == '_')
+                {
+                    sb.Append('_');
+                    state = SnakeCaseState.Start;
                 }
                 else
                 {
-                    sb.Append(c);
+                    if (state == SnakeCaseState.NewWord)
+                    {
+                        sb.Append('_');
+                    }
+
+                    sb.Append(s[i]);
+                    state = SnakeCaseState.Lower;
                 }
             }
 
-            return sb.ToString();
+            return StringBuilderCache.GetStringAndRelease(sb);
+        }
+
+        private enum SnakeCaseState
+        {
+            Start,
+            Lower,
+            Upper,
+            NewWord
         }
     }
 }
