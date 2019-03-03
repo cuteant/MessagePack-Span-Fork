@@ -26,20 +26,6 @@ namespace CuteAnt.Extensions.Serialization
     /// constructor runs, so any override should be very careful about using derived class state.</remarks>
     Int32 MaxDepth { get; set; }
 
-    /// <summary>Creates a <see cref="JsonSerializerSettings"/> instance with the default settings used by the <see cref="IJsonMessageFormatter"/>.</summary>
-    JsonSerializerSettings CreateDefaultSerializerSettings();
-
-    /// <summary>Creates a <see cref="JsonSerializerSettings"/> instance with the limit properties settings used by the <see cref="IJsonMessageFormatter"/>.</summary>
-    /// <param name="limitProps"></param>
-    /// <returns></returns>
-    JsonSerializerSettings CreateLimitPropsSerializerSettings(ICollection<String> limitProps);
-
-    /// <summary>Creates a <see cref="JsonSerializerSettings"/> instance with the property mappings settings used by the <see cref="IJsonMessageFormatter"/>.</summary>
-    /// <param name="propertyMappings"></param>
-    /// <param name="limitProps"></param>
-    /// <returns></returns>
-    JsonSerializerSettings CreatePropertyMappingSerializerSettings(IDictionary<String, String> propertyMappings, Boolean limitProps = false);
-
     /// <summary>Called during deserialization to read an object of the specified <paramref name="type"/>
     /// from the specified <paramref name="readStream"/>.</summary>
     /// <param name="type">The <see cref="Type"/> of object to read.</param>

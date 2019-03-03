@@ -24,7 +24,7 @@ namespace CuteAnt.Extensions.Serialization
       using (var pooledStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledStream.Object;
-        outputStream.Reinitialize(initialBufferSize);
+        outputStream.Reinitialize(initialBufferSize, s_sharedBufferPool);
 
         WriteToStream<T>(item, outputStream);
         return outputStream.ToByteArray();
@@ -68,7 +68,7 @@ namespace CuteAnt.Extensions.Serialization
       using (var pooledStream = BufferManagerOutputStreamManager.Create())
       {
         var outputStream = pooledStream.Object;
-        outputStream.Reinitialize(initialBufferSize);
+        outputStream.Reinitialize(initialBufferSize, s_sharedBufferPool);
 
         WriteToStream(item, outputStream);
         return outputStream.ToByteArray();

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using CuteAnt.Buffers;
 using CuteAnt.IO;
 
 namespace CuteAnt.Extensions.Serialization
@@ -11,6 +13,8 @@ namespace CuteAnt.Extensions.Serialization
     {
         private const int c_initialBufferSize = 1024 * 80;
         private const int c_zeroSize = 0;
+
+        private static readonly ArrayPool<byte> s_sharedBufferPool = BufferManager.Shared;
 
         #region @@ Constructors @@
 

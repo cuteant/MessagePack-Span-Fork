@@ -56,7 +56,6 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public void Json_Byte_Array_Test()
     {
       var jsonFormatter = JsonMessageFormatter.DefaultInstance;
-      jsonFormatter.DefaultSerializerSettings = JsonConvertX.IncludeTypeNameSettings;
 
       byte[] data = new byte[1];
       data[0] = 0;
@@ -75,7 +74,6 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public void Json_Empty_Byte_Array_Test()
     {
       var jsonFormatter = JsonMessageFormatter.DefaultInstance;
-      jsonFormatter.DefaultSerializerSettings = JsonConvertX.IncludeTypeNameSettings;
 
       byte[] data = new byte[0];
       byte[] serializedData = jsonFormatter.SerializeObject(data);
@@ -119,7 +117,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
         ["emptybytes"] = new byte[0]
       };
 
-      var json = JsonConvertX.SerializeObject(dict, JsonConvertX.IncludeTypeNameSettings);
+      var json = JsonConvertX.SerializeObject(dict, JsonConvertX.DefaultSettings);
       var newDict = JsonConvertX.DeserializeObject<Dictionary<string, object>>(json, JsonConvertX.DefaultSettings);
       Assert.Equal(dict["name"], JsonObjectTypeDeserializer.Deserialize<string>(newDict, "name"));
       Assert.Equal(dict["Age"], JsonObjectTypeDeserializer.Deserialize<int>(newDict, "Age"));
@@ -190,12 +188,12 @@ namespace CuteAnt.Extensions.Serialization.Tests
       Assert.Equal(obj.Worten, newobj.Worten);
       Assert.Equal(obj.My, newobj.My);
 
-      json = JsonConvertX.SerializeObject(obj, JsonConvertX.IndentedStringEnumSettings);
+      json = JsonConvertX.SerializeObject(obj, JsonConvertX.IndentedSettings);
       newobj = JsonConvertX.DeserializeObject<StringEmumObject>(json, JsonConvertX.DefaultDeserializerSettings);
       Assert.Equal(obj.Worten, newobj.Worten);
       Assert.Equal(obj.My, newobj.My);
 
-      json = JsonConvertX.SerializeObject(obj, JsonConvertX.IndentedStringEnumCamelCaseSettings);
+      json = JsonConvertX.SerializeObject(obj, JsonConvertX.IndentedCamelCaseSettings);
       newobj = JsonConvertX.DeserializeObject<StringEmumObject>(json, JsonConvertX.DefaultDeserializerSettings);
       Assert.Equal(obj.Worten, newobj.Worten);
       Assert.Equal(obj.My, newobj.My);
