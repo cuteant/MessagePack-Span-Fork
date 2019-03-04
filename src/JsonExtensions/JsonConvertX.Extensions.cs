@@ -163,7 +163,7 @@ namespace Newtonsoft.Json
             setting.Converters.Add(DefaultIpEndPointConverter);
             setting.Converters.Add(DefaultCombGuidConverter);
 
-            setting.SerializationBinder = new JsonSerializationBinder();
+            setting.SerializationBinder = JsonSerializationBinder.Instance;
 
             return setting;
         }
