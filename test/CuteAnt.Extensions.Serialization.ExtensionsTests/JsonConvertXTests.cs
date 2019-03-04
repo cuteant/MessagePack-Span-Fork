@@ -20,7 +20,7 @@ namespace CuteAnt.Extensions.Serialization.Tests
     public void SerializeToArraySegmentTest1()
     {
       var poco = SerializerPocoSerializable.Create();
-      var serializedObject = JsonConvertX.SerializeToArraySegment(poco);
+      var serializedObject = JsonConvertX.SerializeToMemoryPool(poco);
       var newPoco = JsonConvertX.DeserializeFromByteArray<SerializerPocoSerializable>(serializedObject.Array, serializedObject.Offset, serializedObject.Count);
       BufferManager.Shared.Return(serializedObject.Array);
       Helper.ComparePoco(poco, newPoco);
