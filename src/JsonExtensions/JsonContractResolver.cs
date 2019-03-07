@@ -35,16 +35,16 @@ namespace JsonExtensions
 
     internal sealed class JsonContractResolverHelper
     {
-        internal static readonly DictionaryCache<Type, bool> s_supportedTypeInfoSet;
+        internal static readonly CachedReadConcurrentDictionary<Type, bool> s_supportedTypeInfoSet;
 
         static JsonContractResolverHelper()
         {
-            s_supportedTypeInfoSet = new DictionaryCache<Type, bool>(DictionaryCacheConstants.SIZE_MEDIUM);
+            s_supportedTypeInfoSet = new CachedReadConcurrentDictionary<Type, bool>(DictionaryCacheConstants.SIZE_MEDIUM);
         }
 
         public static bool IsSupportedType(Type objectType)
         {
-            return s_supportedTypeInfoSet.GetItem(objectType, s_isSupportedTypeFunc);
+            return s_supportedTypeInfoSet.GetOrAdd(objectType, s_isSupportedTypeFunc);
         }
 
         private static readonly Func<Type, bool> s_isSupportedTypeFunc = IsSupportedTypeInternal;

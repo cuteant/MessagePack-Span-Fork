@@ -34,6 +34,7 @@ using JsonExtensions.Utilities.LinqBridge;
 using System.Linq;
 #endif
 using Newtonsoft.Json.Serialization;
+using CuteAnt.Text;
 
 namespace JsonExtensions.Utilities
 {
@@ -69,7 +70,7 @@ namespace JsonExtensions.Utilities
         {
             // leave this a private to force code to use an explicit overload
             // avoids stack memory being reserved for the object array
-            ValidationUtils.ArgumentNotNull(format, nameof(format));
+            if (null == format) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.format); }
 
             return string.Format(provider, format, args);
         }
@@ -81,7 +82,7 @@ namespace JsonExtensions.Utilities
         /// <returns>
         /// 	<c>true</c> if the string is all white space; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsWhiteSpace(string s)
+        internal static bool IsWhiteSpace(string s)
         {
             if (s == null)
             {
@@ -104,7 +105,7 @@ namespace JsonExtensions.Utilities
             return true;
         }
 
-        public static StringWriter CreateStringWriter(int capacity)
+        internal static StringWriter CreateStringWriter(int capacity)
         {
             StringBuilder sb = new StringBuilder(capacity);
             StringWriter sw = new StringWriter(sb, CultureInfo.InvariantCulture);
@@ -122,7 +123,7 @@ namespace JsonExtensions.Utilities
             buffer[5] = MathUtils.IntToHex(c & '\x000f');
         }
 
-        public static TSource ForgivingCaseSensitiveFind<TSource>(this IEnumerable<TSource> source, Func<TSource, string> valueSelector, string testValue)
+        internal static TSource ForgivingCaseSensitiveFind<TSource>(this IEnumerable<TSource> source, Func<TSource, string> valueSelector, string testValue)
         {
             if (source == null)
             {
@@ -212,7 +213,7 @@ namespace JsonExtensions.Utilities
                 return s;
             }
 
-            StringBuilder sb = new StringBuilder();
+            var sb = StringBuilderCache.Acquire();
             SnakeCaseState state = SnakeCaseState.Start;
 
             for (int i = 0; i < s.Length; i++)
@@ -272,10 +273,10 @@ namespace JsonExtensions.Utilities
                 }
             }
 
-            return sb.ToString();
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
-        public static bool IsHighSurrogate(char c)
+        internal static bool IsHighSurrogate(char c)
         {
 #if HAVE_UNICODE_SURROGATE_DETECTION
             return char.IsHighSurrogate(c);
@@ -284,7 +285,7 @@ namespace JsonExtensions.Utilities
 #endif
         }
 
-        public static bool IsLowSurrogate(char c)
+        internal static bool IsLowSurrogate(char c)
         {
 #if HAVE_UNICODE_SURROGATE_DETECTION
             return char.IsLowSurrogate(c);
@@ -295,12 +296,14 @@ namespace JsonExtensions.Utilities
 
         public static bool StartsWith(this string source, char value)
         {
-            return (source.Length > 0 && source[0] == value);
+            var pos = 0;
+            return ((uint)pos < (uint)source.Length && source[pos] == value) ? true : false;
         }
 
         public static bool EndsWith(this string source, char value)
         {
-            return (source.Length > 0 && source[source.Length - 1] == value);
+            var pos = source.Length - 1;
+            return ((uint)pos < (uint)source.Length && source[pos] == value) ? true : false;
         }
 
         public static string Trim(this string s, int start, int length)
@@ -309,20 +312,21 @@ namespace JsonExtensions.Utilities
             // https://referencesource.microsoft.com/#mscorlib/system/string.cs,1226
             if (s == null)
             {
-                throw new ArgumentNullException();
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.s);
             }
             if (start < 0)
             {
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
                 throw new ArgumentOutOfRangeException(nameof(start));
             }
             if (length < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(length));
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
             }
             int end = start + length - 1;
             if (end >= s.Length)
             {
-                throw new ArgumentOutOfRangeException(nameof(length));
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
             }
             for (; start < end; start++)
             {
