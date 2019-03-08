@@ -5,11 +5,60 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Tests.TestObjects;
 using Xunit;
 using JsonExtensions;
+using Utf8JsonSerializer = Utf8Json.JsonSerializer;
 
 namespace CuteAnt.Extensions.Serialization.Tests
 {
     public class JsonSerializerTests
     {
+        [Fact]
+        public void JsonSerializer_Datetime()
+        {
+            var timestamp = DateTime.UtcNow;
+            var bts = Utf8JsonSerializer.Serialize(timestamp, Utf8Json.Resolvers.StandardResolver.AllowPrivateExcludeNullSnakeCase);
+            var newdt = Utf8JsonSerializer.Deserialize<DateTime>(bts, Utf8Json.Resolvers.StandardResolver.AllowPrivateExcludeNullSnakeCase);
+            Assert.Equal(DateTimeKind.Utc, newdt.Kind);
+            var newdt1 = JsonConvert.DeserializeObject<DateTime>(System.Text.Encoding.UTF8.GetString(bts));
+            Assert.Equal(DateTimeKind.Utc, newdt1.Kind);
+            var newdt2 = JsonObjectTypeDeserializer.Deserialize<DateTime>(System.Text.Encoding.UTF8.GetString(bts));
+            Assert.Equal(DateTimeKind.Utc, newdt2.Kind);
+        }
+
+        [Fact]
+        public void JsonSerializer_DateTimeOffset()
+        {
+            var timestamp = DateTimeOffset.UtcNow;
+            var bts = Utf8JsonSerializer.Serialize(timestamp, Utf8Json.Resolvers.StandardResolver.AllowPrivateExcludeNullSnakeCase);
+            var newdt = Utf8JsonSerializer.Deserialize<DateTimeOffset>(bts, Utf8Json.Resolvers.StandardResolver.AllowPrivateExcludeNullSnakeCase);
+            Assert.Equal(timestamp, newdt);
+            var newdt1 = JsonConvert.DeserializeObject<DateTimeOffset>(System.Text.Encoding.UTF8.GetString(bts));
+            Assert.Equal(timestamp, newdt1);
+            var newdt2 = JsonObjectTypeDeserializer.Deserialize<DateTimeOffset>(System.Text.Encoding.UTF8.GetString(bts));
+            Assert.Equal(timestamp, newdt2);
+        }
+
+        [Fact]
+        public void JsonSerializer_Dictionary_DateTime()
+        {
+            var dict = new Dictionary<string, object>();
+            dict["Timestamp"] = DateTime.UtcNow;
+            var bts = Utf8JsonSerializer.Serialize(dict, Utf8Json.Resolvers.StandardResolver.AllowPrivateExcludeNullSnakeCase);
+            var newdt = Utf8JsonSerializer.Deserialize<Dictionary<string, object>>(bts, Utf8Json.Resolvers.StandardResolver.AllowPrivateExcludeNullSnakeCase);
+            var newdt2 = JsonObjectTypeDeserializer.Deserialize<DateTime>(newdt, "Timestamp");
+            Assert.Equal(DateTimeKind.Utc, newdt2.Kind);
+        }
+
+        [Fact]
+        public void JsonSerializer_Dictionary_DateTimeOffset()
+        {
+            var dict = new Dictionary<string, object>();
+            dict["Timestamp"] = DateTimeOffset.UtcNow;
+            var bts = Utf8JsonSerializer.Serialize(dict, Utf8Json.Resolvers.StandardResolver.AllowPrivateExcludeNullSnakeCase);
+            var newdt = Utf8JsonSerializer.Deserialize<Dictionary<string, object>>(bts, Utf8Json.Resolvers.StandardResolver.AllowPrivateExcludeNullSnakeCase);
+            var newdt2 = JsonObjectTypeDeserializer.Deserialize<DateTimeOffset>(newdt, "Timestamp");
+            Assert.Equal(dict["Timestamp"], newdt2);
+        }
+
         [Fact]
         public void JsonSerializer_IsCheckAdditionalContentSet()
         {
@@ -219,6 +268,11 @@ namespace CuteAnt.Extensions.Serialization.Tests
         {
             public string Name { get; set; }
             public int Age { get; set; }
+        }
+
+        public class DTModel
+        {
+            public DateTime Timestamp { get; set; }
         }
 
         [Fact]

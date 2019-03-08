@@ -170,107 +170,117 @@ namespace JsonExtensions
                 }
             }
 
-            switch (typeCode)
+            try
             {
-                case PrimitiveTypeCode.BooleanNullable:
-                    return (bool?)token;
-                case PrimitiveTypeCode.Boolean:
-                    return (bool)token;
-                case PrimitiveTypeCode.CharNullable:
-                    return (char?)token;
-                case PrimitiveTypeCode.Char:
-                    return (char)token;
-                case PrimitiveTypeCode.SByte:
-                    return (sbyte)token;
-                case PrimitiveTypeCode.SByteNullable:
-                    return (sbyte?)token;
-                case PrimitiveTypeCode.ByteNullable:
-                    return (byte?)token;
-                case PrimitiveTypeCode.Byte:
-                    return (byte)token;
-                case PrimitiveTypeCode.Int16Nullable:
-                    return (short?)token;
-                case PrimitiveTypeCode.Int16:
-                    return (short)token;
-                case PrimitiveTypeCode.UInt16Nullable:
-                    return (ushort?)token;
-                case PrimitiveTypeCode.UInt16:
-                    return (ushort)token;
-                case PrimitiveTypeCode.Int32Nullable:
-                    return (int?)token;
-                case PrimitiveTypeCode.Int32:
-                    return (int)token;
-                case PrimitiveTypeCode.UInt32Nullable:
-                    return (uint?)token;
-                case PrimitiveTypeCode.UInt32:
-                    return (uint)token;
-                case PrimitiveTypeCode.Int64Nullable:
-                    return (long?)token;
-                case PrimitiveTypeCode.Int64:
-                    return (long)token;
-                case PrimitiveTypeCode.UInt64Nullable:
-                    return (ulong?)token;
-                case PrimitiveTypeCode.UInt64:
-                    return (ulong)token;
-                case PrimitiveTypeCode.SingleNullable:
-                    return (float?)token;
-                case PrimitiveTypeCode.Single:
-                    return (float)token;
-                case PrimitiveTypeCode.DoubleNullable:
-                    return (double?)token;
-                case PrimitiveTypeCode.Double:
-                    return (double)token;
-                case PrimitiveTypeCode.DecimalNullable:
-                    return (decimal?)token;
-                case PrimitiveTypeCode.Decimal:
-                    return (decimal)token;
-                case PrimitiveTypeCode.DateTimeNullable:
-                    return (DateTime?)token;
-                case PrimitiveTypeCode.DateTime:
-                    return (DateTime)token;
+                switch (typeCode)
+                {
+                    case PrimitiveTypeCode.BooleanNullable:
+                        return (bool?)token;
+                    case PrimitiveTypeCode.Boolean:
+                        return (bool)token;
+                    case PrimitiveTypeCode.CharNullable:
+                        return (char?)token;
+                    case PrimitiveTypeCode.Char:
+                        return (char)token;
+                    case PrimitiveTypeCode.SByte:
+                        return (sbyte)token;
+                    case PrimitiveTypeCode.SByteNullable:
+                        return (sbyte?)token;
+                    case PrimitiveTypeCode.ByteNullable:
+                        return (byte?)token;
+                    case PrimitiveTypeCode.Byte:
+                        return (byte)token;
+                    case PrimitiveTypeCode.Int16Nullable:
+                        return (short?)token;
+                    case PrimitiveTypeCode.Int16:
+                        return (short)token;
+                    case PrimitiveTypeCode.UInt16Nullable:
+                        return (ushort?)token;
+                    case PrimitiveTypeCode.UInt16:
+                        return (ushort)token;
+                    case PrimitiveTypeCode.Int32Nullable:
+                        return (int?)token;
+                    case PrimitiveTypeCode.Int32:
+                        return (int)token;
+                    case PrimitiveTypeCode.UInt32Nullable:
+                        return (uint?)token;
+                    case PrimitiveTypeCode.UInt32:
+                        return (uint)token;
+                    case PrimitiveTypeCode.Int64Nullable:
+                        return (long?)token;
+                    case PrimitiveTypeCode.Int64:
+                        return (long)token;
+                    case PrimitiveTypeCode.UInt64Nullable:
+                        return (ulong?)token;
+                    case PrimitiveTypeCode.UInt64:
+                        return (ulong)token;
+                    case PrimitiveTypeCode.SingleNullable:
+                        return (float?)token;
+                    case PrimitiveTypeCode.Single:
+                        return (float)token;
+                    case PrimitiveTypeCode.DoubleNullable:
+                        return (double?)token;
+                    case PrimitiveTypeCode.Double:
+                        return (double)token;
+                    case PrimitiveTypeCode.DecimalNullable:
+                        return (decimal?)token;
+                    case PrimitiveTypeCode.Decimal:
+                        return (decimal)token;
+                    //case PrimitiveTypeCode.DateTimeNullable:
+                    //    return (DateTime?)token;
+                    //case PrimitiveTypeCode.DateTime:
+                    //    return (DateTime)token;
 #if HAVE_DATE_TIME_OFFSET
-                case PrimitiveTypeCode.DateTimeOffsetNullable:
-                    return (DateTimeOffset?)token;
-                case PrimitiveTypeCode.DateTimeOffset:
-                    return (DateTimeOffset)token;
+                    //case PrimitiveTypeCode.DateTimeOffsetNullable:
+                    //    return (DateTimeOffset?)token;
+                    //case PrimitiveTypeCode.DateTimeOffset:
+                    //    return (DateTimeOffset)token;
 #endif
-                case PrimitiveTypeCode.String:
-                    return (string)token;
-                case PrimitiveTypeCode.GuidNullable:
-                    return (Guid?)token;
-                case PrimitiveTypeCode.Guid:
-                    return (Guid)token;
-                case PrimitiveTypeCode.Uri:
-                    return (Uri)token;
-                case PrimitiveTypeCode.TimeSpanNullable:
-                    return (TimeSpan?)token;
-                case PrimitiveTypeCode.TimeSpan:
-                    return (TimeSpan)token;
+                    case PrimitiveTypeCode.String:
+                        return (string)token;
+                    case PrimitiveTypeCode.GuidNullable:
+                        return (Guid?)token;
+                    case PrimitiveTypeCode.Guid:
+                        return (Guid)token;
+                    case PrimitiveTypeCode.Uri:
+                        return (Uri)token;
+                    case PrimitiveTypeCode.TimeSpanNullable:
+                        return (TimeSpan?)token;
+                    case PrimitiveTypeCode.TimeSpan:
+                        return (TimeSpan)token;
 #if HAVE_BIG_INTEGER
-                case PrimitiveTypeCode.BigIntegerNullable:
-                    return ToBigIntegerNullable(token);
-                case PrimitiveTypeCode.BigInteger:
-                    return ToBigInteger(token);
+                    case PrimitiveTypeCode.BigIntegerNullable:
+                        return ToBigIntegerNullable(token);
+                    case PrimitiveTypeCode.BigInteger:
+                        return ToBigInteger(token);
 #endif
+                }
             }
-
+            catch { }
             return ToObject(token, objectType);
         }
 
         private static object ToObject(JToken token, Type objectType)
         {
-            using (var jsonReader = new JTokenReader(token))
+            try
             {
-                var jsonDeserializer = JsonSerializerPool.Take();
+                using (var jsonReader = new JTokenReader(token))
+                {
+                    var jsonDeserializer = JsonSerializerPool.Take();
 
-                try
-                {
-                    return jsonDeserializer.Deserialize(jsonReader, objectType);
+                    try
+                    {
+                        return jsonDeserializer.Deserialize(jsonReader, objectType);
+                    }
+                    finally
+                    {
+                        JsonSerializerPool.Return(jsonDeserializer);
+                    }
                 }
-                finally
-                {
-                    JsonSerializerPool.Return(jsonDeserializer);
-                }
+            }
+            catch
+            {
+                return JsonConvertX.DeserializeObject(token.ToString(), objectType, FromSettings);
             }
         }
 
