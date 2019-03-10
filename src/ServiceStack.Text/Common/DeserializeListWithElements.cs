@@ -162,15 +162,17 @@ namespace ServiceStack.Text.Common
 
         public static ICollection<T> ParseGenericList(ReadOnlySpan<char> value, Type createListType, ParseStringSpanDelegate parseFn)
         {
-            if ((value = DeserializeListWithElements<TSerializer>.StripList(value)).IsEmpty) 
-                return null;
-
-            var isReadOnly = createListType != null
-                && (createListType.IsGenericType && createListType.GetGenericTypeDefinition() == typeof(ReadOnlyCollection<>));
-
+            var isReadOnly = createListType != null && (createListType.IsGenericType && createListType.GetGenericTypeDefinition() == typeof(ReadOnlyCollection<>));
             var to = (createListType == null || isReadOnly)
                 ? new List<T>()
                 : ActivatorUtils.FastCreateInstance<ICollection<T>>(createListType);
+
+            var objSerializer = Json.JsonTypeSerializer.Instance.ObjectDeserializer;
+            if (to is List<object> && objSerializer != null)
+                return (ICollection<T>)objSerializer(value);
+
+            if ((value = DeserializeListWithElements<TSerializer>.StripList(value)).IsEmpty)
+                return null;
 
             if (value.IsNullOrEmpty())
                 return isReadOnly ? (ICollection<T>)Activator.CreateInstance(createListType, to) : to;

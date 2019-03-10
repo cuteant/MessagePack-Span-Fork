@@ -13,6 +13,7 @@ namespace ServiceStack
         object ConvertFrom(object value);
         bool TryParse(string str, out object result);
         string ToString(object value);
+        object DefaultValue { get; }
 
         object add(object lhs, object rhs);
         object sub(object lhs, object rhs);
@@ -32,7 +33,7 @@ namespace ServiceStack
 
     public class DynamicSByte : IDynamicNumber
     {
-        public static readonly DynamicSByte Instance = new DynamicSByte();
+        public static DynamicSByte Instance = new DynamicSByte();
         public Type Type => typeof(sbyte);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -53,6 +54,7 @@ namespace ServiceStack
         }
 
         public string ToString(object value) => Convert(value).ToString();
+        public object DefaultValue => default(sbyte);
 
         public object add(object lhs, object rhs) => Convert(lhs) + Convert(rhs);
         public object sub(object lhs, object rhs) => Convert(lhs) - Convert(rhs);
@@ -72,7 +74,7 @@ namespace ServiceStack
 
     public class DynamicByte : IDynamicNumber
     {
-        public static readonly DynamicByte Instance = new DynamicByte();
+        public static DynamicByte Instance = new DynamicByte();
         public Type Type => typeof(byte);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,6 +95,7 @@ namespace ServiceStack
         }
 
         public string ToString(object value) => Convert(value).ToString();
+        public object DefaultValue => default(byte);
 
         public object add(object lhs, object rhs) => Convert(lhs) + Convert(rhs);
         public object sub(object lhs, object rhs) => Convert(lhs) - Convert(rhs);
@@ -112,7 +115,7 @@ namespace ServiceStack
 
     public class DynamicShort : IDynamicNumber
     {
-        public static readonly DynamicShort Instance = new DynamicShort();
+        public static DynamicShort Instance = new DynamicShort();
         public Type Type => typeof(short);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -133,6 +136,7 @@ namespace ServiceStack
         }
 
         public string ToString(object value) => Convert(value).ToString();
+        public object DefaultValue => default(short);
 
         public object add(object lhs, object rhs) => Convert(lhs) + Convert(rhs);
         public object sub(object lhs, object rhs) => Convert(lhs) - Convert(rhs);
@@ -152,7 +156,7 @@ namespace ServiceStack
 
     public class DynamicUShort : IDynamicNumber
     {
-        public static readonly DynamicUShort Instance = new DynamicUShort();
+        public static DynamicUShort Instance = new DynamicUShort();
         public Type Type => typeof(ushort);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -173,6 +177,7 @@ namespace ServiceStack
         }
 
         public string ToString(object value) => Convert(value).ToString();
+        public object DefaultValue => default(ushort);
 
         public object add(object lhs, object rhs) => Convert(lhs) + Convert(rhs);
         public object sub(object lhs, object rhs) => Convert(lhs) - Convert(rhs);
@@ -192,7 +197,7 @@ namespace ServiceStack
 
     public class DynamicInt : IDynamicNumber
     {
-        public static readonly DynamicInt Instance = new DynamicInt();
+        public static DynamicInt Instance = new DynamicInt();
         public Type Type => typeof(int);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -213,6 +218,7 @@ namespace ServiceStack
         }
 
         public string ToString(object value) => Convert(value).ToString();
+        public object DefaultValue => default(int);
 
         public object add(object lhs, object rhs) => Convert(lhs) + Convert(rhs);
         public object sub(object lhs, object rhs) => Convert(lhs) - Convert(rhs);
@@ -232,7 +238,7 @@ namespace ServiceStack
 
     public class DynamicUInt : IDynamicNumber
     {
-        public static readonly DynamicUInt Instance = new DynamicUInt();
+        public static DynamicUInt Instance = new DynamicUInt();
         public Type Type => typeof(uint);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -253,6 +259,7 @@ namespace ServiceStack
         }
 
         public string ToString(object value) => Convert(value).ToString();
+        public object DefaultValue => default(uint);
 
         public object add(object lhs, object rhs) => Convert(lhs) + Convert(rhs);
         public object sub(object lhs, object rhs) => Convert(lhs) - Convert(rhs);
@@ -272,7 +279,7 @@ namespace ServiceStack
 
     public class DynamicLong : IDynamicNumber
     {
-        public static readonly DynamicLong Instance = new DynamicLong();
+        public static DynamicLong Instance = new DynamicLong();
         public Type Type => typeof(long);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -293,6 +300,7 @@ namespace ServiceStack
         }
 
         public string ToString(object value) => Convert(value).ToString();
+        public object DefaultValue => default(long);
 
         public object add(object lhs, object rhs) => Convert(lhs) + Convert(rhs);
         public object sub(object lhs, object rhs) => Convert(lhs) - Convert(rhs);
@@ -312,7 +320,7 @@ namespace ServiceStack
 
     public class DynamicULong : IDynamicNumber
     {
-        public static readonly DynamicULong Instance = new DynamicULong();
+        public static DynamicULong Instance = new DynamicULong();
         public Type Type => typeof(ulong);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -333,6 +341,7 @@ namespace ServiceStack
         }
 
         public string ToString(object value) => Convert(value).ToString();
+        public object DefaultValue => default(ulong);
 
         public object add(object lhs, object rhs) => Convert(lhs) + Convert(rhs);
         public object sub(object lhs, object rhs) => Convert(lhs) - Convert(rhs);
@@ -352,7 +361,7 @@ namespace ServiceStack
 
     public class DynamicFloat : IDynamicNumber
     {
-        public static readonly DynamicFloat Instance = new DynamicFloat();
+        public static DynamicFloat Instance = new DynamicFloat();
         public Type Type => typeof(float);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -373,6 +382,7 @@ namespace ServiceStack
         }
 
         public string ToString(object value) => Convert(value).ToString("r", CultureInfo.InvariantCulture);
+        public object DefaultValue => default(float);
 
         public object add(object lhs, object rhs) => Convert(lhs) + Convert(rhs);
         public object sub(object lhs, object rhs) => Convert(lhs) - Convert(rhs);
@@ -392,7 +402,7 @@ namespace ServiceStack
 
     public class DynamicDouble : IDynamicNumber
     {
-        public static readonly DynamicDouble Instance = new DynamicDouble();
+        public static DynamicDouble Instance = new DynamicDouble();
         public Type Type => typeof(double);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -413,6 +423,7 @@ namespace ServiceStack
         }
 
         public string ToString(object value) => Convert(value).ToString("r", CultureInfo.InvariantCulture);
+        public object DefaultValue => default(double);
 
         public object add(object lhs, object rhs) => Convert(lhs) + Convert(rhs);
         public object sub(object lhs, object rhs) => Convert(lhs) - Convert(rhs);
@@ -432,7 +443,7 @@ namespace ServiceStack
 
     public class DynamicDecimal : IDynamicNumber
     {
-        public static readonly DynamicDecimal Instance = new DynamicDecimal();
+        public static DynamicDecimal Instance = new DynamicDecimal();
         public Type Type => typeof(decimal);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -453,6 +464,7 @@ namespace ServiceStack
         }
 
         public string ToString(object value) => Convert(value).ToString(CultureInfo.InvariantCulture);
+        public object DefaultValue => default(decimal);
 
         public object add(object lhs, object rhs) => Convert(lhs) + Convert(rhs);
         public object sub(object lhs, object rhs) => Convert(lhs) - Convert(rhs);

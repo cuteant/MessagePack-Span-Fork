@@ -15,7 +15,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using CuteAnt.Reflection;
-using ServiceStack.Text.Json;
 
 namespace ServiceStack.Text.Common
 {
@@ -47,18 +46,14 @@ namespace ServiceStack.Text.Common
                     return s => ParseIDictionary(s, type);
                 }
 
-                throw new ArgumentException(string.Format("Type {0} is not of type IDictionary<,>", type.FullName));
+                throw new ArgumentException($"Type {type.FullName} is not of type IDictionary<,>");
             }
 
             //optimized access for regularly used types
             if (type == typeof(Dictionary<string, string>))
-            {
                 return ParseStringDictionary;
-            }
             if (type == typeof(JsonObject))
-            {
                 return ParseJsonObject;
-            }
             if (typeof(JsonObject).IsAssignableFrom(type))
             {
                 var method = typeof(DeserializeDictionary<TSerializer>).GetMethod("ParseInheritedJsonObject");
@@ -90,7 +85,7 @@ namespace ServiceStack.Text.Common
 
             var result = new T();
 
-            if (JsonTypeSerializer.IsEmptyMap(value, index)) return result;
+            if (Json.JsonTypeSerializer.IsEmptyMap(value, index)) return result;
 
             var valueLength = value.Length;
             while (index < valueLength)
@@ -120,7 +115,7 @@ namespace ServiceStack.Text.Common
 
             var result = new JsonObject();
 
-            if (JsonTypeSerializer.IsEmptyMap(value, index)) return result;
+            if (Json.JsonTypeSerializer.IsEmptyMap(value, index)) return result;
 
             var valueLength = value.Length;
             while (index < valueLength)
@@ -152,7 +147,7 @@ namespace ServiceStack.Text.Common
 
             var result = new Dictionary<string, string>();
 
-            if (JsonTypeSerializer.IsEmptyMap(value, index)) return result;
+            if (Json.JsonTypeSerializer.IsEmptyMap(value, index)) return result;
 
             var valueLength = value.Length;
             while (index < valueLength)
@@ -186,7 +181,7 @@ namespace ServiceStack.Text.Common
 
             var to = ActivatorUtils.FastCreateInstance<IDictionary>(dictType);
 
-            if (JsonTypeSerializer.IsEmptyMap(value, index)) return to;
+            if (Json.JsonTypeSerializer.IsEmptyMap(value, index)) return to;
 
             var valueLength = value.Length;
             while (index < valueLength)
@@ -233,6 +228,14 @@ namespace ServiceStack.Text.Common
         {
             if (value.IsEmpty) return null;
 
+            var to = (createMapType == null)
+                ? new Dictionary<TKey, TValue>()
+                : (IDictionary<TKey, TValue>)createMapType.CreateInstance();
+
+            var objDeserializer = Json.JsonTypeSerializer.Instance.ObjectDeserializer;
+            if (to is Dictionary<string, object> && objDeserializer != null)
+                return (IDictionary<TKey, TValue>)objDeserializer(value);
+
             var config = JsConfig.GetConfig();
 
             var tryToParseItemsAsDictionaries =
@@ -242,11 +245,7 @@ namespace ServiceStack.Text.Common
 
             var index = VerifyAndGetStartIndex(value, createMapType);
 
-            var to = (createMapType == null)
-                ? new Dictionary<TKey, TValue>()
-                : ActivatorUtils.FastCreateInstance<IDictionary<TKey, TValue>>(createMapType);
-
-            if (JsonTypeSerializer.IsEmptyMap(value, index)) return to;
+            if (Json.JsonTypeSerializer.IsEmptyMap(value, index)) return to;
 
             var valueLength = value.Length;
             while (index < valueLength)
@@ -340,9 +339,10 @@ namespace ServiceStack.Text.Common
             do
             {
                 snapshot = ParseDelegateCache;
-                newCache = new Dictionary<TypesKey, ParseDictionaryDelegate>(ParseDelegateCache);
-                newCache[key] = parseDelegate;
-
+                newCache = new Dictionary<TypesKey, ParseDictionaryDelegate>(ParseDelegateCache)
+                {
+                    [key] = parseDelegate
+                };
             } while (!ReferenceEquals(
                 Interlocked.CompareExchange(ref ParseDelegateCache, newCache, snapshot), snapshot));
 
