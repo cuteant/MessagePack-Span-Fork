@@ -27,10 +27,10 @@ namespace Hyperion.SerializerFactories
                 return false;
 
             // Stack<T> has IEnumerable<T> constructor, but reverses order of the stack, so can't be used.
-            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Stack<>))
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Stack<>))
                 return false;
 
-            var countProperty = type.GetTypeInfo().GetProperty("Count");
+            var countProperty = type.GetProperty("Count");
             if (countProperty == null || countProperty.PropertyType != typeof(int))
                 return false;
 
@@ -41,7 +41,7 @@ namespace Hyperion.SerializerFactories
             if (!HasParameterlessConstructor(type))
                 return false;
             
-            if (type.GetTypeInfo().GetMethods(BindingFlagsEx.All).Any(IsAddMethod))
+            if (type.GetMethods(BindingFlagsEx.All).Any(IsAddMethod))
                 return true;
 
             return false;
@@ -60,7 +60,7 @@ namespace Hyperion.SerializerFactories
 
         private static bool HasParameterlessConstructor(Type type)
         {
-            return type.GetTypeInfo()
+            return type
                 .GetConstructors(BindingFlagsEx.All)
                 .Any(ctor => !ctor.GetParameters().Any());
         }
@@ -73,14 +73,9 @@ namespace Hyperion.SerializerFactories
         private static Type GetEnumerableType(Type type)
         {
             return type
-                .GetTypeInfo()
                 .GetInterfaces()
-                .Where(intType => intType.GetTypeInfo().IsGenericType && intType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IEnumerable<>))
-#if NET40
+                .Where(intType => intType.IsGenericType && intType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 .Select(intType => intType.GetGenericArguments()[0])
-#else
-                .Select(intType => intType.GetTypeInfo().GetGenericArguments()[0])
-#endif
                 .FirstOrDefault();
         }
 
@@ -89,7 +84,7 @@ namespace Hyperion.SerializerFactories
             var enumerableType = GetEnumerableType(type);
             var iEnumerableType = typeof(IEnumerable<>).MakeGenericType(enumerableType);
             return enumerableType != null
-                ? type.GetTypeInfo()
+                ? type
                     .GetConstructors(BindingFlagsEx.All)
                     .Where(ctor => HasSingleParameterOfType(ctor, iEnumerableType))
                     .FirstOrDefault()
@@ -136,13 +131,9 @@ namespace Hyperion.SerializerFactories
             var elementType = GetEnumerableType(type) ?? typeof(object);
             var elementSerializer = serializer.GetSerializerByType(elementType);
 
-            var countProperty = type.GetTypeInfo().GetProperty("Count");
+            var countProperty = type.GetProperty("Count");
 
-#if NET40
             var addMethod = type.GetMethod("Add", BindingFlagsEx.All);
-#else
-            var addMethod = type.GetTypeInfo().GetMethod("Add", BindingFlagsEx.All);
-#endif
             var enumerableConstructor = GetEnumerableConstructor(type);
 
             Func<object, int> countGetter = o => (int)countProperty.GetValue(o);

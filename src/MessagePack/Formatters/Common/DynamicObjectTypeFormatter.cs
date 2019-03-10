@@ -176,7 +176,7 @@ namespace MessagePack.Formatters
                     yield return field;
                 }
 
-                current = current.GetTypeInfo().BaseType;
+                current = current.BaseType;
             }
         }
 

@@ -77,7 +77,7 @@ namespace Hyperion.Compilation
         public int CastOrUnbox(int value, Type type)
         {
             var tempQualifier = _expressions[value];
-            var cast = type.GetTypeInfo().IsValueType
+            var cast = type.IsValueType
                 // ReSharper disable once AssignNullToNotNullAttribute
                 ? Expression.Unbox(tempQualifier, type)
                 // ReSharper disable once AssignNullToNotNullAttribute
@@ -132,11 +132,7 @@ namespace Hyperion.Compilation
             if (field.IsInitOnly)
             {
                 //TODO: field is readonly, can we set it via IL or only via reflection
-                var method = typeof(FieldInfo)
-#if !NET40
-                    .GetTypeInfo()
-#endif
-                    .GetMethod(nameof(FieldInfo.SetValue), new[] {typeof(object), typeof(object)});
+                var method = typeof(FieldInfo).GetMethod(nameof(FieldInfo.SetValue), new[] {typeof(object), typeof(object)});
                 var fld = Constant(field);
                 var valueToObject = Convert<object>(value);
                 return Call(method, fld, target, valueToObject); 

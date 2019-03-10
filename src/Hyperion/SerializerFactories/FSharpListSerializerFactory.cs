@@ -26,17 +26,9 @@ namespace Hyperion.SerializerFactories
         private static Type GetEnumerableType(Type type)
         {
             return type
-#if !NET40
-                .GetTypeInfo()
-#endif
                 .GetInterfaces()
-#if NET40
                 .Where(intType => intType.IsGenericType && intType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 .Select(intType => intType.GetGenericArguments()[0])
-#else
-                .Where(intType => intType.GetTypeInfo().IsGenericType && intType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                .Select(intType => intType.GetTypeInfo().GetGenericArguments()[0])
-#endif
                 .FirstOrDefault();
         }
 
@@ -59,20 +51,11 @@ namespace Hyperion.SerializerFactories
 
             var elementType = GetEnumerableType(type);
             var arrType = elementType.MakeArrayType();
-#if NET40
             var listModule = type.Assembly.GetType("Microsoft.FSharp.Collections.ListModule");
             var ofArray = listModule.GetMethod("OfArray");
-#else
-            var listModule = type.GetTypeInfo().Assembly.GetType("Microsoft.FSharp.Collections.ListModule");
-            var ofArray = listModule.GetTypeInfo().GetMethod("OfArray");
-#endif
             var ofArrayConcrete = ofArray.MakeGenericMethod(elementType);
             var ofArrayCompiled = CompileToDelegate(ofArrayConcrete, arrType);
-#if NET40
             var toArray = listModule.GetMethod("ToArray");
-#else
-            var toArray = listModule.GetTypeInfo().GetMethod("ToArray");
-#endif
             var toArrayConcrete = toArray.MakeGenericMethod(elementType);
             var toArrayCompiled = CompileToDelegate(toArrayConcrete, type);
             var preserveObjectReferences = serializer.Options.PreserveObjectReferences;

@@ -28,23 +28,27 @@ namespace MessagePack.Resolvers
 
             static FormatterCache()
             {
-                var ti = typeof(T).GetTypeInfo();
+                var ti = typeof(T);
 
                 if (ti.IsNullable())
                 {
                     // build underlying type and use wrapped formatter.
-                    ti = ti.GenericTypeArguments[0].GetTypeInfo();
+#if NET40
+                    ti = ti.GenericTypeArguments()[0];
+#else
+                    ti = ti.GenericTypeArguments[0];
+#endif
                     if (!ti.IsEnum)
                     {
                         return;
                     }
 
-                    var innerFormatter = DynamicEnumAsStringResolver.Instance.GetFormatterDynamic(ti.AsType());
+                    var innerFormatter = DynamicEnumAsStringResolver.Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
                     {
                         return;
                     }
-                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti), new object[] { innerFormatter });
                     return;
                 }
                 else if (!ti.IsEnum)

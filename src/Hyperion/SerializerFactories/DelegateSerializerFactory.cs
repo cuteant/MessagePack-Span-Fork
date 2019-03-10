@@ -19,7 +19,7 @@ namespace Hyperion.SerializerFactories
     {
         public override bool CanSerialize(Serializer serializer, Type type)
         {
-            return type.GetTypeInfo().IsSubclassOf(typeof(Delegate));
+            return type.IsSubclassOf(typeof(Delegate));
         }
 
         public override bool CanDeserialize(Serializer serializer, Type type)

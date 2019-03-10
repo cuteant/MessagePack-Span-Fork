@@ -49,11 +49,7 @@ namespace Hyperion
       if (serializer.Options.PreserveObjectReferences)
       {
         var trackDeserializedObjectMethod =
-#if NET40
             typeof(DeserializerSession).GetMethod(nameof(DeserializerSession.TrackDeserializedObject));
-#else
-            typeof(DeserializerSession).GetTypeInfo().GetMethod(nameof(DeserializerSession.TrackDeserializedObject));
-#endif
 
         c.EmitCall(trackDeserializedObjectMethod, session, target);
       }
@@ -84,11 +80,7 @@ namespace Hyperion
       if (preallocatedBufferSize > 0)
       {
         EmitPreallocatedBuffer(c, preallocatedBufferSize, session,
-#if NET40
             typeof(DeserializerSession).GetMethod(nameof(DeserializerSession.GetBuffer)));
-#else
-            typeof(DeserializerSession).GetTypeInfo().GetMethod(nameof(DeserializerSession.GetBuffer)));
-#endif
       }
 
       for (var i = 0; i < fields.Length; i++)
@@ -107,11 +99,7 @@ namespace Hyperion
         }
         else
         {
-#if NET40
           var method = typeof(StreamEx).GetMethod(nameof(StreamEx.ReadObject));
-#else
-          var method = typeof(StreamEx).GetTypeInfo().GetMethod(nameof(StreamEx.ReadObject));
-#endif
           read = c.StaticCall(method, stream, session);
           read = c.Convert(read, field.FieldType);
         }
@@ -150,11 +138,7 @@ namespace Hyperion
       if (serializer.Options.PreserveObjectReferences)
       {
         var method =
-#if NET40
             typeof(SerializerSession).GetMethod(nameof(SerializerSession.TrackSerializedObject));
-#else
-            typeof(SerializerSession).GetTypeInfo().GetMethod(nameof(SerializerSession.TrackSerializedObject));
-#endif
 
         c.EmitCall(method, session, target);
       }
@@ -168,11 +152,7 @@ namespace Hyperion
       if (preallocatedBufferSize > 0)
       {
         EmitPreallocatedBuffer(c, preallocatedBufferSize, session,
-#if NET40
             typeof(SerializerSession).GetMethod("GetBuffer"));
-#else
-            typeof(SerializerSession).GetTypeInfo().GetMethod("GetBuffer"));
-#endif
       }
 
       for (var i = 0; i < fieldsArray.Length; i++)
@@ -205,11 +185,7 @@ namespace Hyperion
           var vs = c.Constant(valueSerializer);
           var vt = c.Constant(valueType);
 
-#if NET40
           var method = typeof(StreamEx).GetMethod(nameof(StreamEx.WriteObject));
-#else
-          var method = typeof(StreamEx).GetTypeInfo().GetMethod(nameof(StreamEx.WriteObject));
-#endif
 
           c.EmitStaticCall(method, stream, converted, vt, vs, preserveReferences, session);
         }

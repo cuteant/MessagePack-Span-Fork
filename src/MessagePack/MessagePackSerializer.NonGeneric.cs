@@ -120,13 +120,12 @@ namespace MessagePack
 
                 public CompiledMethods(Type type)
                 {
-                    var ti = type.GetTypeInfo();
                     {
                         // public static byte[] Serialize<T>(T obj)
                         var serialize = GetMethod(type, new Type[] { null });
 
                         var param1 = Expression.Parameter(typeof(object), "obj");
-                        var body = Expression.Call(serialize, ti.IsValueType
+                        var body = Expression.Call(serialize, type.IsValueType
                             ? Expression.Unbox(param1, type)
                             : Expression.Convert(param1, type));
                         var lambda = Expression.Lambda<Func<object, byte[]>>(body, param1).Compile();
@@ -140,7 +139,7 @@ namespace MessagePack
                         var param1 = Expression.Parameter(typeof(object), "obj");
                         var param2 = Expression.Parameter(typeof(IFormatterResolver), "formatterResolver");
 
-                        var body = Expression.Call(serialize, ti.IsValueType
+                        var body = Expression.Call(serialize, type.IsValueType
                             ? Expression.Unbox(param1, type)
                             : Expression.Convert(param1, type), param2);
                         var lambda = Expression.Lambda<Func<object, IFormatterResolver, byte[]>>(body, param1, param2).Compile();
@@ -154,7 +153,7 @@ namespace MessagePack
                         var param1 = Expression.Parameter(typeof(Stream), "stream");
                         var param2 = Expression.Parameter(typeof(object), "obj");
 
-                        var body = Expression.Call(serialize, param1, ti.IsValueType
+                        var body = Expression.Call(serialize, param1, type.IsValueType
                             ? Expression.Unbox(param2, type)
                             : Expression.Convert(param2, type));
                         var lambda = Expression.Lambda<Action<Stream, object>>(body, param1, param2).Compile();
@@ -169,7 +168,7 @@ namespace MessagePack
                         var param2 = Expression.Parameter(typeof(object), "obj");
                         var param3 = Expression.Parameter(typeof(IFormatterResolver), "formatterResolver");
 
-                        var body = Expression.Call(serialize, param1, ti.IsValueType
+                        var body = Expression.Call(serialize, param1, type.IsValueType
                             ? Expression.Unbox(param2, type)
                             : Expression.Convert(param2, type), param3);
                         var lambda = Expression.Lambda<Action<Stream, object, IFormatterResolver>>(body, param1, param2, param3).Compile();
@@ -185,7 +184,7 @@ namespace MessagePack
                         var param3 = Expression.Parameter(typeof(object), "value");
                         var param4 = Expression.Parameter(typeof(IFormatterResolver), "formatterResolver");
 
-                        var body = Expression.Call(serialize, param1, param2, ti.IsValueType
+                        var body = Expression.Call(serialize, param1, param2, type.IsValueType
                             ? Expression.Unbox(param3, type)
                             : Expression.Convert(param3, type), param4);
                         var lambda = Expression.Lambda<RawFormatterSerialize>(body, param1, param2, param3, param4).Compile();

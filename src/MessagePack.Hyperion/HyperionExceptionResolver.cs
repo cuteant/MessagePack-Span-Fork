@@ -33,7 +33,7 @@ namespace MessagePack
     {
         internal static object GetFormatter(Type t)
         {
-            if (typeof(Exception).GetTypeInfo().IsAssignableFrom(t.GetTypeInfo()))
+            if (typeof(Exception).IsAssignableFrom(t))
             {
                 return ActivatorUtils.FastCreateInstance(typeof(HyperionExceptionFormatter<>).GetCachedGenericType(t));
             }

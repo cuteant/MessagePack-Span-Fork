@@ -10,21 +10,17 @@ namespace MessagePack.Internal
 {
     internal static class ReflectionExtensions
     {
-        public static bool IsNullable(this System.Reflection.TypeInfo type)
+        public static bool IsNullable(this System.Type type)
         {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(System.Nullable<>);
         }
 
-        public static bool IsPublic(this System.Reflection.TypeInfo type)
+        public static bool IsAnonymous(this System.Type type)
         {
-            return type.IsPublic;
-        }
-
-        public static bool IsAnonymous(this System.Reflection.TypeInfo type)
-        {
-            return type.AsType().GetCustomAttributeX<CompilerGeneratedAttribute>() != null
-                && type.IsGenericType && type.Name.Contains("AnonymousType")
-                && (type.Name.StartsWith("<>", StringComparison.Ordinal) || type.Name.StartsWith("VB$", StringComparison.Ordinal))
+            var typeName = type.Name;
+            return type.GetCustomAttributeX<CompilerGeneratedAttribute>() != null
+                && type.IsGenericType && typeName.Contains("AnonymousType")
+                && (typeName.StartsWith("<>", StringComparison.Ordinal) || typeName.StartsWith("VB$", StringComparison.Ordinal))
                 && (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
         }
 
@@ -34,15 +30,6 @@ namespace MessagePack.Internal
         }
 
 #if NETSTANDARD || NETFRAMEWORK
-
-        public static bool IsConstructedGenericType(this System.Reflection.TypeInfo type)
-        {
-#if NET40
-            return type.AsType().IsConstructedGenericType();
-#else
-            return type.AsType().IsConstructedGenericType;
-#endif
-        }
 
         public static MethodInfo GetGetMethod(this PropertyInfo propInfo)
         {

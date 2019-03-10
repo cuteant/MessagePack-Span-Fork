@@ -116,7 +116,7 @@ namespace MessagePack.Formatters
             GetMethodExt(ref matchingMethod, thisType, name, bindingFlags, parameterTypes);
 
             // If we're searching an interface, we have to manually search base interfaces
-            if (matchingMethod == null && thisType.GetTypeInfo().IsInterface)
+            if (matchingMethod == null && thisType.IsInterface)
             {
                 foreach (Type interfaceType in thisType.GetInterfaces())
                 {
@@ -141,7 +141,7 @@ namespace MessagePack.Formatters
 #if NET40
             foreach (MethodInfo methodInfo in type.GetMethods(bindingFlags).Where(_ => string.Equals(_.Name, name, StringComparison.Ordinal)))
 #else
-            foreach (MethodInfo methodInfo in type.GetTypeInfo().GetMember(name, MemberTypes.Method, bindingFlags))
+            foreach (MethodInfo methodInfo in type.GetMember(name, MemberTypes.Method, bindingFlags))
 #endif
             {
                 // Check that the parameter counts and types match, 
@@ -199,7 +199,7 @@ namespace MessagePack.Formatters
             }
 
             // Handle any generic arguments
-            if (thisType.GetTypeInfo().IsGenericType && type.GetTypeInfo().IsGenericType)
+            if (thisType.IsGenericType && type.IsGenericType)
             {
                 Type[] thisArguments = thisType.GetGenericArguments();
                 Type[] arguments = type.GetGenericArguments();

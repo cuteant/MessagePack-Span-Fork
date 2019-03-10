@@ -23,7 +23,7 @@ namespace Hyperion.Extensions
 
     internal static class ReflectionEx
     {
-        public static readonly Assembly CoreAssembly = typeof(int).GetTypeInfo().Assembly;
+        public static readonly Assembly CoreAssembly = typeof(int).Assembly;
 
         public static FieldInfo[] GetFieldInfosForType(this Type type,
             Func<FieldInfo, bool> serializationFieldsFilter = null,
@@ -106,7 +106,7 @@ namespace Hyperion.Extensions
                     yield return field;
                 }
 
-                current = current.GetTypeInfo().BaseType;
+                current = current.BaseType;
             }
         }
 

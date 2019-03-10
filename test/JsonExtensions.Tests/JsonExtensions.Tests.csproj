@@ -5,6 +5,7 @@
     <RootNamespace>JsonExtensions.Tests</RootNamespace>
     <AssemblyName>JsonExtensions.Tests</AssemblyName>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>

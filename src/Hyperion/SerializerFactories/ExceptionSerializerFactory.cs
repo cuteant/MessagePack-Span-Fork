@@ -21,11 +21,8 @@ namespace Hyperion.SerializerFactories
 {
     internal sealed class ExceptionSerializerFactory : ValueSerializerFactory
     {
-#if NET40
-        private static readonly Type ExceptionTypeInfo = typeof(Exception);
-#else
-        private static readonly TypeInfo ExceptionTypeInfo = typeof(Exception).GetTypeInfo();
-#endif
+        private static readonly Type ExceptionType = TypeConstants.ExceptionType;
+
         /// <summary>The field filter used for generating serializers for subclasses of <see cref="Exception"/>.</summary>
         private static readonly Func<FieldInfo, bool> _exceptionFieldFilter;
 
@@ -36,21 +33,17 @@ namespace Hyperion.SerializerFactories
             _exceptionFieldFilter = field =>
             {
                 // Any field defined below Exception is acceptable.
-                if (field.DeclaringType != TypeConstants.ExceptionType) return true;
+                if (field.DeclaringType != ExceptionType) return true;
 
                 // Certain fields from the Exception base class are acceptable.
-                return field.FieldType == TypeConstants.StringType || field.FieldType == TypeConstants.ExceptionType;
+                return field.FieldType == TypeConstants.StringType || field.FieldType == ExceptionType;
             };
         }
         public ExceptionSerializerFactory()
         {
         }
 
-#if NET40
-        public override bool CanSerialize(Serializer serializer, Type type) => ExceptionTypeInfo.IsAssignableFrom(type);
-#else
-        public override bool CanSerialize(Serializer serializer, Type type) => ExceptionTypeInfo.IsAssignableFrom(type.GetTypeInfo());
-#endif
+        public override bool CanSerialize(Serializer serializer, Type type) => ExceptionType.IsAssignableFrom(type);
 
         public override bool CanDeserialize(Serializer serializer, Type type) => CanSerialize(serializer, type);
 

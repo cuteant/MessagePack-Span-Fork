@@ -40,23 +40,27 @@ namespace Utf8Json.Resolvers.Internal
 
             static FormatterCache()
             {
-                var ti = typeof(T).GetTypeInfo();
+                var ti = typeof(T);
 
                 if (ti.IsNullable())
                 {
                     // build underlying type and use wrapped formatter.
-                    ti = ti.GenericTypeArguments[0].GetTypeInfo();
+#if NET40
+                    ti = ti.GenericTypeArguments()[0];
+#else
+                    ti = ti.GenericTypeArguments[0];
+#endif
                     if (!ti.IsEnum)
                     {
                         return;
                     }
 
-                    var innerFormatter = Instance.GetFormatterDynamic(ti.AsType());
+                    var innerFormatter = Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
                     {
                         return;
                     }
-                    formatter = (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti), new object[] { innerFormatter });
                     return;
                 }
                 else if (typeof(T).IsEnum)
@@ -86,23 +90,27 @@ namespace Utf8Json.Resolvers.Internal
 
             static FormatterCache()
             {
-                var ti = typeof(T).GetTypeInfo();
+                var ti = typeof(T);
 
                 if (ti.IsNullable())
                 {
                     // build underlying type and use wrapped formatter.
-                    ti = ti.GenericTypeArguments[0].GetTypeInfo();
+#if NET40
+                    ti = ti.GenericTypeArguments()[0];
+#else
+                    ti = ti.GenericTypeArguments[0];
+#endif
                     if (!ti.IsEnum)
                     {
                         return;
                     }
 
-                    var innerFormatter = Instance.GetFormatterDynamic(ti.AsType());
+                    var innerFormatter = Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
                     {
                         return;
                     }
-                    formatter = (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti), new object[] { innerFormatter });
                     return;
                 }
                 else if (typeof(T).IsEnum)

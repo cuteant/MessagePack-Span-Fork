@@ -529,22 +529,26 @@ namespace Utf8Json.Resolvers.Internal
 
         public static object BuildFormatterToAssembly<T>(DynamicAssembly assembly, IJsonFormatterResolver selfResolver, Func<string, string> nameMutator, bool excludeNull)
         {
-            var ti = typeof(T).GetTypeInfo();
+            var ti = typeof(T);
 
             if (ti.IsNullable())
             {
-                ti = ti.GenericTypeArguments[0].GetTypeInfo();
+#if NET40
+                ti = ti.GenericTypeArguments()[0];
+#else
+                ti = ti.GenericTypeArguments[0];
+#endif
 
-                var innerFormatter = selfResolver.GetFormatterDynamic(ti.AsType());
+                var innerFormatter = selfResolver.GetFormatterDynamic(ti);
                 if (innerFormatter == null)
                 {
                     return null;
                 }
-                return (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
+                return (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti), new object[] { innerFormatter });
             }
 
             Type elementType;
-            if (typeof(Exception).GetTypeInfo().IsAssignableFrom(ti))
+            if (typeof(Exception).IsAssignableFrom(ti))
             {
                 return DynamicObjectTypeBuilder.BuildAnonymousFormatter(typeof(T), nameMutator, excludeNull, false, true);
             }
@@ -561,20 +565,24 @@ namespace Utf8Json.Resolvers.Internal
 
         public static object BuildFormatterToDynamicMethod<T>(IJsonFormatterResolver selfResolver, Func<string, string> nameMutator, bool excludeNull, bool allowPrivate)
         {
-            var ti = typeof(T).GetTypeInfo();
+            var ti = typeof(T);
 
             if (ti.IsNullable())
             {
-                ti = ti.GenericTypeArguments[0].GetTypeInfo();
+#if NET40
+                ti = ti.GenericTypeArguments()[0];
+#else
+                ti = ti.GenericTypeArguments[0];
+#endif
 
-                var innerFormatter = selfResolver.GetFormatterDynamic(ti.AsType());
+                var innerFormatter = selfResolver.GetFormatterDynamic(ti);
                 if (innerFormatter == null)
                 {
                     return null;
                 }
-                return (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
+                return (IJsonFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti), new object[] { innerFormatter });
             }
-            if (typeof(Exception).GetTypeInfo().IsAssignableFrom(ti))
+            if (typeof(Exception).IsAssignableFrom(ti))
             {
                 return DynamicObjectTypeBuilder.BuildAnonymousFormatter(typeof(T), nameMutator, excludeNull, false, true);
             }
@@ -974,7 +982,7 @@ namespace Utf8Json.Resolvers.Internal
                     // if(value.X != null)
                     if (excludeNull)
                     {
-                        if (item.Type.GetTypeInfo().IsNullable())
+                        if (item.Type.IsNullable())
                         {
                             var local = il.DeclareLocal(item.Type);
 

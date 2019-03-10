@@ -39,17 +39,9 @@ namespace Hyperion.SerializerFactories
         private static Type GetEnumerableType(Type type)
         {
             return type
-#if !NET40
-                .GetTypeInfo()
-#endif
                 .GetInterfaces()
-#if NET40
                 .Where(intType => intType.IsGenericType && intType.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 .Select(intType => intType.GetGenericArguments()[0])
-#else
-                .Where(intType => intType.GetTypeInfo().IsGenericType && intType.GetTypeInfo().GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                .Select(intType => intType.GetTypeInfo().GetGenericArguments()[0])
-#endif
                 .FirstOrDefault();
         }
 
@@ -69,7 +61,6 @@ namespace Hyperion.SerializerFactories
             var creatorType =
                 Type.GetType(ImmutableCollectionsNamespace + "." + typeName + ", " + ImmutableCollectionsAssembly);
 
-#if NET40
             var createRangeMethodInfo = creatorType != null
                 ? creatorType.GetMethods(BindingFlags.Public | BindingFlags.Static)
                     .First(methodInfo => methodInfo.Name == "CreateRange" && methodInfo.GetParameters().Length == 1)
@@ -77,21 +68,9 @@ namespace Hyperion.SerializerFactories
 
             // If the element type is a generic type and the method located to create the collection instance requires more than one generic type parameter
             // we need to obtain the generic arguments of the element type.
-            var genericTypes = elementType.GetTypeInfo().IsGenericType && createRangeMethodInfo != null && createRangeMethodInfo.GetGenericArguments().Length > 1
+            var genericTypes = elementType.IsGenericType && createRangeMethodInfo != null && createRangeMethodInfo.GetGenericArguments().Length > 1
                 ? elementType.GetGenericArguments()
                 : new[] { elementType };
-#else
-            var createRangeMethodInfo = creatorType != null
-                ? creatorType.GetTypeInfo().GetMethods(BindingFlags.Public | BindingFlags.Static)
-                    .First(methodInfo => methodInfo.Name == "CreateRange" && methodInfo.GetParameters().Length == 1)
-                : null;
-
-            // If the element type is a generic type and the method located to create the collection instance requires more than one generic type parameter
-            // we need to obtain the generic arguments of the element type.
-            var genericTypes = elementType.GetTypeInfo().IsGenericType && createRangeMethodInfo != null && createRangeMethodInfo.GetGenericArguments().Length > 1
-                ? elementType.GetTypeInfo().GetGenericArguments()
-                : new[] { elementType };
-#endif
 
             // if creatorType == null it means that type is probably an interface
             // we propagate null to create mock serializer - it won't be used anyway

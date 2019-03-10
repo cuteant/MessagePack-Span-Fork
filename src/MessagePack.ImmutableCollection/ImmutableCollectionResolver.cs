@@ -53,23 +53,27 @@ namespace MessagePack.ImmutableCollection
 
         internal static object GetFormatter(Type t)
         {
-            var ti = t.GetTypeInfo();
-
-            if (ti.IsGenericType)
+            if (t.IsGenericType)
             {
-                var genericType = ti.GetGenericTypeDefinition();
-                var genericTypeInfo = genericType.GetTypeInfo();
-                var isNullable = genericTypeInfo.IsNullable();
-                var nullableElementType = isNullable ? ti.GenericTypeArguments[0] : null;
+                var genericType = t.GetGenericTypeDefinition();
+                var isNullable = genericType.IsNullable();
+#if NET40
+                var nullableElementType = isNullable ? t.GenericTypeArguments()[0] : null;
 
                 Type formatterType;
                 if (formatterMap.TryGetValue(genericType, out formatterType))
                 {
-                    return CreateInstance(formatterType, ti.GenericTypeArguments);
+                    return CreateInstance(formatterType, t.GenericTypeArguments());
                 }
-#if NET40
                 else if (isNullable && nullableElementType.IsConstructedGenericType() && nullableElementType.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
 #else
+                var nullableElementType = isNullable ? t.GenericTypeArguments[0] : null;
+
+                Type formatterType;
+                if (formatterMap.TryGetValue(genericType, out formatterType))
+                {
+                    return CreateInstance(formatterType, t.GenericTypeArguments);
+                }
                 else if (isNullable && nullableElementType.IsConstructedGenericType && nullableElementType.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
 #endif
                 {
@@ -88,7 +92,7 @@ namespace MessagePack.ImmutableCollection
 
     internal static class ReflectionExtensions
     {
-        public static bool IsNullable(this System.Reflection.TypeInfo type)
+        public static bool IsNullable(this System.Type type)
         {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(System.Nullable<>);
         }

@@ -55,7 +55,7 @@ namespace MessagePack.Resolvers
 
             static FormatterCache()
             {
-                var ti = typeof(T).GetTypeInfo();
+                var ti = typeof(T);
 
                 if (ti.IsInterface)
                 {
@@ -64,14 +64,18 @@ namespace MessagePack.Resolvers
 
                 if (ti.IsNullable())
                 {
-                    ti = ti.GenericTypeArguments[0].GetTypeInfo();
+#if NET40
+                    ti = ti.GenericTypeArguments()[0];
+#else
+                    ti = ti.GenericTypeArguments[0];
+#endif
 
-                    var innerFormatter = DynamicObjectResolver.Instance.GetFormatterDynamic(ti.AsType());
+                    var innerFormatter = DynamicObjectResolver.Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
                     {
                         return;
                     }
-                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti), new object[] { innerFormatter });
                     return;
                 }
 
@@ -112,7 +116,7 @@ namespace MessagePack.Resolvers
 
             static FormatterCache()
             {
-                var ti = typeof(T).GetTypeInfo();
+                var ti = typeof(T);
 
                 if (ti.IsInterface)
                 {
@@ -121,14 +125,18 @@ namespace MessagePack.Resolvers
 
                 if (ti.IsNullable())
                 {
-                    ti = ti.GenericTypeArguments[0].GetTypeInfo();
+#if NET40
+                    ti = ti.GenericTypeArguments()[0];
+#else
+                    ti = ti.GenericTypeArguments[0];
+#endif
 
-                    var innerFormatter = DynamicObjectResolverAllowPrivate.Instance.GetFormatterDynamic(ti.AsType());
+                    var innerFormatter = DynamicObjectResolverAllowPrivate.Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
                     {
                         return;
                     }
-                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti), new object[] { innerFormatter });
                     return;
                 }
 
@@ -188,7 +196,7 @@ namespace MessagePack.Resolvers
                     return;
                 }
 
-                var ti = typeof(T).GetTypeInfo();
+                var ti = typeof(T);
 
                 if (ti.IsInterface)
                 {
@@ -197,14 +205,18 @@ namespace MessagePack.Resolvers
 
                 if (ti.IsNullable())
                 {
-                    ti = ti.GenericTypeArguments[0].GetTypeInfo();
+#if NET40
+                    ti = ti.GenericTypeArguments()[0];
+#else
+                    ti = ti.GenericTypeArguments[0];
+#endif
 
-                    var innerFormatter = DynamicContractlessObjectResolver.Instance.GetFormatterDynamic(ti.AsType());
+                    var innerFormatter = DynamicContractlessObjectResolver.Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
                     {
                         return;
                     }
-                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti), new object[] { innerFormatter });
                     return;
                 }
 
@@ -245,7 +257,7 @@ namespace MessagePack.Resolvers
                     return;
                 }
 
-                var ti = typeof(T).GetTypeInfo();
+                var ti = typeof(T);
 
                 if (ti.IsInterface)
                 {
@@ -254,14 +266,18 @@ namespace MessagePack.Resolvers
 
                 if (ti.IsNullable())
                 {
-                    ti = ti.GenericTypeArguments[0].GetTypeInfo();
+#if NET40
+                    ti = ti.GenericTypeArguments()[0];
+#else
+                    ti = ti.GenericTypeArguments[0];
+#endif
 
-                    var innerFormatter = DynamicContractlessObjectResolverAllowPrivate.Instance.GetFormatterDynamic(ti.AsType());
+                    var innerFormatter = DynamicContractlessObjectResolverAllowPrivate.Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
                     {
                         return;
                     }
-                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti), new object[] { innerFormatter });
                     return;
                 }
 
@@ -601,7 +617,7 @@ namespace MessagePack.Internal
             var argResolver = new ArgumentField(il, firstArgIndex + 3);
 
             // if(value == null) return WriteNil
-            if (type.GetTypeInfo().IsClass)
+            if (type.IsClass)
             {
                 var elseBody = il.DefineLabel();
 
@@ -817,7 +833,7 @@ namespace MessagePack.Internal
             argOffset.EmitLoad();
             il.EmitCall(MessagePackBinaryTypeInfo.IsNil);
             il.Emit(OpCodes.Brfalse_S, falseLabel);
-            if (type.GetTypeInfo().IsClass)
+            if (type.IsClass)
             {
                 argReadSize.EmitLoad();
                 il.EmitLdc_I4(1);
@@ -1270,12 +1286,8 @@ typeof(int), typeof(int) });
         internal static class EmitInfo
         {
             public static readonly MethodInfo GetTypeFromHandle = ExpressionUtility.GetMethodInfo(() => Type.GetTypeFromHandle(default(RuntimeTypeHandle)));
-#if NET40
             public static readonly MethodInfo TypeGetProperty = ExpressionUtility.GetMethodInfo((Type t) => t.GetProperty(default(string), default(BindingFlags)));
-#else
-            public static readonly MethodInfo TypeGetProperty = ExpressionUtility.GetMethodInfo((Type t) => t.GetTypeInfo().GetProperty(default(string), default(BindingFlags)));
-#endif
-            public static readonly MethodInfo TypeGetField = ExpressionUtility.GetMethodInfo((Type t) => t.GetTypeInfo().GetField(default(string), default(BindingFlags)));
+            public static readonly MethodInfo TypeGetField = ExpressionUtility.GetMethodInfo((Type t) => t.GetField(default(string), default(BindingFlags)));
             public static readonly MethodInfo GetCustomAttributeMessagePackFormatterAttribute = ExpressionUtility.GetMethodInfo(() => AttributeX.GetCustomAttributeX<MessagePackFormatterAttribute>(default(MemberInfo), default(bool)));
             public static readonly MethodInfo ActivatorCreateInstance = ExpressionUtility.GetMethodInfo(() => Activator.CreateInstance(default(Type), default(object[]))); // 注意：这儿不能使用 Activator.CreateInstance
 
@@ -1345,8 +1357,7 @@ typeof(int), typeof(int) });
 
         public static ObjectSerializationInfo CreateOrNull(Type type, bool forceStringKey, bool contractless, bool allowPrivate)
         {
-            var ti = type.GetTypeInfo();
-            var isClass = ti.IsClass || ti.IsInterface || ti.IsAbstract;
+            var isClass = type.IsClass || type.IsInterface || type.IsAbstract;
 
             var contractAttr = type.GetCustomAttributeX<MessagePackObjectAttribute>();
             var dataContractAttr = type.GetCustomAttributeX<DataContractAttribute>();
@@ -1597,11 +1608,12 @@ typeof(int), typeof(int) });
 
             // GetConstructor
             IEnumerator<ConstructorInfo> ctorEnumerator = null;
-            var ctor = ti.DeclaredConstructors.Where(x => x.IsPublic).SingleOrDefault(x => x.GetCustomAttributeX<SerializationConstructorAttribute>(false) != null);
+            var declaredConstructors = type.GetTypeInfo().DeclaredConstructors;
+            var ctor = declaredConstructors.Where(x => x.IsPublic).SingleOrDefault(x => x.GetCustomAttributeX<SerializationConstructorAttribute>(false) != null);
             if (ctor == null)
             {
                 ctorEnumerator =
-                    ti.DeclaredConstructors.Where(x => x.IsPublic).OrderBy(x => x.GetParameters().Length)
+                    declaredConstructors.Where(x => x.IsPublic).OrderBy(x => x.GetParameters().Length)
                     .GetEnumerator();
 
                 if (ctorEnumerator.MoveNext())
@@ -1789,7 +1801,7 @@ typeof(int), typeof(int) });
                 get
                 {
                     var mi = IsProperty ? (MemberInfo)PropertyInfo : FieldInfo;
-                    return mi.DeclaringType.GetTypeInfo().IsValueType;
+                    return mi.DeclaringType.IsValueType;
                 }
             }
 

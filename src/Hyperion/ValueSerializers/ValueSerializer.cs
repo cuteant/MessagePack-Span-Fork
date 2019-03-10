@@ -27,11 +27,7 @@ namespace Hyperion.ValueSerializers
     public virtual void EmitWriteValue(ICompiler<ObjectWriter> c, int stream, int fieldValue, int session)
     {
       var converted = c.Convert<object>(fieldValue);
-#if NET40
       var method = typeof(ValueSerializer).GetMethod(nameof(WriteValue));
-#else
-      var method = typeof(ValueSerializer).GetTypeInfo().GetMethod(nameof(WriteValue));
-#endif
 
       //write it to the value serializer
       var vs = c.Constant(this);
@@ -41,11 +37,7 @@ namespace Hyperion.ValueSerializers
     public virtual int EmitReadValue([NotNull] ICompiler<ObjectReader> c, int stream, int session,
         [NotNull] FieldInfo field)
     {
-#if NET40
       var method = typeof(ValueSerializer).GetMethod(nameof(ReadValue));
-#else
-      var method = typeof(ValueSerializer).GetTypeInfo().GetMethod(nameof(ReadValue));
-#endif
       var ss = c.Constant(this);
       var read = c.Call(method, ss, stream, session);
       read = c.Convert(read, field.FieldType);

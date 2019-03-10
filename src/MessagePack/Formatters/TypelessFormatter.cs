@@ -158,8 +158,7 @@ namespace MessagePack.Formatters
                     ThrowHelper.ThrowInvalidOperationException_Blacklist(type);
                 }
 
-                var ti = type.GetTypeInfo();
-                if (ti.IsAnonymous() || useBuiltinTypes.Contains(type))
+                if (type.IsAnonymous() || useBuiltinTypes.Contains(type))
                 {
                     typeName = null;
                     expectedType = null;
@@ -183,8 +182,6 @@ namespace MessagePack.Formatters
                 {
                     if (!serializers.TryGetValue(expectedType, out formatterAndDelegate))
                     {
-                        var ti = expectedType.GetTypeInfo();
-
                         var formatter = formatterResolver.GetFormatterDynamic(expectedType);
                         if (formatter == null)
                         {
@@ -205,7 +202,7 @@ namespace MessagePack.Formatters
                             serializeMethodInfo,
                             param1,
                             param2,
-                            ti.IsValueType ? Expression.Unbox(param3, expectedType) : Expression.Convert(param3, expectedType),
+                            expectedType.IsValueType ? Expression.Unbox(param3, expectedType) : Expression.Convert(param3, expectedType),
                             param4);
 
                         var lambda = Expression.Lambda<SerializeMethod>(body, param0, param1, param2, param3, param4).Compile();
@@ -300,8 +297,6 @@ namespace MessagePack.Formatters
                 {
                     if (!deserializers.TryGetValue(type, out formatterAndDelegate))
                     {
-                        var ti = type.GetTypeInfo();
-
                         var formatter = formatterResolver.GetFormatterDynamic(type);
                         if (formatter == null)
                         {
@@ -326,7 +321,7 @@ namespace MessagePack.Formatters
                             param4);
 
                         Expression body = deserialize;
-                        if (ti.IsValueType)
+                        if (type.IsValueType)
                             body = Expression.Convert(deserialize, typeof(object));
                         var lambda = Expression.Lambda<DeserializeMethod>(body, param0, param1, param2, param3, param4).Compile();
 

@@ -25,11 +25,7 @@ namespace CuteAnt.Extensions.Serialization
     {
       if (null == type) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.type); }
 
-      return type.
-#if !NET40
-             GetTypeInfo().
-#endif
-             IsSerializable;
+      return type.IsSerializable;
     }
 
     #endregion

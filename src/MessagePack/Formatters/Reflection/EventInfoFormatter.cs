@@ -34,9 +34,6 @@ namespace MessagePack.Formatters
             var declaringType = MessagePackBinary.ReadNamedType(bytes, offset + nameSize, out readSize, _throwOnError);
             readSize += nameSize;
             return (TEvent)declaringType
-#if !NET40
-                .GetTypeInfo()
-#endif
                 .GetEvent(name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
         }
 

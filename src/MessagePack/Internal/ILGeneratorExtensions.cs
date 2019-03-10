@@ -24,8 +24,7 @@ namespace MessagePack.Internal
         {
             this.il = il;
             this.i = i;
-            var ti = type.GetTypeInfo();
-            this.@ref = (ti.IsClass || ti.IsInterface || ti.IsAbstract) ? false : true;
+            this.@ref = (type.IsClass || type.IsInterface || type.IsAbstract) ? false : true;
         }
 
         public void EmitLoad()
@@ -222,7 +221,7 @@ namespace MessagePack.Internal
 
         public static void EmitUnboxOrCast(this ILGenerator il, Type type)
         {
-            if (type.GetTypeInfo().IsValueType)
+            if (type.IsValueType)
             {
                 il.Emit(OpCodes.Unbox_Any, type);
             }
@@ -234,7 +233,7 @@ namespace MessagePack.Internal
 
         public static void EmitBoxOrDoNothing(this ILGenerator il, Type type)
         {
-            if (type.GetTypeInfo().IsValueType)
+            if (type.IsValueType)
             {
                 il.Emit(OpCodes.Box, type);
             }

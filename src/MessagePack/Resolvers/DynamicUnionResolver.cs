@@ -59,17 +59,21 @@ namespace MessagePack.Resolvers
 
             static FormatterCache()
             {
-                var ti = typeof(T).GetTypeInfo();
+                var ti = typeof(T);
                 if (ti.IsNullable())
                 {
-                    ti = ti.GenericTypeArguments[0].GetTypeInfo();
+#if NET40
+                    ti = ti.GenericTypeArguments()[0];
+#else
+                    ti = ti.GenericTypeArguments[0];
+#endif
 
-                    var innerFormatter = DynamicUnionResolver.Instance.GetFormatterDynamic(ti.AsType());
+                    var innerFormatter = DynamicUnionResolver.Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
                     {
                         return;
                     }
-                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti.AsType()), new object[] { innerFormatter });
+                    formatter = (IMessagePackFormatter<T>)ActivatorUtils.CreateInstance(typeof(StaticNullableFormatter<>).GetCachedGenericType(ti), new object[] { innerFormatter });
                     return;
                 }
 
@@ -82,12 +86,11 @@ namespace MessagePack.Resolvers
 
         static TypeInfo BuildType(Type type)
         {
-            var ti = type.GetTypeInfo();
             // order by key(important for use jump-table of switch)
             var unionAttrs = type.GetAllAttributes<UnionAttribute>().OrderBy(x => x.Key).ToArray();
 
             if (unionAttrs.Length == 0) return null;
-            if (!ti.IsInterface && !ti.IsAbstract)
+            if (!type.IsInterface && !type.IsAbstract)
             {
                 ThrowHelper.ThrowDynamicUnionResolverException_InterfaceOrAbstract(type);
             }
@@ -250,7 +253,7 @@ namespace MessagePack.Resolvers
                 }, () =>
                 {
                     il.EmitLdarg(3);
-                    if (item.Attr.SubType.GetTypeInfo().IsValueType)
+                    if (item.Attr.SubType.IsValueType)
                     {
                         il.Emit(OpCodes.Unbox_Any, item.Attr.SubType);
                     }
@@ -386,7 +389,7 @@ namespace MessagePack.Resolvers
                 il.EmitLdarg(3);
                 il.EmitLdarg(4);
                 il.EmitCall(getDeserialize(item.Attr.SubType));
-                if (item.Attr.SubType.GetTypeInfo().IsValueType)
+                if (item.Attr.SubType.IsValueType)
                 {
                     il.Emit(OpCodes.Box, item.Attr.SubType);
                 }

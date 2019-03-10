@@ -119,21 +119,29 @@ namespace Utf8Json.Resolvers.Internal
                     return null; // not supported built-in
                 }
             }
-            else if (ti.IsGenericType)
+            else if (t.IsGenericType)
             {
-                var genericType = ti.GetGenericTypeDefinition();
-                var genericTypeInfo = genericType.GetTypeInfo();
-                var isNullable = genericTypeInfo.IsNullable();
-                var nullableElementType = isNullable ? ti.GenericTypeArguments[0] : null;
+                var genericType = t.GetGenericTypeDefinition();
+                var isNullable = genericType.IsNullable();
+#if NET40
+                var genericTypeArguments = t.GenericTypeArguments();
+#else
+                var genericTypeArguments = t.GenericTypeArguments;
+#endif
+                var nullableElementType = isNullable ? genericTypeArguments[0] : null;
 
                 const string _systemTupleType = "System.Tuple";
                 const string _systemValueTupleType = "System.ValueTuple";
 
                 if (genericType == typeof(KeyValuePair<,>))
                 {
-                    return CreateInstance(typeof(KeyValuePairFormatter<,>), ti.GenericTypeArguments);
+                    return CreateInstance(typeof(KeyValuePairFormatter<,>), genericTypeArguments);
                 }
-                else if (isNullable && nullableElementType.GetTypeInfo().IsConstructedGenericType() && nullableElementType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
+#if NET40
+                else if (isNullable && nullableElementType.IsConstructedGenericType() && nullableElementType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
+#else
+                else if (isNullable && nullableElementType.IsConstructedGenericType && nullableElementType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
+#endif
                 {
                     return CreateInstance(typeof(NullableFormatter<>), new[] { nullableElementType });
                 }
@@ -144,7 +152,7 @@ namespace Utf8Json.Resolvers.Internal
                 // ValueTask
                 else if (genericType == typeof(ValueTask<>))
                 {
-                    return CreateInstance(typeof(ValueTaskFormatter<>), ti.GenericTypeArguments);
+                    return CreateInstance(typeof(ValueTaskFormatter<>), genericTypeArguments);
                 }
                 else if (isNullable && nullableElementType.IsConstructedGenericType && nullableElementType.GetGenericTypeDefinition() == typeof(ValueTask<>))
                 {
@@ -153,14 +161,10 @@ namespace Utf8Json.Resolvers.Internal
 #endif
 
                 // Tuple
-#if NET40
-                else if (ti.AsType().FullName.StartsWith(_systemTupleType, StringComparison.Ordinal))
-#else
-                else if (ti.FullName.StartsWith(_systemTupleType, StringComparison.Ordinal))
-#endif
+                else if (t.FullName.StartsWith(_systemTupleType, StringComparison.Ordinal))
                 {
                     Type tupleFormatterType = null;
-                    switch (ti.GenericTypeArguments.Length)
+                    switch (genericTypeArguments.Length)
                     {
                         case 1:
                             tupleFormatterType = typeof(TupleFormatter<>);
@@ -190,18 +194,14 @@ namespace Utf8Json.Resolvers.Internal
                             break;
                     }
 
-                    return CreateInstance(tupleFormatterType, ti.GenericTypeArguments);
+                    return CreateInstance(tupleFormatterType, genericTypeArguments);
                 }
 
                 // ValueTuple
-#if NET40
-                else if (ti.AsType().FullName.StartsWith(_systemValueTupleType, StringComparison.Ordinal))
-#else
-                else if (ti.FullName.StartsWith(_systemValueTupleType, StringComparison.Ordinal))
-#endif
+                else if (t.FullName.StartsWith(_systemValueTupleType, StringComparison.Ordinal))
                 {
                     Type tupleFormatterType = null;
-                    switch (ti.GenericTypeArguments.Length)
+                    switch (genericTypeArguments.Length)
                     {
                         case 1:
                             tupleFormatterType = typeof(ValueTupleFormatter<>);
@@ -231,7 +231,7 @@ namespace Utf8Json.Resolvers.Internal
                             break;
                     }
 
-                    return CreateInstance(tupleFormatterType, ti.GenericTypeArguments);
+                    return CreateInstance(tupleFormatterType, genericTypeArguments);
                 }
 
 #endif
@@ -239,16 +239,20 @@ namespace Utf8Json.Resolvers.Internal
                 // ArraySegement
                 else if (genericType == typeof(ArraySegment<>))
                 {
-                    if (ti.GenericTypeArguments[0] == typeof(byte))
+                    if (genericTypeArguments[0] == typeof(byte))
                     {
                         return ByteArraySegmentFormatter.Default;
                     }
                     else
                     {
-                        return CreateInstance(typeof(ArraySegmentFormatter<>), ti.GenericTypeArguments);
+                        return CreateInstance(typeof(ArraySegmentFormatter<>), genericTypeArguments);
                     }
                 }
-                else if (isNullable && nullableElementType.GetTypeInfo().IsConstructedGenericType() && nullableElementType.GetGenericTypeDefinition() == typeof(ArraySegment<>))
+#if NET40
+                else if (isNullable && nullableElementType.IsConstructedGenericType() && nullableElementType.GetGenericTypeDefinition() == typeof(ArraySegment<>))
+#else
+                else if (isNullable && nullableElementType.IsConstructedGenericType && nullableElementType.GetGenericTypeDefinition() == typeof(ArraySegment<>))
+#endif
                 {
                     if (nullableElementType == typeof(ArraySegment<byte>))
                     {
@@ -266,24 +270,32 @@ namespace Utf8Json.Resolvers.Internal
                     Type formatterType;
                     if (formatterMap.TryGetValue(genericType, out formatterType))
                     {
-                        return CreateInstance(formatterType, ti.GenericTypeArguments);
+                        return CreateInstance(formatterType, genericTypeArguments);
                     }
 
                     // generic collection
-                    else if (ti.GenericTypeArguments.Length == 1
-                          && ti.ImplementedInterfaces.Any(x => x.GetTypeInfo().IsConstructedGenericType() && x.GetGenericTypeDefinition() == typeof(ICollection<>))
+                    else if (genericTypeArguments.Length == 1
+#if NET40
+                          && ti.ImplementedInterfaces.Any(x => x.IsConstructedGenericType() && x.GetGenericTypeDefinition() == typeof(ICollection<>))
+#else
+                          && ti.ImplementedInterfaces.Any(x => x.IsConstructedGenericType && x.GetGenericTypeDefinition() == typeof(ICollection<>))
+#endif
                           && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
                     {
-                        var elemType = ti.GenericTypeArguments[0];
+                        var elemType = genericTypeArguments[0];
                         return CreateInstance(typeof(GenericCollectionFormatter<,>), new[] { elemType, t });
                     }
                     // generic dictionary
-                    else if (ti.GenericTypeArguments.Length == 2
-                          && ti.ImplementedInterfaces.Any(x => x.GetTypeInfo().IsConstructedGenericType() && x.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+                    else if (genericTypeArguments.Length == 2
+#if NET40
+                          && ti.ImplementedInterfaces.Any(x => x.IsConstructedGenericType() && x.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+#else
+                          && ti.ImplementedInterfaces.Any(x => x.IsConstructedGenericType && x.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+#endif
                           && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
                     {
-                        var keyType = ti.GenericTypeArguments[0];
-                        var valueType = ti.GenericTypeArguments[1];
+                        var keyType = genericTypeArguments[0];
+                        var valueType = genericTypeArguments[1];
                         return CreateInstance(typeof(GenericDictionaryFormatter<,,>), new[] { keyType, valueType, t });
                     }
                 }
@@ -307,15 +319,15 @@ namespace Utf8Json.Resolvers.Internal
                 {
                     return NonGenericInterfaceDictionaryFormatter.Default;
                 }
-                if (typeof(IList).GetTypeInfo().IsAssignableFrom(ti) && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
+                if (typeof(IList).IsAssignableFrom(t) && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(NonGenericListFormatter<>).GetCachedGenericType(t));
                 }
-                else if (typeof(IDictionary).GetTypeInfo().IsAssignableFrom(ti) && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
+                else if (typeof(IDictionary).IsAssignableFrom(t) && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(NonGenericDictionaryFormatter<>).GetCachedGenericType(t));
                 }
-                if (typeof(Type).GetTypeInfo().IsAssignableFrom(ti))
+                if (typeof(Type).IsAssignableFrom(t))
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(SimpleTypeFormatter<>).GetCachedGenericType(t));
                 }

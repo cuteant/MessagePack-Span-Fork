@@ -49,11 +49,7 @@ namespace MessagePack.Formatters
                 }
             }
             readSize = offset - startOffset;
-#if NET40
             var ctor = declaringType.GetConstructor(parameterTypes);
-#else
-            var ctor = declaringType.GetTypeInfo().GetConstructor(parameterTypes);
-#endif
             return (TConstructor)ctor;
         }
 

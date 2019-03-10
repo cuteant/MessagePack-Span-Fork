@@ -19,7 +19,7 @@ namespace Hyperion.SerializerFactories
     {
         public override bool CanSerialize(Serializer serializer, Type type)
         {
-            return type.GetTypeInfo().IsSubclassOf(typeof(FieldInfo));
+            return type.IsSubclassOf(typeof(FieldInfo));
         }
 
         public override bool CanDeserialize(Serializer serializer, Type type)
@@ -37,7 +37,7 @@ namespace Hyperion.SerializerFactories
                 var name = stream.ReadString(session);
                 var owner = stream.ReadObject(session) as Type;
 
-                var field = owner.GetTypeInfo().GetField(name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var field = owner.GetField(name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                 return field;
             };
             ObjectWriter writer = (stream, obj, session) =>

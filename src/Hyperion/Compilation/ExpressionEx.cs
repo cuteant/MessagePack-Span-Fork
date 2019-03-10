@@ -24,18 +24,14 @@ namespace Hyperion.Compilation
 
     public static Expression GetNewExpression(Type type)
     {
-      if (type.GetTypeInfo().IsValueType)
+      if (type.IsValueType)
       {
         var x = Expression.Constant(ActivatorUtils.FastCreateInstance(type));
         var convert = Expression.Convert(x, typeof(object));
         return convert;
       }
 //#if SERIALIZATION
-      var defaultCtor = type
-#if !NET40
-          .GetTypeInfo()
-#endif
-          .GetConstructor(new Type[] { });
+      var defaultCtor = type.GetConstructor(new Type[] { });
       var il = defaultCtor?.GetMethodBody()?.GetILAsByteArray();
       var sideEffectFreeCtor = il != null && il.Length <= 8; //this is the size of an empty ctor
       if (sideEffectFreeCtor)
@@ -44,11 +40,7 @@ namespace Hyperion.Compilation
         return Expression.New(defaultCtor);
       }
 //#endif
-      var emptyObjectMethod = typeof(TypeEx)
-#if !NET40
-          .GetTypeInfo()
-#endif
-          .GetMethod(nameof(TypeEx.GetEmptyObject));
+      var emptyObjectMethod = typeof(TypeEx).GetMethod(nameof(TypeEx.GetEmptyObject));
       var emptyObject = Expression.Call(null, emptyObjectMethod, type.ToConstant());
 
       return emptyObject;

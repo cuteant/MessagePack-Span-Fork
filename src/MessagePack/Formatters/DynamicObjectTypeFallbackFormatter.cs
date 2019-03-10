@@ -30,7 +30,6 @@ namespace MessagePack.Formatters
             }
 
             var type = value.GetType();
-            var ti = type.GetTypeInfo();
 
             if (type == typeof(object))
             {
@@ -46,66 +45,53 @@ namespace MessagePack.Formatters
                     if (!serializers.TryGetValue(type, out formatterAndDelegate))
                     {
                         var aliasType = type;
-                        var aliasTypeInfo = ti;
                         if (typeof(Type).IsAssignableFrom(type))
                         {
                             aliasType = typeof(Type);
-                            aliasTypeInfo = typeof(Type).GetTypeInfo();
                         }
                         else if (typeof(ConstructorInfo).IsAssignableFrom(type))
                         {
                             aliasType = typeof(ConstructorInfo);
-                            aliasTypeInfo = typeof(ConstructorInfo).GetTypeInfo();
                         }
                         else if (typeof(EventInfo).IsAssignableFrom(type))
                         {
                             aliasType = typeof(EventInfo);
-                            aliasTypeInfo = typeof(EventInfo).GetTypeInfo();
                         }
                         else if (typeof(FieldInfo).IsAssignableFrom(type))
                         {
                             aliasType = typeof(FieldInfo);
-                            aliasTypeInfo = typeof(FieldInfo).GetTypeInfo();
                         }
                         else if (typeof(PropertyInfo).IsAssignableFrom(type))
                         {
                             aliasType = typeof(PropertyInfo);
-                            aliasTypeInfo = typeof(PropertyInfo).GetTypeInfo();
                         }
                         else if (typeof(MethodInfo).IsAssignableFrom(type))
                         {
                             aliasType = typeof(MethodInfo);
-                            aliasTypeInfo = typeof(MethodInfo).GetTypeInfo();
                         }
                         else if (typeof(MemberInfo).IsAssignableFrom(type))
                         {
                             aliasType = typeof(MemberInfo);
-                            aliasTypeInfo = typeof(MemberInfo).GetTypeInfo();
                         }
                         else if (typeof(Delegate).IsAssignableFrom(type))
                         {
                             aliasType = typeof(Delegate);
-                            aliasTypeInfo = typeof(Delegate).GetTypeInfo();
                         }
                         else if (typeof(Exception).IsAssignableFrom(type))
                         {
                             aliasType = typeof(Exception);
-                            aliasTypeInfo = typeof(Exception).GetTypeInfo();
                         }
                         else if (typeof(Expression).IsAssignableFrom(type))
                         {
                             aliasType = typeof(Expression);
-                            aliasTypeInfo = typeof(Expression).GetTypeInfo();
                         }
                         else if (typeof(SymbolDocumentInfo).IsAssignableFrom(type))
                         {
                             aliasType = typeof(SymbolDocumentInfo);
-                            aliasTypeInfo = typeof(SymbolDocumentInfo).GetTypeInfo();
                         }
                         else if (typeof(MemberBinding).IsAssignableFrom(type))
                         {
                             aliasType = typeof(MemberBinding);
-                            aliasTypeInfo = typeof(MemberBinding).GetTypeInfo();
                         }
                         object formatter = null;
                         foreach (var innerResolver in innerResolvers)
@@ -134,7 +120,7 @@ namespace MessagePack.Formatters
                                 serializeMethodInfo,
                                 param1,
                                 param2,
-                                aliasTypeInfo.IsValueType ? Expression.Unbox(param3, t) : Expression.Convert(param3, t),
+                                aliasType.IsValueType ? Expression.Unbox(param3, t) : Expression.Convert(param3, t),
                                 param4);
 
                             var lambda = Expression.Lambda<SerializeMethod>(body, param0, param1, param2, param3, param4).Compile();

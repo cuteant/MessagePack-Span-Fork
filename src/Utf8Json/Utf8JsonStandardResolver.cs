@@ -220,8 +220,11 @@ namespace Utf8Json
                 {
                     foreach (var implInterface in item.GetType().GetTypeInfo().ImplementedInterfaces)
                     {
-                        var ti = implInterface.GetTypeInfo();
-                        if (ti.IsGenericType && ti.GenericTypeArguments[0] == typeof(T))
+#if NET40
+                        if (implInterface.IsGenericType && implInterface.GenericTypeArguments()[0] == typeof(T))
+#else
+                        if (implInterface.IsGenericType && implInterface.GenericTypeArguments[0] == typeof(T))
+#endif
                         {
                             formatter = (IJsonFormatter<T>)item;
                             return;
@@ -389,8 +392,11 @@ namespace Utf8Json
                 {
                     foreach (var implInterface in item.GetType().GetTypeInfo().ImplementedInterfaces)
                     {
-                        var ti = implInterface.GetTypeInfo();
-                        if (ti.IsGenericType && ti.GenericTypeArguments[0] == typeof(T))
+#if NET40
+                        if (implInterface.IsGenericType && implInterface.GenericTypeArguments()[0] == typeof(T))
+#else
+                        if (implInterface.IsGenericType && implInterface.GenericTypeArguments[0] == typeof(T))
+#endif
                         {
                             formatter = (IJsonFormatter<T>)item;
                             return;
@@ -558,8 +564,11 @@ namespace Utf8Json
                 {
                     foreach (var implInterface in item.GetType().GetTypeInfo().ImplementedInterfaces)
                     {
-                        var ti = implInterface.GetTypeInfo();
-                        if (ti.IsGenericType && ti.GenericTypeArguments[0] == typeof(T))
+#if NET40
+                        if (implInterface.IsGenericType && implInterface.GenericTypeArguments()[0] == typeof(T))
+#else
+                        if (implInterface.IsGenericType && implInterface.GenericTypeArguments[0] == typeof(T))
+#endif
                         {
                             formatter = (IJsonFormatter<T>)item;
                             return;

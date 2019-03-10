@@ -20,7 +20,7 @@ namespace Hyperion.SerializerFactories
     {
         public override bool CanSerialize(Serializer serializer, Type type)
         {
-            return type.GetTypeInfo().IsSubclassOf(typeof(ConstructorInfo));
+            return type.IsSubclassOf(typeof(ConstructorInfo));
         }
 
         public override bool CanDeserialize(Serializer serializer, Type type)
@@ -38,11 +38,7 @@ namespace Hyperion.SerializerFactories
                 var owner = stream.ReadObject(session) as Type;
                 var arguments = stream.ReadObject(session) as Type[];
 
-#if NET40
                 var ctor = owner.GetConstructor(arguments);
-#else
-                var ctor = owner.GetTypeInfo().GetConstructor(arguments);
-#endif
                 return ctor;
             };
             ObjectWriter writer = (stream, obj, session) =>

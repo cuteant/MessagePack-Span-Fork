@@ -34,8 +34,7 @@ namespace MessagePack
     {
         internal static object GetFormatter(Type t)
         {
-            var ti = t.GetTypeInfo();
-            if (ti.IsGenericType && ti.GetGenericTypeDefinition() == typeof(Expression<>))
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Expression<>))
             {
                 return ActivatorUtils.FastCreateInstance(typeof(HyperionExpressionFormatter2<>).GetCachedGenericType(t));
             }

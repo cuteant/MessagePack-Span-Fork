@@ -42,7 +42,11 @@ namespace Utf8Json.Resolvers
 
                 try
                 {
-                    if (attr.FormatterType.IsGenericType && !attr.FormatterType.GetTypeInfo().IsConstructedGenericType())
+#if NET40
+                    if (attr.FormatterType.IsGenericType && !attr.FormatterType.IsConstructedGenericType())
+#else
+                    if (attr.FormatterType.IsGenericType && !attr.FormatterType.IsConstructedGenericType)
+#endif
                     {
                         var t = attr.FormatterType.GetCachedGenericType(typeof(T)); // use T self
                         formatter = (IJsonFormatter<T>)ActivatorUtil.CreateInstance(t, attr.Arguments);
