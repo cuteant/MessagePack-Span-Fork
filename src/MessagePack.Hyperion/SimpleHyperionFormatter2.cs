@@ -9,7 +9,7 @@ namespace MessagePack.Formatters
     {
         public static readonly IMessagePackFormatter<T> Instance = new SimpleHyperionFormatter2<T>();
 
-        private const int c_initialBufferSize = 1024 * 80;
+        private const int c_initialBufferSize = 1024 * 64;
 
         public SimpleHyperionFormatter2() { }
 

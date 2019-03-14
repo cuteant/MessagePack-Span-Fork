@@ -12,7 +12,7 @@ namespace CuteAnt.Extensions.Serialization
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static partial class JsonMessageFormatterExtensions
     {
-        internal const int c_initialBufferSize = 1024 * 80;
+        internal const int c_initialBufferSize = 1024 * 64;
         private const int c_zeroSize = 0;
 
         #region -- Serialize --
