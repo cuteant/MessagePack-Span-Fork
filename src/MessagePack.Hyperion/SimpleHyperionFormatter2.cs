@@ -9,7 +9,11 @@ namespace MessagePack.Formatters
     {
         public static readonly IMessagePackFormatter<T> Instance = new SimpleHyperionFormatter2<T>();
 
+#if DESKTOPCLR
+        private const int c_initialBufferSize = 1024 * 80;
+#else
         private const int c_initialBufferSize = 1024 * 64;
+#endif
 
         public SimpleHyperionFormatter2() { }
 

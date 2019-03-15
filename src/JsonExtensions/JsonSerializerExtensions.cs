@@ -14,7 +14,11 @@ namespace Newtonsoft.Json
     {
         private static readonly Encoding UTF8NoBOM = StringHelper.UTF8NoBOM;
         private static readonly ArrayPool<byte> s_sharedBufferPool = BufferManager.Shared;
+#if DESKTOPCLR
+        private const int c_initialBufferSize = 1024 * 80;
+#else
         private const int c_initialBufferSize = 1024 * 64;
+#endif
 
         #region -- SerializeObject --
 

@@ -12,7 +12,11 @@ namespace CuteAnt.Extensions.Serialization
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static partial class JsonMessageFormatterExtensions
     {
+#if DESKTOPCLR
+        internal const int c_initialBufferSize = 1024 * 80;
+#else
         internal const int c_initialBufferSize = 1024 * 64;
+#endif
         private const int c_zeroSize = 0;
 
         #region -- Serialize --

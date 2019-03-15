@@ -13,7 +13,11 @@ namespace MessagePack.Formatters
 {
     public abstract class HyperionFormatterBase2<T> : DynamicObjectTypeFormatterBase<T>
     {
+#if DESKTOPCLR
+        private const int c_initialBufferSize = 1024 * 80;
+#else
         private const int c_initialBufferSize = 1024 * 64;
+#endif
         private static readonly HashSet<Type> s_primitiveTypes = new HashSet<Type>(new[]
         {
             typeof(Int32), typeof(Int64), typeof(Int16), typeof(UInt32), typeof(UInt64), typeof(UInt16),

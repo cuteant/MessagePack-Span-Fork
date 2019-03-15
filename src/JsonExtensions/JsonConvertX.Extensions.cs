@@ -303,7 +303,11 @@ namespace Newtonsoft.Json
 
         #region -- Serialize to Byte-Array --
 
+#if DESKTOPCLR
+        private const int c_initialBufferSize = 1024 * 80;
+#else
         private const int c_initialBufferSize = 1024 * 64;
+#endif
 
         /// <summary>Serializes the specified object to a JSON byte array.</summary>
         /// <param name="value">The object to serialize.</param>

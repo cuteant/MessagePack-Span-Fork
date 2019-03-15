@@ -11,7 +11,11 @@ namespace CuteAnt.Extensions.Serialization
     /// <summary>Base class to handle serializing and deserializing strongly-typed objects.</summary>
     public abstract partial class MessageFormatter : IMessageFormatter
     {
+#if DESKTOPCLR
+        private const int c_initialBufferSize = 1024 * 80;
+#else
         private const int c_initialBufferSize = 1024 * 64;
+#endif
         private const int c_zeroSize = 0;
 
         private static readonly ArrayPool<byte> s_sharedBufferPool = BufferManager.Shared;
