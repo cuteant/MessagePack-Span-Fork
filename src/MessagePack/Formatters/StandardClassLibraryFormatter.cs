@@ -118,12 +118,38 @@ namespace MessagePack.Formatters
 
         public int Serialize(ref byte[] bytes, int offset, decimal value, IFormatterResolver formatterResolver)
         {
-            return MessagePackBinary.WriteString(ref bytes, offset, value.ToString(CultureInfo.InvariantCulture));
+            //return MessagePackBinary.WriteString(ref bytes, offset, value.ToString(CultureInfo.InvariantCulture));
+            var bits = decimal.GetBits(value);
+            var startOffset = offset;
+            offset += MessagePackBinary.WriteArrayHeader(ref bytes, offset, 4);
+            offset += MessagePackBinary.WriteInt32(ref bytes, offset, bits[0]); // lo
+            offset += MessagePackBinary.WriteInt32(ref bytes, offset, bits[1]); // mid
+            offset += MessagePackBinary.WriteInt32(ref bytes, offset, bits[2]); // hi
+            offset += MessagePackBinary.WriteInt32(ref bytes, offset, bits[3]); // flags
+            return offset - startOffset;
         }
 
         public decimal Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
-            return decimal.Parse(MessagePackBinary.ReadString(bytes, offset, out readSize), CultureInfo.InvariantCulture);
+            //return decimal.Parse(MessagePackBinary.ReadString(bytes, offset, out readSize), CultureInfo.InvariantCulture);
+            var startOffset = offset;
+            var count = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
+            offset += readSize;
+
+            if (count != 4) ThrowHelper.ThrowInvalidOperationException_Decimal_Format();
+
+            var lo = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+            offset += readSize;
+            var mid = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+            offset += readSize;
+            var hi = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+            offset += readSize;
+            var flags = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+            offset += readSize;
+
+            readSize = offset - startOffset;
+
+            return new decimal(new int[] { lo, mid, hi, flags });
         }
     }
 
@@ -195,20 +221,39 @@ namespace MessagePack.Formatters
 
         }
 
+        const int c_totalSize = 18;
+        const int c_valueSize = 16;
+
         public int Serialize(ref byte[] bytes, int offset, Guid value, IFormatterResolver formatterResolver)
         {
-            MessagePackBinary.EnsureCapacity(ref bytes, offset, 38);
+            var buffer = value.ToByteArray();
 
-            bytes[offset] = MessagePackCode.Str8;
-            bytes[offset + 1] = unchecked((byte)36);
-            new GuidBits(ref value).Write(bytes, offset + 2);
-            return 38;
+            MessagePackBinary.EnsureCapacity(ref bytes, offset, c_totalSize);
+
+            bytes[offset] = MessagePackCode.Bin8;
+            bytes[offset + 1] = c_valueSize;
+
+            Buffer.BlockCopy(buffer, 0, bytes, offset + 2, c_valueSize);
+
+            return c_totalSize;
+            //MessagePackBinary.EnsureCapacity(ref bytes, offset, 38);
+
+            //bytes[offset] = MessagePackCode.Str8;
+            //bytes[offset + 1] = unchecked((byte)36);
+            //new GuidBits(ref value).Write(bytes, offset + 2);
+            //return 38;
         }
 
         public Guid Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
         {
-            var segment = MessagePackBinary.ReadStringSegment(bytes, offset, out readSize);
-            return new GuidBits(segment).Value;
+            var newBytes = new byte[c_valueSize];
+            Buffer.BlockCopy(bytes, offset + 2, newBytes, 0, c_valueSize);
+
+            readSize = c_totalSize;
+
+            return new Guid(newBytes);
+            //var segment = MessagePackBinary.ReadStringSegment(bytes, offset, out readSize);
+            //return new GuidBits(segment).Value;
         }
     }
 

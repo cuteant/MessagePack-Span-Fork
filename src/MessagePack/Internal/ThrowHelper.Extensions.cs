@@ -193,6 +193,16 @@ namespace MessagePack
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowInvalidOperationException_Decimal_Format()
+        {
+            throw GetException();
+            InvalidOperationException GetException()
+            {
+                return new InvalidOperationException("Invalid Decimal format.");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ThrowInvalidOperationException_Guid_Size()
         {
             throw GetException();
