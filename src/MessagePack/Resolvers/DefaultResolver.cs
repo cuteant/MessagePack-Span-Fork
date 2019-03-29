@@ -54,7 +54,7 @@ namespace MessagePack.Resolvers
         {
             s_defaultResolvers = new IFormatterResolver[]
             {
-                UnsafeBinaryResolver.Instance,
+                //UnsafeBinaryResolver.Instance,
                 NativeDateTimeResolver.Instance, // Native c# DateTime format, preserving timezone
 
                 BuiltinResolver.Instance, // Try Builtin
