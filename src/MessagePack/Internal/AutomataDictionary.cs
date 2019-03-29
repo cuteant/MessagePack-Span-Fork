@@ -671,11 +671,7 @@ namespace MessagePack.Internal
                         il.Emit(OpCodes.Ldloc_1);
                         il.Emit(OpCodes.Ret);
 
-#if NET40
-                        var genereatedType = helperType.CreateType();
-#else
                         var genereatedType = helperType.CreateTypeInfo().AsType();
-#endif
                         dynamicGetKeyMethod = genereatedType.GetMethods().First();
                     }
                 }

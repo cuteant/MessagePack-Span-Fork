@@ -49,11 +49,7 @@ namespace MessagePack
             // The fact that we're using static constructors to initialize this is an internal detail.
             // Rethrow the inner exception if there is one.
             // Do it carefully so as to not stomp on the original callstack.
-#if NET40
-            throw ExceptionEnlightenment.PrepareForRethrow(ex.InnerException ?? ex);
-#else
             ExceptionDispatchInfo.Capture(ex.InnerException ?? ex).Throw();
-#endif
             throw new InvalidOperationException("Unreachable"); // keep the compiler happy
         }
 
@@ -68,13 +64,7 @@ namespace MessagePack
         }
 
 #if !UNITY_WSA
-        private static readonly MethodInfo s_getFormatterMethod = typeof(IFormatterResolver)
-#if NET40
-                .GetMethod
-#else
-                .GetRuntimeMethod
-#endif
-                ("GetFormatter", Type.EmptyTypes);
+        private static readonly MethodInfo s_getFormatterMethod = typeof(IFormatterResolver).GetRuntimeMethod("GetFormatter", Type.EmptyTypes);
         public static object GetFormatterDynamic(this IFormatterResolver resolver, Type type)
         {
             var formatter = s_getFormatterMethod.MakeGenericMethod(type).Invoke(resolver, null);

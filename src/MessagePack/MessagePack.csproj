@@ -1,12 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\version.pack.props" />
-  <Import Project="..\nuget.pack.props" />
-  <ImportGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <Import Project="..\..\..\CuteAnt.Extensions.Common\src\CuteAnt.Extensions.Reflection.Sources\CuteAnt.Extensions.Reflection.Sources.projitems" Label="Shared" />
-  </ImportGroup>
+  <Import Project="..\version.props" />
+  <Import Project="..\nuget.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net471;net451;net40</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net471;net451</TargetFrameworks>
     <RootNamespace>MessagePack</RootNamespace>
     <AssemblyName>MessagePack</AssemblyName>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -44,12 +41,11 @@ System.Linq.Expressions.*
 
   <ItemGroup>
     <PackageReference Include="CuteAnt.Core" Version="$(CuteAntCorePackageVersion)" />
-    <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net40' ">
     <PackageReference Include="System.Buffers" Version="$(SystemBuffersPackageVersion)" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
+    <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
   </ItemGroup>
+  
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Reflection.Emit" Version="$(SystemReflectionEmitPackageVersion)" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="$(SystemReflectionEmitLightweightPackageVersion)" />

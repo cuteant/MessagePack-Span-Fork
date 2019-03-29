@@ -62,11 +62,7 @@ namespace MessagePack.Resolvers
                 var ti = typeof(T);
                 if (ti.IsNullable())
                 {
-#if NET40
-                    ti = ti.GenericTypeArguments()[0];
-#else
                     ti = ti.GenericTypeArguments[0];
-#endif
 
                     var innerFormatter = DynamicUnionResolver.Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
@@ -136,11 +132,7 @@ namespace MessagePack.Resolvers
                 BuildDeserialize(type, unionAttrs, method, keyToJumpMap, il);
             }
 
-#if NET40
-            return typeBuilder.CreateType().GetTypeInfo();
-#else
             return typeBuilder.CreateTypeInfo();
-#endif
         }
 
         static void BuildConstructor(Type type, UnionAttribute[] infos, ConstructorInfo method, FieldBuilder typeToKeyAndJumpMap, FieldBuilder keyToJumpMap, ILGenerator il)

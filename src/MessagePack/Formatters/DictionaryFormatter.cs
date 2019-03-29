@@ -218,7 +218,6 @@ namespace MessagePack.Formatters
         }
     }
 
-#if !NET40
     public sealed class ReadOnlyDictionaryFormatter<TKey, TValue> : DictionaryFormatterBase<TKey, TValue, Dictionary<TKey, TValue>, ReadOnlyDictionary<TKey, TValue>>
     {
         protected override void Add(Dictionary<TKey, TValue> collection, int index, TKey key, TValue value)
@@ -254,7 +253,6 @@ namespace MessagePack.Formatters
             return new Dictionary<TKey, TValue>(count);
         }
     }
-#endif
 
     public sealed class ConcurrentDictionaryFormatter<TKey, TValue> : DictionaryFormatterBase<TKey, TValue, System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue>>
     {

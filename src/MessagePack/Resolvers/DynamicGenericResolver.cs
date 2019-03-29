@@ -66,23 +66,17 @@ namespace MessagePack.Internal
 #if NETSTANDARD || NETFRAMEWORK
               {typeof(ObservableCollection<>), typeof(ObservableCollectionFormatter<>)},
               {typeof(ReadOnlyObservableCollection<>),(typeof(ReadOnlyObservableCollectionFormatter<>))},
-#if !NET40
               {typeof(IReadOnlyList<>), typeof(InterfaceReadOnlyListFormatter<>)},
               {typeof(IReadOnlyCollection<>), typeof(InterfaceReadOnlyCollectionFormatter<>)},
-#endif
               {typeof(ISet<>), typeof(InterfaceSetFormatter<>)},
               {typeof(System.Collections.Concurrent.ConcurrentBag<>), typeof(ConcurrentBagFormatter<>)},
               {typeof(System.Collections.Concurrent.ConcurrentQueue<>), typeof(ConcurrentQueueFormatter<>)},
               {typeof(System.Collections.Concurrent.ConcurrentStack<>), typeof(ConcurrentStackFormatter<>)},
-#if !NET40
               {typeof(ReadOnlyDictionary<,>), typeof(ReadOnlyDictionaryFormatter<,>)},
               {typeof(IReadOnlyDictionary<,>), typeof(InterfaceReadOnlyDictionaryFormatter<,>)},
-#endif
               {typeof(System.Collections.Concurrent.ConcurrentDictionary<,>), typeof(ConcurrentDictionaryFormatter<,>)},
               {typeof(Lazy<>), typeof(LazyFormatter<>)},
-#if !NET40
               {typeof(Task<>), typeof(TaskValueFormatter<>)},
-#endif
 #endif
         };
 
@@ -124,11 +118,7 @@ namespace MessagePack.Internal
             {
                 var genericType = t.GetGenericTypeDefinition();
                 var isNullable = genericType.IsNullable();
-#if NET40
-                var genericTypeArguments = t.GenericTypeArguments();
-#else
                 var genericTypeArguments = t.GenericTypeArguments;
-#endif
                 var nullableElementType = isNullable ? genericTypeArguments[0] : null;
 
                 const string _systemTupleType = "System.Tuple";
@@ -138,18 +128,13 @@ namespace MessagePack.Internal
                 {
                     return CreateInstance(typeof(KeyValuePairFormatter<,>), genericTypeArguments);
                 }
-#if NET40
-                else if (isNullable && nullableElementType.IsConstructedGenericType() && nullableElementType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
-#else
                 else if (isNullable && nullableElementType.IsConstructedGenericType && nullableElementType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
-#endif
                 {
                     return CreateInstance(typeof(NullableFormatter<>), new[] { nullableElementType });
                 }
 
 #if NETSTANDARD || NETFRAMEWORK
 
-#if !NET40
                 // ValueTask
                 else if (genericType == typeof(ValueTask<>))
                 {
@@ -159,7 +144,6 @@ namespace MessagePack.Internal
                 {
                     return CreateInstance(typeof(NullableFormatter<>), new[] { nullableElementType });
                 }
-#endif
 
                 // Tuple
                 else if (t.FullName.StartsWith(_systemTupleType, StringComparison.Ordinal))
@@ -249,11 +233,7 @@ namespace MessagePack.Internal
                         return CreateInstance(typeof(ArraySegmentFormatter<>), genericTypeArguments);
                     }
                 }
-#if NET40
-                else if (isNullable && nullableElementType.IsConstructedGenericType() && nullableElementType.GetGenericTypeDefinition() == typeof(ArraySegment<>))
-#else
                 else if (isNullable && nullableElementType.IsConstructedGenericType && nullableElementType.GetGenericTypeDefinition() == typeof(ArraySegment<>))
-#endif
                 {
                     if (nullableElementType == typeof(ArraySegment<byte>))
                     {
@@ -276,11 +256,7 @@ namespace MessagePack.Internal
 
                     // generic collection
                     else if (genericTypeArguments.Length == 1
-#if NET40
-                          && ti.ImplementedInterfaces.Any(x => x.IsConstructedGenericType() && x.GetGenericTypeDefinition() == typeof(ICollection<>))
-#else
                           && ti.ImplementedInterfaces.Any(x => x.IsConstructedGenericType && x.GetGenericTypeDefinition() == typeof(ICollection<>))
-#endif
                           && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
                     {
                         var elemType = genericTypeArguments[0];
@@ -288,11 +264,7 @@ namespace MessagePack.Internal
                     }
                     // generic dictionary
                     else if (genericTypeArguments.Length == 2
-#if NET40
-                          && ti.ImplementedInterfaces.Any(x => x.IsConstructedGenericType() && x.GetGenericTypeDefinition() == typeof(IDictionary<,>))
-#else
                           && ti.ImplementedInterfaces.Any(x => x.IsConstructedGenericType && x.GetGenericTypeDefinition() == typeof(IDictionary<,>))
-#endif
                           && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
                     {
                         var keyType = genericTypeArguments[0];

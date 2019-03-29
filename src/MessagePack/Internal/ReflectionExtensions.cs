@@ -28,28 +28,6 @@ namespace MessagePack.Internal
         {
             return propertyInfo.GetIndexParameters().Length > 0;
         }
-
-#if NETSTANDARD || NETFRAMEWORK
-
-        public static MethodInfo GetGetMethod(this PropertyInfo propInfo)
-        {
-#if NET40
-            return propInfo.GetGetMethod(true);
-#else
-            return propInfo.GetMethod;
-#endif
-        }
-
-        public static MethodInfo GetSetMethod(this PropertyInfo propInfo)
-        {
-#if NET40
-            return propInfo.GetSetMethod(true);
-#else
-            return propInfo.SetMethod;
-#endif
-        }
-
-#endif
     }
 }
 

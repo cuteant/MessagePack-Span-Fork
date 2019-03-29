@@ -138,11 +138,7 @@ namespace MessagePack.Formatters
                                          params Type[] parameterTypes)
         {
             // Check all methods with the specified name, including in base classes
-#if NET40
-            foreach (MethodInfo methodInfo in type.GetMethods(bindingFlags).Where(_ => string.Equals(_.Name, name, StringComparison.Ordinal)))
-#else
             foreach (MethodInfo methodInfo in type.GetMember(name, MemberTypes.Method, bindingFlags))
-#endif
             {
                 // Check that the parameter counts and types match, 
                 // with 'loose' matching on generic parameters

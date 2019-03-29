@@ -64,11 +64,7 @@ namespace MessagePack.Resolvers
 
                 if (ti.IsNullable())
                 {
-#if NET40
-                    ti = ti.GenericTypeArguments()[0];
-#else
                     ti = ti.GenericTypeArguments[0];
-#endif
 
                     var innerFormatter = DynamicObjectResolver.Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
@@ -125,11 +121,7 @@ namespace MessagePack.Resolvers
 
                 if (ti.IsNullable())
                 {
-#if NET40
-                    ti = ti.GenericTypeArguments()[0];
-#else
                     ti = ti.GenericTypeArguments[0];
-#endif
 
                     var innerFormatter = DynamicObjectResolverAllowPrivate.Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
@@ -205,11 +197,7 @@ namespace MessagePack.Resolvers
 
                 if (ti.IsNullable())
                 {
-#if NET40
-                    ti = ti.GenericTypeArguments()[0];
-#else
                     ti = ti.GenericTypeArguments[0];
-#endif
 
                     var innerFormatter = DynamicContractlessObjectResolver.Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
@@ -266,11 +254,7 @@ namespace MessagePack.Resolvers
 
                 if (ti.IsNullable())
                 {
-#if NET40
-                    ti = ti.GenericTypeArguments()[0];
-#else
                     ti = ti.GenericTypeArguments[0];
-#endif
 
                     var innerFormatter = DynamicContractlessObjectResolverAllowPrivate.Instance.GetFormatterDynamic(ti);
                     if (innerFormatter == null)
@@ -426,11 +410,7 @@ namespace MessagePack.Internal
                 }, 1); // firstArgIndex:0 is this.
             }
 
-#if NET40
-            return typeBuilder.CreateType().GetTypeInfo();
-#else
             return typeBuilder.CreateTypeInfo();
-#endif
         }
 
         public static object BuildFormatterToDynamicMethod(Type type, bool forceStringKey, bool contractless, bool allowPrivate)

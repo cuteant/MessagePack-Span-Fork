@@ -33,11 +33,7 @@ namespace MessagePack.Resolvers
                 if (ti.IsNullable())
                 {
                     // build underlying type and use wrapped formatter.
-#if NET40
-                    ti = ti.GenericTypeArguments()[0];
-#else
                     ti = ti.GenericTypeArguments[0];
-#endif
                     if (!ti.IsEnum)
                     {
                         return;

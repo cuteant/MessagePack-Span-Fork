@@ -324,7 +324,7 @@ namespace MessagePack
         [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
 #endif
         public
-#if !(NET40 || NET451)
+#if !(NET451)
             unsafe
 #endif
             static byte[] FastCloneWithResize(byte[] array, int newSize)
@@ -340,7 +340,7 @@ namespace MessagePack
             }
 
             byte[] array3 = new byte[newSize];
-#if !(NET40 || NET451)
+#if !(NET451)
             fixed (byte* pSrc = &array2[0])
             fixed (byte* pDst = &array3[0])
             {

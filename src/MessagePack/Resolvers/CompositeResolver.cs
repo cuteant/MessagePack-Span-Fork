@@ -83,11 +83,7 @@ namespace MessagePack.Resolvers
                 {
                     foreach (var implInterface in item.GetType().GetTypeInfo().ImplementedInterfaces)
                     {
-#if NET40
-                        if (implInterface.IsGenericType && implInterface.GenericTypeArguments()[0] == typeof(T))
-#else
                         if (implInterface.IsGenericType && implInterface.GenericTypeArguments[0] == typeof(T))
-#endif
                         {
                             formatter = (IMessagePackFormatter<T>)item;
                             return;

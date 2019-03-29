@@ -4,7 +4,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
-#if NET451 || NET40
+#if NET451
 using LZ4;
 #else
 using K4os.Compression.LZ4;

@@ -56,11 +56,7 @@ namespace MessagePack.Resolvers
                 if (ti.IsNullable())
                 {
                     // build underlying type and use wrapped formatter.
-#if NET40
-                    ti = ti.GenericTypeArguments()[0];
-#else
                     ti = ti.GenericTypeArguments[0];
-#endif
                     if (!ti.IsEnum)
                     {
                         return;
@@ -119,11 +115,7 @@ namespace MessagePack.Resolvers
                 il.Emit(OpCodes.Ret);
             }
 
-#if NET40
-            return typeBuilder.CreateType().GetTypeInfo();
-#else
             return typeBuilder.CreateTypeInfo();
-#endif
         }
     }
 }

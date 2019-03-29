@@ -1,12 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\version.pack.props" />
-  <Import Project="..\nuget.pack.props" />
-  <ImportGroup Condition=" '$(TargetFramework)' == 'net40' ">
-    <Import Project="..\..\..\CuteAnt.Extensions.Common\src\Nito.AsyncEx.ExceptionEnlightenment.Sources\Nito.AsyncEx.ExceptionEnlightenment.Sources.projitems" Label="Shared" />
-  </ImportGroup>
+  <Import Project="..\version.props" />
+  <Import Project="..\nuget.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net471;net451;net40</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net471;net451</TargetFrameworks>
     <RootNamespace>MessagePack</RootNamespace>
     <AssemblyName>MessagePack.Abstractions</AssemblyName>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>

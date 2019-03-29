@@ -1,10 +1,8 @@
 ﻿using System;
+using System.Buffers;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
-#if !NET40
-using System.Buffers;
-#endif
 using MessagePack.Internal;
 
 namespace MessagePack
@@ -15,10 +13,8 @@ namespace MessagePack
     public static partial class MessagePackSerializer
     {
         private const int c_zeroSize = 0;
-        private const int c_defaultCopyBufferSize = 1024 * 80;
-#if !NET40
+        private const int c_defaultCopyBufferSize = 1024 * 64;
         private static readonly ArrayPool<byte> s_bufferPool = ArrayPool<byte>.Shared;
-#endif
 
         static IFormatterResolver defaultResolver;
 
@@ -140,7 +136,6 @@ namespace MessagePack
 
 #if NETSTANDARD || NETFRAMEWORK
 
-#if !NET40
         /// <summary>
         /// Serialize to stream(async).
         /// </summary>
@@ -171,7 +166,6 @@ namespace MessagePack
                 s_bufferPool.Return(rentBuffer);
             }
         }
-#endif
 
 #endif
 
@@ -297,7 +291,6 @@ namespace MessagePack
 
 #if NETSTANDARD || NETFRAMEWORK
 
-#if !NET40
         public static System.Threading.Tasks.Task<T> DeserializeAsync<T>(Stream stream)
         {
             return DeserializeAsync<T>(stream, defaultResolver);
@@ -329,7 +322,6 @@ namespace MessagePack
                 s_bufferPool.Return(rentBuffer);
             }
         }
-#endif
 
 #endif
 

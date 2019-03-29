@@ -57,25 +57,13 @@ namespace MessagePack.ImmutableCollection
             {
                 var genericType = t.GetGenericTypeDefinition();
                 var isNullable = genericType.IsNullable();
-#if NET40
-                var nullableElementType = isNullable ? t.GenericTypeArguments()[0] : null;
-
-                Type formatterType;
-                if (formatterMap.TryGetValue(genericType, out formatterType))
-                {
-                    return CreateInstance(formatterType, t.GenericTypeArguments());
-                }
-                else if (isNullable && nullableElementType.IsConstructedGenericType() && nullableElementType.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
-#else
                 var nullableElementType = isNullable ? t.GenericTypeArguments[0] : null;
 
-                Type formatterType;
-                if (formatterMap.TryGetValue(genericType, out formatterType))
+                if (formatterMap.TryGetValue(genericType, out Type formatterType))
                 {
                     return CreateInstance(formatterType, t.GenericTypeArguments);
                 }
                 else if (isNullable && nullableElementType.IsConstructedGenericType && nullableElementType.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
-#endif
                 {
                     return CreateInstance(typeof(NullableFormatter<>), nullableElementType);
                 }

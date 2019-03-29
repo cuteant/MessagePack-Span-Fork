@@ -34,11 +34,7 @@ namespace MessagePack.Formatters
 
 #if !UNITY_WSA
 
-#if NET40
-        public static bool IsSupportedType(Type type, Type typeInfo, object value)
-#else
         public static bool IsSupportedType(Type type, TypeInfo typeInfo, object value)
-#endif
         {
             if (value == null) return true;
             if (typeToJumpCode.ContainsKey(type)) return true;

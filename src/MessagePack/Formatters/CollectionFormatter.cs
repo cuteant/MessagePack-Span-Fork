@@ -953,7 +953,6 @@ namespace MessagePack.Formatters
         }
     }
 
-#if !NET40
     public sealed class InterfaceReadOnlyListFormatter<T> : CollectionFormatterBase<T, T[], IReadOnlyList<T>>
     {
         protected override void Add(T[] collection, int index, T value)
@@ -989,7 +988,6 @@ namespace MessagePack.Formatters
             return intermediateCollection;
         }
     }
-#endif
 
     public sealed class InterfaceSetFormatter<T> : CollectionFormatterBase<T, HashSet<T>, ISet<T>>
     {

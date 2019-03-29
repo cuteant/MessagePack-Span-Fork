@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using MessagePack.Internal;
-#if NET451 || NET40
+#if NET451
 using LZ4;
 #else
 using K4os.Compression.LZ4;
@@ -73,7 +73,7 @@ namespace MessagePack
             }
             else
             {
-#if NET451 || NET40
+#if NET451
                 var maxOutCount = LZ4Codec.MaximumOutputLength(serializedData.Count);
 #else
                 var maxOutCount = LZ4Codec.MaximumOutputSize(serializedData.Count);
@@ -120,7 +120,7 @@ namespace MessagePack
             {
                 var offset = 0;
                 var buffer = LZ4MemoryPool.GetBuffer();
-#if NET451 || NET40
+#if NET451
                 var maxOutCount = LZ4Codec.MaximumOutputLength(serializedData.Count);
 #else
                 var maxOutCount = LZ4Codec.MaximumOutputSize(serializedData.Count);
@@ -381,7 +381,7 @@ namespace MessagePack.Internal
         {
             if (lz4buffer == null)
             {
-#if NET451 || NET40
+#if NET451
                 lz4buffer = new byte[LZ4Codec.MaximumOutputLength(65536)];
 #else
                 lz4buffer = new byte[LZ4Codec.MaximumOutputSize(65536)];
