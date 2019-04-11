@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace MessagePack
+﻿namespace MessagePack
 {
+    using System;
+
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
     public class MessagePackObjectAttribute : Attribute
     {

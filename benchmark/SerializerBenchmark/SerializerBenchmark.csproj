@@ -29,6 +29,9 @@
       <Aliases>newmsgpacklz4</Aliases>
     </ProjectReference>
     <ProjectReference Include="..\..\src\MessagePack\MessagePack.csproj">
+      <Aliases>newmsgpackcore</Aliases>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\MessagePack.Abstractions\MessagePack.Abstractions.csproj">
       <Aliases>newmsgpack</Aliases>
     </ProjectReference>
   </ItemGroup>

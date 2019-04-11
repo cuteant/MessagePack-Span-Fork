@@ -1,4 +1,4 @@
-﻿extern alias newmsgpack;
+﻿extern alias newmsgpackcore;
 
 namespace Benchmark
 {
@@ -1064,31 +1064,31 @@ namespace Benchmark
         [Benchmark(OperationsPerInvoke = 10000)]
         public void CopyMemorySize4()
         {
-            newmsgpack::MessagePack.MessagePackBinary.CopyMemory(srcSize4, 0, dstSize4a, 0, 4);
+            newmsgpackcore::MessagePack.MessagePackBinary.CopyMemory(srcSize4, 0, dstSize4a, 0, 4);
         }
 
         [Benchmark(OperationsPerInvoke = 1000)]
         public void CopyMemorySize8()
         {
-            newmsgpack::MessagePack.MessagePackBinary.CopyMemory(srcSize8, 0, dstSize8a, 0, 8);
+            newmsgpackcore::MessagePack.MessagePackBinary.CopyMemory(srcSize8, 0, dstSize8a, 0, 8);
         }
 
         [Benchmark(OperationsPerInvoke = 1000)]
         public void CopyMemorySize16()
         {
-            newmsgpack::MessagePack.MessagePackBinary.CopyMemory(srcSize16, 0, dstSize16a, 0, 16);
+            newmsgpackcore::MessagePack.MessagePackBinary.CopyMemory(srcSize16, 0, dstSize16a, 0, 16);
         }
 
         [Benchmark(OperationsPerInvoke = 1000)]
         public void CopyMemorySize32()
         {
-            newmsgpack::MessagePack.MessagePackBinary.CopyMemory(srcSize32, 0, dstSize32a, 0, 32);
+            newmsgpackcore::MessagePack.MessagePackBinary.CopyMemory(srcSize32, 0, dstSize32a, 0, 32);
         }
 
         [Benchmark(OperationsPerInvoke = 1000)]
         public void CopyMemorySize64()
         {
-            newmsgpack::MessagePack.MessagePackBinary.CopyMemory(srcSize64, 0, dstSize64a, 0, 64);
+            newmsgpackcore::MessagePack.MessagePackBinary.CopyMemory(srcSize64, 0, dstSize64a, 0, 64);
         }
 
         [Benchmark(OperationsPerInvoke = 1000)]

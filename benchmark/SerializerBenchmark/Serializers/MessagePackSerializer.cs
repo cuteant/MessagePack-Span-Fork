@@ -1,5 +1,5 @@
 ﻿extern alias oldmsgpack;
-extern alias newmsgpack;
+extern alias newmsgpackcore;
 extern alias newmsgpacklz4;
 
 using Benchmark.Serializers;
@@ -21,12 +21,12 @@ public class MessagePack_Span : SerializerBase
 {
     public override T Deserialize<T>(object input)
     {
-        return newmsgpack::MessagePack.MessagePackSerializer.Deserialize<T>((byte[])input);
+        return newmsgpackcore::MessagePack.MessagePackSerializer.Deserialize<T>((byte[])input);
     }
 
     public override object Serialize<T>(T input)
     {
-        return newmsgpack::MessagePack.MessagePackSerializer.Serialize<T>(input);
+        return newmsgpackcore::MessagePack.MessagePackSerializer.Serialize<T>(input);
     }
 }
 
@@ -73,11 +73,11 @@ public class Typeless_Span : SerializerBase
 {
     public override T Deserialize<T>(object input)
     {
-        return (T)newmsgpack::MessagePack.MessagePackSerializer.Typeless.Deserialize((byte[])input);
+        return (T)newmsgpackcore::MessagePack.MessagePackSerializer.Typeless.Deserialize((byte[])input);
     }
 
     public override object Serialize<T>(T input)
     {
-        return newmsgpack::MessagePack.MessagePackSerializer.Typeless.Serialize(input);
+        return newmsgpackcore::MessagePack.MessagePackSerializer.Typeless.Serialize(input);
     }
 }

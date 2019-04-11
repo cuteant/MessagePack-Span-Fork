@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagePack.LZ4", "src\Mess
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagePack.Hyperion", "src\MessagePack.Hyperion\MessagePack.Hyperion.csproj", "{310BF6D7-EBD4-467F-96D1-6F8B8AC525E7}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagePack.Abstractions", "src\MessagePack.Abstractions\MessagePack.Abstractions.csproj", "{772A9C6B-DB14-4321-82B7-2DF3C838D3E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{310BF6D7-EBD4-467F-96D1-6F8B8AC525E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{310BF6D7-EBD4-467F-96D1-6F8B8AC525E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{310BF6D7-EBD4-467F-96D1-6F8B8AC525E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{772A9C6B-DB14-4321-82B7-2DF3C838D3E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{772A9C6B-DB14-4321-82B7-2DF3C838D3E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{772A9C6B-DB14-4321-82B7-2DF3C838D3E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{772A9C6B-DB14-4321-82B7-2DF3C838D3E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,6 +74,7 @@ Global
 		{209B8F56-FD13-4121-B53A-775BDDB4C0D8} = {FACE25BE-FB88-424B-9D9E-C78542E6FEF9}
 		{028380C2-D126-4E9A-BC60-6C425625446E} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{310BF6D7-EBD4-467F-96D1-6F8B8AC525E7} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
+		{772A9C6B-DB14-4321-82B7-2DF3C838D3E8} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93230366-D5C3-4397-83D3-ED46E43B8121}

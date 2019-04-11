@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagePack.LZ4.Standalone"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagePack.Tests.Standalone", "test\MessagePack.Tests.Standalone\MessagePack.Tests.Standalone.csproj", "{BEB5A2EA-6AC9-47A8-929E-AFB7A3D9ABBD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagePack.Abstractions", "src\MessagePack.Abstractions\MessagePack.Abstractions.csproj", "{5FCD07E4-92F6-4B9C-92B0-1B473E88D22D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{BEB5A2EA-6AC9-47A8-929E-AFB7A3D9ABBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEB5A2EA-6AC9-47A8-929E-AFB7A3D9ABBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BEB5A2EA-6AC9-47A8-929E-AFB7A3D9ABBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FCD07E4-92F6-4B9C-92B0-1B473E88D22D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FCD07E4-92F6-4B9C-92B0-1B473E88D22D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FCD07E4-92F6-4B9C-92B0-1B473E88D22D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FCD07E4-92F6-4B9C-92B0-1B473E88D22D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -52,6 +58,7 @@ Global
 		{85522D0F-39AA-4C39-9A32-5450AA1541C2} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{E1E20280-649C-4F13-9270-6F9BC63ED118} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{BEB5A2EA-6AC9-47A8-929E-AFB7A3D9ABBD} = {4744CD6C-82C3-4D38-A708-3D301A74397F}
+		{5FCD07E4-92F6-4B9C-92B0-1B473E88D22D} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93230366-D5C3-4397-83D3-ED46E43B8121}
