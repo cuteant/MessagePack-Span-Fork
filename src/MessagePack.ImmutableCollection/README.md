@@ -774,8 +774,8 @@ IMessagePackFormatter is serializer by each type. For example `Int32Formatter : 
 ```csharp
 public interface IMessagePackFormatter<T>
 {
-    int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver);
-    T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize);
+    void Serialize(ref MessagePackWriter writer, ref int idx, T value, IFormatterResolver formatterResolver);
+    T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver);
 }
 ```
 
@@ -785,7 +785,7 @@ All api works on byte[] level, no use Stream, no use Writer/Reader so improve pe
 // serialize fileinfo as string fullpath.
 public class FileInfoFormatter<T> : IMessagePackFormatter<FileInfo>
 {
-    public int Serialize(ref byte[] bytes, int offset, FileInfo value, IFormatterResolver formatterResolver)
+    public void Serialize(ref MessagePackWriter writer, ref int idx, FileInfo value, IFormatterResolver formatterResolver)
     {
         if (value == null)
         {
@@ -795,7 +795,7 @@ public class FileInfoFormatter<T> : IMessagePackFormatter<FileInfo>
         return MessagePackBinary.WriteString(ref bytes, offset, value.FullName);
     }
 
-    public FileInfo Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+    public FileInfo Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
     {
         if (MessagePackBinary.IsNil(bytes, offset))
         {
@@ -1055,12 +1055,12 @@ public class CustomObject
     // serialize/deserialize internal field.
     class CustomObjectFormatter : IMessagePackFormatter<CustomObject>
     {
-        public int Serialize(ref byte[] bytes, int offset, CustomObject value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, CustomObject value, IFormatterResolver formatterResolver)
         {
             return formatterResolver.GetFormatterWithVerify<string>().Serialize(ref bytes, offset, value.internalId, formatterResolver);
         }
 
-        public CustomObject Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public CustomObject Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             var id = formatterResolver.GetFormatterWithVerify<string>().Deserialize(bytes, offset, formatterResolver, out readSize);
             return new CustomObject { internalId = id };
@@ -1072,12 +1072,12 @@ public class CustomObject
 
 public class Int_x10Formatter : IMessagePackFormatter<int>
 {
-    public int Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+    public int Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
     {
         return MessagePackBinary.ReadInt32(bytes, offset, out readSize) * 10;
     }
 
-    public int Serialize(ref byte[] bytes, int offset, int value, IFormatterResolver formatterResolver)
+    public void Serialize(ref MessagePackWriter writer, ref int idx, int value, IFormatterResolver formatterResolver)
     {
         return MessagePackBinary.WriteInt32(ref bytes, offset, value * 10);
     }

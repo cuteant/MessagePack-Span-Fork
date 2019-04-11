@@ -1,15 +1,13 @@
-﻿#if NETSTANDARD || NETFRAMEWORK
-
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Runtime.CompilerServices;
-using MessagePack.Resolvers;
-using MessagePack.Formatters;
-using System.IO;
-
-namespace MessagePack
+﻿namespace MessagePack
 {
+    using System;
+    using System.Buffers;
+    using System.IO;
+    using System.Runtime.CompilerServices;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using MessagePack.Formatters;
+
     // Typeless API
     public static partial class MessagePackSerializer
     {
@@ -29,12 +27,12 @@ namespace MessagePack
             private static Type s_typelessFormatterType;
             internal static IMessagePackFormatter<object> TypelessFormatter
             {
-                [MethodImpl(InlineMethod.Value)]
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => Volatile.Read(ref s_typelessFormatter) ?? s_defaultTypelessFormatter;
             }
             internal static Type TypelessFormatterType
             {
-                [MethodImpl(InlineMethod.Value)]
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => Volatile.Read(ref s_typelessFormatterType) ?? DefaultTypelessFormatterType;
             }
             public static void RegisterTypelessFormatter(IMessagePackFormatter<object> typelessFormatter)
@@ -47,42 +45,77 @@ namespace MessagePack
                 }
             }
 
+            /// <summary>TBD</summary>
+            public static object DeepCopy(object source) => DeepCopy(source, null);
+
+            /// <summary>TBD</summary>
+            public static object DeepCopy(object source, IFormatterResolver resolver)
+            {
+                if (source == null) { return null; }
+                if (null == resolver) { resolver = defaultResolver; }
+
+                var type = source.GetType();
+                using (var serializedObject = MessagePackSerializer.SerializeUnsafe(source, resolver))
+                {
+                    return MessagePackSerializer.Deserialize<object>(serializedObject.Span, resolver);
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static byte[] Serialize(object obj)
             {
                 return MessagePackSerializer.Serialize(obj, defaultResolver);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static IOwnedBuffer<byte> SerializeSafe(object obj)
+            {
+                return MessagePackSerializer.SerializeSafe(obj, defaultResolver);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static IOwnedBuffer<byte> SerializeUnsafe(object obj)
+            {
+                return MessagePackSerializer.SerializeUnsafe(obj, defaultResolver);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static void Serialize(Stream stream, object obj)
             {
                 MessagePackSerializer.Serialize(stream, obj, defaultResolver);
             }
 
-            public static System.Threading.Tasks.Task SerializeAsync(Stream stream, object obj)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static ValueTask SerializeAsync(Stream stream, object obj)
             {
                 return MessagePackSerializer.SerializeAsync(stream, obj, defaultResolver);
             }
 
-            public static object Deserialize(byte[] bytes)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static object Deserialize(ReadOnlySpan<byte> bytes)
             {
                 return MessagePackSerializer.Deserialize<object>(bytes, defaultResolver);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static object Deserialize(ReadOnlySequence<byte> sequence)
+            {
+                return MessagePackSerializer.Deserialize<object>(sequence, defaultResolver);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static object Deserialize(Stream stream)
             {
                 return MessagePackSerializer.Deserialize<object>(stream, defaultResolver);
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static object Deserialize(Stream stream, bool readStrict)
             {
                 return MessagePackSerializer.Deserialize<object>(stream, defaultResolver, readStrict);
             }
 
-            public static System.Threading.Tasks.Task<object> DeserializeAsync(Stream stream)
-            {
-                return MessagePackSerializer.DeserializeAsync<object>(stream, defaultResolver);
-            }
-
-            class CompositeResolver : FormatterResolver
+            sealed class CompositeResolver : FormatterResolver
             {
                 public static readonly CompositeResolver Instance = new CompositeResolver();
 
@@ -131,5 +164,3 @@ namespace MessagePack
         }
     }
 }
-
-#endif

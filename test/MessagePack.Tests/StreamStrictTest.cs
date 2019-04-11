@@ -1,10 +1,7 @@
-﻿using SharedData;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MessagePack.Internal;
+using SharedData;
 using Xunit;
 
 namespace MessagePack.Tests
@@ -15,35 +12,42 @@ namespace MessagePack.Tests
         {
             const int ExtTypeCode = 111; // sample ext code
 
-            byte[] buffer = null;
-            var formatter = resolver.GetFormatter<T>();
-            var dataSize = formatter.Serialize(ref buffer, 0, data, resolver);
+            var serializedData = MessagePackSerializer.Serialize(data, resolver);
+            var tmp = MessagePackSerializer.Deserialize<T>(serializedData, resolver);
+
+            var dataSize = serializedData.Length;
+            var idx = 0;
+            var writer = new MessagePackWriter(16);
 
             var headerLength = MessagePackBinary.GetExtensionFormatHeaderLength(dataSize);
-
-            MessagePackBinary.EnsureCapacity(ref buffer, 0, headerLength);
-            Buffer.BlockCopy(buffer, 0, buffer, headerLength, dataSize);
-            MessagePackBinary.WriteExtensionFormatHeader(ref buffer, 0, ExtTypeCode, dataSize);
-
-            stream.Write(buffer, 0, dataSize + headerLength);
+            writer.Ensure(idx, headerLength + dataSize);
+            writer.WriteExtensionFormatHeader(ExtTypeCode, dataSize, ref idx);
+            UnsafeMemory.WriteRaw(ref writer, serializedData, ref idx);
+            var buffer = writer.ToArray(idx);
+            stream.Write(buffer);
         }
 
         static T DeserializeWithLengthPrefixExt<T>(Stream stream, IFormatterResolver resolver)
         {
             const int ExtTypeCode = 111; // sample ext code
 
-            var header = MessagePackBinary.ReadExtensionFormatHeader(stream);
-            if (header.TypeCode == ExtTypeCode)
+            using (var output = new ArrayBufferWriter(16))
             {
-                // memo, read fully
-                var buffer = new byte[1024];
-                stream.Read(buffer, 0, (int)header.Length);
+                MessagePackBinary.ReadMessageBlockFromStreamUnsafe(stream, output);
 
-                return resolver.GetFormatter<T>().Deserialize(buffer, 0, resolver, out var _);
-            }
-            else
-            {
-                throw new Exception();
+                var reader = new MessagePackReader(output.WrittenSpan);
+                var header = reader.ReadExtensionFormatHeader();
+                if (header.TypeCode == ExtTypeCode)
+                {
+                    // memo, read fully
+                    var valueSpan = reader.Peek((int)header.Length);
+                    var reader0 = new MessagePackReader(valueSpan);
+                    return resolver.GetFormatter<T>().Deserialize(ref reader0, resolver);
+                }
+                else
+                {
+                    throw new Exception();
+                }
             }
         }
 
@@ -51,14 +55,20 @@ namespace MessagePack.Tests
         {
             const int ExtTypeCode = 111; // sample ext code
 
-            var header = MessagePackBinary.ReadExtensionFormat(stream);
-            if (header.TypeCode == ExtTypeCode)
+            using (var output = new ArrayBufferWriter(16))
             {
-                return MessagePackSerializer.Deserialize<T>(header.Data, resolver);
-            }
-            else
-            {
-                throw new Exception();
+                MessagePackBinary.ReadMessageBlockFromStreamUnsafe(stream, output);
+
+                var reader = new MessagePackReader(output.WrittenSpan);
+                var header = reader.ReadExtensionFormat();
+                if (header.TypeCode == ExtTypeCode)
+                {
+                    return MessagePackSerializer.Deserialize<T>(header.Data, resolver);
+                }
+                else
+                {
+                    throw new Exception();
+                }
             }
         }
 
@@ -117,6 +127,18 @@ namespace MessagePack.Tests
         {
             throw new NotImplementedException();
         }
+
+#if NETCOREAPP_2_0_GREATER
+        public override int Read(Span<byte> buffer)
+        {
+            return stream.Read(buffer);
+        }
+
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            stream.Write(buffer);
+        }
+#endif
 
         public override int Read(byte[] buffer, int offset, int count)
         {

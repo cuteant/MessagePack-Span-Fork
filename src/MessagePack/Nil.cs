@@ -6,25 +6,13 @@ namespace MessagePack
     {
         public static readonly Nil Default = new Nil();
 
-        public override bool Equals(object obj)
-        {
-            return obj is Nil;
-        }
+        public override bool Equals(object obj) => obj is Nil;
 
-        public bool Equals(Nil other)
-        {
-            return true;
-        }
+        public bool Equals(Nil other) => true;
 
-        public override int GetHashCode()
-        {
-            return 0;
-        }
+        public override int GetHashCode() => 0;
 
-        public override string ToString()
-        {
-            return "()";
-        }
+        public override string ToString() => "()";
     }
 }
 
@@ -34,19 +22,16 @@ namespace MessagePack.Formatters
     {
         public static readonly IMessagePackFormatter<Nil> Instance = new NilFormatter();
 
-        NilFormatter()
-        {
+        NilFormatter() { }
 
+        public void Serialize(ref MessagePackWriter writer, ref int idx, Nil value, IFormatterResolver typeResolver)
+        {
+            writer.WriteNil(ref idx);
         }
 
-        public int Serialize(ref byte[] bytes, int offset, Nil value, IFormatterResolver typeResolver)
+        public Nil Deserialize(ref MessagePackReader reader, IFormatterResolver typeResolver)
         {
-            return MessagePackBinary.WriteNil(ref bytes, offset);
-        }
-
-        public Nil Deserialize(byte[] bytes, int offset, IFormatterResolver typeResolver, out int readSize)
-        {
-            return MessagePackBinary.ReadNil(bytes, offset, out readSize);
+            return reader.ReadNil();
         }
     }
 
@@ -55,19 +40,16 @@ namespace MessagePack.Formatters
     {
         public static readonly IMessagePackFormatter<Nil?> Instance = new NullableNilFormatter();
 
-        NullableNilFormatter()
-        {
+        NullableNilFormatter() { }
 
+        public void Serialize(ref MessagePackWriter writer, ref int idx, Nil? value, IFormatterResolver typeResolver)
+        {
+            writer.WriteNil(ref idx);
         }
 
-        public int Serialize(ref byte[] bytes, int offset, Nil? value, IFormatterResolver typeResolver)
+        public Nil? Deserialize(ref MessagePackReader reader, IFormatterResolver typeResolver)
         {
-            return MessagePackBinary.WriteNil(ref bytes, offset);
-        }
-
-        public Nil? Deserialize(byte[] bytes, int offset, IFormatterResolver typeResolver, out int readSize)
-        {
-            return MessagePackBinary.ReadNil(bytes, offset, out readSize);
+            return reader.ReadNil();
         }
     }
 }

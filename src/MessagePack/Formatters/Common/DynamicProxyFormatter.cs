@@ -2,29 +2,22 @@
 {
     public sealed class DynamicProxyFormatter<T> : IMessagePackFormatter<T>
     {
-        public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return default;
-            }
+            if (reader.IsNil()) { return default; }
 
             var formatter = formatterResolver.GetFormatter<WrappedObject>();
-            var shim = formatter.Deserialize(bytes, offset, formatterResolver, out readSize);
+            var shim = formatter.Deserialize(ref reader, formatterResolver);
             return (T)shim.Data;
         }
 
-        public int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, T value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
             var wrappedObject = new WrappedObject(value);
             var formatter = formatterResolver.GetFormatter<WrappedObject>();
-            return formatter.Serialize(ref bytes, offset, wrappedObject, formatterResolver);
+            formatter.Serialize(ref writer, ref idx, wrappedObject, formatterResolver);
         }
 
         [MessagePackObject]

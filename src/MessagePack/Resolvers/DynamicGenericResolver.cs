@@ -1,17 +1,15 @@
-﻿#if !UNITY_WSA
-
-using MessagePack.Formatters;
-using System.Linq;
-using MessagePack.Internal;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Collections.ObjectModel;
+﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Linq.Expressions;
-using CuteAnt.Reflection;
-#if NETSTANDARD || NETFRAMEWORK
+using System.Reflection;
 using System.Threading.Tasks;
+using MessagePack.Formatters;
+using MessagePack.Internal;
+#if DEPENDENT_ON_CUTEANT
+using CuteAnt.Reflection;
 #endif
 
 namespace MessagePack.Resolvers
@@ -63,7 +61,6 @@ namespace MessagePack.Internal
               {typeof(SortedList<,>), typeof(SortedListFormatter<,>)},
               {typeof(ILookup<,>), typeof(InterfaceLookupFormatter<,>)},
               {typeof(IGrouping<,>), typeof(InterfaceGroupingFormatter<,>)},
-#if NETSTANDARD || NETFRAMEWORK
               {typeof(ObservableCollection<>), typeof(ObservableCollectionFormatter<>)},
               {typeof(ReadOnlyObservableCollection<>),(typeof(ReadOnlyObservableCollectionFormatter<>))},
               {typeof(IReadOnlyList<>), typeof(InterfaceReadOnlyListFormatter<>)},
@@ -77,7 +74,6 @@ namespace MessagePack.Internal
               {typeof(System.Collections.Concurrent.ConcurrentDictionary<,>), typeof(ConcurrentDictionaryFormatter<,>)},
               {typeof(Lazy<>), typeof(LazyFormatter<>)},
               {typeof(Task<>), typeof(TaskValueFormatter<>)},
-#endif
         };
 
         // Reduce IL2CPP code generate size(don't write long code in <T>)
@@ -132,8 +128,6 @@ namespace MessagePack.Internal
                 {
                     return CreateInstance(typeof(NullableFormatter<>), new[] { nullableElementType });
                 }
-
-#if NETSTANDARD || NETFRAMEWORK
 
                 // ValueTask
                 else if (genericType == typeof(ValueTask<>))
@@ -219,8 +213,6 @@ namespace MessagePack.Internal
                     return CreateInstance(tupleFormatterType, genericTypeArguments);
                 }
 
-#endif
-
                 // ArraySegement
                 else if (genericType == typeof(ArraySegment<>))
                 {
@@ -257,7 +249,7 @@ namespace MessagePack.Internal
                     // generic collection
                     else if (genericTypeArguments.Length == 1
                           && ti.ImplementedInterfaces.Any(x => x.IsConstructedGenericType && x.GetGenericTypeDefinition() == typeof(ICollection<>))
-                          && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
+                          && ti.DeclaredConstructors.Any(x => 0u >= (uint)x.GetParameters().Length))
                     {
                         var elemType = genericTypeArguments[0];
                         return CreateInstance(typeof(GenericCollectionFormatter<,>), new[] { elemType, t });
@@ -265,7 +257,7 @@ namespace MessagePack.Internal
                     // generic dictionary
                     else if (genericTypeArguments.Length == 2
                           && ti.ImplementedInterfaces.Any(x => x.IsConstructedGenericType && x.GetGenericTypeDefinition() == typeof(IDictionary<,>))
-                          && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
+                          && ti.DeclaredConstructors.Any(x => 0u >= (uint)x.GetParameters().Length))
                     {
                         var keyType = genericTypeArguments[0];
                         var valueType = genericTypeArguments[1];
@@ -305,11 +297,11 @@ namespace MessagePack.Internal
                 {
                     return NonGenericInterfaceDictionaryFormatter.Instance;
                 }
-                if (typeof(IList).IsAssignableFrom(t) && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
+                if (typeof(IList).IsAssignableFrom(t) && ti.DeclaredConstructors.Any(x => 0u >= (uint)x.GetParameters().Length))
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(NonGenericListFormatter<>).GetCachedGenericType(t));
                 }
-                else if (typeof(IDictionary).IsAssignableFrom(t) && ti.DeclaredConstructors.Any(x => x.GetParameters().Length == 0))
+                else if (typeof(IDictionary).IsAssignableFrom(t) && ti.DeclaredConstructors.Any(x => 0u >= (uint)x.GetParameters().Length))
                 {
                     return ActivatorUtils.FastCreateInstance(typeof(NonGenericDictionaryFormatter<>).GetCachedGenericType(t));
                 }
@@ -373,5 +365,3 @@ namespace MessagePack.Internal
         }
     }
 }
-
-#endif

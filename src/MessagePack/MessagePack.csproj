@@ -3,18 +3,17 @@
   <Import Project="..\nuget.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net471;net451</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.2;netstandard2.0;net471;net451</TargetFrameworks>
     <RootNamespace>MessagePack</RootNamespace>
     <AssemblyName>MessagePack</AssemblyName>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
-    <DefineConstants>$(DefineConstants);ENABLE_UNSAFE_MSGPACK;</DefineConstants>
+    <DefineConstants>$(DefineConstants);ENABLE_UNSAFE_MSGPACK;DEPENDENT_ON_CUTEANT</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
     <PackageId>MessagePack.Unofficial</PackageId>
     <Title>MessagePack for C# (Unofficial).</Title>
-    <Description>This package includes a mostly complete port of the MessagePack(for more info see: https://github.com/neuecc/MessagePack-CSharp/) assembly to support .NET 4.0 and newer.
+    <Description>This package includes a mostly complete port of the MessagePack(for more info see: https://github.com/neuecc/MessagePack-CSharp/) assembly to support .NET 4.5.1 and newer.
 
 These types can serialize by default:
 System.Delegate
@@ -30,7 +29,7 @@ System.Reflection.MethodInfo
 System.Reflection.PropertyInfo
 System.Linq.Expressions.*
     </Description>
-    <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer, Unity, Xamarin</PackageTags>
+    <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer</PackageTags>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
@@ -41,19 +40,20 @@ System.Linq.Expressions.*
 
   <ItemGroup>
     <PackageReference Include="CuteAnt.Core" Version="$(CuteAntCorePackageVersion)" />
-    <PackageReference Include="System.Buffers" Version="$(SystemBuffersPackageVersion)" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
-    <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
-  </ItemGroup>
-  
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="System.Reflection.Emit" Version="$(SystemReflectionEmitPackageVersion)" />
-    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="$(SystemReflectionEmitLightweightPackageVersion)" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\MessagePack.Abstractions\MessagePack.Abstractions.csproj" />
+  <ItemGroup Condition=" '$(TargetFramework)' != 'netcoreapp2.2' ">
+    <PackageReference Include="System.Buffers" Version="$(SystemBuffersPackageVersion)" />
+    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
+    <PackageReference Include="System.Numerics.Vectors" Version="$(SystemNumericsVectorsPackageVersion)" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
+    <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.Reflection.Emit" Version="$(SystemReflectionEmitPackageVersion)" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="$(SystemReflectionEmitLightweightPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -80,8 +80,12 @@ System.Linq.Expressions.*
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ValueTupleFormatter.cs</LastGenOutput>
     </None>
-    <None Update="Internal\UnsafeMemory.tt">
-      <LastGenOutput>UnsafeMemory.cs</LastGenOutput>
+    <None Update="Internal\UnsafeMemory32.tt">
+      <LastGenOutput>UnsafeMemory32.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Update="Internal\UnsafeMemory64.tt">
+      <LastGenOutput>UnsafeMemory64.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
     </None>
   </ItemGroup>
@@ -116,8 +120,13 @@ System.Linq.Expressions.*
       <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
-    <Compile Update="Internal\UnsafeMemory.cs">
-      <DependentUpon>UnsafeMemory.tt</DependentUpon>
+    <Compile Update="Internal\UnsafeMemory32.cs">
+      <DependentUpon>UnsafeMemory32.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Internal\UnsafeMemory64.cs">
+      <DependentUpon>UnsafeMemory64.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>

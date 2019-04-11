@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -36,9 +36,9 @@ namespace MessagePack.Tests
                 Name = "John",
                 Addresses = new[]
                 {
-                        new { Street = "St." },
-                        new { Street = "Ave." }
-                    }
+                    new { Street = "St." },
+                    new { Street = "Ave." }
+                }
             };
 
             var result = MessagePackSerializer.Serialize(p, TypelessContractlessStandardResolver.Instance);
@@ -161,7 +161,15 @@ namespace MessagePack.Tests
         [InlineData((uint)0)]
         [InlineData((ulong)0)]
         [InlineData((char)'a')]
-        public void TypelessPrimitive<T>(T p)
+        public void TypelessPrimitive(object p)
+        {
+            var helper = typeof(TypelessContractlessStandardResolverTest).GetTypeInfo().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Single(m => m.Name == nameof(TypelessPrimitiveHelper));
+            var helperClosedGeneric = helper.MakeGenericMethod(p.GetType());
+
+            helperClosedGeneric.Invoke(this, new object[] { p });
+        }
+
+        private void TypelessPrimitiveHelper<T>(T p)
         {
             var v = new ForTypelessObj() { Obj = p };
 

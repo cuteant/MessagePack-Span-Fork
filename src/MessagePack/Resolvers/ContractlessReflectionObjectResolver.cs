@@ -1,303 +1,283 @@
-﻿#if NETSTANDARD || NETFRAMEWORK
+﻿//using MessagePack.Formatters;
+//using MessagePack.Internal;
+//using System;
+//using System.Collections.Generic;
+//using System.Text;
 
-using MessagePack.Formatters;
-using MessagePack.Internal;
-using System;
-using System.Collections.Generic;
-using System.Text;
+//namespace MessagePack.Resolvers
+//{
+//    public static class ContractlessReflectionObjectResolver
+//    {
+//        // TODO:CamelCase Option? AllowPrivate?
+//        public static readonly IFormatterResolver Default = new DefaultResolver();
+//        public static readonly IFormatterResolver Contractless = new ContractlessResolver();
+//        public static readonly IFormatterResolver ContractlessForceStringKey = new ContractlessForceStringResolver();
 
-namespace MessagePack.Resolvers
-{
-    public static class ContractlessReflectionObjectResolver
-    {
-        // TODO:CamelCase Option? AllowPrivate?
-        public static readonly IFormatterResolver Default = new DefaultResolver();
-        public static readonly IFormatterResolver Contractless = new ContractlessResolver();
-        public static readonly IFormatterResolver ContractlessForceStringKey = new ContractlessForceStringResolver();
+//        class DefaultResolver : FormatterResolver
+//        {
+//            const bool ForceStringKey = false;
+//            const bool Contractless = false;
+//            const bool AllowPrivate = false;
 
-        class DefaultResolver : FormatterResolver
-        {
-            const bool ForceStringKey = false;
-            const bool Contractless = false;
-            const bool AllowPrivate = false;
+//            public override IMessagePackFormatter<T> GetFormatter<T>()
+//            {
+//                return Cache<T>.formatter;
+//            }
 
-            public override IMessagePackFormatter<T> GetFormatter<T>()
-            {
-                return Cache<T>.formatter;
-            }
+//            static class Cache<T>
+//            {
+//                public static readonly IMessagePackFormatter<T> formatter;
 
-            static class Cache<T>
-            {
-                public static readonly IMessagePackFormatter<T> formatter;
+//                static Cache()
+//                {
+//                    var metaInfo = ObjectSerializationInfo.CreateOrNull(typeof(T), ForceStringKey, Contractless, AllowPrivate);
+//                    if (metaInfo != null)
+//                    {
+//                        formatter = new ReflectionObjectFormatter<T>(metaInfo);
+//                    }
+//                }
+//            }
+//        }
 
-                static Cache()
-                {
-                    var metaInfo = ObjectSerializationInfo.CreateOrNull(typeof(T), ForceStringKey, Contractless, AllowPrivate);
-                    if (metaInfo != null)
-                    {
-                        formatter = new ReflectionObjectFormatter<T>(metaInfo);
-                    }
-                }
-            }
-        }
+//        class ContractlessResolver : FormatterResolver
+//        {
+//            const bool ForceStringKey = false;
+//            const bool Contractless = true;
+//            const bool AllowPrivate = false;
 
-        class ContractlessResolver : FormatterResolver
-        {
-            const bool ForceStringKey = false;
-            const bool Contractless = true;
-            const bool AllowPrivate = false;
+//            public override IMessagePackFormatter<T> GetFormatter<T>()
+//            {
+//                return Cache<T>.formatter;
+//            }
 
-            public override IMessagePackFormatter<T> GetFormatter<T>()
-            {
-                return Cache<T>.formatter;
-            }
+//            static class Cache<T>
+//            {
+//                public static readonly IMessagePackFormatter<T> formatter;
 
-            static class Cache<T>
-            {
-                public static readonly IMessagePackFormatter<T> formatter;
+//                static Cache()
+//                {
+//                    var metaInfo = ObjectSerializationInfo.CreateOrNull(typeof(T), ForceStringKey, Contractless, AllowPrivate);
+//                    if (metaInfo != null)
+//                    {
+//                        formatter = new ReflectionObjectFormatter<T>(metaInfo);
+//                    }
+//                }
+//            }
+//        }
 
-                static Cache()
-                {
-                    var metaInfo = ObjectSerializationInfo.CreateOrNull(typeof(T), ForceStringKey, Contractless, AllowPrivate);
-                    if (metaInfo != null)
-                    {
-                        formatter = new ReflectionObjectFormatter<T>(metaInfo);
-                    }
-                }
-            }
-        }
+//        class ContractlessForceStringResolver : FormatterResolver
+//        {
+//            const bool ForceStringKey = true;
+//            const bool Contractless = true;
+//            const bool AllowPrivate = false;
 
-        class ContractlessForceStringResolver : FormatterResolver
-        {
-            const bool ForceStringKey = true;
-            const bool Contractless = true;
-            const bool AllowPrivate = false;
+//            public override IMessagePackFormatter<T> GetFormatter<T>()
+//            {
+//                return Cache<T>.formatter;
+//            }
 
-            public override IMessagePackFormatter<T> GetFormatter<T>()
-            {
-                return Cache<T>.formatter;
-            }
+//            static class Cache<T>
+//            {
+//                public static readonly IMessagePackFormatter<T> formatter;
 
-            static class Cache<T>
-            {
-                public static readonly IMessagePackFormatter<T> formatter;
+//                static Cache()
+//                {
+//                    var metaInfo = ObjectSerializationInfo.CreateOrNull(typeof(T), ForceStringKey, Contractless, AllowPrivate);
+//                    if (metaInfo != null)
+//                    {
+//                        formatter = new ReflectionObjectFormatter<T>(metaInfo);
+//                    }
+//                }
+//            }
+//        }
 
-                static Cache()
-                {
-                    var metaInfo = ObjectSerializationInfo.CreateOrNull(typeof(T), ForceStringKey, Contractless, AllowPrivate);
-                    if (metaInfo != null)
-                    {
-                        formatter = new ReflectionObjectFormatter<T>(metaInfo);
-                    }
-                }
-            }
-        }
-
-    }
+//    }
 
 
-    public class ReflectionObjectFormatter<T> : IMessagePackFormatter<T>
-    {
-        readonly ObjectSerializationInfo metaInfo;
+//    public class ReflectionObjectFormatter<T> : IMessagePackFormatter<T>
+//    {
+//        readonly ObjectSerializationInfo metaInfo;
 
-        // for write
-        readonly byte[][] writeMemberNames;
-        readonly ObjectSerializationInfo.EmittableMember[] writeMembers;
+//        // for write
+//        readonly byte[][] writeMemberNames;
+//        readonly ObjectSerializationInfo.EmittableMember[] writeMembers;
 
-        // for read
-        readonly int[] constructorParameterIndexes;
-        readonly AutomataDictionary mapMemberDictionary;
-        readonly ObjectSerializationInfo.EmittableMember[] readMembers;
+//        // for read
+//        readonly int[] constructorParameterIndexes;
+//        readonly AutomataDictionary mapMemberDictionary;
+//        readonly ObjectSerializationInfo.EmittableMember[] readMembers;
 
 
-        internal ReflectionObjectFormatter(ObjectSerializationInfo metaInfo)
-        {
-            this.metaInfo = metaInfo;
+//        internal ReflectionObjectFormatter(ObjectSerializationInfo metaInfo)
+//        {
+//            this.metaInfo = metaInfo;
 
-            // for write
-            {
-                var memberNameList = new List<byte[]>(metaInfo.Members.Length);
-                var emmitableMemberList = new List<ObjectSerializationInfo.EmittableMember>(metaInfo.Members.Length);
-                foreach (var item in metaInfo.Members)
-                {
-                    if (item.IsWritable)
-                    {
-                        emmitableMemberList.Add(item);
-                        memberNameList.Add(Encoding.UTF8.GetBytes(item.Name));
-                    }
-                }
-                this.writeMemberNames = memberNameList.ToArray();
-                this.writeMembers = emmitableMemberList.ToArray();
-            }
-            // for read
-            {
-                var automata = new AutomataDictionary();
-                var emmitableMemberList = new List<ObjectSerializationInfo.EmittableMember>(metaInfo.Members.Length);
-                int index = 0;
-                foreach (var item in metaInfo.Members)
-                {
-                    if (item.IsReadable)
-                    {
-                        emmitableMemberList.Add(item);
-                        automata.Add(item.Name, index++);
-                    }
-                }
-                this.readMembers = emmitableMemberList.ToArray();
-                this.mapMemberDictionary = automata;
-            }
-        }
+//            // for write
+//            {
+//                var memberNameList = new List<byte[]>(metaInfo.Members.Length);
+//                var emmitableMemberList = new List<ObjectSerializationInfo.EmittableMember>(metaInfo.Members.Length);
+//                foreach (var item in metaInfo.Members)
+//                {
+//                    if (item.IsWritable)
+//                    {
+//                        emmitableMemberList.Add(item);
+//                        memberNameList.Add(Encoding.UTF8.GetBytes(item.Name));
+//                    }
+//                }
+//                this.writeMemberNames = memberNameList.ToArray();
+//                this.writeMembers = emmitableMemberList.ToArray();
+//            }
+//            // for read
+//            {
+//                var automata = new AutomataDictionary();
+//                var emmitableMemberList = new List<ObjectSerializationInfo.EmittableMember>(metaInfo.Members.Length);
+//                int index = 0;
+//                foreach (var item in metaInfo.Members)
+//                {
+//                    if (item.IsReadable)
+//                    {
+//                        emmitableMemberList.Add(item);
+//                        automata.Add(item.Name, index++);
+//                    }
+//                }
+//                this.readMembers = emmitableMemberList.ToArray();
+//                this.mapMemberDictionary = automata;
+//            }
+//        }
 
-        public int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
-        {
-            // reduce generic method size, avoid write code in <T> type.
-            if (metaInfo.IsIntKey)
-            {
-                return ReflectionObjectFormatterHelper.WriteArraySerialize(metaInfo, writeMembers, ref bytes, offset, value, formatterResolver);
-            }
-            else
-            {
-                return ReflectionObjectFormatterHelper.WriteMapSerialize(metaInfo, writeMembers, writeMemberNames, ref bytes, offset, value, formatterResolver);
-            }
-        }
+//        public void Serialize(ref MessagePackWriter writer, ref int idx, T value, IFormatterResolver formatterResolver)
+//        {
+//            // reduce generic method size, avoid write code in <T> type.
+//            if (metaInfo.IsIntKey)
+//            {
+//                ReflectionObjectFormatterHelper.WriteArraySerialize(metaInfo, writeMembers, ref writer, ref idx, value, formatterResolver);
+//            }
+//            else
+//            {
+//                ReflectionObjectFormatterHelper.WriteMapSerialize(metaInfo, writeMembers, writeMemberNames, ref writer, ref idx, value, formatterResolver);
+//            }
+//        }
 
-        public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
-        {
-            return (T)ReflectionObjectFormatterHelper.Deserialize(metaInfo, readMembers, constructorParameterIndexes, mapMemberDictionary, bytes, offset, formatterResolver, out readSize);
-        }
-    }
+//        public T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
+//        {
+//            return (T)ReflectionObjectFormatterHelper.Deserialize(metaInfo, readMembers, constructorParameterIndexes, mapMemberDictionary, ref reader, formatterResolver);
+//        }
+//    }
 
-    internal static class ReflectionObjectFormatterHelper
-    {
-        internal static int WriteArraySerialize(ObjectSerializationInfo metaInfo, ObjectSerializationInfo.EmittableMember[] writeMembers, ref byte[] bytes, int offset, object value, IFormatterResolver formatterResolver)
-        {
-            var startOffset = offset;
+//    internal static class ReflectionObjectFormatterHelper
+//    {
+//        internal static void WriteArraySerialize(ObjectSerializationInfo metaInfo, ObjectSerializationInfo.EmittableMember[] writeMembers, ref MessagePackWriter writer, ref int idx, object value, IFormatterResolver formatterResolver)
+//        {
+//            writer.WriteArrayHeader(writeMembers.Length, ref idx);
+//            foreach (var item in metaInfo.Members)
+//            {
+//                if (item == null)
+//                {
+//                    writer.WriteNil(ref idx);
+//                }
+//                else
+//                {
+//                    var memberValue = item.ReflectionLoadValue(value);
+//                    MessagePackSerializer.NonGeneric.Serialize(item.Type, ref writer, ref idx, memberValue, formatterResolver);
+//                }
+//            }
+//        }
 
-            offset += MessagePackBinary.WriteArrayHeader(ref bytes, offset, writeMembers.Length);
-            foreach (var item in metaInfo.Members)
-            {
-                if (item == null)
-                {
-                    offset += MessagePackBinary.WriteNil(ref bytes, offset);
-                }
-                else
-                {
-                    var memberValue = item.ReflectionLoadValue(value);
-                    offset += MessagePackSerializer.NonGeneric.Serialize(item.Type, ref bytes, offset, memberValue, formatterResolver);
-                }
-            }
+//        internal static void WriteMapSerialize(ObjectSerializationInfo metaInfo, ObjectSerializationInfo.EmittableMember[] writeMembers, byte[][] memberNames, ref MessagePackWriter writer, ref int idx, object value, IFormatterResolver formatterResolver)
+//        {
+//            writer.WriteMapHeader(writeMembers.Length, ref idx);
 
-            return offset - startOffset;
-        }
+//            for (int i = 0; i < writeMembers.Length; i++)
+//            {
+//                writer.WriteStringBytes(memberNames[i], ref idx);
+//                var memberValue = writeMembers[i].ReflectionLoadValue(value);
+//                MessagePackSerializer.NonGeneric.Serialize(writeMembers[i].Type, ref writer, ref idx, memberValue, formatterResolver);
+//            }
+//        }
 
-        internal static int WriteMapSerialize(ObjectSerializationInfo metaInfo, ObjectSerializationInfo.EmittableMember[] writeMembers, byte[][] memberNames, ref byte[] bytes, int offset, object value, IFormatterResolver formatterResolver)
-        {
-            var startOffset = offset;
+//        internal static object Deserialize(ObjectSerializationInfo metaInfo, ObjectSerializationInfo.EmittableMember[] readMembers, int[] constructorParameterIndexes, AutomataDictionary mapMemberDictionary, ref MessagePackReader reader, IFormatterResolver formatterResolver)
+//        {
+//            object[] parameters = null;
 
-            offset += MessagePackBinary.WriteMapHeader(ref bytes, offset, writeMembers.Length);
+//            var headerType = reader.GetMessagePackType();
+//            if (headerType == MessagePackType.Nil)
+//            {
+//                reader.AdvanceCurrentSpan(1);
+//                return null;
+//            }
+//            else if (headerType == MessagePackType.Array)
+//            {
+//                var arraySize = reader.ReadArrayHeader();
 
-            for (int i = 0; i < writeMembers.Length; i++)
-            {
-                offset += MessagePackBinary.WriteStringBytes(ref bytes, offset, memberNames[i]);
-                var memberValue = writeMembers[i].ReflectionLoadValue(value);
-                offset += MessagePackSerializer.NonGeneric.Serialize(writeMembers[i].Type, ref bytes, offset, memberValue, formatterResolver);
-            }
+//                // ReadValues
+//                parameters = new object[arraySize];
+//                for (int i = 0; i < arraySize; i++)
+//                {
+//                    var info = readMembers[i];
+//                    if (info != null)
+//                    {
+//                        parameters[i] = MessagePackSerializer.NonGeneric.Deserialize(info.Type, ref reader, formatterResolver);
+//                    }
+//                    else
+//                    {
+//                        reader.ReadNextBlock();
+//                    }
+//                }
+//            }
+//            else if (headerType == MessagePackType.Map)
+//            {
+//                var mapSize = reader.ReadMapHeader();
 
-            return offset - startOffset;
-        }
+//                // ReadValues
+//                parameters = new object[mapSize];
+//                for (int i = 0; i < mapSize; i++)
+//                {
+//                    var rawPropName = reader.ReadStringSegment();
 
-        internal static object Deserialize(ObjectSerializationInfo metaInfo, ObjectSerializationInfo.EmittableMember[] readMembers, int[] constructorParameterIndexes, AutomataDictionary mapMemberDictionary, byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
-        {
-            var startOffset = offset;
-            object[] parameters = null;
+//                    if (mapMemberDictionary.TryGetValue(rawPropName, out int index))
+//                    {
+//                        var info = readMembers[index];
+//                        parameters[index] = MessagePackSerializer.NonGeneric.Deserialize(info.Type, ref reader, formatterResolver);
+//                    }
+//                    else
+//                    {
+//                        reader.ReadNextBlock();
+//                    }
+//                }
+//            }
+//            else
+//            {
+//                ThrowHelper.ThrowInvalidOperationException_MessagePackType(reader.Peek());
+//            }
 
-            var headerType = MessagePackBinary.GetMessagePackType(bytes, offset);
-            if (headerType == MessagePackType.Nil)
-            {
-                readSize = 1;
-                return null;
-            }
-            else if (headerType == MessagePackType.Array)
-            {
-                var arraySize = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                offset += readSize;
+//            // CreateObject
+//            object result = null;
+//            if (constructorParameterIndexes.Length == 0)
+//            {
+//                result = Activator.CreateInstance(metaInfo.Type);
+//            }
+//            else
+//            {
+//                var args = new object[constructorParameterIndexes.Length];
+//                for (int i = 0; i < constructorParameterIndexes.Length; i++)
+//                {
+//                    args[i] = parameters[constructorParameterIndexes[i]];
+//                }
 
-                // ReadValues
-                parameters = new object[arraySize];
-                for (int i = 0; i < arraySize; i++)
-                {
-                    var info = readMembers[i];
-                    if (info != null)
-                    {
-                        parameters[i] = MessagePackSerializer.NonGeneric.Deserialize(info.Type, bytes, offset, formatterResolver, out readSize);
-                        offset += readSize;
-                    }
-                    else
-                    {
-                        offset += MessagePackBinary.ReadNextBlock(bytes, offset);
-                    }
-                }
-            }
-            else if (headerType == MessagePackType.Map)
-            {
-                var mapSize = MessagePackBinary.ReadMapHeader(bytes, offset, out readSize);
-                offset += readSize;
+//                result = Activator.CreateInstance(metaInfo.Type, args);
+//            }
 
-                // ReadValues
-                parameters = new object[mapSize];
-                for (int i = 0; i < mapSize; i++)
-                {
-                    var rawPropName = MessagePackBinary.ReadStringSegment(bytes, offset, out readSize);
-                    offset += readSize;
+//            // SetMembers
+//            for (int i = 0; i < readMembers.Length; i++)
+//            {
+//                var info = readMembers[i];
+//                if (info != null)
+//                {
+//                    info.ReflectionStoreValue(result, parameters[i]);
+//                }
+//            }
 
-                    int index;
-                    if (mapMemberDictionary.TryGetValue(rawPropName.Array, rawPropName.Offset, rawPropName.Count, out index))
-                    {
-                        var info = readMembers[index];
-                        parameters[index] = MessagePackSerializer.NonGeneric.Deserialize(info.Type, bytes, offset, formatterResolver, out readSize);
-                        offset += readSize;
-                    }
-                    else
-                    {
-                        offset += MessagePackBinary.ReadNextBlock(bytes, offset);
-                    }
-                }
-            }
-            else
-            {
-                ThrowHelper.ThrowInvalidOperationException_MessagePackType(bytes[offset]);
-            }
-
-            // CreateObject
-            object result = null;
-            if (constructorParameterIndexes.Length == 0)
-            {
-                result = Activator.CreateInstance(metaInfo.Type);
-            }
-            else
-            {
-                var args = new object[constructorParameterIndexes.Length];
-                for (int i = 0; i < constructorParameterIndexes.Length; i++)
-                {
-                    args[i] = parameters[constructorParameterIndexes[i]];
-                }
-
-                result = Activator.CreateInstance(metaInfo.Type, args);
-            }
-
-            // SetMembers
-            for (int i = 0; i < readMembers.Length; i++)
-            {
-                var info = readMembers[i];
-                if (info != null)
-                {
-                    info.ReflectionStoreValue(result, parameters[i]);
-                }
-            }
-
-            readSize = offset - startOffset;
-            return result;
-        }
-    }
-}
-
-#endif
+//            return result;
+//        }
+//    }
+//}

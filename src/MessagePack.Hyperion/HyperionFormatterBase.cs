@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using CuteAnt;
-using CuteAnt.Buffers;
-using CuteAnt.Reflection;
-using Hyperion;
-using Hyperion.Extensions;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Reflection;
+    using System.Runtime.CompilerServices;
+    using CuteAnt;
+    using CuteAnt.Buffers;
+    using CuteAnt.Reflection;
+    using Hyperion;
+    using Hyperion.Extensions;
+
     public abstract class HyperionFormatterBase<T> : DynamicObjectTypeFormatterBase<T>
     {
 #if DESKTOPCLR
@@ -44,15 +44,12 @@ namespace MessagePack.Formatters
             _serializer = new Serializer(options);
         }
 
-        public override T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public override T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset)) { readSize = 1; return default; }
+            if (reader.IsNil()) { return default; }
 
-            var startOffset = offset;
-
-            var actualType = MessagePackBinary.ReadNamedType(bytes, offset, out var typeSize, true);
-            var serializedObject = MessagePackBinary.ReadBytesSegment(bytes, offset + typeSize, out readSize);
-            readSize += typeSize;
+            var actualType = reader.ReadNamedType(true);
+            var serializedObject = reader.ReadBytes();
 
             var obj = ActivatorUtils.FastCreateInstance(actualType);
 
@@ -62,7 +59,7 @@ namespace MessagePack.Formatters
                 session.TrackDeserializedObject(obj);
                 session.TrackDeserializedType(actualType);
 
-                using (var ms = new MemoryStream(serializedObject.Array, serializedObject.Offset, serializedObject.Count, false))
+                using (var ms = new MemoryStream(serializedObject, false))
                 {
                     var fields = GetFieldsFromCache(actualType);
                     foreach (var (field, getter, setter) in fields)
@@ -92,14 +89,14 @@ namespace MessagePack.Formatters
             return (T)obj;
         }
 
-        public override int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
+        public override void Serialize(ref MessagePackWriter writer, ref int idx, T value, IFormatterResolver formatterResolver)
         {
-            if (value == null) { return MessagePackBinary.WriteNil(ref bytes, offset); }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
             var actualType = value.GetType();
             if (!IsSupportedType(actualType)) { ThrowInvalidOperationException(actualType); }
 
-            var typeSize = MessagePackBinary.WriteNamedType(ref bytes, offset, actualType);
+            writer.WriteNamedType(actualType, ref idx);
 
             var bufferPool = BufferManager.Shared;
             byte[] buffer = null; int bufferSize;
@@ -143,7 +140,7 @@ namespace MessagePack.Formatters
                     }
                 }
 
-                return MessagePackBinary.WriteBytes(ref bytes, offset + typeSize, buffer, 0, bufferSize) + typeSize;
+                writer.WriteBytes(buffer, 0, bufferSize, ref idx);
             }
             finally { if (buffer != null) { bufferPool.Return(buffer); } }
         }

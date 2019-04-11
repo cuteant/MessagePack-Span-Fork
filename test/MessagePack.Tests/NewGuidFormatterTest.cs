@@ -40,12 +40,15 @@ namespace MessagePack.Tests
         {
             {
                 var original = Guid.NewGuid();
-                byte[] bytes = null;
-                GuidFormatter.Instance.Serialize(ref bytes, 0, original, null).Is(18/*38*/);
 
-                int readSize;
-                GuidFormatter.Instance.Deserialize(bytes, 0, null, out readSize).Is(original);
-                readSize.Is(18/*38*/);
+                var idx = 0;
+                var writer = new MessagePackWriter(16);
+                GuidFormatter.Instance.Serialize(ref writer, ref idx, original, null);
+                idx.Is(18/*38*/);
+
+                var reader = new MessagePackReader(writer.ToArray(idx));
+                GuidFormatter.Instance.Deserialize(ref reader, null).Is(original);
+                reader.CurrentSpanIndex.Is(18/*38*/);
             }
             {
                 var c = new InClass() { MyProperty = 3414141, Guid = Guid.NewGuid() };

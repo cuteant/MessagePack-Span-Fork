@@ -1,13 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using CuteAnt;
-using MessagePack.Formatters;
-
-namespace MessagePack.Resolvers
+﻿namespace MessagePack.Resolvers
 {
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+    using System.Runtime.CompilerServices;
+    using System.Threading;
+    using MessagePack.Formatters;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt;
+#else
+    using MessagePack.Internal;
+#endif
+
+    /// <summary>DefaultResolver 使用详情，参考 https://github.com/cuteant/akka.net/tree/future/src/Akka/Serialization </summary>
     public class DefaultResolver : FormatterResolver
     {
         public static readonly DefaultResolver Instance = new DefaultResolver();
@@ -54,7 +59,6 @@ namespace MessagePack.Resolvers
         {
             s_defaultResolvers = new IFormatterResolver[]
             {
-                //UnsafeBinaryResolver.Instance,
                 NativeDateTimeResolver.Instance, // Native c# DateTime format, preserving timezone
 
                 BuiltinResolver.Instance, // Try Builtin
@@ -79,7 +83,7 @@ namespace MessagePack.Resolvers
         private static IMessagePackFormatter<object> s_objectFallbackFormatter;
         public static IMessagePackFormatter<object> ObjectFallbackFormatter
         {
-            [MethodImpl(InlineMethod.Value)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return Volatile.Read(ref s_objectFallbackFormatter) ?? EnsureObjectFallbackFormatterCreated(); }
         }
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -91,7 +95,7 @@ namespace MessagePack.Resolvers
 
         public static bool TryRegister(params IFormatterResolver[] resolvers)
         {
-            if (null == resolvers || resolvers.Length == 0) { return false; }
+            if (null == resolvers || 0u >= (uint)resolvers.Length) { return false; }
             if (Locked == Volatile.Read(ref s_isFreezed)) { return false; }
 
             List<IFormatterResolver> snapshot, newCache;
@@ -108,7 +112,7 @@ namespace MessagePack.Resolvers
 
         public static void Register(params IFormatterResolver[] resolvers)
         {
-            if (null == resolvers || resolvers.Length == 0) { return; }
+            if (null == resolvers || 0u >= (uint)resolvers.Length) { return; }
 
             if (TryRegister(resolvers)) { return; }
             ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);
@@ -116,7 +120,7 @@ namespace MessagePack.Resolvers
 
         public static bool TryRegister(params IMessagePackFormatter[] formatters)
         {
-            if (null == formatters || formatters.Length == 0) { return false; }
+            if (null == formatters || 0u >= (uint)formatters.Length) { return false; }
             if (Locked == Volatile.Read(ref s_isFreezed)) { return false; }
 
             List<IMessagePackFormatter> snapshot, newCache;
@@ -133,7 +137,7 @@ namespace MessagePack.Resolvers
 
         public static void Register(params IMessagePackFormatter[] formatters)
         {
-            if (null == formatters || formatters.Length == 0) { return; }
+            if (null == formatters || 0u >= (uint)formatters.Length) { return; }
 
             if (TryRegister(formatters)) { return; }
             ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MessagePack_Register_Err);

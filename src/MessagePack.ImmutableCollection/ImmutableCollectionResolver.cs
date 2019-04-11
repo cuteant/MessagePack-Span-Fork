@@ -1,12 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Reflection;
-using CuteAnt.Reflection;
-using MessagePack.Formatters;
-
-namespace MessagePack.ImmutableCollection
+﻿namespace MessagePack.ImmutableCollection
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Immutable;
+    using System.Reflection;
+    using MessagePack.Formatters;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Reflection;
+#else
+    using MessagePack.Internal;
+#endif
+
     public sealed class ImmutableCollectionResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new ImmutableCollectionResolver();
@@ -74,7 +78,7 @@ namespace MessagePack.ImmutableCollection
 
         static object CreateInstance(Type genericType, params Type[] genericTypeArguments)
         {
-            return ActivatorUtils.CreateInstance(genericType.GetCachedGenericType(genericTypeArguments));
+            return ActivatorUtils.FastCreateInstance(genericType.GetCachedGenericType(genericTypeArguments));
         }
     }
 

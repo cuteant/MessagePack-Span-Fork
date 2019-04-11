@@ -1,38 +1,35 @@
-﻿#if NETSTANDARD || NETFRAMEWORK
-
-using MessagePack.Internal;
-using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using CuteAnt.Reflection;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
-    /// <summary>
-    /// For `object` field that holds derived from `object` value, ex: var arr = new object[] { 1, "a", new Model() };
-    /// </summary>
+    using System;
+    using System.Collections.Generic;
+    using System.Linq.Expressions;
+    using System.Reflection;
+    using System.Runtime.CompilerServices;
+    using System.Text.RegularExpressions;
+    using MessagePack.Internal;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Reflection;
+#endif
+
+    /// <summary>For `object` field that holds derived from `object` value, ex: var arr = new object[] { 1, "a", new Model() };</summary>
     public class TypelessFormatter : IMessagePackFormatter<object>
     {
         public const sbyte ExtensionTypeCode = 100;
 
         static readonly Regex SubtractFullNameRegex = new Regex(@", Version=\d+.\d+.\d+.\d+, Culture=\w+, PublicKeyToken=\w+", RegexOptions.Compiled);
 
-        delegate int SerializeMethod(object dynamicContractlessFormatter, ref byte[] bytes, int offset, object value, IFormatterResolver formatterResolver);
-        delegate object DeserializeMethod(object dynamicContractlessFormatter, byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize);
+        delegate void SerializeMethod(object dynamicContractlessFormatter, ref MessagePackWriter writer, ref int idx, object value, IFormatterResolver formatterResolver);
+        delegate object DeserializeMethod(object dynamicContractlessFormatter, ref MessagePackReader reader, IFormatterResolver formatterResolver);
 
         public static readonly IMessagePackFormatter<object> Instance = new TypelessFormatter();
 
-        static readonly ThreadsafeTypeKeyHashTable<KeyValuePair<object, SerializeMethod>> serializers = new ThreadsafeTypeKeyHashTable<KeyValuePair<object, SerializeMethod>>();
-        static readonly ThreadsafeTypeKeyHashTable<KeyValuePair<object, DeserializeMethod>> deserializers = new ThreadsafeTypeKeyHashTable<KeyValuePair<object, DeserializeMethod>>();
-        static readonly ThreadsafeTypeKeyHashTable<KeyValuePair<Type, byte[]>> typeNameCache = new ThreadsafeTypeKeyHashTable<KeyValuePair<Type, byte[]>>();
-        static readonly AsymmetricKeyHashTable<byte[], ArraySegment<byte>, Type> typeCache = new AsymmetricKeyHashTable<byte[], ArraySegment<byte>, Type>(new StringArraySegmentByteAscymmetricEqualityComparer());
+        static readonly ThreadsafeTypeKeyHashTable<KeyValuePair<object, SerializeMethod>> s_serializers = new ThreadsafeTypeKeyHashTable<KeyValuePair<object, SerializeMethod>>();
+        static readonly ThreadsafeTypeKeyHashTable<KeyValuePair<object, DeserializeMethod>> s_deserializers = new ThreadsafeTypeKeyHashTable<KeyValuePair<object, DeserializeMethod>>();
+        static readonly ThreadsafeTypeKeyHashTable<Type> s_typeNameCache = new ThreadsafeTypeKeyHashTable<Type>();
+        static readonly AsymmetricKeyHashTable<Type> s_typeCache = new AsymmetricKeyHashTable<Type>(new StringReadOnlySpanByteAscymmetricEqualityComparer());
 
-        static readonly HashSet<string> blacklistCheck;
-        static readonly HashSet<Type> useBuiltinTypes = new HashSet<Type>()
+        static readonly HashSet<string> s_blacklistCheck;
+        static readonly HashSet<Type> s_useBuiltinTypes = new HashSet<Type>()
         {
             typeof(Boolean),
             // typeof(Char),
@@ -77,264 +74,219 @@ namespace MessagePack.Formatters
             typeof(Double?),
         };
 
-        public static Func<string, Type> BindToType { get; set; }
-
-        //static Type DefaultBindToType(string typeName)
-        //{
-        //    return Type.GetType(typeName, false);
-        //}
-
-        // mscorlib or System.Private.CoreLib
-        static readonly bool isMscorlib = typeof(int).AssemblyQualifiedName.Contains("mscorlib");
-
-        ///// <summary>
-        ///// When type name does not have Version, Culture, Public token - sometimes can not find type, example - ExpandoObject
-        ///// In that can set to `false`
-        ///// </summary>
-        //public static volatile bool RemoveAssemblyVersion = true;
-
         static TypelessFormatter()
         {
-            blacklistCheck = new HashSet<string>()
+            s_blacklistCheck = new HashSet<string>(StringComparer.Ordinal)
             {
                 "System.CodeDom.Compiler.TempFileCollection",
                 "System.IO.FileSystemInfo",
                 "System.Management.IWbemClassObjectFreeThreaded"
             };
 
-            serializers.TryAdd(typeof(object), _ => new KeyValuePair<object, SerializeMethod>(null, (object p1, ref byte[] p2, int p3, object p4, IFormatterResolver p5) => 0));
-            deserializers.TryAdd(typeof(object), _ => new KeyValuePair<object, DeserializeMethod>(null, (object p1, byte[] p2, int p3, IFormatterResolver p4, out int p5) =>
+            s_serializers.TryAdd(typeof(object), _ => new KeyValuePair<object, SerializeMethod>(null, (object p1, ref MessagePackWriter p2, ref int p3, object p4, IFormatterResolver p5) => { }));
+            s_deserializers.TryAdd(typeof(object), _ => new KeyValuePair<object, DeserializeMethod>(null, (object p1, ref MessagePackReader p2, IFormatterResolver p3) =>
             {
-                p5 = 0;
                 return new object();
             }));
-
-            BindToType = TypeUtils.ResolveType; // DefaultBindToType;
         }
 
-        //// see:http://msdn.microsoft.com/en-us/library/w3f99sx1.aspx
-        //// subtract Version, Culture and PublicKeyToken from AssemblyQualifiedName 
-        //static string BuildTypeName(Type type)
-        //{
-        //    if (RemoveAssemblyVersion)
-        //    {
-        //        string full = type.AssemblyQualifiedName;
-
-        //        var shortened = SubtractFullNameRegex.Replace(full, "");
-        //        if (Type.GetType(shortened, false) == null)
-        //        {
-        //            // if type cannot be found with shortened name - use full name
-        //            shortened = full;
-        //        }
-
-        //        return shortened;
-        //    }
-        //    else
-        //    {
-        //        return type.AssemblyQualifiedName;
-        //    }
-        //}
-
-        public int Serialize(ref byte[] bytes, int offset, object value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, object value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
             var type = value.GetType();
 
-            Type expectedType;
-            byte[] typeName;
-            if (typeNameCache.TryGetValue(type, out var typeAndName))
+            if (!s_typeNameCache.TryGetValue(type, out Type expectedType))
             {
-                expectedType = typeAndName.Key;
-                typeName = typeAndName.Value;
-            }
-            else
-            {
-                if (blacklistCheck.Contains(type.FullName))
-                {
-                    ThrowHelper.ThrowInvalidOperationException_Blacklist(type);
-                }
-
-                if (type.IsAnonymous() || useBuiltinTypes.Contains(type))
-                {
-                    typeName = null;
-                    expectedType = null;
-                }
-                else
-                {
-                    typeName = TranslateTypeName(type, out expectedType);
-                }
-                typeNameCache.TryAdd(type, new KeyValuePair<Type, byte[]>(expectedType, typeName));
+                GetExpectedTypeSlow(type, out expectedType);
             }
 
-            if (typeName == null)
+            if (expectedType == null)
             {
-                return Resolvers.TypelessFormatterFallbackResolver.Instance.GetFormatter<object>().Serialize(ref bytes, offset, value, formatterResolver);
+                Resolvers.TypelessFormatterFallbackResolver.Instance.GetFormatter<object>().Serialize(ref writer, ref idx, value, formatterResolver);
+                return;
             }
 
             // don't use GetOrAdd for avoid closure capture.
-            if (!serializers.TryGetValue(expectedType, out var formatterAndDelegate))
+            if (!s_serializers.TryGetValue(expectedType, out var formatterAndDelegate))
             {
-                lock (serializers) // double check locking...
-                {
-                    if (!serializers.TryGetValue(expectedType, out formatterAndDelegate))
-                    {
-                        var formatter = formatterResolver.GetFormatterDynamic(expectedType);
-                        if (formatter == null)
-                        {
-                            ThrowHelper.ThrowFormatterNotRegisteredException(expectedType, formatterResolver);
-                        }
-
-                        var formatterType = typeof(IMessagePackFormatter<>).GetCachedGenericType(expectedType);
-                        var param0 = Expression.Parameter(typeof(object), "formatter");
-                        var param1 = Expression.Parameter(typeof(byte[]).MakeByRefType(), "bytes");
-                        var param2 = Expression.Parameter(typeof(int), "offset");
-                        var param3 = Expression.Parameter(typeof(object), "value");
-                        var param4 = Expression.Parameter(typeof(IFormatterResolver), "formatterResolver");
-
-                        var serializeMethodInfo = formatterType.GetRuntimeMethod("Serialize", new[] { typeof(byte[]).MakeByRefType(), typeof(int), expectedType, typeof(IFormatterResolver) });
-
-                        var body = Expression.Call(
-                            Expression.Convert(param0, formatterType),
-                            serializeMethodInfo,
-                            param1,
-                            param2,
-                            expectedType.IsValueType ? Expression.Unbox(param3, expectedType) : Expression.Convert(param3, expectedType),
-                            param4);
-
-                        var lambda = Expression.Lambda<SerializeMethod>(body, param0, param1, param2, param3, param4).Compile();
-
-                        formatterAndDelegate = new KeyValuePair<object, SerializeMethod>(formatter, lambda);
-                        serializers.TryAdd(expectedType, formatterAndDelegate);
-                    }
-                }
+                GetFormatterAndDelegateSlow(expectedType, formatterResolver, out formatterAndDelegate);
             }
 
             // mark as extension with code 100
-            var startOffset = offset;
-            offset += 6; // mark will be written at the end, when size is known
-            offset += MessagePackBinary.WriteStringBytes(ref bytes, offset, typeName);
-            offset += formatterAndDelegate.Value(formatterAndDelegate.Key, ref bytes, offset, value, formatterResolver);
-            MessagePackBinary.WriteExtensionFormatHeaderForceExt32Block(ref bytes, startOffset, ExtensionTypeCode, offset - startOffset - 6);
-            return offset - startOffset;
+            writer.Ensure(idx, 6);
+            var startOffset = idx;
+            idx += 6; // mark will be written at the end, when size is known
+
+            var typeName = expectedType.GetEncodedTypeName();
+            UnsafeMemory.WriteRaw(ref writer, typeName, ref idx);
+            formatterAndDelegate.Value(formatterAndDelegate.Key, ref writer, ref idx, value, formatterResolver);
+
+            var dataLength = idx - startOffset - 6;
+            MessagePackBinary.WriteExtensionFormatHeaderForceExt32Block(ref writer.PinnableAddress, startOffset, ExtensionTypeCode, dataLength);
         }
 
-        protected virtual byte[] TranslateTypeName(Type actualType, out Type expectedType)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void GetExpectedTypeSlow(Type type, out Type expectedType)
         {
-            expectedType = actualType;
-            return TypeSerializer.GetTypeKeyFromType(actualType).TypeName; // StringEncoding.UTF8.GetBytes(BuildTypeName(type));
-        }
-
-        public object Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
-        {
-            if (MessagePackBinary.IsNil(bytes, offset))
+            if (s_blacklistCheck.Contains(type.FullName))
             {
-                readSize = 1;
-                return null;
+                ThrowHelper.ThrowInvalidOperationException_Blacklist(type);
             }
 
-            int startOffset = offset;
-            var packType = MessagePackBinary.GetMessagePackType(bytes, offset);
+            if (type.IsAnonymous() || s_useBuiltinTypes.Contains(type))
+            {
+                expectedType = null;
+            }
+            else
+            {
+                expectedType = TranslateTypeName(type);
+            }
+            s_typeNameCache.TryAdd(type, expectedType);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void GetFormatterAndDelegateSlow(Type expectedType, IFormatterResolver formatterResolver, out KeyValuePair<object, SerializeMethod> formatterAndDelegate)
+        {
+            lock (s_serializers) // double check locking...
+            {
+                if (!s_serializers.TryGetValue(expectedType, out formatterAndDelegate))
+                {
+                    var formatter = formatterResolver.GetFormatterDynamic(expectedType);
+                    if (formatter == null)
+                    {
+                        ThrowHelper.ThrowFormatterNotRegisteredException(expectedType, formatterResolver);
+                    }
+
+                    var formatterType = typeof(IMessagePackFormatter<>).GetCachedGenericType(expectedType);
+                    var param0 = Expression.Parameter(typeof(object), "formatter");
+                    var param1 = Expression.Parameter(typeof(MessagePackWriter).MakeByRefType(), "writer");
+                    var param2 = Expression.Parameter(typeof(int).MakeByRefType(), "idx");
+                    var param3 = Expression.Parameter(typeof(object), "value");
+                    var param4 = Expression.Parameter(typeof(IFormatterResolver), "formatterResolver");
+
+                    var serializeMethodInfo = formatterType.GetRuntimeMethod("Serialize", new[] { typeof(MessagePackWriter).MakeByRefType(), typeof(int).MakeByRefType(), expectedType, typeof(IFormatterResolver) });
+
+                    var body = Expression.Call(
+                        Expression.Convert(param0, formatterType),
+                        serializeMethodInfo,
+                        param1,
+                        param2,
+                        expectedType.IsValueType ? Expression.Unbox(param3, expectedType) : Expression.Convert(param3, expectedType),
+                        param4);
+
+                    var lambda = Expression.Lambda<SerializeMethod>(body, param0, param1, param2, param3, param4).Compile();
+
+                    formatterAndDelegate = new KeyValuePair<object, SerializeMethod>(formatter, lambda);
+                    s_serializers.TryAdd(expectedType, formatterAndDelegate);
+                }
+            }
+        }
+
+        protected virtual Type TranslateTypeName(Type actualType) => actualType;
+
+        public object Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
+        {
+            if (reader.IsNil()) { return null; }
+
+            var packType = reader.GetMessagePackType();
             if (packType == MessagePackType.Extension)
             {
-                var ext = MessagePackBinary.ReadExtensionFormatHeader(bytes, offset, out readSize);
+                var ext = reader.ReadExtensionFormatHeader();
                 if (ext.TypeCode == ExtensionTypeCode)
                 {
                     // it has type name serialized
-                    offset += readSize;
-                    var typeName = MessagePackBinary.ReadStringSegment(bytes, offset, out readSize);
-                    offset += readSize;
-                    var result = DeserializeByTypeName(typeName, bytes, offset, formatterResolver, out readSize);
-                    offset += readSize;
-                    readSize = offset - startOffset;
+                    var typeName = reader.ReadStringSegment();
+                    var result = DeserializeByTypeName(typeName, ref reader, formatterResolver);
                     return result;
                 }
             }
 
             // fallback
-            return Resolvers.TypelessFormatterFallbackResolver.Instance.GetFormatter<object>().Deserialize(bytes, startOffset, formatterResolver, out readSize);
+            return Resolvers.TypelessFormatterFallbackResolver.Instance.GetFormatter<object>().Deserialize(ref reader, formatterResolver);
         }
 
-        /// <summary>
-        /// Does not support deserializing of anonymous types
-        /// Type should be covered by preceeding resolvers in complex/standard resolver
-        /// </summary>
-        private object DeserializeByTypeName(in ArraySegment<byte> typeName, byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        /// <summary>Does not support deserializing of anonymous types
+        /// Type should be covered by preceeding resolvers in complex/standard resolver.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static object DeserializeByTypeName(ReadOnlySpan<byte> typeName, ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             // try get type with assembly name, throw if not found
-            if (!typeCache.TryGetValue(typeName, out var type))
+            if (!s_typeCache.TryGetValue(typeName, out var type))
             {
-                var buffer = new byte[typeName.Count];
-                Buffer.BlockCopy(typeName.Array, typeName.Offset, buffer, 0, buffer.Length);
-                var str = StringEncoding.UTF8.GetString(buffer);
-                type = BindToType(str);
-                if (type == null)
-                {
-                    if (isMscorlib && str.Contains("System.Private.CoreLib"))
-                    {
-                        str = str.Replace("System.Private.CoreLib", "mscorlib");
-                        type = Type.GetType(str, true); // throw
-                    }
-                    else if (!isMscorlib && str.Contains("mscorlib"))
-                    {
-                        str = str.Replace("mscorlib", "System.Private.CoreLib");
-                        type = Type.GetType(str, true); // throw
-                    }
-                    else
-                    {
-                        type = Type.GetType(str, true); // re-throw
-                    }
-                }
-                typeCache.TryAdd(buffer, type);
+                ResolveTypeSlow(typeName, true, out type);
             }
 
-            if (!deserializers.TryGetValue(type, out var formatterAndDelegate))
+            if (!s_deserializers.TryGetValue(type, out var formatterAndDelegate))
             {
-                lock (deserializers)
-                {
-                    if (!deserializers.TryGetValue(type, out formatterAndDelegate))
-                    {
-                        var formatter = formatterResolver.GetFormatterDynamic(type);
-                        if (formatter == null)
-                        {
-                            ThrowHelper.ThrowFormatterNotRegisteredException(type, formatterResolver);
-                        }
-
-                        var formatterType = typeof(IMessagePackFormatter<>).GetCachedGenericType(type);
-                        var param0 = Expression.Parameter(typeof(object), "formatter");
-                        var param1 = Expression.Parameter(typeof(byte[]), "bytes");
-                        var param2 = Expression.Parameter(typeof(int), "offset");
-                        var param3 = Expression.Parameter(typeof(IFormatterResolver), "formatterResolver");
-                        var param4 = Expression.Parameter(typeof(int).MakeByRefType(), "readSize");
-
-                        var deserializeMethodInfo = formatterType.GetRuntimeMethod("Deserialize", new[] { typeof(byte[]), typeof(int), typeof(IFormatterResolver), typeof(int).MakeByRefType() });
-
-                        var deserialize = Expression.Call(
-                            Expression.Convert(param0, formatterType),
-                            deserializeMethodInfo,
-                            param1,
-                            param2,
-                            param3,
-                            param4);
-
-                        Expression body = deserialize;
-                        if (type.IsValueType)
-                            body = Expression.Convert(deserialize, typeof(object));
-                        var lambda = Expression.Lambda<DeserializeMethod>(body, param0, param1, param2, param3, param4).Compile();
-
-                        formatterAndDelegate = new KeyValuePair<object, DeserializeMethod>(formatter, lambda);
-                        deserializers.TryAdd(type, formatterAndDelegate);
-                    }
-                }
+                GetFormatterAndDelegateSlow(type, formatterResolver, out formatterAndDelegate);
             }
 
-            return formatterAndDelegate.Value(formatterAndDelegate.Key, bytes, offset, formatterResolver, out readSize);
+            return formatterAndDelegate.Value(formatterAndDelegate.Key, ref reader, formatterResolver);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Type ResolveType(ReadOnlySpan<byte> typeName, bool throwOnError)
+        {
+            if (!s_typeCache.TryGetValue(typeName, out var type))
+            {
+                ResolveTypeSlow(typeName, throwOnError, out type);
+            }
+            return type;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ResolveTypeSlow(ReadOnlySpan<byte> typeName, bool throwOnError, out Type type)
+        {
+            var buffer = typeName.ToArray();
+            var str = StringEncoding.UTF8.GetString(buffer);
+            if (throwOnError)
+            {
+                type = TypeUtils.ResolveType(str);
+            }
+            else
+            {
+                TypeUtils.TryResolveType(str, out type);
+            }
+            if (type != null) { s_typeCache.TryAdd(buffer, type); }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void GetFormatterAndDelegateSlow(Type type, IFormatterResolver formatterResolver, out KeyValuePair<object, DeserializeMethod> formatterAndDelegate)
+        {
+            lock (s_deserializers)
+            {
+                if (!s_deserializers.TryGetValue(type, out formatterAndDelegate))
+                {
+                    var formatter = formatterResolver.GetFormatterDynamic(type);
+                    if (formatter == null)
+                    {
+                        ThrowHelper.ThrowFormatterNotRegisteredException(type, formatterResolver);
+                    }
+
+                    var formatterType = typeof(IMessagePackFormatter<>).GetCachedGenericType(type);
+                    var param0 = Expression.Parameter(typeof(object), "formatter");
+                    var param1 = Expression.Parameter(typeof(MessagePackReader).MakeByRefType(), "reader");
+                    var param2 = Expression.Parameter(typeof(IFormatterResolver), "formatterResolver");
+
+                    var deserializeMethodInfo = formatterType.GetRuntimeMethod("Deserialize", new[] { typeof(MessagePackReader).MakeByRefType(), typeof(IFormatterResolver) });
+
+                    var deserialize = Expression.Call(
+                        Expression.Convert(param0, formatterType),
+                        deserializeMethodInfo,
+                        param1,
+                        param2);
+
+                    Expression body = deserialize;
+                    if (type.IsValueType)
+                        body = Expression.Convert(deserialize, typeof(object));
+                    var lambda = Expression.Lambda<DeserializeMethod>(body, param0, param1, param2).Compile();
+
+                    formatterAndDelegate = new KeyValuePair<object, DeserializeMethod>(formatter, lambda);
+                    s_deserializers.TryAdd(type, formatterAndDelegate);
+                }
+            }
         }
     }
 
 }
-
-#endif

@@ -40,18 +40,17 @@ namespace MessagePack.Tests
 
     public class DynamicObjectResolverOrderTest
     {
-        IEnumerable<string> IteratePropertyNames(byte[] bin)
+        IList<string> IteratePropertyNames(byte[] bin)
         {
-            var offset = 0;
-            int readSize = 0;
-            var mapCount = MessagePackBinary.ReadMapHeader(bin, 0, out readSize);
-            offset += readSize;
+            var reader = new MessagePackReader(bin);
+            var mapCount = reader.ReadMapHeader();
+            var list = new List<string>();
             for (int i = 0; i < mapCount; i++)
             {
-                yield return MessagePackBinary.ReadString(bin, offset, out readSize);
-                offset += readSize;
-                offset += MessagePackBinary.ReadNext(bin, offset);
+                list.Add(reader.ReadString());
+                reader.ReadNext();
             }
+            return list;
         }
 
         [Fact]

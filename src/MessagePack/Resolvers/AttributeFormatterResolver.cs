@@ -1,22 +1,19 @@
-﻿using MessagePack.Formatters;
-using System;
-using System.Reflection;
-using System.Linq; // require UNITY_WSA
-using CuteAnt.Reflection;
-
-namespace MessagePack.Resolvers
+﻿namespace MessagePack.Resolvers
 {
-    /// <summary>
-    /// Get formatter from [MessaegPackFromatter] attribute.
-    /// </summary>
+    using System;
+    using System.Reflection;
+    using System.Linq; // require UNITY_WSA
+    using MessagePack.Formatters;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Reflection;
+#endif
+
+    /// <summary>Get formatter from [MessaegPackFromatter] attribute.</summary>
     public sealed class AttributeFormatterResolver : FormatterResolver
     {
         public static IFormatterResolver Instance = new AttributeFormatterResolver();
 
-        AttributeFormatterResolver()
-        {
-
-        }
+        AttributeFormatterResolver() { }
 
         public override IMessagePackFormatter<T> GetFormatter<T>()
         {
@@ -29,10 +26,10 @@ namespace MessagePack.Resolvers
 
             static FormatterCache()
             {
-#if UNITY_WSA && !NETFX_CORE
-                var attr = (MessagePackFormatterAttribute)typeof(T).GetCustomAttributes(typeof(MessagePackFormatterAttribute), true).FirstOrDefault();
-#else
+#if DEPENDENT_ON_CUTEANT
                 var attr = typeof(T).GetCustomAttributeX<MessagePackFormatterAttribute>();
+#else
+                var attr = (MessagePackFormatterAttribute)typeof(T).GetCustomAttributes(typeof(MessagePackFormatterAttribute), true).FirstOrDefault();
 #endif
                 if (attr == null) { return; }
 

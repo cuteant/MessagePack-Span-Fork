@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Reflection;
-using Hyperion;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq.Expressions;
+    using System.Reflection;
+    using Hyperion;
+
     public class HyperionExpressionFormatter<TExpression> : HyperionFormatterBase<TExpression>
         where TExpression : Expression
     {

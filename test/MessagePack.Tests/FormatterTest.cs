@@ -18,24 +18,26 @@ namespace MessagePack.Tests
             return MessagePackSerializer.Deserialize<T>(MessagePackSerializer.Serialize(value));
         }
 
-        public static IEnumerable<object[]> primitiveFormatterTestData = new []
+        public static IEnumerable<object[]> primitiveFormatterTestData = new[]
         {
             new object[] { Int16.MinValue, Int16.MaxValue },
             new object[] { (Int16?)100, null },
             new object[] { Int32.MinValue, Int32.MaxValue },
             new object[] { (Int32?)100, null },
+            new object[] { (Int32)127, (Int32)255 },
+            new object[] { (Int32)ushort.MaxValue, (Int32)(ushort.MaxValue + 1) },
             new object[] { Int64.MinValue, Int64.MaxValue },
-            new object[] { (Int64?)100, null },
+            new object[] { (Int64?)100L, null },
             new object[] { UInt16.MinValue, UInt16.MaxValue },
             new object[] { (UInt16?)100, null },
             new object[] { UInt32.MinValue, UInt32.MaxValue },
-            new object[] { (UInt32?)100, null },
+            new object[] { (UInt32?)100u, null },
             new object[] { UInt64.MinValue, UInt64.MaxValue },
-            new object[] { (UInt64?)100, null },
+            new object[] { (UInt64?)100ul, null },
             new object[] { Single.MinValue, Single.MaxValue },
-            new object[] { (Single?)100.100, null },
+            new object[] { (Single?)100.100f, null },
             new object[] { Double.MinValue, Double.MaxValue },
-            new object[] { (Double?)100.100, null },
+            new object[] { (Double?)100.100d, null },
             new object[] { true, false },
             new object[] { (Boolean?)true, null },
             new object[] { Byte.MinValue, Byte.MaxValue },
@@ -50,14 +52,22 @@ namespace MessagePack.Tests
 
         [Theory]
         [MemberData(nameof(primitiveFormatterTestData))]
-        public void PrimitiveFormatterTest<T>(T x, T? y)
+        public void PrimitiveFormatterTest(object x, object y)
+        {
+            var helper = typeof(FormatterTest).GetTypeInfo().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Single(m => m.Name == nameof(PrimitiveFormatterTestHelper));
+            var helperClosedGeneric = helper.MakeGenericMethod(x.GetType());
+
+            helperClosedGeneric.Invoke(this, new object[] { x });
+            helperClosedGeneric.Invoke(this, new object[] { y });
+        }
+
+        private void PrimitiveFormatterTestHelper<T>(T? x)
             where T : struct
         {
             Convert(x).Is(x);
-            Convert(y).Is(y);
         }
 
-        public static IEnumerable<object[]> enumFormatterTestData = new []
+        public static IEnumerable<object[]> enumFormatterTestData = new[]
         {
             new object[] { ByteEnum.A, ByteEnum.B },
             new object[] { (ByteEnum?)ByteEnum.C, null },
@@ -79,11 +89,19 @@ namespace MessagePack.Tests
 
         [Theory]
         [MemberData(nameof(enumFormatterTestData))]
-        public void EnumFormatterTest<T>(T x, T? y)
+        public void EnumFormatterTest(object x, object y)
+        {
+            var helper = typeof(FormatterTest).GetTypeInfo().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Single(m => m.Name == nameof(EnumFormatterTestHelper));
+            var helperClosedGeneric = helper.MakeGenericMethod(x.GetType());
+
+            helperClosedGeneric.Invoke(this, new object[] { x });
+            helperClosedGeneric.Invoke(this, new object[] { y });
+        }
+
+        private void EnumFormatterTestHelper<T>(T? x)
             where T : struct
         {
             Convert(x).Is(x);
-            Convert(y).Is(y);
         }
 
         [Fact]
@@ -93,7 +111,7 @@ namespace MessagePack.Tests
             Convert((Nil?)null).Is(Nil.Default);
         }
 
-        public static IEnumerable<object[]> standardStructFormatterTestData = new []
+        public static IEnumerable<object[]> standardStructFormatterTestData = new[]
         {
             new object[] { decimal.MaxValue, decimal.MinValue, null },
             new object[] { TimeSpan.MaxValue, TimeSpan.MinValue, null },
@@ -128,7 +146,7 @@ namespace MessagePack.Tests
 
         private void StandardClassLibraryStructFormatterTest_Helper<T>(T? value) where T : struct => Convert(value).Is(value);
 
-        public static IEnumerable<object[]> standardClassFormatterTestData = new []
+        public static IEnumerable<object[]> standardClassFormatterTestData = new[]
         {
             new object[] { new byte[] { 1, 10, 100 }, new byte[0] { }, null },
             new object[] { "aaa", "", null },
@@ -140,11 +158,19 @@ namespace MessagePack.Tests
 
         [Theory]
         [MemberData(nameof(standardClassFormatterTestData))]
-        public void StandardClassLibraryFormatterTest<T>(T x, T y, T z)
+        public void StandardClassLibraryFormatterTest(object x, object y, object z)
+        {
+            var helper = typeof(FormatterTest).GetTypeInfo().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Single(m => m.Name == nameof(StandardClassLibraryFormatterTestHelper));
+            var helperClosedGeneric = helper.MakeGenericMethod(x.GetType());
+
+            helperClosedGeneric.Invoke(this, new object[] { x });
+            helperClosedGeneric.Invoke(this, new object[] { y });
+            helperClosedGeneric.Invoke(this, new object[] { z });
+        }
+
+        private void StandardClassLibraryFormatterTestHelper<T>(T x)
         {
             Convert(x).Is(x);
-            Convert(y).Is(y);
-            Convert(z).Is(z);
         }
 
         [Fact]
@@ -210,23 +236,34 @@ namespace MessagePack.Tests
             var c = new String('あ', 130);
             var d = new String('あ', 40000);
 
-            byte[] bytesA = null;
-            MessagePackBinary.WriteString(ref bytesA, 0, a).Is(Encoding.UTF8.GetByteCount(a) + 1);
+            var idx = 0;
+            var writer = new MessagePackWriter(16);
 
-            byte[] bytesB = null;
-            MessagePackBinary.WriteString(ref bytesB, 0, b).Is(Encoding.UTF8.GetByteCount(b) + 2);
+            writer.WriteString(a, ref idx);
+            idx.Is(Encoding.UTF8.GetByteCount(a) + 1);
+            var reader = new MessagePackReader(writer.ToArray(idx));
+            reader.ReadString().Is(a);
 
-            byte[] bytesC = null;
-            MessagePackBinary.WriteString(ref bytesC, 0, c).Is(Encoding.UTF8.GetByteCount(c) + 3);
+            writer = new MessagePackWriter(16);
+            idx = 0;
+            writer.WriteString(b, ref idx);
+            idx.Is(Encoding.UTF8.GetByteCount(b) + 2);
+            reader = new MessagePackReader(writer.ToArray(idx));
+            reader.ReadString().Is(b);
 
-            byte[] bytesD = null;
-            MessagePackBinary.WriteString(ref bytesD, 0, d).Is(Encoding.UTF8.GetByteCount(d) + 5);
+            writer = new MessagePackWriter(16);
+            idx = 0;
+            writer.WriteString(c, ref idx);
+            idx.Is(Encoding.UTF8.GetByteCount(c) + 3);
+            reader = new MessagePackReader(writer.ToArray(idx));
+            reader.ReadString().Is(c);
 
-            int readSize = 0;
-            MessagePackBinary.ReadString(bytesA, 0, out readSize).Is(a);
-            MessagePackBinary.ReadString(bytesB, 0, out readSize).Is(b);
-            MessagePackBinary.ReadString(bytesC, 0, out readSize).Is(c);
-            MessagePackBinary.ReadString(bytesD, 0, out readSize).Is(d);
+            writer = new MessagePackWriter(16);
+            idx = 0;
+            writer.WriteString(d, ref idx);
+            idx.Is(Encoding.UTF8.GetByteCount(d) + 5);
+            reader = new MessagePackReader(writer.ToArray(idx));
+            reader.ReadString().Is(d);
         }
 
         [Fact]
@@ -237,23 +274,34 @@ namespace MessagePack.Tests
             var c = new String('风', 130);
             var d = new String('电', 40000);
 
-            byte[] bytesA = null;
-            MessagePackBinary.WriteString(ref bytesA, 0, a).Is(Encoding.UTF8.GetByteCount(a) + 2);
+            var idx = 0;
+            var writer = new MessagePackWriter(16);
 
-            byte[] bytesB = null;
-            MessagePackBinary.WriteString(ref bytesB, 0, b).Is(Encoding.UTF8.GetByteCount(b) + 2);
+            writer.WriteString(a, ref idx);
+            idx.Is(Encoding.UTF8.GetByteCount(a) + 2);
+            var reader = new MessagePackReader(writer.ToArray(idx));
+            reader.ReadString().Is(a);
 
-            byte[] bytesC = null;
-            MessagePackBinary.WriteString(ref bytesC, 0, c).Is(Encoding.UTF8.GetByteCount(c) + 3);
+            writer = new MessagePackWriter(16);
+            idx = 0;
+            writer.WriteString(b, ref idx);
+            idx.Is(Encoding.UTF8.GetByteCount(b) + 2);
+            reader = new MessagePackReader(writer.ToArray(idx));
+            reader.ReadString().Is(b);
 
-            byte[] bytesD = null;
-            MessagePackBinary.WriteString(ref bytesD, 0, d).Is(Encoding.UTF8.GetByteCount(d) + 5);
+            writer = new MessagePackWriter(16);
+            idx = 0;
+            writer.WriteString(c, ref idx);
+            idx.Is(Encoding.UTF8.GetByteCount(c) + 3);
+            reader = new MessagePackReader(writer.ToArray(idx));
+            reader.ReadString().Is(c);
 
-            int readSize = 0;
-            MessagePackBinary.ReadString(bytesA, 0, out readSize).Is(a);
-            MessagePackBinary.ReadString(bytesB, 0, out readSize).Is(b);
-            MessagePackBinary.ReadString(bytesC, 0, out readSize).Is(c);
-            MessagePackBinary.ReadString(bytesD, 0, out readSize).Is(d);
+            writer = new MessagePackWriter(16);
+            idx = 0;
+            writer.WriteString(d, ref idx);
+            idx.Is(Encoding.UTF8.GetByteCount(d) + 5);
+            reader = new MessagePackReader(writer.ToArray(idx));
+            reader.ReadString().Is(d);
         }
 
         // https://github.com/neuecc/MessagePack-CSharp/issues/22

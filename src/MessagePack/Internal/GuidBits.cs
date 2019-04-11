@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MessagePack.Internal
@@ -160,17 +161,13 @@ namespace MessagePack.Internal
             ThrowHelper.ThrowArgumentException_Guid_Pattern(); ;
         }
 
-#if NETSTANDARD || NETFRAMEWORK
-        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
-#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static byte Parse(byte[] bytes, int highOffset)
         {
             return unchecked((byte)(SwitchParse(bytes[highOffset]) * 16 + SwitchParse(bytes[highOffset + 1])));
         }
 
-#if NETSTANDARD || NETFRAMEWORK
-        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
-#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static byte SwitchParse(byte b)
         {
             // '0'(48) ~ '9'(57) => -48

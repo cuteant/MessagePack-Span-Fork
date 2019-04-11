@@ -23,9 +23,9 @@ namespace MessagePack.Tests.ExtensionTests
         public void TestSmall()
         {
             // small size binary don't use LZ4 Encode
-            MessagePackBinary.GetMessagePackType(LZ4MessagePackSerializer.Serialize(100), 0).Is(MessagePackType.Integer);
-            MessagePackBinary.GetMessagePackType(LZ4MessagePackSerializer.Serialize("test"), 0).Is(MessagePackType.String);
-            MessagePackBinary.GetMessagePackType(LZ4MessagePackSerializer.Serialize(false), 0).Is(MessagePackType.Boolean);
+            (new MessagePackReader(LZ4MessagePackSerializer.Serialize(100))).GetMessagePackType().Is(MessagePackType.Integer);
+            (new MessagePackReader(LZ4MessagePackSerializer.Serialize("test"))).GetMessagePackType().Is(MessagePackType.String);
+            (new MessagePackReader(LZ4MessagePackSerializer.Serialize(false))).GetMessagePackType().Is(MessagePackType.Boolean);
         }
 
         [Fact]
@@ -34,10 +34,10 @@ namespace MessagePack.Tests.ExtensionTests
             var originalData = Enumerable.Range(1, 1000).Select(x => x).ToArray();
 
             var lz4Data = LZ4MessagePackSerializer.Serialize(originalData);
+            var reader = new MessagePackReader(lz4Data);
 
-            MessagePackBinary.GetMessagePackType(lz4Data, 0).Is(MessagePackType.Extension);
-            int r;
-            var header = MessagePackBinary.ReadExtensionFormatHeader(lz4Data, 0, out r);
+            reader.GetMessagePackType().Is(MessagePackType.Extension);
+            var header = reader.ReadExtensionFormatHeader();
             header.TypeCode.Is((sbyte)LZ4MessagePackSerializer.ExtensionTypeCode);
 
             var decompress = LZ4MessagePackSerializer.Deserialize<int[]>(lz4Data);
@@ -51,10 +51,10 @@ namespace MessagePack.Tests.ExtensionTests
             var originalData = Enumerable.Range(1, 100).Select(x => new FirstSimpleData { Prop1 = x * x, Prop2 = "hoge", Prop3 = x }).ToArray();
 
             var lz4Data = LZ4MessagePackSerializer.NonGeneric.Serialize(typeof(FirstSimpleData[]), originalData);
+            var reader = new MessagePackReader(lz4Data);
 
-            MessagePackBinary.GetMessagePackType(lz4Data, 0).Is(MessagePackType.Extension);
-            int r;
-            var header = MessagePackBinary.ReadExtensionFormatHeader(lz4Data, 0, out r);
+            reader.GetMessagePackType().Is(MessagePackType.Extension);
+            var header = reader.ReadExtensionFormatHeader();
             header.TypeCode.Is((sbyte)LZ4MessagePackSerializer.ExtensionTypeCode);
 
             var decompress = LZ4MessagePackSerializer.NonGeneric.Deserialize(typeof(FirstSimpleData[]), lz4Data);
@@ -120,17 +120,16 @@ namespace MessagePack.Tests.ExtensionTests
         {
             var originalData = Enumerable.Range(1, 1000).Select(x => x).ToArray();
 
-            byte[] bytes = null;
+            var idx = 0;
+            var writer = new MessagePackWriter(16);
 
-            var len = LZ4MessagePackSerializer.SerializeToBlock(ref bytes, 0, originalData, MessagePackSerializer.DefaultResolver);
+#pragma warning disable CS0618 // 类型或成员已过时
+            LZ4MessagePackSerializer.SerializeToBlock(ref writer, ref idx, originalData, MessagePackSerializer.DefaultResolver);
+#pragma warning restore CS0618 // 类型或成员已过时
+
             var lz4Data = LZ4MessagePackSerializer.Serialize(originalData);
 
-            len.Is(lz4Data.Length);
-
-            for (int i = 0; i < len; i++)
-            {
-                if (bytes[i] != lz4Data[i]) throw new AssertException("not same");
-            }
+            writer.ToArray(idx).AsSpan().SequenceEqual(lz4Data).Is(true);
         }
 
         [Fact]

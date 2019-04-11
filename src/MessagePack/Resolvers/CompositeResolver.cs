@@ -1,9 +1,11 @@
-﻿using MessagePack.Formatters;
-using System;
-using System.Reflection;
-
+﻿
 namespace MessagePack.Resolvers
 {
+    using System;
+    using System.Reflection;
+    using MessagePack.Formatters;
+
+    [Obsolete("=> MessagePackStandardResolver")]
     public sealed class CompositeResolver : FormatterResolver
     {
         public static readonly CompositeResolver Instance = new CompositeResolver();
@@ -12,9 +14,7 @@ namespace MessagePack.Resolvers
         static IMessagePackFormatter[] formatters = new IMessagePackFormatter[0];
         static IFormatterResolver[] resolvers = new IFormatterResolver[0];
 
-        CompositeResolver()
-        {
-        }
+        CompositeResolver() { }
 
         public static void Register(params IFormatterResolver[] resolvers)
         {

@@ -19,21 +19,14 @@ namespace MessagePack.Formatters
 
         public MemberInfoFormatter() : this(true) { }
 
-        public MemberInfoFormatter(bool throwOnError)
-        {
-            _throwOnError = throwOnError;
-        }
+        public MemberInfoFormatter(bool throwOnError) => _throwOnError = throwOnError;
 
-        public TMember Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public TMember Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return null;
-            }
+            if (reader.IsNil()) { return null; }
 
             var formatter = formatterResolver.GetFormatter<MemberinfoShim>();
-            var shim = formatter.Deserialize(bytes, offset, formatterResolver, out readSize);
+            var shim = formatter.Deserialize(ref reader, formatterResolver);
             switch (shim.MemberType)
             {
                 case MemberinfoType.EventInfo:
@@ -49,12 +42,9 @@ namespace MessagePack.Formatters
             }
         }
 
-        public int Serialize(ref byte[] bytes, int offset, TMember value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, TMember value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
             var shim = new MemberinfoShim();
             switch (value)
@@ -80,11 +70,11 @@ namespace MessagePack.Formatters
                     break;
 
                 default:
-                    return MessagePackBinary.WriteNil(ref bytes, offset);
+                    writer.WriteNil(ref idx); return;
             }
 
             var formatter = formatterResolver.GetFormatter<MemberinfoShim>();
-            return formatter.Serialize(ref bytes, offset, shim, formatterResolver);
+            formatter.Serialize(ref writer, ref idx, shim, formatterResolver);
         }
     }
 }

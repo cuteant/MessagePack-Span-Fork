@@ -1,363 +1,244 @@
-﻿using System;
-using System.Buffers;
-using System.ComponentModel;
-using System.IO;
-using System.Threading;
-using MessagePack.Internal;
-
-namespace MessagePack
+﻿namespace MessagePack
 {
-    /// <summary>
-    /// High-Level API of MessagePack for C#.
-    /// </summary>
+    using System;
+    using System.Buffers;
+    using System.IO;
+    using System.Runtime.CompilerServices;
+    using System.Threading;
+    using System.Threading.Tasks;
+
+    /// <summary>High-Level API of MessagePack for C#.</summary>
     public static partial class MessagePackSerializer
     {
-        private const int c_zeroSize = 0;
-        private const int c_defaultCopyBufferSize = 1024 * 64;
-        private static readonly ArrayPool<byte> s_bufferPool = ArrayPool<byte>.Shared;
+        private const uint c_zeroSize = 0u;
 
-        static IFormatterResolver defaultResolver;
+        static IFormatterResolver s_defaultResolver = MessagePack.Resolvers.StandardResolver.Instance;
 
-        /// <summary>
-        /// FormatterResolver that used resolver less overloads. If does not set it, used StandardResolver.
-        /// </summary>
+        /// <summary>FormatterResolver that used resolver less overloads. If does not set it, used StandardResolver.</summary>
         public static IFormatterResolver DefaultResolver
         {
-            get
+            get => s_defaultResolver;
+            set
             {
-                if (defaultResolver == null)
-                {
-                    defaultResolver = MessagePack.Resolvers.StandardResolver.Instance;
-                }
-
-                return defaultResolver;
+                if (value == null) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.value); }
+                Interlocked.Exchange(ref s_defaultResolver, value);
             }
         }
 
-        /// <summary>
-        /// Is resolver decided?
-        /// </summary>
-        public static bool IsInitialized
-        {
-            get
-            {
-                return defaultResolver != null;
-            }
-        }
+        /// <summary>Is resolver decided?</summary>
+        public static bool IsInitialized => s_defaultResolver != null;
 
-        /// <summary>
-        /// Set default resolver of MessagePackSerializer APIs.
-        /// </summary>
+        /// <summary>Set default resolver of MessagePackSerializer APIs.</summary>
         /// <param name="resolver"></param>
+        [Obsolete("=> DefaultResolver")]
         public static void SetDefaultResolver(IFormatterResolver resolver)
         {
-            Interlocked.Exchange(ref defaultResolver, resolver);
+            Interlocked.Exchange(ref s_defaultResolver, resolver);
         }
 
-        /// <summary>
-        /// Serialize to binary with default resolver.
-        /// </summary>
-        public static byte[] Serialize<T>(T obj)
+        /// <summary>TBD</summary>
+        public static T DeepCopy<T>(T source) => DeepCopy(source, null);
+
+        /// <summary>TBD</summary>
+        public static T DeepCopy<T>(T source, IFormatterResolver resolver)
         {
-            return Serialize(obj, defaultResolver);
+            if (source == null) { return default; }
+            if (null == resolver) { resolver = s_defaultResolver; }
+
+            var type = source.GetType(); // 要获取对象本身的类型，忽略基类、接口
+            using (var serializedObject = SerializeUnsafe<object>(source, resolver))
+            {
+                return (T)NonGeneric.Deserialize(type, serializedObject.Span, resolver);
+            }
         }
 
-        /// <summary>
-        /// Serialize to binary with specified resolver.
-        /// </summary>
+        /// <summary>Serialize to binary with default resolver.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte[] Serialize<T>(T obj) => Serialize(obj, s_defaultResolver);
+
+        /// <summary>Serialize to binary with specified resolver.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] Serialize<T>(T obj, IFormatterResolver resolver)
         {
-            if (resolver == null) resolver = DefaultResolver;
+            if (null == resolver) { resolver = s_defaultResolver; }
             var formatter = resolver.GetFormatterWithVerify<T>();
 
-            var buffer = InternalMemoryPool.GetBuffer();
-
-            var len = formatter.Serialize(ref buffer, 0, obj, resolver);
-
-            // do not return MemoryPool.Buffer.
-            return MessagePackBinary.FastCloneWithResize(buffer, len);
+            var idx = 0;
+            var writer = new MessagePackWriter(true);
+            formatter.Serialize(ref writer, ref idx, obj, resolver);
+            return writer.ToArray(idx);
         }
 
-        /// <summary>
-        /// Serialize to binary. Get the raw memory pool byte[]. The result can not share across thread and can not hold, so use quickly.
-        /// </summary>
-        public static ArraySegment<byte> SerializeUnsafe<T>(T obj)
-        {
-            return SerializeUnsafe(obj, defaultResolver);
-        }
+        /// <summary>Serialize to binary. Get the raw <see cref="IOwnedBuffer{Byte}"/>.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IOwnedBuffer<byte> SerializeSafe<T>(T obj) => SerializeSafe(obj, s_defaultResolver);
 
-        /// <summary>
-        /// Serialize to binary with specified resolver. Get the raw memory pool byte[]. The result can not share across thread and can not hold, so use quickly.
-        /// </summary>
-        public static ArraySegment<byte> SerializeUnsafe<T>(T obj, IFormatterResolver resolver)
+        /// <summary>Serialize to binary with specified resolver. Get the raw <see cref="IOwnedBuffer{Byte}"/>.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IOwnedBuffer<byte> SerializeSafe<T>(T obj, IFormatterResolver resolver)
         {
-            if (resolver == null) resolver = DefaultResolver;
+            if (null == resolver) { resolver = s_defaultResolver; }
             var formatter = resolver.GetFormatterWithVerify<T>();
 
-            var buffer = InternalMemoryPool.GetBuffer();
-
-            var len = formatter.Serialize(ref buffer, 0, obj, resolver);
-
-            // return raw memory pool, unsafe!
-            return new ArraySegment<byte>(buffer, 0, len);
+            var idx = 0;
+            var writer = new MessagePackWriter(false);
+            formatter.Serialize(ref writer, ref idx, obj, resolver);
+            return writer.ToOwnedBuffer(idx);
         }
 
-        /// <summary>
-        /// Serialize to stream.
-        /// </summary>
-        public static void Serialize<T>(Stream stream, T obj)
+        /// <summary>Serialize to binary. Get the raw <see cref="IOwnedBuffer{Byte}"/>.
+        /// The result can not share across thread and can not hold, so use quickly.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IOwnedBuffer<byte> SerializeUnsafe<T>(T obj) => SerializeUnsafe(obj, s_defaultResolver);
+
+        /// <summary>Serialize to binary with specified resolver. Get the raw <see cref="IOwnedBuffer{Byte}"/>.
+        /// The result can not share across thread and can not hold, so use quickly.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IOwnedBuffer<byte> SerializeUnsafe<T>(T obj, IFormatterResolver resolver)
         {
-            Serialize(stream, obj, defaultResolver);
+            if (null == resolver) { resolver = s_defaultResolver; }
+            var formatter = resolver.GetFormatterWithVerify<T>();
+
+            var idx = 0;
+            var writer = new MessagePackWriter(true);
+            formatter.Serialize(ref writer, ref idx, obj, resolver);
+            return writer.ToOwnedBuffer(idx);
         }
 
-        /// <summary>
-        /// Serialize to stream with specified resolver.
-        /// </summary>
+        /// <summary>Serialize to stream.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Serialize<T>(Stream stream, T obj) => Serialize(stream, obj, s_defaultResolver);
+
+        /// <summary>Serialize to stream with specified resolver.</summary>
         public static void Serialize<T>(Stream stream, T obj, IFormatterResolver resolver)
         {
-            if (resolver == null) resolver = DefaultResolver;
-            var formatter = resolver.GetFormatterWithVerify<T>();
-
-            var buffer = InternalMemoryPool.GetBuffer();
-
-            var len = formatter.Serialize(ref buffer, 0, obj, resolver);
-
-            // do not need resize.
-            stream.Write(buffer, 0, len);
-        }
-
-        /// <summary>
-        /// Reflect of resolver.GetFormatterWithVerify[T].Serialize.
-        /// </summary>
-        public static int Serialize<T>(ref byte[] bytes, int offset, T value, IFormatterResolver resolver)
-        {
-            return resolver.GetFormatterWithVerify<T>().Serialize(ref bytes, offset, value, resolver);
-        }
-
-#if NETSTANDARD || NETFRAMEWORK
-
-        /// <summary>
-        /// Serialize to stream(async).
-        /// </summary>
-        public static System.Threading.Tasks.Task SerializeAsync<T>(Stream stream, T obj)
-        {
-            return SerializeAsync(stream, obj, defaultResolver);
-        }
-
-        /// <summary>
-        /// Serialize to stream(async) with specified resolver.
-        /// </summary>
-        public static async System.Threading.Tasks.Task SerializeAsync<T>(Stream stream, T obj, IFormatterResolver resolver)
-        {
-            if (resolver == null) resolver = DefaultResolver;
-            var formatter = resolver.GetFormatterWithVerify<T>();
-
-            var rentBuffer = s_bufferPool.Rent(c_defaultCopyBufferSize);
-            try
+            using (var output = SerializeUnsafe(obj, resolver))
             {
-                var buffer = rentBuffer;
-                var len = formatter.Serialize(ref buffer, 0, obj, resolver);
-
-                // do not need resize.
-                await stream.WriteAsync(buffer, 0, len).ConfigureAwait(false);
-            }
-            finally
-            {
-                s_bufferPool.Return(rentBuffer);
-            }
-        }
-
+#if NETCOREAPP
+                stream.Write(output.Span);
+#else
+                var buffer = output.Buffer;
+                stream.Write(buffer.Array, buffer.Offset, buffer.Count);
 #endif
-
-        public static T Deserialize<T>(byte[] bytes)
-        {
-            return Deserialize<T>(bytes, defaultResolver);
+            }
         }
 
-        public static T Deserialize<T>(byte[] bytes, IFormatterResolver resolver)
-        {
-            if (null == bytes || c_zeroSize == bytes.Length) { return default; }
+        /// <summary>Serialize to stream(async).</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ValueTask SerializeAsync<T>(Stream stream, T obj) => SerializeAsync(stream, obj, s_defaultResolver);
 
-            if (resolver == null) resolver = DefaultResolver;
+        /// <summary>Serialize to stream(async) with specified resolver.</summary>
+        public static async ValueTask SerializeAsync<T>(Stream stream, T obj, IFormatterResolver resolver)
+        {
+            using (var output = SerializeSafe(obj, resolver))
+            {
+#if NETCOREAPP
+                await stream.WriteAsync(output.Memory);
+#else
+                var buffer = output.Buffer;
+                await stream.WriteAsync(buffer.Array, buffer.Offset, buffer.Count);
+#endif
+            }
+        }
+
+        /// <summary>Reflect of resolver.GetFormatterWithVerify[T].Serialize.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Serialize<T>(ref MessagePackWriter writer, ref int idx, T obj, IFormatterResolver resolver)
+        {
+            resolver.GetFormatterWithVerify<T>().Serialize(ref writer, ref idx, obj, resolver);
+        }
+
+        /// <summary>Reflect of resolver.GetFormatterWithVerify[T].Deserialize.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Deserialize<T>(ref MessagePackReader reader, IFormatterResolver resolver)
+        {
+            return resolver.GetFormatterWithVerify<T>().Deserialize(ref reader, resolver);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Deserialize<T>(ReadOnlySpan<byte> bytes) => Deserialize<T>(bytes, s_defaultResolver);
+
+        public static T Deserialize<T>(ReadOnlySpan<byte> bytes, IFormatterResolver resolver)
+        {
+            if (bytes.IsEmpty) { return default; }
+
+            if (null == resolver) { resolver = s_defaultResolver; }
             var formatter = resolver.GetFormatterWithVerify<T>();
-
-            return formatter.Deserialize(bytes, 0, resolver, out int readSize);
+            var reader = new MessagePackReader(bytes);
+            return formatter.Deserialize(ref reader, resolver);
         }
 
-        // 只提供给 NonGeneric 使用
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public static T DeserializeInternal<T>(ArraySegment<byte> bytes)
-        {
-            return DeserializeInternal<T>(bytes, defaultResolver);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Deserialize<T>(ReadOnlySequence<byte> sequence) => Deserialize<T>(sequence, s_defaultResolver);
 
-        // 只提供给 NonGeneric 使用
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public static T DeserializeInternal<T>(ArraySegment<byte> bytes, IFormatterResolver resolver)
+        public static T Deserialize<T>(ReadOnlySequence<byte> sequence, IFormatterResolver resolver)
         {
-            if (c_zeroSize == bytes.Count) { return default; }
+            if (sequence.IsEmpty) { return default; }
 
-            if (resolver == null) resolver = DefaultResolver;
+            if (null == resolver) { resolver = s_defaultResolver; }
             var formatter = resolver.GetFormatterWithVerify<T>();
-
-            return formatter.Deserialize(bytes.Array, bytes.Offset, resolver, out int readSize);
+            var reader = new MessagePackReader(sequence);
+            return formatter.Deserialize(ref reader, resolver);
         }
 
-        public static T Deserialize<T>(in ArraySegment<byte> bytes)
-        {
-            return Deserialize<T>(bytes, defaultResolver);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Deserialize<T>(Stream stream) => Deserialize<T>(stream, s_defaultResolver, false);
 
-        public static T Deserialize<T>(in ArraySegment<byte> bytes, IFormatterResolver resolver)
-        {
-            if (c_zeroSize == bytes.Count) { return default; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Deserialize<T>(Stream stream, IFormatterResolver resolver) => Deserialize<T>(stream, resolver, false);
 
-            if (resolver == null) resolver = DefaultResolver;
-            var formatter = resolver.GetFormatterWithVerify<T>();
-
-            return formatter.Deserialize(bytes.Array, bytes.Offset, resolver, out int readSize);
-        }
-
-        public static T Deserialize<T>(byte[] bytes, int offset, int count, IFormatterResolver resolver)
-        {
-            if (c_zeroSize == count) { return default; }
-
-            if (resolver == null) resolver = DefaultResolver;
-            var formatter = resolver.GetFormatterWithVerify<T>();
-
-            return formatter.Deserialize(bytes, offset, resolver, out int readSize);
-        }
-
-        public static T Deserialize<T>(Stream stream)
-        {
-            return Deserialize<T>(stream, defaultResolver);
-        }
-
-        public static T Deserialize<T>(Stream stream, IFormatterResolver resolver)
-        {
-            return Deserialize<T>(stream, resolver, false);
-        }
-
-        public static T Deserialize<T>(Stream stream, bool readStrict)
-        {
-            return Deserialize<T>(stream, defaultResolver, readStrict);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Deserialize<T>(Stream stream, bool readStrict) => Deserialize<T>(stream, s_defaultResolver, readStrict);
 
         public static T Deserialize<T>(Stream stream, IFormatterResolver resolver, bool readStrict)
         {
-            if (resolver == null) resolver = DefaultResolver;
-            var formatter = resolver.GetFormatterWithVerify<T>();
-
             if (!readStrict)
             {
-#if NETSTANDARD || NET_4_5_GREATER
-
-                if (stream is MemoryStream ms)
+#if NET_4_5_GREATER
+                // optimize for MemoryStream
+                if (stream is MemoryStream ms && ms.TryGetBuffer(out ArraySegment<byte> buffer))
                 {
-                    // optimize for MemoryStream
-                    if (ms.TryGetBuffer(out ArraySegment<byte> buffer))
-                    {
-                        if (c_zeroSize == buffer.Count) { return default; }
-                        return formatter.Deserialize(buffer.Array, buffer.Offset, resolver, out int readSize);
-                    }
+                    return Deserialize<T>(buffer, resolver);
                 }
 #endif
-
                 // no else.
                 {
-                    var buffer = InternalMemoryPool.GetBuffer();
-
-                    var inputLength = FillFromStream(stream, ref buffer);
-
-                    if (c_zeroSize == inputLength) { return default; }
-                    return formatter.Deserialize(buffer, 0, resolver, out int readSize);
+                    using (var output = new ThreadLocalBufferWriter())
+                    {
+                        FillFromStream(stream, output);
+                        return Deserialize<T>(output.WrittenSpan, resolver);
+                    }
                 }
             }
             else
             {
-                var bytes = MessagePackBinary.ReadMessageBlockFromStreamUnsafe(stream, false, out var inputLength);
-                if (c_zeroSize == inputLength) { return default; }
-                return formatter.Deserialize(bytes, 0, resolver, out int readSize);
-            }
-        }
-
-        /// <summary>
-        /// Reflect of resolver.GetFormatterWithVerify[T].Deserialize.
-        /// </summary>
-        public static T Deserialize<T>(byte[] bytes, int offset, IFormatterResolver resolver, out int readSize)
-        {
-            return resolver.GetFormatterWithVerify<T>().Deserialize(bytes, offset, resolver, out readSize);
-        }
-
-#if NETSTANDARD || NETFRAMEWORK
-
-        public static System.Threading.Tasks.Task<T> DeserializeAsync<T>(Stream stream)
-        {
-            return DeserializeAsync<T>(stream, defaultResolver);
-        }
-
-        // readStrict async read is too slow(many Task garbage) so I don't provide async option.
-
-        public static async System.Threading.Tasks.Task<T> DeserializeAsync<T>(Stream stream, IFormatterResolver resolver)
-        {
-            var rentBuffer = s_bufferPool.Rent(c_defaultCopyBufferSize);
-            var buf = rentBuffer;
-            try
-            {
-                int length = 0;
-                int read;
-                while ((read = await stream.ReadAsync(buf, length, buf.Length - length).ConfigureAwait(false)) > 0)
+                using (var output = new ThreadLocalBufferWriter())
                 {
-                    length += read;
-                    if (length == buf.Length)
-                    {
-                        MessagePackBinary.FastResize(ref buf, length * 2);
-                    }
+                    MessagePackBinary.ReadMessageBlockFromStreamUnsafe(stream, output, false);
+                    return Deserialize<T>(output.WrittenSpan, resolver);
                 }
-
-                return Deserialize<T>(buf, resolver);
-            }
-            finally
-            {
-                s_bufferPool.Return(rentBuffer);
             }
         }
 
-#endif
-
-        static int FillFromStream(Stream input, ref byte[] buffer)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void FillFromStream(Stream input, IArrayBufferWriter<byte> bufferWriter)
         {
-            int length = 0;
             int read;
-            while ((read = input.Read(buffer, length, buffer.Length - length)) > 0)
+#if NETCOREAPP
+            var outputSpan = bufferWriter.GetSpan();
+            while ((read = input.Read(outputSpan)) > 0)
             {
-                length += read;
-                if (length == buffer.Length)
-                {
-                    MessagePackBinary.FastResize(ref buffer, length * 2);
-                }
+                bufferWriter.Advance(read);
+                outputSpan = bufferWriter.GetSpan();
             }
-
-            return length;
-        }
-    }
-}
-
-namespace MessagePack.Internal
-{
-    internal static class InternalMemoryPool
-    {
-        [ThreadStatic]
-        static byte[] buffer = null;
-
-        public static byte[] GetBuffer()
-        {
-            if (buffer == null)
+#else
+            var buffer = bufferWriter.GetBuffer();
+            while ((read = input.Read(buffer.Array, buffer.Offset, buffer.Count)) > 0)
             {
-                const int _bufferSize = 1024 * 80;
-                buffer = new byte[_bufferSize];
+                bufferWriter.Advance(read);
+                buffer = bufferWriter.GetBuffer();
             }
-            return buffer;
+#endif
         }
     }
 }

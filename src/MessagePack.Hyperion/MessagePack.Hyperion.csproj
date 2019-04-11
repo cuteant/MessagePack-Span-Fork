@@ -21,15 +21,14 @@ MessagePack.Formatters.HyperionFormatter
 MessagePack.Formatters.HyperionExceptionFormatter
 MessagePack.Formatters.HyperionExpressionFormatter
     </Description>
-    <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer, Unity, Xamarin</PackageTags>
+    <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CuteAnt.Runtime" Version="$(CuteAntRuntimePackageVersion)" />
+    <PackageReference Include="Hyperion.Unofficial" Version="$(HyperionUnofficialPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Hyperion\Hyperion.csproj" />
     <ProjectReference Include="..\MessagePack\MessagePack.csproj" />
   </ItemGroup>
 

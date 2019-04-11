@@ -24,23 +24,21 @@ namespace MessagePack.Formatters
             }
         }
 
-        public int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, T value, IFormatterResolver formatterResolver)
         {
-            string name;
-            if (!valueNameMapping.TryGetValue(value, out name))
+            if (!valueNameMapping.TryGetValue(value, out string name))
             {
                 name = value.ToString(); // fallback for flags etc, But Enum.ToString is too slow.
             }
 
-            return MessagePackBinary.WriteString(ref bytes, offset, name);
+            writer.WriteString(name, ref idx);
         }
 
-        public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            var name = MessagePackBinary.ReadString(bytes, offset, out readSize);
+            var name = reader.ReadString();
 
-            T value;
-            if (!nameValueMapping.TryGetValue(name, out value))
+            if (!nameValueMapping.TryGetValue(name, out T value))
             {
                 value = (T)Enum.Parse(typeof(T), name); // Enum.Parse is too slow
             }

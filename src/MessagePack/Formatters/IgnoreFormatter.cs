@@ -2,15 +2,15 @@
 {
     public sealed class IgnoreFormatter<T> : IMessagePackFormatter<T>
     {
-        public int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, T value, IFormatterResolver formatterResolver)
         {
-            return MessagePackBinary.WriteNil(ref bytes, offset);
+            writer.WriteNil(ref idx); return;
         }
 
-        public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            readSize = MessagePackBinary.ReadNextBlock(bytes, offset);
-            return default(T);
+            reader.ReadNextBlock();
+            return default;
         }
     }
 }

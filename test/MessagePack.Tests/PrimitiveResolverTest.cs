@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -9,29 +9,52 @@ namespace MessagePack.Tests
 {
     public class PrimitiveResolverTest
     {
-
         [Theory]
         [InlineData((bool)true)]
         [InlineData((byte)10)]
         [InlineData((sbyte)123)]
+        [InlineData((short)(10))]
+        [InlineData((short)(200))]
+        [InlineData((short)(1000))]
+        [InlineData((short)(-10))]
+        [InlineData((short)(-32))]
+        [InlineData((short)(-60))]
+        [InlineData((short)(-128))]
+        [InlineData((short)(-190))]
         [InlineData((short)(-4123))]
         [InlineData((ushort)42342)]
+        [InlineData((int)(127))]
+        [InlineData((int)(255))]
+        [InlineData((int)(ushort.MaxValue))]
+        [InlineData((int)(ushort.MaxValue + 1))]
         [InlineData((int)(int.MaxValue))]
-        [InlineData((UInt32)432423)]
-        [InlineData((long)(235))]
-        [InlineData((UInt64)65346464)]
+        [InlineData((int)(-31))]
+        [InlineData((int)(-127))]
+        [InlineData((int)(short.MinValue))]
+        [InlineData((int)(-ushort.MaxValue))]
+        [InlineData((UInt32)432423u)]
+        [InlineData((long)(235L))]
+        [InlineData((UInt64)65346464UL)]
         [InlineData((float)1241.42342f)]
-        [InlineData((double)1241312.4242342)]
+        [InlineData((double)1241312.4242342D)]
         [InlineData("hogehoge")]
         [InlineData(new byte[] { 1, 10, 100 })]
-        public void PrimitiveObjectTest<T>(T x)
+        public void PrimitiveObjectTest(object x)
         {
             var bin = MessagePackSerializer.Serialize<object>(x);
-            var bin2 = MessagePackSerializer.Serialize<T>(x);
+
+            var helper = typeof(PrimitiveResolverTest).GetTypeInfo().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Single(m => m.Name == nameof(PrimitiveObjectTestHelper));
+            var helperClosedGeneric = helper.MakeGenericMethod(x.GetType());
+            var bin2 = helperClosedGeneric.Invoke(this, new object[] { x });
 
             bin.Is(bin2);
             //var re1 = MessagePackSerializer.Deserialize<object>(bin);
             //((T)re1).Is(x);
+        }
+
+        private byte[] PrimitiveObjectTestHelper<T>(T x)
+        {
+            return MessagePackSerializer.Serialize<T>(x);
         }
 
         [Fact]

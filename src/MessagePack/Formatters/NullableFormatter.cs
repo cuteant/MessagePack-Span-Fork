@@ -1,35 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
     public sealed class NullableFormatter<T> : IMessagePackFormatter<T?>
         where T : struct
     {
-        public int Serialize(ref byte[] bytes, int offset, T? value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, T? value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
-            else
-            {
-                return formatterResolver.GetFormatterWithVerify<T>().Serialize(ref bytes, offset, value.Value, formatterResolver);
-            }
+            if (value == null) { writer.WriteNil(ref idx); return; }
+
+            formatterResolver.GetFormatterWithVerify<T>().Serialize(ref writer, ref idx, value.Value, formatterResolver);
         }
 
-        public T? Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public T? Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return null;
-            }
-            else
-            {
-                return formatterResolver.GetFormatterWithVerify<T>().Deserialize(bytes, offset, formatterResolver, out readSize);
-            }
+            if (reader.IsNil()) { return null; }
+
+            return formatterResolver.GetFormatterWithVerify<T>().Deserialize(ref reader, formatterResolver);
         }
     }
 
@@ -38,34 +23,20 @@ namespace MessagePack.Formatters
     {
         readonly IMessagePackFormatter<T> underlyingFormatter;
 
-        public StaticNullableFormatter(IMessagePackFormatter<T> underlyingFormatter)
+        public StaticNullableFormatter(IMessagePackFormatter<T> underlyingFormatter) => this.underlyingFormatter = underlyingFormatter;
+
+        public void Serialize(ref MessagePackWriter writer, ref int idx, T? value, IFormatterResolver formatterResolver)
         {
-            this.underlyingFormatter = underlyingFormatter;
+            if (value == null) { writer.WriteNil(ref idx); return; }
+
+            underlyingFormatter.Serialize(ref writer, ref idx, value.Value, formatterResolver);
         }
 
-        public int Serialize(ref byte[] bytes, int offset, T? value, IFormatterResolver formatterResolver)
+        public T? Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
-            else
-            {
-                return underlyingFormatter.Serialize(ref bytes, offset, value.Value, formatterResolver);
-            }
-        }
+            if (reader.IsNil()) { return null; }
 
-        public T? Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
-        {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return null;
-            }
-            else
-            {
-                return underlyingFormatter.Deserialize(bytes, offset, formatterResolver, out readSize);
-            }
+            return underlyingFormatter.Deserialize(ref reader, formatterResolver);
         }
     }
 }

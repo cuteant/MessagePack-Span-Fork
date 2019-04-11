@@ -7,40 +7,28 @@ namespace MessagePack.Formatters
     {
         public static readonly IMessagePackFormatter<IPAddress> Instance = new IPAddressFormatter();
 
-        public IPAddressFormatter()
-        {
-        }
+        public IPAddressFormatter() { }
 
-        public IPAddress Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public IPAddress Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return null;
-            }
+            if (reader.IsNil()) { return null; }
 
-            var addressBytes = MessagePackBinary.ReadBytes(bytes, offset, out readSize);
+#if NETCOREAPP
+            var addressBytes = reader.ReadBytesSegment();
             return new IPAddress(addressBytes);
+#else
+            var addressBytes = reader.ReadBytes();
+            return new IPAddress(addressBytes);
+#endif
 
         }
 
 
-        public int Serialize(ref byte[] bytes, int offset, IPAddress value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, IPAddress value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
-            var addressBytes = value.GetAddressBytes();
-            var length = addressBytes.Length;
-            var totalSize = length + 2;
-            MessagePackBinary.EnsureCapacity(ref bytes, offset, totalSize);
-            bytes[offset] = MessagePackCode.Bin8;
-            bytes[offset + 1] = (byte)length;
-
-            Buffer.BlockCopy(addressBytes, 0, bytes, offset + 2, length);
-            return totalSize;
+            writer.WriteBytes(value.GetAddressBytes(), ref idx);
         }
     }
 }

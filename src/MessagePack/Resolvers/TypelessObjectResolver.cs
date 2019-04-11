@@ -5,8 +5,6 @@ using MessagePack.Internal;
 
 namespace MessagePack.Resolvers
 {
-#if NETSTANDARD || NETFRAMEWORK
-
     /// <summary>
     /// Used for `object` fields/collections, ex: var arr = new object[] { 1, "a", new Model() };
     /// The runtime type of value in object field, should be covered by one of resolvers in complex/standard resolver.
@@ -19,10 +17,7 @@ namespace MessagePack.Resolvers
     {
         public static readonly IFormatterResolver Instance = new TypelessObjectResolver();
 
-        TypelessObjectResolver()
-        {
-
-        }
+        TypelessObjectResolver() { }
 
         public override IMessagePackFormatter<T> GetFormatter<T>()
         {
@@ -48,10 +43,7 @@ namespace MessagePack.Resolvers
     {
         public static readonly IFormatterResolver Instance = new ForceSizePrimitiveObjectResolver();
 
-        ForceSizePrimitiveObjectResolver()
-        {
-
-        }
+        ForceSizePrimitiveObjectResolver() { }
 
         public override IMessagePackFormatter<T> GetFormatter<T>()
         {
@@ -82,7 +74,7 @@ namespace MessagePack.Resolvers
                 {typeof(byte), ForceByteBlockFormatter.Instance},
                 {typeof(sbyte), ForceSByteBlockFormatter.Instance},
             
-                // Nulllable Primitive
+                // Nullable Primitive
                 {typeof(Nullable<Int16>), NullableForceInt16BlockFormatter.Instance},
                 {typeof(Nullable<Int32>), NullableForceInt32BlockFormatter.Instance},
                 {typeof(Nullable<Int64>), NullableForceInt64BlockFormatter.Instance},
@@ -92,7 +84,7 @@ namespace MessagePack.Resolvers
                 {typeof(Nullable<byte>), NullableForceByteBlockFormatter.Instance},
                 {typeof(Nullable<sbyte>), NullableForceSByteBlockFormatter.Instance},
             
-                // otpmitized primitive array formatter
+                // optimized primitive array formatter
                 {typeof(Int16[]), ForceInt16BlockArrayFormatter.Instance},
                 {typeof(Int32[]), ForceInt32BlockArrayFormatter.Instance},
                 {typeof(Int64[]), ForceInt64BlockArrayFormatter.Instance},
@@ -104,8 +96,7 @@ namespace MessagePack.Resolvers
 
             public static object GetFormatter(Type type)
             {
-                object formatter;
-                return formatterMap.TryGetValue(type, out formatter)
+                return formatterMap.TryGetValue(type, out object formatter)
                     ? formatter
                     : null;
             }
@@ -120,10 +111,7 @@ namespace MessagePack.Resolvers
             ForceSizePrimitiveObjectResolver.Instance,
             ContractlessStandardResolverAllowPrivateCore.Instance);
 
-        TypelessFormatterFallbackResolver()
-        {
-
-        }
+        TypelessFormatterFallbackResolver() { }
 
         public override IMessagePackFormatter<T> GetFormatter<T>()
         {
@@ -143,6 +131,4 @@ namespace MessagePack.Resolvers
             }
         }
     }
-
-#endif
 }

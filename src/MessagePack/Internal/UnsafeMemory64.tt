@@ -1,0 +1,248 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#
+    var Max = 31;
+#>
+
+namespace MessagePack.Internal
+{
+    using System;
+    using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
+
+    public static partial class UnsafeMemory64
+    {
+        public static void WriteRaw(ref MessagePackWriter writer, byte[] source, ref int idx)
+        {
+            var nCount = (uint)source.Length;
+            switch (nCount)
+            {
+                case 0u: return;
+<# for(var i = 1; i <= Max; i++) { #>
+                case <#= i #>u: WriteRaw<#= i #>(ref writer, source, ref idx); return;
+<# } #>
+                default: UnsafeMemory.WriteRawBytes(ref writer, source, ref idx); return;
+            }
+        }
+
+        public static void WriteRaw(ref MessagePackWriter writer, ref byte source, int sourceBytesToCopy, ref int idx)
+        {
+            var nCount = (uint)sourceBytesToCopy;
+            switch (nCount)
+            {
+                case 0u: return;
+<# for(var i = 1; i <= Max; i++) { #>
+                case <#= i #>u: WriteRaw<#= i #>(ref writer, ref source, sourceBytesToCopy, ref idx); return;
+<# } #>
+                default: UnsafeMemory.WriteRawBytes(ref writer, ref source, sourceBytesToCopy, ref idx); return;
+            }
+        }
+
+<# for(var i = 2; i <= Max; i++) { #>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteRaw<#= i #>(ref MessagePackWriter writer, byte[] source, ref int idx)
+        {
+            writer.Ensure(idx, <#= i #>);
+
+            ref byte dest = ref Unsafe.Add(ref writer.PinnableAddress, (IntPtr)(ulong)idx);
+            ref byte src = ref source[0];
+
+<#
+int index = 0;
+var count = i;
+int lengthToExamine = i;
+if (i >= 8) 
+{ 
+    for (int j = 0; j < (count / 8); j++)
+    {
+        lengthToExamine -= 8;
+        if ((8 * j) > 0)
+        {
+#>
+            Unsafe.As<byte, long>(ref Unsafe.Add(ref dest, <#= 8 * j #>)) = Unsafe.As<byte, long>(ref Unsafe.Add(ref src, <#= 8 * j #>));
+<#
+        }
+        else
+        {
+#>
+            Unsafe.As<byte, long>(ref dest) = Unsafe.As<byte, long>(ref src);
+<#
+        }
+        index += 8;
+    }
+}
+
+if (lengthToExamine >= 4)
+{
+    count = lengthToExamine;
+    for (int j = 0; j < (count / 4); j++)
+    {
+        lengthToExamine -= 4;
+        if ((index + 4 * j) > 0)
+        {
+#>
+            Unsafe.As<byte, int>(ref Unsafe.Add(ref dest, <#= index + 4 * j #>)) = Unsafe.As<byte, int>(ref Unsafe.Add(ref src, <#= index + 4 * j #>));
+<#
+        }
+        else
+        {
+#>
+            Unsafe.As<byte, int>(ref dest) = Unsafe.As<byte, int>(ref src);
+<#
+        }
+        index += 4;
+    }
+}
+
+if (lengthToExamine >= 2)
+{
+    count = lengthToExamine;
+    for (int j = 0; j < (count / 2); j++)
+    {
+        lengthToExamine -= 2;
+        if ((index + 2 * j) > 0)
+        {
+#>
+            Unsafe.As<byte, short>(ref Unsafe.Add(ref dest, <#= index + 2 * j #>)) = Unsafe.As<byte, short>(ref Unsafe.Add(ref src, <#= index + 2 * j #>));
+<#
+        }
+        else
+        {
+#>
+            Unsafe.As<byte, short>(ref dest) = Unsafe.As<byte, short>(ref src);
+<#
+        }
+        index += 2;
+    }
+}
+
+if (i % 2 != 0)
+{
+    for (int j = 0; j < lengthToExamine; j++)
+    {
+        if (index > 0)
+        {
+#>
+            Unsafe.AddByteOffset(ref dest, (IntPtr)<#= index #>) = Unsafe.AddByteOffset(ref src, (IntPtr)<#= index #>);
+<#
+        }
+        else
+        {
+#>
+            dest = src;
+<#
+        }
+        index += 1;
+    }
+}
+#>
+
+            idx += <#= i #>;
+        }
+<# } #>
+
+<# for(var i = 2; i <= Max; i++) { #>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteRaw<#= i #>(ref MessagePackWriter writer, ref byte src, int srcBytesToCopy, ref int idx)
+        {
+            ref byte dest = ref Unsafe.Add(ref writer.PinnableAddress, (IntPtr)(ulong)idx);
+
+<#
+int index_0 = 0;
+var count_0 = i;
+int lengthToExamine_0 = i;
+if (i >= 8) 
+{ 
+    for (int j = 0; j < (count_0 / 8); j++)
+    {
+        lengthToExamine_0 -= 8;
+        if ((8 * j) > 0)
+        {
+#>
+            Unsafe.As<byte, long>(ref Unsafe.Add(ref dest, <#= 8 * j #>)) = Unsafe.As<byte, long>(ref Unsafe.Add(ref src, <#= 8 * j #>));
+<#
+        }
+        else
+        {
+#>
+            Unsafe.As<byte, long>(ref dest) = Unsafe.As<byte, long>(ref src);
+<#
+        }
+        index_0 += 8;
+    }
+}
+
+if (lengthToExamine_0 >= 4)
+{
+    count_0 = lengthToExamine_0;
+    for (int j = 0; j < (count_0 / 4); j++)
+    {
+        lengthToExamine_0 -= 4;
+        if ((index_0 + 4 * j) > 0)
+        {
+#>
+            Unsafe.As<byte, int>(ref Unsafe.Add(ref dest, <#= index_0 + 4 * j #>)) = Unsafe.As<byte, int>(ref Unsafe.Add(ref src, <#= index_0 + 4 * j #>));
+<#
+        }
+        else
+        {
+#>
+            Unsafe.As<byte, int>(ref dest) = Unsafe.As<byte, int>(ref src);
+<#
+        }
+        index_0 += 4;
+    }
+}
+
+if (lengthToExamine_0 >= 2)
+{
+    count_0 = lengthToExamine_0;
+    for (int j = 0; j < (count_0 / 2); j++)
+    {
+        lengthToExamine_0 -= 2;
+        if ((index_0 + 2 * j) > 0)
+        {
+#>
+            Unsafe.As<byte, short>(ref Unsafe.Add(ref dest, <#= index_0 + 2 * j #>)) = Unsafe.As<byte, short>(ref Unsafe.Add(ref src, <#= index_0 + 2 * j #>));
+<#
+        }
+        else
+        {
+#>
+            Unsafe.As<byte, short>(ref dest) = Unsafe.As<byte, short>(ref src);
+<#
+        }
+        index_0 += 2;
+    }
+}
+
+if (i % 2 != 0)
+{
+    for (int j = 0; j < lengthToExamine_0; j++)
+    {
+        if (index_0 > 0)
+        {
+#>
+            Unsafe.AddByteOffset(ref dest, (IntPtr)<#= index_0 #>) = Unsafe.AddByteOffset(ref src, (IntPtr)<#= index_0 #>);
+<#
+        }
+        else
+        {
+#>
+            dest = src;
+<#
+        }
+        index_0 += 1;
+    }
+}
+#>
+
+            idx += <#= i #>;
+        }
+<# } #>
+    }
+}

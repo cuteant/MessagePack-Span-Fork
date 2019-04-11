@@ -1,167 +1,101 @@
-﻿#if NETSTANDARD || NETFRAMEWORK
-
-using System;
-using System.Runtime.CompilerServices;
-
-namespace MessagePack.Internal
+﻿namespace MessagePack.Internal
 {
+    using System;
+    using System.Runtime.CompilerServices;
+
     // for string key property name write optimization.
 
     public static class UnsafeMemory
     {
-        public static readonly bool Is32Bit = (IntPtr.Size == 4);
+        public static readonly bool Is64BitProcess = IntPtr.Size >= 8;
+
+        // 直接引用 byte[], 节省 byte[] => ReadOnlySpan<byte> 的转换
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteRaw(ref MessagePackWriter writer, byte[] source, ref int idx)
+        {
+            if (Is64BitProcess)
+            {
+                UnsafeMemory64.WriteRaw(ref writer, source, ref idx);
+            }
+            else
+            {
+                UnsafeMemory32.WriteRaw(ref writer, source, ref idx);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteRaw(ref MessagePackWriter writer, ref byte source, int sourceBytesToCopy, ref int idx)
+        {
+            if (Is64BitProcess)
+            {
+                UnsafeMemory64.WriteRaw(ref writer, ref source, sourceBytesToCopy, ref idx);
+            }
+            else
+            {
+                UnsafeMemory32.WriteRaw(ref writer, ref source, sourceBytesToCopy, ref idx);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteRawBytes(ref MessagePackWriter writer, byte[] source, ref int idx)
+        {
+            var count = source.Length;
+            writer.Ensure(idx, count);
+            MessagePackBinary.CopyMemory(source, 0, writer._borrowedBuffer, idx, count);
+            idx += count;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void WriteRawBytes(ref MessagePackWriter writer, ref byte source, int sourceBytesToCopy, ref int idx)
+        {
+            //if (0u >= (uint)sourceBytesToCopy) { return; }
+
+            MessagePackBinary.CopyMemory(ref source, ref Unsafe.AddByteOffset(ref writer.PinnableAddress, (IntPtr)idx), sourceBytesToCopy);
+            idx += sourceBytesToCopy;
+        }
     }
 
     public static partial class UnsafeMemory32
     {
-        [MethodImpl(InlineMethod.Value)]
-        public static unsafe int WriteRaw1(ref byte[] dst, int dstOffset, byte[] src)
+        // 直接引用 byte[], 节省 byte[] => ReadOnlySpan<byte> 的转换
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteRaw1(ref MessagePackWriter writer, byte[] source, ref int idx)
         {
-            MessagePackBinary.EnsureCapacity(ref dst, dstOffset, src.Length);
+            writer.Ensure(idx, 1);
 
-            fixed (byte* pSrc = &src[0])
-            fixed (byte* pDst = &dst[dstOffset])
-            {
-                *(byte*)pDst = *(byte*)pSrc;
-            }
+            Unsafe.Add(ref writer.PinnableAddress, (IntPtr)(uint)idx) = source[0];
 
-            return src.Length;
+            idx += 1;
         }
 
-        [MethodImpl(InlineMethod.Value)]
-        public static unsafe int WriteRaw2(ref byte[] dst, int dstOffset, byte[] src)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteRaw1(ref MessagePackWriter writer, ref byte source, int sourceBytesToCopy, ref int idx)
         {
-            MessagePackBinary.EnsureCapacity(ref dst, dstOffset, src.Length);
+            Unsafe.Add(ref writer.PinnableAddress, (IntPtr)(uint)idx) = source;
 
-            fixed (byte* pSrc = &src[0])
-            fixed (byte* pDst = &dst[dstOffset])
-            {
-                *(short*)pDst = *(short*)pSrc;
-            }
-
-            return src.Length;
-        }
-
-        [MethodImpl(InlineMethod.Value)]
-        public static unsafe int WriteRaw3(ref byte[] dst, int dstOffset, byte[] src)
-        {
-            MessagePackBinary.EnsureCapacity(ref dst, dstOffset, src.Length);
-
-            fixed (byte* pSrc = &src[0])
-            fixed (byte* pDst = &dst[dstOffset])
-            {
-                *(byte*)pDst = *(byte*)pSrc;
-                *(short*)(pDst + 1) = *(short*)(pSrc + 1);
-            }
-
-            return src.Length;
+            idx += 1;
         }
     }
 
     public static partial class UnsafeMemory64
     {
-        [MethodImpl(InlineMethod.Value)]
-        public static unsafe int WriteRaw1(ref byte[] dst, int dstOffset, byte[] src)
+        // 直接引用 byte[], 节省 byte[] => ReadOnlySpan<byte> 的转换
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteRaw1(ref MessagePackWriter writer, byte[] source, ref int idx)
         {
-            MessagePackBinary.EnsureCapacity(ref dst, dstOffset, src.Length);
+            writer.Ensure(idx, 1);
 
-            fixed (byte* pSrc = &src[0])
-            fixed (byte* pDst = &dst[dstOffset])
-            {
-                *(byte*)pDst = *(byte*)pSrc;
-            }
+            Unsafe.Add(ref writer.PinnableAddress, (IntPtr)(uint)idx) = source[0];
 
-            return src.Length;
+            idx += 1;
         }
 
-        [MethodImpl(InlineMethod.Value)]
-        public static unsafe int WriteRaw2(ref byte[] dst, int dstOffset, byte[] src)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteRaw1(ref MessagePackWriter writer, ref byte source, int sourceBytesToCopy, ref int idx)
         {
-            MessagePackBinary.EnsureCapacity(ref dst, dstOffset, src.Length);
+            Unsafe.Add(ref writer.PinnableAddress, (IntPtr)(uint)idx) = source;
 
-            fixed (byte* pSrc = &src[0])
-            fixed (byte* pDst = &dst[dstOffset])
-            {
-                *(short*)pDst = *(short*)pSrc;
-            }
-
-            return src.Length;
-        }
-
-        [MethodImpl(InlineMethod.Value)]
-        public static unsafe int WriteRaw3(ref byte[] dst, int dstOffset, byte[] src)
-        {
-            MessagePackBinary.EnsureCapacity(ref dst, dstOffset, src.Length);
-
-            fixed (byte* pSrc = &src[0])
-            fixed (byte* pDst = &dst[dstOffset])
-            {
-                *(byte*)pDst = *(byte*)pSrc;
-                *(short*)(pDst + 1) = *(short*)(pSrc + 1);
-            }
-
-            return src.Length;
-        }
-
-        [MethodImpl(InlineMethod.Value)]
-        public static unsafe int WriteRaw4(ref byte[] dst, int dstOffset, byte[] src)
-        {
-            MessagePackBinary.EnsureCapacity(ref dst, dstOffset, src.Length);
-
-            fixed (byte* pSrc = &src[0])
-            fixed (byte* pDst = &dst[dstOffset])
-            {
-                *(int*)(pDst + 0) = *(int*)(pSrc + 0);
-            }
-
-            return src.Length;
-        }
-
-        [MethodImpl(InlineMethod.Value)]
-        public static unsafe int WriteRaw5(ref byte[] dst, int dstOffset, byte[] src)
-        {
-            MessagePackBinary.EnsureCapacity(ref dst, dstOffset, src.Length);
-
-            fixed (byte* pSrc = &src[0])
-            fixed (byte* pDst = &dst[dstOffset])
-            {
-                *(int*)(pDst + 0) = *(int*)(pSrc + 0);
-                *(int*)(pDst + 1) = *(int*)(pSrc + 1);
-            }
-
-            return src.Length;
-        }
-
-        [MethodImpl(InlineMethod.Value)]
-        public static unsafe int WriteRaw6(ref byte[] dst, int dstOffset, byte[] src)
-        {
-            MessagePackBinary.EnsureCapacity(ref dst, dstOffset, src.Length);
-
-            fixed (byte* pSrc = &src[0])
-            fixed (byte* pDst = &dst[dstOffset])
-            {
-                *(int*)(pDst + 0) = *(int*)(pSrc + 0);
-                *(int*)(pDst + 2) = *(int*)(pSrc + 2);
-            }
-
-            return src.Length;
-        }
-
-        [MethodImpl(InlineMethod.Value)]
-        public static unsafe int WriteRaw7(ref byte[] dst, int dstOffset, byte[] src)
-        {
-            MessagePackBinary.EnsureCapacity(ref dst, dstOffset, src.Length);
-
-            fixed (byte* pSrc = &src[0])
-            fixed (byte* pDst = &dst[dstOffset])
-            {
-                *(int*)(pDst + 0) = *(int*)(pSrc + 0);
-                *(int*)(pDst + 3) = *(int*)(pSrc + 3);
-            }
-
-            return src.Length;
+            idx += 1;
         }
     }
 }
-
-#endif

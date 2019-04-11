@@ -28,15 +28,15 @@ namespace MessagePack.Tests
 
             class NoObjectFormatter : IMessagePackFormatter<CustomClassObject>
             {
-                public CustomClassObject Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+                public CustomClassObject Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
                 {
-                    var r = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+                    var r = reader.ReadInt32();
                     return new CustomClassObject(r);
                 }
 
-                public int Serialize(ref byte[] bytes, int offset, CustomClassObject value, IFormatterResolver formatterResolver)
+                public void Serialize(ref MessagePackWriter writer, ref int offset, CustomClassObject value, IFormatterResolver formatterResolver)
                 {
-                    return MessagePackBinary.WriteInt32(ref bytes, offset, value.X);
+                    writer.WriteInt32(value.X, ref offset);
                 }
             }
         }
@@ -58,15 +58,15 @@ namespace MessagePack.Tests
 
             class CustomStructObjectFormatter : IMessagePackFormatter<CustomStructObject>
             {
-                public CustomStructObject Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+                public CustomStructObject Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
                 {
-                    var r = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+                    var r = reader.ReadInt32();
                     return new CustomStructObject(r);
                 }
 
-                public int Serialize(ref byte[] bytes, int offset, CustomStructObject value, IFormatterResolver formatterResolver)
+                public void Serialize(ref MessagePackWriter writer, ref int offset, CustomStructObject value, IFormatterResolver formatterResolver)
                 {
-                    return MessagePackBinary.WriteInt32(ref bytes, offset, value.X);
+                    writer.WriteInt32(value.X, ref offset);
                 }
             }
         }
@@ -79,9 +79,9 @@ namespace MessagePack.Tests
 
         class CustomEnumObjectFormatter : IMessagePackFormatter<CustomyEnumObject>
         {
-            public CustomyEnumObject Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+            public CustomyEnumObject Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
             {
-                var r = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+                var r = reader.ReadInt32();
                 if (r == 0)
                 {
                     return CustomyEnumObject.A;
@@ -93,9 +93,9 @@ namespace MessagePack.Tests
                 return CustomyEnumObject.B;
             }
 
-            public int Serialize(ref byte[] bytes, int offset, CustomyEnumObject value, IFormatterResolver formatterResolver)
+            public void Serialize(ref MessagePackWriter writer, ref int offset, CustomyEnumObject value, IFormatterResolver formatterResolver)
             {
-                return MessagePackBinary.WriteInt32(ref bytes, offset, (int)value);
+                writer.WriteInt32((int)value, ref offset);
             }
         }
 
@@ -107,15 +107,15 @@ namespace MessagePack.Tests
 
         class CustomInterfaceObjectFormatter : IMessagePackFormatter<ICustomInterfaceObject>
         {
-            public ICustomInterfaceObject Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+            public ICustomInterfaceObject Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
             {
-                var r = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+                var r = reader.ReadInt32();
                 return new InheritDefault(r);
             }
 
-            public int Serialize(ref byte[] bytes, int offset, ICustomInterfaceObject value, IFormatterResolver formatterResolver)
+            public void Serialize(ref MessagePackWriter writer, ref int offset, ICustomInterfaceObject value, IFormatterResolver formatterResolver)
             {
-                return MessagePackBinary.WriteInt32(ref bytes, offset, value.A);
+                writer.WriteInt32(value.A, ref offset);
             }
         }
 
@@ -159,15 +159,15 @@ namespace MessagePack.Tests
                     this.x = x;
                 }
 
-                public CustomClassObjectWithArgument Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+                public CustomClassObjectWithArgument Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
                 {
-                    var r = MessagePackBinary.ReadInt32(bytes, offset, out readSize);
+                    var r = reader.ReadInt32();
                     return new CustomClassObjectWithArgument(r);
                 }
 
-                public int Serialize(ref byte[] bytes, int offset, CustomClassObjectWithArgument value, IFormatterResolver formatterResolver)
+                public void Serialize(ref MessagePackWriter writer, ref int offset, CustomClassObjectWithArgument value, IFormatterResolver formatterResolver)
                 {
-                    return MessagePackBinary.WriteInt32(ref bytes, offset, value.X * (int)x);
+                    writer.WriteInt32(value.X * (int)x, ref offset);
                 }
             }
         }

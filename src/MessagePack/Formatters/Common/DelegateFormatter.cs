@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Reflection;
+#if DEPENDENT_ON_CUTEANT
 using CuteAnt.Reflection;
+#else
+using MessagePack.Internal;
+#endif
 
 namespace MessagePack.Formatters
 {
@@ -13,24 +17,20 @@ namespace MessagePack.Formatters
 
     public class DelegateFormatter<TDelegate> : IMessagePackFormatter<TDelegate>
     {
-        public TDelegate Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public TDelegate Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return default;
-            }
+            if (reader.IsNil()) { return default; }
 
-            var delegateShim = (IDelegateShim)MessagePackSerializer.Typeless.TypelessFormatter.Deserialize(bytes, offset, formatterResolver, out readSize);
+            var delegateShim = (IDelegateShim)MessagePackSerializer.Typeless.TypelessFormatter.Deserialize(ref reader, formatterResolver);
             return (TDelegate)(object)delegateShim.Method.CreateDelegate(delegateShim.DelegateType, delegateShim.GetTarget());
 
         }
 
-        public int Serialize(ref byte[] bytes, int offset, TDelegate value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, TDelegate value, IFormatterResolver formatterResolver)
         {
             if (value == null)
             {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
+                writer.WriteNil(ref idx); return;
             }
 
             var d = value as Delegate;
@@ -47,7 +47,7 @@ namespace MessagePack.Formatters
             delegateShim.DelegateType = value.GetType();
             delegateShim.SetTarget(target);
             delegateShim.Method = d.GetMethodInfo();
-            return MessagePackSerializer.Typeless.TypelessFormatter.Serialize(ref bytes, offset, delegateShim, formatterResolver);
+            MessagePackSerializer.Typeless.TypelessFormatter.Serialize(ref writer, ref idx, delegateShim, formatterResolver);
         }
     }
 }

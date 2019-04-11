@@ -1,6 +1,8 @@
 ﻿using MessagePack.Resolvers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace MessagePack.Tests
@@ -30,7 +32,7 @@ namespace MessagePack.Tests
 
     public class EnumAsStringTest
     {
-        public static IEnumerable<object[]> enumData = new []
+        public static IEnumerable<object[]> enumData = new[]
         {
             // simple
             new object[] { AsString.Foo, null, "Foo", "null" },
@@ -49,16 +51,21 @@ namespace MessagePack.Tests
 
         [Theory]
         [MemberData(nameof(enumData))]
-        public void EnumTest<T>(T x, T? y, string xName, string yName)
+        public void EnumTest(object x, object y, string xName, string yName)
+        {
+            var helper = typeof(EnumAsStringTest).GetTypeInfo().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Single(m => m.Name == nameof(EnumTestHelper));
+            var helperClosedGeneric = helper.MakeGenericMethod(x.GetType());
+
+            helperClosedGeneric.Invoke(this, new object[] { x, xName });
+            helperClosedGeneric.Invoke(this, new object[] { y, yName });
+        }
+
+        private void EnumTestHelper<T>(T? x, string xName)
             where T : struct
         {
             var bin = MessagePackSerializer.Serialize(x, DynamicEnumAsStringResolver.Instance);
             MessagePackSerializer.ToJson(bin).Trim('\"').Is(xName);
-            MessagePackSerializer.Deserialize<T>(bin, DynamicEnumAsStringResolver.Instance).Is(x);
-
-            var bin2 = MessagePackSerializer.Serialize(y, DynamicEnumAsStringResolver.Instance);
-            MessagePackSerializer.ToJson(bin2).Trim('\"').Is(yName);
-            MessagePackSerializer.Deserialize<T?>(bin2, DynamicEnumAsStringResolver.Instance).Is(y);
+            MessagePackSerializer.Deserialize<T?>(bin, DynamicEnumAsStringResolver.Instance).Is(x);
         }
     }
 }

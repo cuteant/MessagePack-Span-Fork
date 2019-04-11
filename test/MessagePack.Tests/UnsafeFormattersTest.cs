@@ -14,28 +14,32 @@ namespace MessagePack.Tests
         public void GuidTest()
         {
             var guid = Guid.NewGuid();
-            byte[] bin = null;
-            BinaryGuidFormatter.Instance.Serialize(ref bin, 0, guid, null).Is(18);
 
-            int readSize;
-            var nguid = BinaryGuidFormatter.Instance.Deserialize(bin, 0, null, out readSize);
-            readSize.Is(18);
+            var idx = 0;
+            var writer = new MessagePackWriter(16);
+            GuidFormatter.Instance.Serialize(ref writer, ref idx, guid, null);
+            idx.Is(18);
+            var buffer = writer.ToArray(idx);
 
-            guid.Is(nguid);
+            var reader = new MessagePackReader(buffer);
+            GuidFormatter.Instance.Deserialize(ref reader, null).Is(guid);
+            reader.CurrentSpanIndex.Is(18);
         }
 
         [Fact]
         public void DecimalTest()
         {
             var d = new Decimal(1341, 53156, 61, true, 3);
-            byte[] bin = null;
-            BinaryDecimalFormatter.Instance.Serialize(ref bin, 0, d, null).Is(18);
 
-            int readSize;
-            var nd = BinaryDecimalFormatter.Instance.Deserialize(bin, 0, null, out readSize);
-            readSize.Is(18);
+            var idx = 0;
+            var writer = new MessagePackWriter(16);
+            BinaryDecimalFormatter.Instance.Serialize(ref writer, ref idx, d, null);
+            idx.Is(18);
+            var buffer = writer.ToArray(idx);
 
-            d.Is(nd);
+            var reader = new MessagePackReader(buffer);
+            BinaryDecimalFormatter.Instance.Deserialize(ref reader, null).Is(d);
+            reader.CurrentSpanIndex.Is(18);
         }
     }
 }

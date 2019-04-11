@@ -1,6 +1,4 @@
-﻿#if !UNITY_WSA
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -354,7 +352,7 @@ namespace MessagePack.Internal
 
         public static void EmitThrowNotimplemented(this ILGenerator il)
         {
-            il.Emit(OpCodes.Newobj, typeof(System.NotImplementedException).GetTypeInfo().DeclaredConstructors.First(x => x.GetParameters().Length == 0));
+            il.Emit(OpCodes.Newobj, typeof(System.NotImplementedException).GetTypeInfo().DeclaredConstructors.First(x => 0u >= (uint)x.GetParameters().Length));
             il.Emit(OpCodes.Throw);
         }
 
@@ -388,5 +386,3 @@ namespace MessagePack.Internal
     }
 
 }
-
-#endif

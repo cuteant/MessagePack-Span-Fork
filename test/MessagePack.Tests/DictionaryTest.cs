@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -28,10 +28,18 @@ namespace MessagePack.Tests
 
         [Theory]
         [MemberData(nameof(dictionaryTestData))]
-        public void DictionaryTestAll<T>(T x, T y)
+        public void DictionaryTestAll(object x, object y)
+        {
+            var helper = typeof(DictionaryTest).GetTypeInfo().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Single(m => m.Name == nameof(DictionaryTestAllHelper));
+            var helperClosedGeneric = helper.MakeGenericMethod(x.GetType());
+
+            helperClosedGeneric.Invoke(this, new object[] { x });
+            helperClosedGeneric.Invoke(this, new object[] { y });
+        }
+
+        private void DictionaryTestAllHelper<T>(T x)
         {
             Convert(x).IsStructuralEqual(x);
-            Convert(y).IsStructuralEqual(y);
         }
 
         [Fact]

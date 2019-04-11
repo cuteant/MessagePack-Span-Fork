@@ -54,7 +54,7 @@ namespace MessagePack.Tests
         {
             SimpleIntKeyData n = null;
             var bytes = MessagePackSerializer.Serialize(n);
-            MessagePackBinary.IsNil(bytes, 0).IsTrue();
+            new MessagePackReader(bytes).IsNil().IsTrue();
             bytes.Length.Is(1);
 
             MessagePackSerializer.Deserialize<SimpleIntKeyData>(bytes).IsNull();

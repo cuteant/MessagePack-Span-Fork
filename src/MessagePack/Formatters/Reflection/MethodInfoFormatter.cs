@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using CuteAnt.Reflection;
 
 namespace MessagePack.Formatters
 {
@@ -21,34 +20,22 @@ namespace MessagePack.Formatters
 
         public MethodInfoFormatter() : this(true) { }
 
-        public MethodInfoFormatter(bool throwOnError)
-        {
-            _throwOnError = throwOnError;
-        }
+        public MethodInfoFormatter(bool throwOnError) => _throwOnError = throwOnError;
 
-        public TMethod Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public TMethod Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return null;
-            }
+            if (reader.IsNil()) { return null; }
 
-            var startOffset = offset;
-            var name = MessagePackBinary.ReadString(bytes, offset, out readSize);
-            offset += readSize;
-            var declaringType = MessagePackBinary.ReadNamedType(bytes, offset, out readSize, _throwOnError);
-            offset += readSize;
-            var argumentCount = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-            offset += readSize;
+            var name = reader.ReadString();
+            var declaringType = reader.ReadNamedType(_throwOnError);
+            var argumentCount = reader.ReadArrayHeader();
             var parameterTypes = Type.EmptyTypes;
             if (argumentCount > 0)
             {
                 parameterTypes = new Type[argumentCount];
                 for (var idx = 0; idx < argumentCount; idx++)
                 {
-                    parameterTypes[idx] = MessagePackBinary.ReadNamedType(bytes, offset, out readSize, _throwOnError);
-                    offset += readSize;
+                    parameterTypes[idx] = reader.ReadNamedType(_throwOnError);
                 }
             }
             var method = GetMethodExt(declaringType, name,
@@ -56,49 +43,40 @@ namespace MessagePack.Formatters
                 parameterTypes);
             if (method.IsGenericMethodDefinition)
             {
-                argumentCount = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                offset += readSize;
+                argumentCount = reader.ReadArrayHeader();
                 var genericTypeArguments = new Type[argumentCount];
                 for (var idx = 0; idx < argumentCount; idx++)
                 {
-                    genericTypeArguments[idx] = MessagePackBinary.ReadNamedType(bytes, offset, out readSize, _throwOnError);
-                    offset += readSize;
+                    genericTypeArguments[idx] = reader.ReadNamedType(_throwOnError);
                 }
                 method = method.MakeGenericMethod(genericTypeArguments);
             }
-            readSize = offset - startOffset;
             return (TMethod)method;
         }
 
-        public int Serialize(ref byte[] bytes, int offset, TMethod value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, TMethod value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
-            var startOffset = offset;
+            writer.WriteString(value.Name, ref idx);
 
-            offset += MessagePackBinary.WriteString(ref bytes, offset, value.Name);
-
-            offset += MessagePackBinary.WriteNamedType(ref bytes, offset, value.DeclaringType);
+            writer.WriteNamedType(value.DeclaringType, ref idx);
 
             var arguments = value.GetParameters().Select(p => p.ParameterType).ToArray();
-            offset += MessagePackBinary.WriteArrayHeader(ref bytes, offset, arguments.Length);
-            for (int idx = 0; idx < arguments.Length; idx++)
+            writer.WriteArrayHeader(arguments.Length, ref idx);
+            for (int i = 0; i < arguments.Length; i++)
             {
-                offset += MessagePackBinary.WriteNamedType(ref bytes, offset, arguments[idx]);
+                writer.WriteNamedType(arguments[i], ref idx);
             }
             if (value.IsGenericMethod)
             {
                 var genericTypeArguments = value.GetGenericArguments();
-                offset += MessagePackBinary.WriteArrayHeader(ref bytes, offset, genericTypeArguments.Length);
-                for (int idx = 0; idx < genericTypeArguments.Length; idx++)
+                writer.WriteArrayHeader(genericTypeArguments.Length, ref idx);
+                for (int i = 0; i < genericTypeArguments.Length; i++)
                 {
-                    offset += MessagePackBinary.WriteNamedType(ref bytes, offset, genericTypeArguments[idx]);
+                    writer.WriteNamedType(genericTypeArguments[i], ref idx);
                 }
             }
-            return offset - startOffset;
         }
 
         /// <summary>Search for a method by name, parameter types, and binding flags.  

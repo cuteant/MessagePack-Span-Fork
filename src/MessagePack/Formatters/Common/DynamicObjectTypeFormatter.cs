@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
+#if DEPENDENT_ON_CUTEANT
 using CuteAnt;
 using CuteAnt.Collections;
 using CuteAnt.Reflection;
+#else
+using MessagePack.Internal;
+#endif
 
 namespace MessagePack.Formatters
 {
@@ -37,18 +41,11 @@ namespace MessagePack.Formatters
             _isSupportedFieldType = isSupportedFieldType ?? IsSupportedFieldType;
         }
 
-        public virtual T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public virtual T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return default;
-            }
+            if (reader.IsNil()) { return default; }
 
-            var startOffset = offset;
-
-            var actualType = MessagePackBinary.ReadNamedType(bytes, offset, out readSize, true);
-            offset += readSize;
+            var actualType = reader.ReadNamedType(true);
             var obj = ActivatorUtils.FastCreateInstance(actualType);
 
             var fields = _filedCache.GetOrAdd(actualType, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer, _isSupportedFieldType);
@@ -59,26 +56,21 @@ namespace MessagePack.Formatters
                 if (fieldType != TypeConstants.ObjectType)
                 {
                     var fieldFormatter = DynamicObjectTypeFormatter.GetObjectTypeFormatter(fieldType);
-                    fieldValue = fieldFormatter.Deserialize(bytes, offset, formatterResolver, out readSize);
+                    fieldValue = fieldFormatter.Deserialize(ref reader, formatterResolver);
                 }
                 else
                 {
-                    fieldValue = MessagePackSerializer.Typeless.TypelessFormatter.Deserialize(bytes, offset, formatterResolver, out readSize);
+                    fieldValue = MessagePackSerializer.Typeless.TypelessFormatter.Deserialize(ref reader, formatterResolver);
                 }
-                offset += readSize;
                 setter(obj, fieldValue);
             }
 
-            readSize = offset - startOffset;
             return (T)obj;
         }
 
-        public virtual int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
+        public virtual void Serialize(ref MessagePackWriter writer, ref int idx, T value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
             var actualType = value.GetType();
             if (!IsSupportedType(actualType))
@@ -86,9 +78,7 @@ namespace MessagePack.Formatters
                 ThrowHelper.ThrowInvalidOperationException_InterfaceOrAbstract(actualType);
             }
 
-            var startOffset = offset;
-
-            offset += MessagePackBinary.WriteNamedType(ref bytes, offset, actualType);
+            writer.WriteNamedType(actualType, ref idx);
 
             var fields = _filedCache.GetOrAdd(actualType, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer, _isSupportedFieldType);
             foreach (var (field, getter, setter) in fields)
@@ -98,15 +88,13 @@ namespace MessagePack.Formatters
                 if (fieldType != TypeConstants.ObjectType)
                 {
                     var fieldFormatter = DynamicObjectTypeFormatter.GetObjectTypeFormatter(fieldType);
-                    offset += fieldFormatter.Serialize(ref bytes, offset, v, formatterResolver);
+                    fieldFormatter.Serialize(ref writer, ref idx, v, formatterResolver);
                 }
                 else
                 {
-                    offset += MessagePackSerializer.Typeless.TypelessFormatter.Serialize(ref bytes, offset, v, formatterResolver);
+                    MessagePackSerializer.Typeless.TypelessFormatter.Serialize(ref writer, ref idx, v, formatterResolver);
                 }
             }
-
-            return offset - startOffset;
         }
 
         /// <summary>GetFieldValue</summary>
@@ -119,7 +107,7 @@ namespace MessagePack.Formatters
             return getter(obj);
         }
 
-        [MethodImpl(InlineMethod.Value)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected List<(FieldInfo field, MemberGetter getter, MemberSetter setter)> GetFieldsFromCache(Type type)
         {
             return _filedCache.GetOrAdd(type, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer, _isSupportedFieldType); ;
@@ -244,23 +232,23 @@ namespace MessagePack.Formatters.Internal
 
     public class DynamicObjectTypeFormatter<T> : IDynamicObjectTypeFormatter
     {
-        public object Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public object Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             var formatter = formatterResolver.GetFormatterWithVerify<T>();
-            return formatter.Deserialize(bytes, offset, formatterResolver, out readSize);
+            return formatter.Deserialize(ref reader, formatterResolver);
         }
 
-        public int Serialize(ref byte[] bytes, int offset, object value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, object value, IFormatterResolver formatterResolver)
         {
             var formatter = formatterResolver.GetFormatterWithVerify<T>();
-            return formatter.Serialize(ref bytes, offset, (T)value, formatterResolver);
+            formatter.Serialize(ref writer, ref idx, (T)value, formatterResolver);
         }
     }
 
     public interface IDynamicObjectTypeFormatter : IMessagePackFormatter
     {
-        int Serialize(ref byte[] bytes, int offset, object value, IFormatterResolver formatterResolver);
-        object Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize);
+        void Serialize(ref MessagePackWriter writer, ref int idx, object value, IFormatterResolver formatterResolver);
+        object Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver);
     }
 }
 ;

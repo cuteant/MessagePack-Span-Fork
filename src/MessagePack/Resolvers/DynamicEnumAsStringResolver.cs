@@ -1,13 +1,13 @@
-﻿#if !UNITY_WSA
-
-using MessagePack.Formatters;
-using MessagePack.Internal;
-using System;
-using System.Reflection;
-using CuteAnt.Reflection;
-
-namespace MessagePack.Resolvers
+﻿namespace MessagePack.Resolvers
 {
+    using System;
+    using System.Reflection;
+    using MessagePack.Formatters;
+    using MessagePack.Internal;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Reflection;
+#endif
+
     public sealed class DynamicEnumAsStringResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new DynamicEnumAsStringResolver();
@@ -57,5 +57,3 @@ namespace MessagePack.Resolvers
         }
     }
 }
-
-#endif

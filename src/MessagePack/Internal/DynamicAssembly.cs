@@ -1,6 +1,4 @@
-﻿#if !UNITY_WSA
-
-using System;
+﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -30,11 +28,8 @@ namespace MessagePack.Internal
             this.assemblyBuilder = System.AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
             this.moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName);
 #else
-#if NETSTANDARD || NETFRAMEWORK
             this.assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(moduleName), AssemblyBuilderAccess.Run);
-#else
-            this.assemblyBuilder = System.AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(moduleName), AssemblyBuilderAccess.Run);
-#endif
+            //this.assemblyBuilder = System.AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName(moduleName), AssemblyBuilderAccess.Run);
 
             this.moduleBuilder = assemblyBuilder.DefineDynamicModule(moduleName);
 #endif
@@ -77,5 +72,3 @@ namespace MessagePack.Internal
 #endif
     }
 }
-
-#endif

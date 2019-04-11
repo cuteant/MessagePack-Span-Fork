@@ -1,11 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using CuteAnt;
-using CuteAnt.Reflection;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Reflection;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt;
+    using CuteAnt.Reflection;
+#else
+    using MessagePack.Internal;
+#endif
+
     public sealed class SimpleExceptionFormatter : SimpleExceptionFormatter<Exception>
     {
         public static readonly IMessagePackFormatter<Exception> Instance = new SimpleExceptionFormatter();

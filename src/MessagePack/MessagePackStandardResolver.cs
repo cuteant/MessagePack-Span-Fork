@@ -1,10 +1,14 @@
-﻿using System.Runtime.CompilerServices;
-using System.Threading;
-using MessagePack.Formatters;
-using MessagePack.Resolvers;
-
-namespace MessagePack
+﻿namespace MessagePack
 {
+    using System.Runtime.CompilerServices;
+    using System.Threading;
+    using MessagePack.Formatters;
+    using MessagePack.Resolvers;
+
+    /// <summary>MessagePackStandardResolver
+    /// TypelessContractlessStandardResolver 和 StandardResolver 扩展性较差，无法实现较为复杂的应用
+    /// MessagePackStandardResolver如何使用，参考 https://github.com/cuteant/akka.net/tree/future/src/Akka/Serialization
+    /// </summary>
     public static class MessagePackStandardResolver
     {
         public static readonly IFormatterResolver Default = DefaultResolver.Instance;
@@ -13,7 +17,7 @@ namespace MessagePack
         private static IFormatterResolver s_typelessObjectResolver;
         public static IFormatterResolver TypelessObjectResolver
         {
-            [MethodImpl(InlineMethod.Value)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => Volatile.Read(ref s_typelessObjectResolver) ?? MessagePack.Resolvers.TypelessObjectResolver.Instance;
         }
 

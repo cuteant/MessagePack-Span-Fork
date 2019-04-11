@@ -1,6 +1,4 @@
-﻿#if NETSTANDARD || NETFRAMEWORK
-
-using MessagePack.Formatters;
+﻿using MessagePack.Formatters;
 using MessagePack.Internal;
 using System;
 
@@ -10,10 +8,7 @@ namespace MessagePack.Resolvers
     {
         public static readonly IFormatterResolver Instance = new UnsafeBinaryResolver();
 
-        UnsafeBinaryResolver()
-        {
-
-        }
+        UnsafeBinaryResolver() { }
 
         public override IMessagePackFormatter<T> GetFormatter<T>()
         {
@@ -59,5 +54,3 @@ namespace MessagePack.Internal
         }
     }
 }
-
-#endif

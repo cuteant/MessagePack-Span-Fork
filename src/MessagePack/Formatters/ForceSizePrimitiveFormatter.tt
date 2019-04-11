@@ -26,18 +26,16 @@ namespace MessagePack.Formatters
     {
         public static readonly Force<#= t.Name #>BlockFormatter Instance = new Force<#= t.Name #>BlockFormatter();
 
-        Force<#= t.Name #>BlockFormatter()
+        Force<#= t.Name #>BlockFormatter() { }
+
+        public void Serialize(ref MessagePackWriter writer, ref int idx, <#= t.Name #> value, IFormatterResolver formatterResolver)
         {
+            writer.Write<#= t.Name #>Force<#= t.Name #>Block(value, ref idx);
         }
 
-        public int Serialize(ref byte[] bytes, int offset, <#= t.Name #> value, IFormatterResolver formatterResolver)
+        public <#= t.Name #> Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            return MessagePackBinary.Write<#= t.Name #>Force<#= t.Name #>Block(ref bytes, offset, value);
-        }
-
-        public <#= t.Name #> Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
-        {
-            return MessagePackBinary.Read<#= t.Name #>(bytes, offset, out readSize);
+            return reader.Read<#= t.Name #>();
         }
     }
 
@@ -45,33 +43,19 @@ namespace MessagePack.Formatters
     {
         public static readonly NullableForce<#= t.Name #>BlockFormatter Instance = new NullableForce<#= t.Name #>BlockFormatter();
 
-        NullableForce<#= t.Name #>BlockFormatter()
+        NullableForce<#= t.Name #>BlockFormatter() { }
+
+        public void Serialize(ref MessagePackWriter writer, ref int idx, <#= t.Name #>? value, IFormatterResolver formatterResolver)
         {
+            if (value == null) { writer.WriteNil(ref idx); return; }
+
+            writer.Write<#= t.Name #>Force<#= t.Name #>Block(value.Value, ref idx);
         }
 
-        public int Serialize(ref byte[] bytes, int offset, <#= t.Name #>? value, IFormatterResolver formatterResolver)
+        public <#= t.Name #>? Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
-            else
-            {
-                return MessagePackBinary.Write<#= t.Name #>Force<#= t.Name #>Block(ref bytes, offset, value.Value);
-            }
-        }
-
-        public <#= t.Name #>? Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
-        {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return null;
-            }
-            else
-            {
-                return MessagePackBinary.Read<#= t.Name #>(bytes, offset, out readSize);
-            }
+            if (reader.IsNil()) { return null; }
+            return reader.Read<#= t.Name #>();
         }
     }
 
@@ -80,52 +64,30 @@ namespace MessagePack.Formatters
     {
         public static readonly Force<#= t.Name #>BlockArrayFormatter Instance = new Force<#= t.Name #>BlockArrayFormatter();
 
-        Force<#= t.Name #>BlockArrayFormatter()
+        Force<#= t.Name #>BlockArrayFormatter() { }
+
+        public void Serialize(ref MessagePackWriter writer, ref int idx, <#= t.Name #>[] value, IFormatterResolver formatterResolver)
         {
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
-        }
-
-        public int Serialize(ref byte[] bytes, int offset, <#= t.Name #>[] value, IFormatterResolver formatterResolver)
-        {
-            if (value == null)
+            writer.WriteArrayHeader(value.Length, ref idx);
+            for (int i = 0; i < value.Length; i++)
             {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
-            else
-            {
-                var startOffset = offset;
-                offset += MessagePackBinary.WriteArrayHeader(ref bytes, offset, value.Length);
-                for (int i = 0; i < value.Length; i++)
-                {
-                    offset += MessagePackBinary.Write<#= t.Name #>Force<#= t.Name #>Block(ref bytes, offset, value[i]);
-                }
-
-                return offset - startOffset;
+                writer.Write<#= t.Name #>Force<#= t.Name #>Block(value[i], ref idx);
             }
         }
 
-        public <#= t.Name #>[] Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public <#= t.Name #>[] Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return null;
-            }
-            else
-            {
-                var startOffset = offset;
+            if (reader.IsNil()) { return null; }
 
-                var len = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                offset += readSize;
-                var array = new <#= t.Name #>[len];
-                for (int i = 0; i < array.Length; i++)
-                {
-                    array[i] = MessagePackBinary.Read<#= t.Name #>(bytes, offset, out readSize);
-                    offset += readSize;
-                }
-                readSize = offset - startOffset;
-                return array;
+            var len = reader.ReadArrayHeader();
+            var array = new <#= t.Name #>[len];
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = reader.Read<#= t.Name #>();
             }
+            return array;
         }
     }
 <# } #>

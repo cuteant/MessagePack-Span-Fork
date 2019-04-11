@@ -1,7 +1,7 @@
-﻿using Hyperion;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using Hyperion;
+
     public class HyperionFormatter<T> : HyperionFormatterBase<T>
     {
         public HyperionFormatter() : base() { }

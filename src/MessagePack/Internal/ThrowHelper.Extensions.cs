@@ -13,6 +13,7 @@ namespace MessagePack
     internal enum ExceptionArgument
     {
         array,
+        arrayPool,
         assembly,
         buffer,
         destination,
@@ -21,6 +22,7 @@ namespace MessagePack
         s,
         str,
         source,
+        bufferWriter,
         type,
         types,
         value,
@@ -30,6 +32,7 @@ namespace MessagePack
         item,
         options,
         list,
+        output,
         ts,
         other,
         pool,
@@ -362,6 +365,14 @@ namespace MessagePack
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowInvalidOperationException_EndPositionNotReached() { throw CreateInvalidOperationException_EndPositionNotReached(); }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static Exception CreateInvalidOperationException_EndPositionNotReached()
+        {
+            return new InvalidOperationException("EndPositionNotReached");
+        }
+
         #endregion
 
         #region -- TinyJsonException --
@@ -401,6 +412,26 @@ namespace MessagePack
         #region -- ArgumentException --
 
         [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowArgumentException_NeedMoreData()
+        {
+            throw GetException();
+            ArgumentException GetException()
+            {
+                return new ArgumentException("Need more data.");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowArgumentException_DestinationTooShort()
+        {
+            throw GetException();
+            ArgumentException GetException()
+            {
+                return new ArgumentException("Destination is too short.");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ThrowArgumentException_Guid_Pattern()
         {
             throw GetArgumentException();
@@ -427,6 +458,28 @@ namespace MessagePack
             ArgumentException GetArgumentException()
             {
                 return new ArgumentException("Key was already exists. Key:" + Encoding.UTF8.GetString(key));
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowArgumentException_FailedToGetLargerSpan()
+        {
+            throw GetArgumentOutOfRangeException();
+
+            ArgumentException GetArgumentOutOfRangeException()
+            {
+                return new ArgumentException("The 'IBufferWriter' could not provide an output buffer that is large enough to continue writing.");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowArgumentException_FailedToGetMinimumSizeSpan(int minimumSize)
+        {
+            throw GetArgumentOutOfRangeException();
+
+            ArgumentException GetArgumentOutOfRangeException()
+            {
+                return new ArgumentException($"The 'IBufferWriter' could not provide an output buffer that is large enough to continue writing. Need at least {minimumSize} bytes.");
             }
         }
 

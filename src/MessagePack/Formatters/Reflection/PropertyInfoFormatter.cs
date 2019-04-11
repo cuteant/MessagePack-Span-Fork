@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using CuteAnt.Reflection;
 
 namespace MessagePack.Formatters
 {
@@ -18,36 +17,24 @@ namespace MessagePack.Formatters
 
         public PropertyInfoFormatter() : this(true) { }
 
-        public PropertyInfoFormatter(bool throwOnError)
-        {
-            _throwOnError = throwOnError;
-        }
+        public PropertyInfoFormatter(bool throwOnError) => _throwOnError = throwOnError;
 
-        public TProperty Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public TProperty Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return null;
-            }
+            if (reader.IsNil()) { return null; }
 
-            var name = MessagePackBinary.ReadString(bytes, offset, out var nameSize);
-            var declaringType = MessagePackBinary.ReadNamedType(bytes, offset + nameSize, out readSize, _throwOnError);
-            readSize += nameSize;
+            var name = reader.ReadString();
+            var declaringType = reader.ReadNamedType(_throwOnError);
             return (TProperty)declaringType
                 .GetProperty(name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
         }
 
-        public int Serialize(ref byte[] bytes, int offset, TProperty value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, TProperty value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
-            var nameSize = MessagePackBinary.WriteString(ref bytes, offset, value.Name);
-            var typeSize = MessagePackBinary.WriteNamedType(ref bytes, offset + nameSize, value.DeclaringType);
-            return nameSize + typeSize;
+            writer.WriteString(value.Name, ref idx);
+            writer.WriteNamedType(value.DeclaringType, ref idx);
         }
     }
 }

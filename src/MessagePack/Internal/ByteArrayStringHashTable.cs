@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MessagePack.Internal
+﻿namespace MessagePack.Internal
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Text;
+    using System.Runtime.CompilerServices;
+
     // like ArraySegment<byte> hashtable.
     // Add is safe for construction phase only and requires capacity(does not do rehash)
     // and specialized for internal use(nongenerics, TValue is int)
@@ -82,13 +83,8 @@ namespace MessagePack.Internal
             var entry = table[hash & indexFor];
 
             if (entry == null) goto NOT_FOUND;
-
             {
-#if NETSTANDARD || NETFRAMEWORK
                 ref var v = ref entry[0];
-#else
-                var v = entry[0];
-#endif
                 if (ByteArrayComparer.Equals(key.Array, key.Offset, key.Count, v.Key))
                 {
                     value = v.Value;
@@ -98,11 +94,7 @@ namespace MessagePack.Internal
 
             for (int i = 1; i < entry.Length; i++)
             {
-#if NETSTANDARD || NETFRAMEWORK
                 ref var v = ref entry[i];
-#else
-                var v = entry[i];
-#endif
                 if (ByteArrayComparer.Equals(key.Array, key.Offset, key.Count, v.Key))
                 {
                     value = v.Value;
@@ -110,51 +102,24 @@ namespace MessagePack.Internal
                 }
             }
 
-            NOT_FOUND:
+        NOT_FOUND:
             value = default(int);
             return false;
         }
 
-#if NETSTANDARD || NETFRAMEWORK
         static readonly bool Is32Bit = (IntPtr.Size == 4);
-#endif
 
-#if NETSTANDARD || NETFRAMEWORK
-        [System.Runtime.CompilerServices.MethodImpl(InlineMethod.Value)]
-#endif
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static ulong ByteArrayGetHashCode(byte[] x, int offset, int count)
         {
-#if NETSTANDARD || NETFRAMEWORK
             // FarmHash https://github.com/google/farmhash
             if (x == null) return 0;
 
-            if (Is32Bit)
-            {
-                return (ulong)FarmHash.Hash32(x, offset, count);
-            }
-            else
+            if (UnsafeMemory.Is64BitProcess)
             {
                 return FarmHash.Hash64(x, offset, count);
             }
-
-#else
-
-            // FNV1-1a 32bit https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
-            uint hash = 0;
-            if (x != null)
-            {
-                var max = offset + count;
-
-                hash = 2166136261;
-                for (int i = offset; i < max; i++)
-                {
-                    hash = unchecked((x[i] ^ hash) * 16777619);
-                }
-            }
-
-            return (ulong)hash;
-
-#endif
+            return (ulong)FarmHash.Hash32(x, offset, count);
         }
 
         static int CalculateCapacity(int collectionSize, float loadFactor)

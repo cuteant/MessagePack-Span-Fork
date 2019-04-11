@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
@@ -13,6 +13,7 @@ namespace MessagePack.Tests.ExtensionTests
 {
     public class WithImmutableDefaultResolver : FormatterResolver
     {
+        public static readonly WithImmutableDefaultResolver Instance = new WithImmutableDefaultResolver();
         public override IMessagePackFormatter<T> GetFormatter<T>()
         {
             return (ImmutableCollectionResolver.Instance.GetFormatter<T>()
@@ -28,7 +29,7 @@ namespace MessagePack.Tests.ExtensionTests
             return MessagePackSerializer.Deserialize<T>(MessagePackSerializer.Serialize(value, resolver), resolver);
         }
 
-        public static IEnumerable<object[]> collectionTestData = new []
+        public static IEnumerable<object[]> collectionTestData = new[]
         {
             new object[]{ ImmutableList<int>.Empty.AddRange(new[] { 1, 10, 100 }) , null },
             new object[]{ ImmutableDictionary<int,int>.Empty.AddRange(new Dictionary<int,int> { { 1, 10 },{ 2, 10 }, { 3, 100 } }) , null },
@@ -41,12 +42,19 @@ namespace MessagePack.Tests.ExtensionTests
 
         [Theory]
         [MemberData(nameof(collectionTestData))]
-        public void ConcreteCollectionTest<T>(T x, T y)
+        public void ConcreteCollectionTest(object x, object y)
         {
-            Convert(x).IsStructuralEqual(x);
-            Convert(y).IsStructuralEqual(y);
+            var helper = typeof(ImmutableCollectionTest).GetTypeInfo().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Single(m => m.Name == nameof(ConcreteCollectionTestHelper));
+            var helperClosedGeneric = helper.MakeGenericMethod(x.GetType());
+
+            helperClosedGeneric.Invoke(this, new object[] { x });
+            helperClosedGeneric.Invoke(this, new object[] { y });
         }
 
+        private void ConcreteCollectionTestHelper<T>(T x)
+        {
+            Convert(x).IsStructuralEqual(x);
+        }
 
 
         [Fact]

@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using CuteAnt;
-using CuteAnt.Reflection;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Reflection;
+    using CuteAnt;
+    using CuteAnt.Reflection;
+
     public sealed class HyperionExceptionFormatter2 : HyperionExceptionFormatter2<Exception>
     {
         public HyperionExceptionFormatter2() : base() { }

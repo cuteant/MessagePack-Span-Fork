@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CuteAnt.Reflection;
 
 namespace MessagePack.Formatters
 {
@@ -20,30 +17,20 @@ namespace MessagePack.Formatters
 
         public SimpleTypeFormatter() : this(true) { }
 
-        public SimpleTypeFormatter(bool throwOnError)
+        public SimpleTypeFormatter(bool throwOnError) => _throwOnError = throwOnError;
+
+        public TType Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            _throwOnError = throwOnError;
+            if (reader.IsNil()) { return null; }
+
+            return (TType)reader.ReadNamedType(_throwOnError);
         }
 
-        public TType Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, TType value, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return null;
-            }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
-            return (TType)MessagePackBinary.ReadNamedType(bytes, offset, out readSize, _throwOnError);
-        }
-
-        public int Serialize(ref byte[] bytes, int offset, TType value, IFormatterResolver formatterResolver)
-        {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
-
-            return MessagePackBinary.WriteNamedType(ref bytes, offset, value);
+            writer.WriteNamedType(value, ref idx);
         }
     }
 }

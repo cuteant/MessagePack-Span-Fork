@@ -6,33 +6,22 @@ namespace MessagePack.Formatters
     {
         public static readonly IMessagePackFormatter<CultureInfo> Instance = new CultureInfoFormatter();
 
-        public CultureInfoFormatter()
+        public CultureInfoFormatter() { }
+
+        public CultureInfo Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
+            if (reader.IsNil()) { return CultureInfo.InvariantCulture; }
+            return new CultureInfo(reader.ReadString());
         }
 
-        public CultureInfo Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, CultureInfo value, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
+            if (value != null)
             {
-                readSize = 1;
-                return CultureInfo.InvariantCulture;
+                writer.WriteString(value.Name, ref idx);
+                return;
             }
-            else
-            {
-                return new CultureInfo(MessagePackBinary.ReadString(bytes, offset, out readSize));
-            }
-        }
-
-        public int Serialize(ref byte[] bytes, int offset, CultureInfo value, IFormatterResolver formatterResolver)
-        {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
-            else
-            {
-                return MessagePackBinary.WriteString(ref bytes, offset, value.Name);
-            }
+            writer.WriteNil(ref idx);
         }
     }
 }

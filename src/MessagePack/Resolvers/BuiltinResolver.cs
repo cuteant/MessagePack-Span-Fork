@@ -1,7 +1,4 @@
-﻿using MessagePack.Formatters;
-using MessagePack.Internal;
-using MessagePack.Resolvers;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,7 +6,11 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using MessagePack.Formatters;
+using MessagePack.Internal;
+#if DEPENDENT_ON_CUTEANT
 using CuteAnt;
+#endif
 
 namespace MessagePack.Resolvers
 {
@@ -86,8 +87,10 @@ namespace MessagePack.Internal
             {typeof(DateTimeOffset?), new StaticNullableFormatter<DateTimeOffset>(DateTimeOffsetFormatter.Instance)},
             {typeof(Guid), GuidFormatter.Instance},
             {typeof(Guid?), new StaticNullableFormatter<Guid>(GuidFormatter.Instance)},
+#if DEPENDENT_ON_CUTEANT
             {typeof(CombGuid), CombGuidFormatter.Instance},
             {typeof(CombGuid?), new StaticNullableFormatter<CombGuid>(CombGuidFormatter.Instance)},
+#endif
             {typeof(Uri), UriFormatter.Instance},
             {typeof(Version), VersionFormatter.Instance},
             {typeof(StringBuilder), StringBuilderFormatter.Instance},
@@ -156,19 +159,16 @@ namespace MessagePack.Internal
             { typeof(ArraySegment<byte>), ByteArraySegmentFormatter.Instance },
             { typeof(ArraySegment<byte>?),new StaticNullableFormatter<ArraySegment<byte>>(ByteArraySegmentFormatter.Instance) },
 
-#if NETSTANDARD || NETFRAMEWORK
             {typeof(System.Numerics.BigInteger), BigIntegerFormatter.Instance},
             {typeof(System.Numerics.BigInteger?), new StaticNullableFormatter<System.Numerics.BigInteger>(BigIntegerFormatter.Instance)},
             {typeof(System.Numerics.Complex), ComplexFormatter.Instance},
             {typeof(System.Numerics.Complex?), new StaticNullableFormatter<System.Numerics.Complex>(ComplexFormatter.Instance)},
             {typeof(System.Threading.Tasks.Task), TaskUnitFormatter.Instance},
-#endif
         };
 
         internal static object GetFormatter(Type t)
         {
-            object formatter;
-            if (formatterMap.TryGetValue(t, out formatter))
+            if (formatterMap.TryGetValue(t, out object formatter))
             {
                 return formatter;
             }

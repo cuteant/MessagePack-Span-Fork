@@ -25,6 +25,7 @@ namespace MessagePack.Tests
             new object[]{new MySubUnion4 { Four = 24353 }, new MySubUnion4 { Four = 24353 }},
         };
 
+        // TODO 测试无效
         [Theory]
         [MemberData(nameof(unionData))]
         public void Hoge<T, U>(T data, U data2)
@@ -89,15 +90,15 @@ namespace MessagePack.Tests
         public void ClassUnion()
         {
             //var a = new RootUnionType() { MyProperty = 10 };
-            var b = new SubUnionType1() { MyProperty = 11, MyProperty1 = 100 };
-            var c = new SubUnionType2() { MyProperty = 12, MyProperty2 = 200 };
+            var b = new ClassUnion.SubUnionType1() { MyProperty = 11, MyProperty1 = 100 };
+            var c = new ClassUnion.SubUnionType2() { MyProperty = 12, MyProperty2 = 200 };
 
             // var binA = MessagePackSerializer.Serialize<RootUnionType>(a);
-            var binB = MessagePackSerializer.Serialize<RootUnionType>(b);
-            var binC = MessagePackSerializer.Serialize<RootUnionType>(c);
+            var binB = MessagePackSerializer.Serialize<ClassUnion.RootUnionType>(b);
+            var binC = MessagePackSerializer.Serialize<ClassUnion.RootUnionType>(c);
 
-            var b2 = MessagePackSerializer.Deserialize<RootUnionType>(binB) as SubUnionType1;
-            var c2 = MessagePackSerializer.Deserialize<RootUnionType>(binC) as SubUnionType2;
+            var b2 = MessagePackSerializer.Deserialize<ClassUnion.RootUnionType>(binB) as ClassUnion.SubUnionType1;
+            var c2 = MessagePackSerializer.Deserialize<ClassUnion.RootUnionType>(binC) as ClassUnion.SubUnionType2;
 
             b2.MyProperty.Is(11); b2.MyProperty1.Is(100);
             c2.MyProperty.Is(12); c2.MyProperty2.Is(200);

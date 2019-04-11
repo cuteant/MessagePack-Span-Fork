@@ -1,6 +1,4 @@
-﻿#if NETSTANDARD || NETFRAMEWORK
-
-using System;
+﻿using System;
 
 namespace MessagePack.Internal
 {
@@ -18,8 +16,6 @@ namespace MessagePack.Internal
 
     internal class StringArraySegmentByteAscymmetricEqualityComparer : IAsymmetricEqualityComparer<byte[], ArraySegment<byte>>
     {
-        static readonly bool Is32Bit = (IntPtr.Size == 4);
-
         public bool Equals(byte[] x, byte[] y)
         {
             if (x.Length != y.Length) return false;
@@ -46,14 +42,11 @@ namespace MessagePack.Internal
         {
             unchecked
             {
-                if (Is32Bit)
-                {
-                    return (int)FarmHash.Hash32(key2.Array, key2.Offset, key2.Count);
-                }
-                else
+                if (UnsafeMemory.Is64BitProcess)
                 {
                     return (int)FarmHash.Hash64(key2.Array, key2.Offset, key2.Count);
                 }
+                return (int)FarmHash.Hash32(key2.Array, key2.Offset, key2.Count);
             }
         }
     }
@@ -82,8 +75,7 @@ namespace MessagePack.Internal
 
         public TValue AddOrGet(TKey1 key1, Func<TKey1, TValue> valueFactory)
         {
-            TValue v;
-            TryAddInternal(key1, valueFactory, out v);
+            TryAddInternal(key1, valueFactory, out TValue v);
             return v;
         }
 
@@ -94,7 +86,6 @@ namespace MessagePack.Internal
 
         public bool TryAdd(TKey1 key, Func<TKey1, TValue> valueFactory)
         {
-            TValue _;
             return TryAddInternal(key, valueFactory, out _);
         }
 
@@ -211,9 +202,8 @@ namespace MessagePack.Internal
                 next = next.Next;
             }
 
-            NOT_FOUND:
-            value = default(TValue);
-            return false;
+        NOT_FOUND:
+            value = default; return false;
         }
 
         static int CalculateCapacity(int collectionSize, float loadFactor)
@@ -273,5 +263,3 @@ namespace MessagePack.Internal
         }
     }
 }
-
-#endif

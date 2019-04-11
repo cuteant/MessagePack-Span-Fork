@@ -81,7 +81,8 @@ namespace MessagePack.Tests
         {
             MessagePackSerializer.Serialize(t).Is(MessagePackSerializer.Serialize(reference));
             Convert(t).Array.Is(reference);
-            MessagePackBinary.IsNil(MessagePackSerializer.Serialize(t2), 0).IsTrue();
+            var reader = new MessagePackReader(MessagePackSerializer.Serialize(t2));
+            reader.IsNil().IsTrue();
         }
 
 

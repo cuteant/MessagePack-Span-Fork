@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -39,7 +39,15 @@ namespace MessagePack.Tests
 
         [Theory]
         [MemberData(nameof(valueTupleData))]
-        public void ValueTuple<T>(T x)
+        public void ValueTuple(object x)
+        {
+            var helper = typeof(ValueTupleTest).GetTypeInfo().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Single(m => m.Name == nameof(ValueTupleHelper));
+            var helperClosedGeneric = helper.MakeGenericMethod(x.GetType());
+
+            helperClosedGeneric.Invoke(this, new object[] { x });
+        }
+
+        private void ValueTupleHelper<T>(T x)
         {
             Convert(x).Is(x);
         }

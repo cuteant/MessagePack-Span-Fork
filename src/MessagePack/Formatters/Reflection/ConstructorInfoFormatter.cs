@@ -20,55 +20,38 @@ namespace MessagePack.Formatters
 
         public ConstructorInfoFormatter() : this(true) { }
 
-        public ConstructorInfoFormatter(bool throwOnError)
-        {
-            _throwOnError = throwOnError;
-        }
+        public ConstructorInfoFormatter(bool throwOnError) => _throwOnError = throwOnError;
 
-        public TConstructor Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public TConstructor Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset))
-            {
-                readSize = 1;
-                return null;
-            }
+            if (reader.IsNil()) { return null; }
 
-            var startOffset = offset;
-            var declaringType = MessagePackBinary.ReadNamedType(bytes, offset, out readSize, _throwOnError);
-            offset += readSize;
-            var argumentCount = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-            offset += readSize;
+            var declaringType = reader.ReadNamedType(_throwOnError);
+            var argumentCount = reader.ReadArrayHeader();
             var parameterTypes = Type.EmptyTypes;
             if (argumentCount > 0)
             {
                 parameterTypes = new Type[argumentCount];
                 for (var idx = 0; idx < argumentCount; idx++)
                 {
-                    parameterTypes[idx] = MessagePackBinary.ReadNamedType(bytes, offset, out readSize, _throwOnError);
-                    offset += readSize;
+                    parameterTypes[idx] = reader.ReadNamedType(_throwOnError);
                 }
             }
-            readSize = offset - startOffset;
             var ctor = declaringType.GetConstructor(parameterTypes);
             return (TConstructor)ctor;
         }
 
-        public int Serialize(ref byte[] bytes, int offset, TConstructor value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, TConstructor value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
-            var startOffset = offset;
-            offset += MessagePackBinary.WriteNamedType(ref bytes, offset, value.DeclaringType);
+            writer.WriteNamedType(value.DeclaringType, ref idx);
             var arguments = value.GetParameters().Select(p => p.ParameterType).ToArray();
-            offset += MessagePackBinary.WriteArrayHeader(ref bytes, offset, arguments.Length);
-            for (int idx = 0; idx < arguments.Length; idx++)
+            writer.WriteArrayHeader(arguments.Length, ref idx);
+            for (int i = 0; i < arguments.Length; i++)
             {
-                offset += MessagePackBinary.WriteNamedType(ref bytes, offset, arguments[idx]);
+                writer.WriteNamedType(arguments[i], ref idx);
             }
-            return offset - startOffset;
         }
     }
 }

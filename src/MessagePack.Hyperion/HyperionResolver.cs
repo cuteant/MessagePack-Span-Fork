@@ -1,17 +1,15 @@
-﻿using System;
-using System.Reflection;
-using CuteAnt.Reflection;
-using MessagePack.Formatters;
-
-namespace MessagePack
+﻿namespace MessagePack
 {
+    using System;
+    using System.Reflection;
+    using CuteAnt.Reflection;
+    using MessagePack.Formatters;
+
     public sealed class HyperionResolver : FormatterResolver
     {
         public static readonly IFormatterResolver Instance = new HyperionResolver();
 
-        HyperionResolver()
-        {
-        }
+        HyperionResolver() { }
 
         public override IMessagePackFormatter<T> GetFormatter<T>()
         {

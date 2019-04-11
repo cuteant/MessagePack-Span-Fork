@@ -1,11 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Runtime.CompilerServices;
-using CuteAnt.Buffers;
-using Hyperion;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System;
+    using System.IO;
+    using System.Runtime.CompilerServices;
+    using CuteAnt.Buffers;
+    using Hyperion;
+
     public class SimpleHyperionFormatter<T> : IMessagePackFormatter<T>
     {
         public static readonly IMessagePackFormatter<T> Instance = new SimpleHyperionFormatter<T>();
@@ -30,21 +30,21 @@ namespace MessagePack.Formatters
             _serializer = new Serializer(options);
         }
 
-        public T Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (MessagePackBinary.IsNil(bytes, offset)) { readSize = 1; return default; }
+            if (reader.IsNil()) { return default; }
 
-            var serializedObject = MessagePackBinary.ReadBytesSegment(bytes, offset, out readSize);
-            using (var ms = new MemoryStream(serializedObject.Array, serializedObject.Offset, serializedObject.Count, false))
+            var serializedObject = reader.ReadBytes();
+            using (var ms = new MemoryStream(serializedObject, false))
             {
                 var result = _serializer.Deserialize<T>(ms);
                 return result;
             }
         }
 
-        public int Serialize(ref byte[] bytes, int offset, T value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, T value, IFormatterResolver formatterResolver)
         {
-            if (value == null) { return MessagePackBinary.WriteNil(ref bytes, offset); }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
             var bufferPool = BufferManager.Shared;
             byte[] buffer = null; int bufferSize;
@@ -60,7 +60,7 @@ namespace MessagePack.Formatters
                     buffer = outputStream.ToArray(out bufferSize);
                 }
 
-                return MessagePackBinary.WriteBytes(ref bytes, offset, buffer, 0, bufferSize);
+                writer.WriteBytes(buffer, 0, bufferSize, ref idx);
             }
             finally { if (buffer != null) { bufferPool.Return(buffer); } }
         }

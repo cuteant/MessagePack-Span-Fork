@@ -32,8 +32,6 @@ namespace MessagePack.Formatters
 
         }
 
-#if !UNITY_WSA
-
         public static bool IsSupportedType(Type type, TypeInfo typeInfo, object value)
         {
             if (value == null) return true;
@@ -46,14 +44,9 @@ namespace MessagePack.Formatters
             return false;
         }
 
-#endif
-
-        public int Serialize(ref byte[] bytes, int offset, object value, IFormatterResolver formatterResolver)
+        public void Serialize(ref MessagePackWriter writer, ref int idx, object value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                return MessagePackBinary.WriteNil(ref bytes, offset);
-            }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
             var t = value.GetType();
 
@@ -62,37 +55,37 @@ namespace MessagePack.Formatters
                 switch (code)
                 {
                     case 0:
-                        return MessagePackBinary.WriteBoolean(ref bytes, offset, (bool)value);
+                        writer.WriteBoolean((bool)value, ref idx); return;
                     case 1:
-                        return MessagePackBinary.WriteChar(ref bytes, offset, (char)value);
+                        writer.WriteChar((char)value, ref idx); return;
                     case 2:
-                        return MessagePackBinary.WriteSByteForceSByteBlock(ref bytes, offset, (sbyte)value);
+                        writer.WriteSByteForceSByteBlock((sbyte)value, ref idx); return;
                     case 3:
-                        return MessagePackBinary.WriteByteForceByteBlock(ref bytes, offset, (byte)value);
+                        writer.WriteByteForceByteBlock((byte)value, ref idx); return;
                     case 4:
-                        return MessagePackBinary.WriteInt16ForceInt16Block(ref bytes, offset, (Int16)value);
+                        writer.WriteInt16ForceInt16Block((Int16)value, ref idx); return;
                     case 5:
-                        return MessagePackBinary.WriteUInt16ForceUInt16Block(ref bytes, offset, (UInt16)value);
+                        writer.WriteUInt16ForceUInt16Block((UInt16)value, ref idx); return;
                     case 6:
-                        return MessagePackBinary.WriteInt32ForceInt32Block(ref bytes, offset, (Int32)value);
+                        writer.WriteInt32ForceInt32Block((Int32)value, ref idx); return;
                     case 7:
-                        return MessagePackBinary.WriteUInt32ForceUInt32Block(ref bytes, offset, (UInt32)value);
+                        writer.WriteUInt32ForceUInt32Block((UInt32)value, ref idx); return;
                     case 8:
-                        return MessagePackBinary.WriteInt64ForceInt64Block(ref bytes, offset, (Int64)value);
+                        writer.WriteInt64ForceInt64Block((Int64)value, ref idx); return;
                     case 9:
-                        return MessagePackBinary.WriteUInt64ForceUInt64Block(ref bytes, offset, (UInt64)value);
+                        writer.WriteUInt64ForceUInt64Block((UInt64)value, ref idx); return;
                     case 10:
-                        return MessagePackBinary.WriteSingle(ref bytes, offset, (Single)value);
+                        writer.WriteSingle((Single)value, ref idx); return;
                     case 11:
-                        return MessagePackBinary.WriteDouble(ref bytes, offset, (double)value);
+                        writer.WriteDouble((double)value, ref idx); return;
                     case 12:
-                        return MessagePackBinary.WriteDateTime(ref bytes, offset, (DateTime)value);
+                        writer.WriteDateTime((DateTime)value, ref idx); return;
                     case 13:
-                        return MessagePackBinary.WriteString(ref bytes, offset, (string)value);
+                        writer.WriteString((string)value, ref idx); return;
                     case 14:
-                        return MessagePackBinary.WriteBytes(ref bytes, offset, (byte[])value);
+                        writer.WriteBytes((byte[])value, ref idx); return;
                     default:
-                        ThrowHelper.ThrowInvalidOperationException_NotSupported(t); return default;
+                        ThrowHelper.ThrowInvalidOperationException_NotSupported(t); return;
                 }
             }
             else
@@ -104,149 +97,135 @@ namespace MessagePack.Formatters
                     switch (code2)
                     {
                         case 2:
-                            return MessagePackBinary.WriteSByteForceSByteBlock(ref bytes, offset, (sbyte)value);
+                            writer.WriteSByteForceSByteBlock((sbyte)value, ref idx); return;
                         case 3:
-                            return MessagePackBinary.WriteByteForceByteBlock(ref bytes, offset, (byte)value);
+                            writer.WriteByteForceByteBlock((byte)value, ref idx); return;
                         case 4:
-                            return MessagePackBinary.WriteInt16ForceInt16Block(ref bytes, offset, (Int16)value);
+                            writer.WriteInt16ForceInt16Block((Int16)value, ref idx); return;
                         case 5:
-                            return MessagePackBinary.WriteUInt16ForceUInt16Block(ref bytes, offset, (UInt16)value);
+                            writer.WriteUInt16ForceUInt16Block((UInt16)value, ref idx); return;
                         case 6:
-                            return MessagePackBinary.WriteInt32ForceInt32Block(ref bytes, offset, (Int32)value);
+                            writer.WriteInt32ForceInt32Block((Int32)value, ref idx); return;
                         case 7:
-                            return MessagePackBinary.WriteUInt32ForceUInt32Block(ref bytes, offset, (UInt32)value);
+                            writer.WriteUInt32ForceUInt32Block((UInt32)value, ref idx); return;
                         case 8:
-                            return MessagePackBinary.WriteInt64ForceInt64Block(ref bytes, offset, (Int64)value);
+                            writer.WriteInt64ForceInt64Block((Int64)value, ref idx); return;
                         case 9:
-                            return MessagePackBinary.WriteUInt64ForceUInt64Block(ref bytes, offset, (UInt64)value);
-                        default:
-                            break;
+                            writer.WriteUInt64ForceUInt64Block((UInt64)value, ref idx); return;
                     }
                 }
                 else if (value is System.Collections.IDictionary) // check IDictionary first
                 {
                     var d = value as System.Collections.IDictionary;
-                    var startOffset = offset;
-                    offset += MessagePackBinary.WriteMapHeader(ref bytes, offset, d.Count);
+                    writer.WriteMapHeader(d.Count, ref idx);
                     foreach (System.Collections.DictionaryEntry item in d)
                     {
-                        offset += Serialize(ref bytes, offset, item.Key, formatterResolver);
-                        offset += Serialize(ref bytes, offset, item.Value, formatterResolver);
+                        Serialize(ref writer, ref idx, item.Key, formatterResolver);
+                        Serialize(ref writer, ref idx, item.Value, formatterResolver);
                     }
-                    return offset - startOffset;
+                    return;
                 }
                 else if (value is System.Collections.ICollection)
                 {
                     var c = value as System.Collections.ICollection;
-                    var startOffset = offset;
-                    offset += MessagePackBinary.WriteArrayHeader(ref bytes, offset, c.Count);
+                    writer.WriteArrayHeader(c.Count, ref idx);
                     foreach (var item in c)
                     {
-                        offset += Serialize(ref bytes, offset, item, formatterResolver);
+                        Serialize(ref writer, ref idx, item, formatterResolver);
                     }
-                    return offset - startOffset;
+                    return;
                 }
             }
 
-            ThrowHelper.ThrowInvalidOperationException_NotSupported(t); return default;
+            ThrowHelper.ThrowInvalidOperationException_NotSupported(t);
         }
 
-        public object Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public object Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            var type = MessagePackBinary.GetMessagePackType(bytes, offset);
+            var type = reader.GetMessagePackType();
             switch (type)
             {
                 case MessagePackType.Integer:
-                    var code = bytes[offset];
+                    var code = reader.Peek();
                     if (MessagePackCode.MinNegativeFixInt <= code && code <= MessagePackCode.MaxNegativeFixInt)
                     {
-                        return MessagePackBinary.ReadSByte(bytes, offset, out readSize);
+                        return reader.ReadSByte();
                     }
                     else if (MessagePackCode.MinFixInt <= code && code <= MessagePackCode.MaxFixInt)
                     {
-                        return MessagePackBinary.ReadByte(bytes, offset, out readSize);
+                        return reader.ReadByte();
                     }
                     else
                     {
                         switch (code)
                         {
-                            case MessagePackCode.Int8: return MessagePackBinary.ReadSByte(bytes, offset, out readSize);
-                            case MessagePackCode.Int16: return MessagePackBinary.ReadInt16(bytes, offset, out readSize);
-                            case MessagePackCode.Int32: return MessagePackBinary.ReadInt32(bytes, offset, out readSize);
-                            case MessagePackCode.Int64: return MessagePackBinary.ReadInt64(bytes, offset, out readSize);
-                            case MessagePackCode.UInt8: return MessagePackBinary.ReadByte(bytes, offset, out readSize);
-                            case MessagePackCode.UInt16: return MessagePackBinary.ReadUInt16(bytes, offset, out readSize);
-                            case MessagePackCode.UInt32: return MessagePackBinary.ReadUInt32(bytes, offset, out readSize);
-                            case MessagePackCode.UInt64: return MessagePackBinary.ReadUInt64(bytes, offset, out readSize);
-                            default: ThrowHelper.ThrowInvalidOperationException_Primitive_Bytes(); readSize = default; return null;
+                            case MessagePackCode.Int8: return reader.ReadSByte();
+                            case MessagePackCode.Int16: return reader.ReadInt16();
+                            case MessagePackCode.Int32: return reader.ReadInt32();
+                            case MessagePackCode.Int64: return reader.ReadInt64();
+                            case MessagePackCode.UInt8: return reader.ReadByte();
+                            case MessagePackCode.UInt16: return reader.ReadUInt16();
+                            case MessagePackCode.UInt32: return reader.ReadUInt32();
+                            case MessagePackCode.UInt64: return reader.ReadUInt64();
+                            default: ThrowHelper.ThrowInvalidOperationException_Primitive_Bytes(); return null;
                         }
                     }
                 case MessagePackType.Boolean:
-                    return MessagePackBinary.ReadBoolean(bytes, offset, out readSize);
+                    return reader.ReadBoolean();
                 case MessagePackType.Float:
-                    if (MessagePackCode.Float32 == bytes[offset])
+                    if (MessagePackCode.Float32 == reader.Peek())
                     {
-                        return MessagePackBinary.ReadSingle(bytes, offset, out readSize);
+                        return reader.ReadSingle();
                     }
                     else
                     {
-                        return MessagePackBinary.ReadDouble(bytes, offset, out readSize);
+                        return reader.ReadDouble();
                     }
                 case MessagePackType.String:
-                    return MessagePackBinary.ReadString(bytes, offset, out readSize);
+                    return reader.ReadString();
                 case MessagePackType.Binary:
-                    return MessagePackBinary.ReadBytes(bytes, offset, out readSize);
+                    return reader.ReadBytes();
                 case MessagePackType.Extension:
-                    var ext = MessagePackBinary.ReadExtensionFormatHeader(bytes, offset, out readSize);
-                    if (ext.TypeCode != ReservedMessagePackExtensionTypeCode.DateTime)
+                    var extTypeCode = reader.GetExtensionFormatTypeCode();
+                    if (extTypeCode != ReservedMessagePackExtensionTypeCode.DateTime)
                     {
                         ThrowHelper.ThrowInvalidOperationException_Primitive_Bytes();
                     }
-                    return MessagePackBinary.ReadDateTime(bytes, offset, out readSize);
+                    return reader.ReadDateTime();
                 case MessagePackType.Array:
                     {
-                        var length = MessagePackBinary.ReadArrayHeader(bytes, offset, out readSize);
-                        var startOffset = offset;
-                        offset += readSize;
+                        var length = reader.ReadArrayHeader();
 
                         var objectFormatter = formatterResolver.GetFormatter<object>();
                         var array = new object[length];
                         for (int i = 0; i < length; i++)
                         {
-                            array[i] = objectFormatter.Deserialize(bytes, offset, formatterResolver, out readSize);
-                            offset += readSize;
+                            array[i] = objectFormatter.Deserialize(ref reader, formatterResolver);
                         }
 
-                        readSize = offset - startOffset;
                         return array;
                     }
                 case MessagePackType.Map:
                     {
-                        var length = MessagePackBinary.ReadMapHeader(bytes, offset, out readSize);
-                        var startOffset = offset;
-                        offset += readSize;
+                        var length = reader.ReadMapHeader();
 
                         var objectFormatter = formatterResolver.GetFormatter<object>();
                         var hash = new Dictionary<object, object>(length);
                         for (int i = 0; i < length; i++)
                         {
-                            var key = objectFormatter.Deserialize(bytes, offset, formatterResolver, out readSize);
-                            offset += readSize;
-
-                            var value = objectFormatter.Deserialize(bytes, offset, formatterResolver, out readSize);
-                            offset += readSize;
+                            var key = objectFormatter.Deserialize(ref reader, formatterResolver);
+                            var value = objectFormatter.Deserialize(ref reader, formatterResolver);
 
                             hash.Add(key, value);
                         }
 
-                        readSize = offset - startOffset;
                         return hash;
                     }
                 case MessagePackType.Nil:
-                    readSize = 1;
+                    reader.AdvanceWithinSpan(1);
                     return null;
                 default:
-                    ThrowHelper.ThrowInvalidOperationException_Primitive_Bytes(); readSize = default; return null;
+                    ThrowHelper.ThrowInvalidOperationException_Primitive_Bytes(); return null;
             }
         }
     }

@@ -1,29 +1,27 @@
-﻿#if NETSTANDARD || NETFRAMEWORK
-
-using System;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System;
+    using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
+
     public sealed class BinaryGuidFormatter : IMessagePackFormatter<Guid>
     {
-        /// <summary>
-        /// Unsafe binary Guid formatter. this is only allows on LittleEndian environment.
-        /// </summary>
+        /// <summary>Unsafe binary Guid formatter. this is only allows on LittleEndian environment.</summary>
         public static readonly IMessagePackFormatter<Guid> Instance = new BinaryGuidFormatter();
 
-        BinaryGuidFormatter()
-        {
-        }
+        BinaryGuidFormatter() { }
 
         // Guid's underlying _a,...,_k field is sequential and same layuout as .NET Framework and Mono(Unity).
         // But target machines must be same endian so restrict only for little endian.
 
-        public unsafe int Serialize(ref byte[] bytes, int offset, Guid value, IFormatterResolver formatterResolver)
+        public unsafe void Serialize(ref MessagePackWriter writer, ref int idx, Guid value, IFormatterResolver formatterResolver)
         {
             if (!BitConverter.IsLittleEndian) ThrowHelper.ThrowException_Guid_Little_Endian();
 
-            MessagePackBinary.EnsureCapacity(ref bytes, offset, 18);
-            fixed (byte* dst = &bytes[offset])
+            writer.Ensure(idx, 18);
+
+            ref byte buffer = ref Unsafe.AddByteOffset(ref writer.PinnableAddress, (IntPtr)idx);
+            fixed (byte* dst = &buffer)
             {
                 var src = &value;
 
@@ -32,57 +30,54 @@ namespace MessagePack.Formatters
 
                 *(Guid*)(dst + 2) = *src;
             }
-
-            return 18;
+            idx += 18;
         }
 
-        public unsafe Guid Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public unsafe Guid Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             if (!BitConverter.IsLittleEndian) ThrowHelper.ThrowException_Guid_Little_Endian();
 
-            if (!(offset + 18 <= bytes.Length))
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeException();
-            }
+            //if (!(offset + 18 <= bytes.Length))
+            //{
+            //    ThrowHelper.ThrowArgumentOutOfRangeException();
+            //}
 
-            fixed (byte* src = &bytes[offset])
+            var valueSpan = reader.Peek(18);
+            reader.Advance(18);
+            fixed (byte* src = &MemoryMarshal.GetReference(valueSpan))
             {
                 if (src[0] != MessagePackCode.Bin8)
                 {
-                    ThrowHelper.ThrowInvalidOperationException_Code(bytes[offset]);
+                    ThrowHelper.ThrowInvalidOperationException_Code(valueSpan[0]);
                 }
                 if (src[1] != 16)
                 {
                     ThrowHelper.ThrowInvalidOperationException_Guid_Size();
                 }
 
-                var target = *(Guid*)(src + 2);
-                readSize = 18;
-                return target;
+                return *(Guid*)(src + 2);
             }
         }
     }
 
     public sealed class BinaryDecimalFormatter : IMessagePackFormatter<Decimal>
     {
-        /// <summary>
-        /// Unsafe binary Decimal formatter. this is only allows on LittleEndian environment.
-        /// </summary>
+        /// <summary>Unsafe binary Decimal formatter. this is only allows on LittleEndian environment.</summary>
         public static readonly IMessagePackFormatter<Decimal> Instance = new BinaryDecimalFormatter();
 
-        BinaryDecimalFormatter()
-        {
-        }
+        BinaryDecimalFormatter() { }
 
         // decimal underlying "flags, hi, lo, mid" fields are sequential and same layuout with .NET Framework and Mono(Unity)
         // But target machines must be same endian so restrict only for little endian.
 
-        public unsafe int Serialize(ref byte[] bytes, int offset, Decimal value, IFormatterResolver formatterResolver)
+        public unsafe void Serialize(ref MessagePackWriter writer, ref int idx, Decimal value, IFormatterResolver formatterResolver)
         {
             if (!BitConverter.IsLittleEndian) ThrowHelper.ThrowException_Decimal_Little_Endian();
 
-            MessagePackBinary.EnsureCapacity(ref bytes, offset, 18);
-            fixed (byte* dst = &bytes[offset])
+            writer.Ensure(idx, 18);
+
+            ref byte buffer = ref Unsafe.AddByteOffset(ref writer.PinnableAddress, (IntPtr)idx);
+            fixed (byte* dst = &buffer)
             {
                 var src = &value;
 
@@ -91,36 +86,33 @@ namespace MessagePack.Formatters
 
                 *(Decimal*)(dst + 2) = *src;
             }
-
-            return 18;
+            idx += 18;
         }
 
-        public unsafe Decimal Deserialize(byte[] bytes, int offset, IFormatterResolver formatterResolver, out int readSize)
+        public unsafe Decimal Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             if (!BitConverter.IsLittleEndian) ThrowHelper.ThrowException_Decimal_Little_Endian();
 
-            if (!(offset + 18 <= bytes.Length))
-            {
-                ThrowHelper.ThrowArgumentOutOfRangeException();
-            }
+            //if (!(offset + 18 <= bytes.Length))
+            //{
+            //    ThrowHelper.ThrowArgumentOutOfRangeException();
+            //}
 
-            fixed (byte* src = &bytes[offset])
+            var valueSpan = reader.Peek(18);
+            reader.Advance(18);
+            fixed (byte* src = &MemoryMarshal.GetReference(valueSpan))
             {
                 if (src[0] != MessagePackCode.Bin8)
                 {
-                    ThrowHelper.ThrowInvalidOperationException_Code(bytes[offset]);
+                    ThrowHelper.ThrowInvalidOperationException_Code(src[0]);
                 }
                 if (src[1] != 16)
                 {
                     ThrowHelper.ThrowInvalidOperationException_Guid_Size();
                 }
 
-                var target = *(Decimal*)(src + 2);
-                readSize = 18;
-                return target;
+                return *(Decimal*)(src + 2);
             }
         }
     }
 }
-
-#endif

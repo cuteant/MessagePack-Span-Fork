@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MessagePack
@@ -30,23 +31,24 @@ namespace MessagePack
             this.Value = value;
         }
 
-        public Float32Bits(byte[] bigEndianBytes, int offset)
+        public Float32Bits(ref byte bigEndianBytes)
         {
             this = default(Float32Bits);
 
+            IntPtr offset = (IntPtr)1;
             if (BitConverter.IsLittleEndian)
             {
-                this.Byte0 = bigEndianBytes[offset + 3];
-                this.Byte1 = bigEndianBytes[offset + 2];
-                this.Byte2 = bigEndianBytes[offset + 1];
-                this.Byte3 = bigEndianBytes[offset];
+                this.Byte0 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 3);
+                this.Byte1 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 2);
+                this.Byte2 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 1);
+                this.Byte3 = Unsafe.AddByteOffset(ref bigEndianBytes, offset);
             }
             else
             {
-                this.Byte0 = bigEndianBytes[offset];
-                this.Byte1 = bigEndianBytes[offset + 1];
-                this.Byte2 = bigEndianBytes[offset + 2];
-                this.Byte3 = bigEndianBytes[offset + 3];
+                this.Byte0 = Unsafe.AddByteOffset(ref bigEndianBytes, offset);
+                this.Byte1 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 1);
+                this.Byte2 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 2);
+                this.Byte3 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 3);
             }
         }
     }
@@ -87,31 +89,32 @@ namespace MessagePack
             this.Value = value;
         }
 
-        public Float64Bits(byte[] bigEndianBytes, int offset)
+        public Float64Bits(ref byte bigEndianBytes)
         {
             this = default(Float64Bits);
 
+            IntPtr offset = (IntPtr)1;
             if (BitConverter.IsLittleEndian)
             {
-                this.Byte0 = bigEndianBytes[offset + 7];
-                this.Byte1 = bigEndianBytes[offset + 6];
-                this.Byte2 = bigEndianBytes[offset + 5];
-                this.Byte3 = bigEndianBytes[offset + 4];
-                this.Byte4 = bigEndianBytes[offset + 3];
-                this.Byte5 = bigEndianBytes[offset + 2];
-                this.Byte6 = bigEndianBytes[offset + 1];
-                this.Byte7 = bigEndianBytes[offset];
+                this.Byte0 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 7);
+                this.Byte1 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 6);
+                this.Byte2 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 5);
+                this.Byte3 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 4);
+                this.Byte4 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 3);
+                this.Byte5 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 2);
+                this.Byte6 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 1);
+                this.Byte7 = Unsafe.AddByteOffset(ref bigEndianBytes, offset);
             }
             else
             {
-                this.Byte0 = bigEndianBytes[offset];
-                this.Byte1 = bigEndianBytes[offset + 1];
-                this.Byte2 = bigEndianBytes[offset + 2];
-                this.Byte3 = bigEndianBytes[offset + 3];
-                this.Byte4 = bigEndianBytes[offset + 4];
-                this.Byte5 = bigEndianBytes[offset + 5];
-                this.Byte6 = bigEndianBytes[offset + 6];
-                this.Byte7 = bigEndianBytes[offset + 7];
+                this.Byte0 = Unsafe.AddByteOffset(ref bigEndianBytes, offset);
+                this.Byte1 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 1);
+                this.Byte2 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 2);
+                this.Byte3 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 3);
+                this.Byte4 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 4);
+                this.Byte5 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 5);
+                this.Byte6 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 6);
+                this.Byte7 = Unsafe.AddByteOffset(ref bigEndianBytes, offset + 7);
             }
         }
     }

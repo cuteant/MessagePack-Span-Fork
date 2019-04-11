@@ -5,11 +5,11 @@ using System.Text;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace MessagePack.Internal
 {
     // Key = long, Value = int for UTF8String Dictionary
-
     public class AutomataDictionary : IEnumerable<KeyValuePair<string, int>>
     {
         readonly AutomataNode root;
@@ -19,7 +19,6 @@ namespace MessagePack.Internal
             root = new AutomataNode(0);
         }
 
-#if NETSTANDARD || NETFRAMEWORK
         public unsafe void Add(string str, int value)
         {
             var bytes = Encoding.UTF8.GetBytes(str);
@@ -33,7 +32,7 @@ namespace MessagePack.Internal
                 {
                     var key = AutomataKeyGen.GetKey(ref p, ref rest);
 
-                    if (rest == 0)
+                    if (0u >= (uint)rest)
                     {
                         node = node.Add(key, value, str);
                     }
@@ -45,13 +44,13 @@ namespace MessagePack.Internal
             }
         }
 
-        public unsafe bool TryGetValue(byte[] bytes, int offset, int count, out int value)
+        public unsafe bool TryGetValue(ReadOnlySpan<byte> bytes, out int value)
         {
-            fixed (byte* p = &bytes[0])
+            fixed (byte* p = &MemoryMarshal.GetReference(bytes))
             {
                 var p1 = p;
                 var node = root;
-                var rest = count;
+                var rest = bytes.Length;
 
                 while (rest != 0 && node != null)
                 {
@@ -70,34 +69,6 @@ namespace MessagePack.Internal
                 }
             }
         }
-#else
-        // for Unity, use safe only.
-
-        public void Add(string str, int value)
-        {
-            var bytes = Encoding.UTF8.GetBytes(str);
-            var offset = 0;
-
-            var node = root;
-
-            var rest = bytes.Length;
-            while (rest != 0)
-            {
-                var key = AutomataKeyGen.GetKeySafe(bytes, ref offset, ref rest);
-
-                if (rest == 0)
-                {
-                    node = node.Add(key, value, str);
-                }
-                else
-                {
-                    node = node.Add(key);
-                }
-            }
-        }
-
-#endif
-
 
         public bool TryGetValueSafe(in ArraySegment<byte> key, out int value)
         {
@@ -209,8 +180,8 @@ namespace MessagePack.Internal
                 {
                     if (nexts.Length == count)
                     {
-                        Array.Resize<AutomataNode>(ref nexts, (count == 0) ? 4 : (count * 2));
-                        Array.Resize<ulong>(ref nextKeys, (count == 0) ? 4 : (count * 2));
+                        Array.Resize<AutomataNode>(ref nexts, (0u >= (uint)count) ? 4 : (count * 2));
+                        Array.Resize<ulong>(ref nextKeys, (0u >= (uint)count) ? 4 : (count * 2));
                     }
                     count++;
 
@@ -234,8 +205,6 @@ namespace MessagePack.Internal
                 v.originalKey = originalKey;
                 return v;
             }
-
-#if NETSTANDARD || NETFRAMEWORK
 
             public unsafe AutomataNode SearchNext(ref byte* p, ref int rest)
             {
@@ -263,8 +232,6 @@ namespace MessagePack.Internal
 
                 return null;
             }
-
-#endif
 
             public AutomataNode SearchNextSafe(byte[] p, ref int offset, ref int rest)
             {
@@ -295,6 +262,9 @@ namespace MessagePack.Internal
 
             internal static int BinarySearch(ulong[] array, int index, int length, ulong value)
             {
+                const int IndexNotFound = -1;
+                const uint NIndexNotFound = unchecked((uint)IndexNotFound);
+
                 int lo = index;
                 int hi = index + length - 1;
                 while (lo <= hi)
@@ -302,20 +272,32 @@ namespace MessagePack.Internal
                     int i = lo + ((hi - lo) >> 1);
 
                     var arrayValue = array[i];
-                    int order;
-                    if (arrayValue < value) order = -1;
-                    else if (arrayValue > value) order = 1;
-                    else order = 0;
+                    uint order;
+                    if (arrayValue < value) order = NIndexNotFound;
+                    else if (arrayValue > value) order = 1u;
+                    else order = 0u;
 
-                    if (order == 0) return i;
-                    if (order < 0)
-                    {
-                        lo = i + 1;
-                    }
-                    else
+                    if (0u >= order) return i;
+                    if (order < NIndexNotFound)
                     {
                         hi = i - 1;
                     }
+                    else
+                    {
+                        lo = i + 1;
+                    }
+                    //int order;
+                    //if (arrayValue < value) order = IndexNotFound;
+                    //else if (arrayValue > value) order = 1;
+                    //else order = 0;
+                    //if (order < 0)
+                    //{
+                    //    lo = i + 1;
+                    //}
+                    //else
+                    //{
+                    //    hi = i - 1;
+                    //}
                 }
 
                 return ~lo;
@@ -340,11 +322,7 @@ namespace MessagePack.Internal
                 // key = AutomataKeyGen.GetKey(ref p, ref rest);
                 il.EmitLdloca(p);
                 il.EmitLdloca(rest);
-#if NETSTANDARD || NETFRAMEWORK
                 il.EmitCall(AutomataKeyGen.GetKeyMethod);
-#else
-                il.EmitCall(AutomataKeyGen.GetGetKeyMethod());
-#endif
                 il.EmitStloc(key);
 
                 // match children.
@@ -363,7 +341,7 @@ namespace MessagePack.Internal
 
                     {
                         il.EmitLdloc(rest);
-                        if (childrenExists.Length != 0 && valueExists.Length == 0)
+                        if (childrenExists.Length != 0 && 0u >= (uint)valueExists.Length)
                         {
 
                             il.Emit(OpCodes.Brfalse, gotoNotFound); // if(rest == 0)
@@ -460,229 +438,7 @@ namespace MessagePack.Internal
     {
         public delegate ulong PointerDelegate<T>(ref T p, ref int rest);
 
-#if NETSTANDARD || NETFRAMEWORK
         public static readonly MethodInfo GetKeyMethod = typeof(AutomataKeyGen).GetRuntimeMethod("GetKey", new[] { typeof(byte).MakePointerType().MakeByRefType(), typeof(int).MakeByRefType() });
-#endif
-
-#if !(NETSTANDARD)
-
-        static MethodInfo dynamicGetKeyMethod;
-        static readonly object gate = new object();
-        static DynamicAssembly dynamicAssembly;
-
-        public static MethodInfo GetGetKeyMethod()
-        {
-            if (dynamicGetKeyMethod == null)
-            {
-                lock (gate)
-                {
-                    if (dynamicGetKeyMethod == null)
-                    {
-                        dynamicAssembly = new DynamicAssembly("AutomataKeyGenHelper");
-                        var helperType = dynamicAssembly.DefineType("AutomataKeyGen", TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Abstract, null);
-
-                        var dm = helperType.DefineMethod("GetKey", MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig, typeof(ulong), new[] { typeof(byte).MakePointerType().MakeByRefType(), typeof(int).MakeByRefType() });
-
-                        var il = dm.GetILGenerator();
-
-                        il.DeclareLocal(typeof(int)); // var readSize
-                        il.DeclareLocal(typeof(ulong)); // var key = 
-                        il.DeclareLocal(typeof(int)); // var _local = 
-
-                        var elseLabel = il.DefineLabel();
-                        var endLabel = il.DefineLabel();
-                        var case0 = il.DefineLabel();
-                        var case1 = il.DefineLabel();
-                        var case2 = il.DefineLabel();
-                        var case3 = il.DefineLabel();
-                        var case4 = il.DefineLabel();
-                        var case5 = il.DefineLabel();
-                        var case6 = il.DefineLabel();
-                        var case7 = il.DefineLabel();
-
-                        il.Emit(OpCodes.Ldarg_1);
-                        il.Emit(OpCodes.Ldind_I4);
-                        il.Emit(OpCodes.Ldc_I4_8);
-                        il.Emit(OpCodes.Blt_S, elseLabel);
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldind_I8);
-                        il.Emit(OpCodes.Stloc_1);
-                        il.Emit(OpCodes.Ldc_I4_8);
-                        il.Emit(OpCodes.Stloc_0);
-                        il.Emit(OpCodes.Br, endLabel);
-
-                        il.MarkLabel(elseLabel);
-                        il.Emit(OpCodes.Ldarg_1);
-                        il.Emit(OpCodes.Ldind_I4);
-                        il.Emit(OpCodes.Stloc_2);
-                        il.Emit(OpCodes.Ldloc_2);
-                        il.Emit(OpCodes.Switch, new[] { case0, case1, case2, case3, case4, case5, case6, case7 });
-                        il.Emit(OpCodes.Br, case0); // default
-
-                        il.MarkLabel(case1);
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldind_U1);
-                        il.Emit(OpCodes.Conv_U8);
-                        il.Emit(OpCodes.Stloc_1);
-                        il.Emit(OpCodes.Ldc_I4_1);
-                        il.Emit(OpCodes.Stloc_0);
-                        il.Emit(OpCodes.Br, endLabel);
-
-                        il.MarkLabel(case2);
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldind_U2);
-                        il.Emit(OpCodes.Conv_U8);
-                        il.Emit(OpCodes.Stloc_1);
-                        il.Emit(OpCodes.Ldc_I4_2);
-                        il.Emit(OpCodes.Stloc_0);
-                        il.Emit(OpCodes.Br, endLabel);
-
-                        il.MarkLabel(case3);
-                        il.DeclareLocal(typeof(ushort)); // _3
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldind_U1);
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldc_I4_1);
-                        il.Emit(OpCodes.Add);
-                        il.Emit(OpCodes.Ldind_U2);
-                        il.Emit(OpCodes.Stloc_3);
-                        il.Emit(OpCodes.Conv_U8);
-                        il.Emit(OpCodes.Ldloc_3);
-                        il.Emit(OpCodes.Conv_U8);
-                        il.Emit(OpCodes.Ldc_I4_8);
-                        il.Emit(OpCodes.Shl);
-                        il.Emit(OpCodes.Or);
-                        il.Emit(OpCodes.Stloc_1);
-                        il.Emit(OpCodes.Ldc_I4_3);
-                        il.Emit(OpCodes.Stloc_0);
-                        il.Emit(OpCodes.Br, endLabel);
-
-                        il.MarkLabel(case4);
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldind_U4);
-                        il.Emit(OpCodes.Conv_U8);
-                        il.Emit(OpCodes.Stloc_1);
-                        il.Emit(OpCodes.Ldc_I4_4);
-                        il.Emit(OpCodes.Stloc_0);
-                        il.Emit(OpCodes.Br, endLabel);
-
-                        il.MarkLabel(case5);
-                        il.DeclareLocal(typeof(uint)); // _4
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldind_U1);
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldc_I4_1);
-                        il.Emit(OpCodes.Add);
-                        il.Emit(OpCodes.Ldind_U4);
-                        il.Emit(OpCodes.Stloc_S, 4);
-                        il.Emit(OpCodes.Conv_U8);
-                        il.Emit(OpCodes.Ldloc_S, 4);
-                        il.Emit(OpCodes.Conv_U8);
-                        il.Emit(OpCodes.Ldc_I4_8);
-                        il.Emit(OpCodes.Shl);
-                        il.Emit(OpCodes.Or);
-                        il.Emit(OpCodes.Stloc_1);
-                        il.Emit(OpCodes.Ldc_I4_5);
-                        il.Emit(OpCodes.Stloc_0);
-                        il.Emit(OpCodes.Br, endLabel);
-
-                        il.MarkLabel(case6);
-                        il.DeclareLocal(typeof(ulong)); // _5
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldind_U2);
-                        il.Emit(OpCodes.Conv_U8); // [x]
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldc_I4_2);
-                        il.Emit(OpCodes.Add); // [x, y]
-                        il.Emit(OpCodes.Ldind_U4);
-                        il.Emit(OpCodes.Conv_U8);
-                        il.Emit(OpCodes.Stloc_S, 5); // [x]
-                        il.Emit(OpCodes.Ldloc_S, 5);
-                        il.Emit(OpCodes.Ldc_I4_S, 16);
-                        il.Emit(OpCodes.Shl);
-                        il.Emit(OpCodes.Or);
-                        il.Emit(OpCodes.Stloc_1);
-                        il.Emit(OpCodes.Ldc_I4_6);
-                        il.Emit(OpCodes.Stloc_0);
-                        il.Emit(OpCodes.Br, endLabel);
-
-                        il.MarkLabel(case7);
-                        il.DeclareLocal(typeof(ushort)); // _6
-                        il.DeclareLocal(typeof(uint)); // _7
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldind_U1);
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldc_I4_1);
-                        il.Emit(OpCodes.Add);
-                        il.Emit(OpCodes.Ldind_U2);
-                        il.Emit(OpCodes.Stloc_S, 6);
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldc_I4_3);
-                        il.Emit(OpCodes.Add);
-                        il.Emit(OpCodes.Ldind_U4);
-                        il.Emit(OpCodes.Stloc_S, 7);
-                        il.Emit(OpCodes.Conv_U8);
-                        il.Emit(OpCodes.Ldloc_S, 6);
-                        il.Emit(OpCodes.Conv_U8);
-                        il.Emit(OpCodes.Ldc_I4_8);
-                        il.Emit(OpCodes.Shl);
-                        il.Emit(OpCodes.Or);
-                        il.Emit(OpCodes.Ldloc_S, 7);
-                        il.Emit(OpCodes.Conv_U8);
-                        il.Emit(OpCodes.Ldc_I4_S, 24);
-                        il.Emit(OpCodes.Shl);
-                        il.Emit(OpCodes.Or);
-                        il.Emit(OpCodes.Stloc_1);
-                        il.Emit(OpCodes.Ldc_I4_7);
-                        il.Emit(OpCodes.Stloc_0);
-                        il.Emit(OpCodes.Br, endLabel);
-
-                        il.MarkLabel(case0);
-                        il.Emit(OpCodes.Ldstr, "Not Supported Length");
-                        il.Emit(OpCodes.Newobj, typeof(InvalidOperationException).GetConstructor(new[] { typeof(string) }));
-                        il.Emit(OpCodes.Throw);
-
-                        il.MarkLabel(endLabel);
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldarg_0);
-                        il.Emit(OpCodes.Ldind_I);
-                        il.Emit(OpCodes.Ldloc_0);
-                        il.Emit(OpCodes.Add);
-                        il.Emit(OpCodes.Stind_I);
-                        il.Emit(OpCodes.Ldarg_1);
-                        il.Emit(OpCodes.Ldarg_1);
-                        il.Emit(OpCodes.Ldind_I4);
-                        il.Emit(OpCodes.Ldloc_0);
-                        il.Emit(OpCodes.Sub);
-                        il.Emit(OpCodes.Stind_I4);
-                        il.Emit(OpCodes.Ldloc_1);
-                        il.Emit(OpCodes.Ret);
-
-                        var genereatedType = helperType.CreateTypeInfo().AsType();
-                        dynamicGetKeyMethod = genereatedType.GetMethods().First();
-                    }
-                }
-            }
-            
-            return dynamicGetKeyMethod;
-        }
-        
-#endif
-
-#if NETSTANDARD || NETFRAMEWORK
 
         public static unsafe ulong GetKey(ref byte* p, ref int rest)
         {
@@ -762,8 +518,6 @@ namespace MessagePack.Internal
                 return key;
             }
         }
-
-#endif
 
         public static ulong GetKeySafe(byte[] bytes, ref int offset, ref int rest)
         {

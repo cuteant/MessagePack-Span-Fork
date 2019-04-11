@@ -3,24 +3,24 @@
   <Import Project="..\nuget.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net471;net451</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.2;netstandard2.0;net471;net451</TargetFrameworks>
     <RootNamespace>MessagePack</RootNamespace>
     <AssemblyName>MessagePack.LZ4</AssemblyName>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <DefineConstants>$(DefineConstants);ENABLE_UNSAFE_MSGPACK;</DefineConstants>
+    <DefineConstants>$(DefineConstants);ENABLE_UNSAFE_MSGPACK;DEPENDENT_ON_CUTEANT</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet">
     <PackageId>MessagePack.LZ4.Unofficial</PackageId>
     <Title>MessagePack.LZ4 (Unofficial).</Title>
-    <Description>This package includes a mostly complete port of the MessagePack(for more info see: https://github.com/neuecc/MessagePack-CSharp/) assembly to support .NET 4.0 and newer.</Description>
-    <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer, Unity, Xamarin</PackageTags>
+    <Description>This package includes a mostly complete port of the MessagePack(for more info see: https://github.com/neuecc/MessagePack-CSharp/) assembly to support .NET 4.5.1 and newer.</Description>
+    <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer</PackageTags>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
     <PackageReference Include="lz4net" Version="$(Lz4netPackageVersion)" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net471' ">
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net451' ">
     <PackageReference Include="K4os.Compression.LZ4" Version="$(K4osCompressionLZ4PackageVersion)" />
   </ItemGroup>
   <ItemGroup>
