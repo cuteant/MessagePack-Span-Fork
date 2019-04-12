@@ -76,24 +76,36 @@
             }
 
             EncodingUtils.ToUtf8(ref MemoryMarshal.GetReference(utf16Source), utf16Source.Length,
-                ref Unsafe.AddByteOffset(ref pinnableAddr, (IntPtr)idx), writer._capacity - idx, out int consumed, out int written);
-            idx += written;
+                ref Unsafe.AddByteOffset(ref pinnableAddr, (IntPtr)idx), writer._capacity - idx, out _, out _);
+            idx += byteCount;
         }
 
         public static void WriteStringForceStr32Block(this ref MessagePackWriter writer, string value, ref int idx)
         {
             if (value == null) { WriteNil(ref writer, ref idx); return; }
 
-            var utf16Source = MemoryMarshal.AsBytes(value.AsSpan());
-            EncodingUtils.ToUtf8Length(utf16Source, out int byteCount);
-            writer.Ensure(idx, byteCount + 5);
+            writer.Ensure(idx, MessagePackBinary.Utf8MaxBytes(value) + 5);
 
             ref byte pinnableAddr = ref writer.PinnableAddress;
 
-            WriteInt(ref pinnableAddr, MessagePackCode.Str32, (uint)byteCount, ref idx);
+            var startOffset = idx;
+            idx += 5;
 
+            var utf16Source = MemoryMarshal.AsBytes(value.AsSpan());
             EncodingUtils.ToUtf8(ref MemoryMarshal.GetReference(utf16Source), utf16Source.Length,
-                ref Unsafe.AddByteOffset(ref pinnableAddr, (IntPtr)idx), writer._capacity - idx, out int consumed, out int written);
+                ref Unsafe.AddByteOffset(ref pinnableAddr, (IntPtr)idx), writer._capacity - idx, out _, out int written);
+
+            uint count = (uint)written;
+            IntPtr offset = (IntPtr)startOffset;
+            unchecked
+            {
+                Unsafe.AddByteOffset(ref pinnableAddr, offset) = MessagePackCode.Str32;
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 1) = (byte)(count >> 24);
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 2) = (byte)(count >> 16);
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 3) = (byte)(count >> 8);
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 4) = (byte)count;
+            }
+
             idx += written;
         }
 
@@ -132,11 +144,12 @@
 
             var utf16Source = MemoryMarshal.AsBytes(value.AsSpan());
             EncodingUtils.ToUtf8(ref MemoryMarshal.GetReference(utf16Source), utf16Source.Length,
-                ref Unsafe.AddByteOffset(ref pinnableAddr, (IntPtr)idx), writer._capacity - idx, out int consumed, out int written);
+                ref Unsafe.AddByteOffset(ref pinnableAddr, (IntPtr)idx), writer._capacity - idx, out _, out int written);
             idx += written;
         }
 
         /// <summary>Unsafe. If value is guranteed length is 0 ~ 31, can use this method.</summary>
+        [Obsolete("=> GetEncodedStringBytes.MessagePackBinary + UnsafeMemory.WriteRaw")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteFixedStringUnsafe(this ref MessagePackWriter writer, string value, int byteCount, ref int idx)
         {
@@ -149,7 +162,7 @@
 
             var utf16Source = MemoryMarshal.AsBytes(value.AsSpan());
             EncodingUtils.ToUtf8(ref MemoryMarshal.GetReference(utf16Source), utf16Source.Length,
-                ref Unsafe.AddByteOffset(ref pinnableAddr, (IntPtr)idx), writer._capacity - idx, out int consumed, out int written);
+                ref Unsafe.AddByteOffset(ref pinnableAddr, (IntPtr)idx), writer._capacity - idx, out _, out int written);
             idx += written;
         }
     }
