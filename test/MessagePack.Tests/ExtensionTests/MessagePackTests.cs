@@ -80,7 +80,7 @@ namespace MessagePack.Tests.ExtensionTests
             Assert.Equal(guid, copy.MyProperty); Assert.Equal(20, copy.MyProperty1);
         }
 
-        [Fact]
+        [Fact(Skip = "ObjectFormatter")]
         public void SerializeImmutableCollectionTest()
         {
             var imList = ImmutableList<int>.Empty.AddRange(new[] { 1, 2 });

@@ -21,7 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MessagePack\MessagePack.Standalone.csproj" />
+    <ProjectReference Include="..\Standalone.MessagePack\MessagePack.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\MessagePack.ImmutableCollection\**\*.cs" Exclude="..\MessagePack.ImmutableCollection\bin\**;..\MessagePack.ImmutableCollection\obj\**" />
+    <EmbeddedResource Include="..\MessagePack.ImmutableCollection\**\*.resx" Exclude="..\MessagePack.ImmutableCollection\bin\**;..\MessagePack.ImmutableCollection\obj\**;@(EmbeddedResource)" />
   </ItemGroup>
 
 </Project>

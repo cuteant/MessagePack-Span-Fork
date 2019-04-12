@@ -1,10 +1,8 @@
-﻿#if !DEPENDENT_ON_CUTEANT
-
-using System;
-using System.Collections.Generic;
-
-namespace MessagePack.Internal
+﻿namespace MessagePack.Internal
 {
+    using System;
+    using System.Collections.Generic;
+
     internal static class TypeConstants
     {
         /// <summary>类型</summary>
@@ -67,4 +65,3 @@ namespace MessagePack.Internal
 
     }
 }
-#endif

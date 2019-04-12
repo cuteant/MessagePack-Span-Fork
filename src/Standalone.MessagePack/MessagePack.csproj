@@ -1,0 +1,67 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\version.props" />
+  <Import Project="..\nuget.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.2;netstandard2.0;net471;net451</TargetFrameworks>
+    <RootNamespace>MessagePack</RootNamespace>
+    <AssemblyName>MessagePack</AssemblyName>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);ENABLE_UNSAFE_MSGPACK;</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet">
+    <PackageId>MessagePack.Span</PackageId>
+    <Title>MessagePack for C# (Unofficial).</Title>
+    <Description>This package includes a mostly complete port of the MessagePack(for more info see: https://github.com/neuecc/MessagePack-CSharp/) assembly to support .NET 4.5.1 and newer.
+
+These types can serialize by default:
+System.Delegate
+System.Type
+System.Globalization.CultureInfo
+System.Net.IPAddress
+System.Net.IPEndPoint
+System.Reflection.ConstructorInfo
+System.Reflection.EventInfo
+System.Reflection.FieldInfo
+System.Reflection.MemberInfo
+System.Reflection.MethodInfo
+System.Reflection.PropertyInfo
+System.Linq.Expressions.*
+    </Description>
+    <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(ImportLibs)' == 'netfx' ">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' != 'netcoreapp2.2' ">
+    <PackageReference Include="System.Buffers" Version="$(SystemBuffersPackageVersion)" />
+    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
+    <PackageReference Include="System.Numerics.Vectors" Version="$(SystemNumericsVectorsPackageVersion)" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
+    <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.Reflection.Emit" Version="$(SystemReflectionEmitPackageVersion)" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="$(SystemReflectionEmitLightweightPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MessagePack.Abstractions\MessagePack.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\MessagePack\**\*.cs" Exclude="..\MessagePack\bin\**;..\MessagePack\obj\**" />
+    <EmbeddedResource Include="..\MessagePack\**\*.resx" Exclude="..\MessagePack\bin\**;..\MessagePack\obj\**;@(EmbeddedResource)" />
+  </ItemGroup>
+
+</Project>

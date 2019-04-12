@@ -1,6 +1,4 @@
-﻿#if !DEPENDENT_ON_CUTEANT
-
-namespace MessagePack.Internal
+﻿namespace MessagePack.Internal
 {
     using System;
     using System.Reflection;
@@ -174,5 +172,3 @@ namespace MessagePack.Internal
         #endregion
     }
 }
-
-#endif

@@ -24,6 +24,11 @@
     <PackageReference Include="K4os.Compression.LZ4" Version="$(K4osCompressionLZ4PackageVersion)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MessagePack\MessagePack.Standalone.csproj" />
+    <ProjectReference Include="..\Standalone.MessagePack\MessagePack.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\MessagePack.LZ4\**\*.cs" Exclude="..\MessagePack.LZ4\bin\**;..\MessagePack.LZ4\obj\**" />
+    <EmbeddedResource Include="..\MessagePack.LZ4\**\*.resx" Exclude="..\MessagePack.LZ4\bin\**;..\MessagePack.LZ4\obj\**;@(EmbeddedResource)" />
   </ItemGroup>
 </Project>

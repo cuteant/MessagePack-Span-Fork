@@ -6,27 +6,6 @@ namespace MessagePack.Internal
     using System.Runtime.CompilerServices;
 #if DEPENDENT_ON_CUTEANT
     using CuteAnt.Reflection;
-#else
-    using System.Linq;
-
-    /// <summary>GetMemberFunc</summary>
-    /// <param name="instance"></param>
-    /// <returns></returns>
-    public delegate object MemberGetter(object instance);
-    /// <summary>GetMemberFunc</summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="instance"></param>
-    /// <returns></returns>
-    public delegate object MemberGetter<T>(T instance);
-    /// <summary>SetMemberAction</summary>
-    /// <param name="instance"></param>
-    /// <param name="value"></param>
-    public delegate void MemberSetter(object instance, object value);
-    /// <summary>SetMemberAction</summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="instance"></param>
-    /// <param name="value"></param>
-    public delegate void MemberSetter<T>(T instance, object value);
 #endif
 
     internal static class ReflectionExtensions
@@ -76,28 +55,5 @@ namespace MessagePack.Internal
             s_encodedTypeNameCache.TryAdd(type, encodedTypeName);
             return encodedTypeName;
         }
-
-#if !DEPENDENT_ON_CUTEANT
-        public static MemberGetter GetValueGetter(this FieldInfo fieldInfo) => fieldInfo.GetValue;
-        public static MemberSetter GetValueSetter(this FieldInfo fieldInfo) => fieldInfo.SetValue;
-
-        public static bool HasAttributeNamed(this FieldInfo fieldInfo, string name, bool inherit = true)
-        {
-            if (null == fieldInfo) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.fieldInfo); }
-            if (string.IsNullOrWhiteSpace(name)) { ThrowHelper.ThrowArgumentNullException(ExceptionArgument.name); }
-
-            var normalizedAttr = name.Replace("Attribute", "");
-            return fieldInfo.GetCustomAttributes(inherit).Any(_ =>
-                   string.Equals(_.GetType().Name.Replace("Attribute", ""), normalizedAttr, StringComparison.OrdinalIgnoreCase));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Type GetCachedGenericType(this Type type, params Type[] argTypes)
-        {
-            if (argTypes == null) { argTypes = Type.EmptyTypes; }
-
-            return type.MakeGenericType(argTypes);
-        }
-#endif
     }
 }

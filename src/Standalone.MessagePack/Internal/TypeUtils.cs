@@ -1,6 +1,4 @@
-﻿#if !DEPENDENT_ON_CUTEANT
-
-namespace MessagePack.Internal
+﻿namespace MessagePack.Internal
 {
     using System;
     using System.Linq.Expressions;
@@ -8,7 +6,7 @@ namespace MessagePack.Internal
     using System.Runtime.CompilerServices;
 
     /// <summary>A collection of utility functions for dealing with Type information.</summary>
-    public static class TypeUtils
+    internal static class TypeUtils
     {
         private static readonly CachedReadConcurrentDictionary<string, Type> _resolveTypeCache =
             new CachedReadConcurrentDictionary<string, Type>(DictionaryCacheConstants.SIZE_MEDIUM, StringComparer.Ordinal)
@@ -285,5 +283,3 @@ namespace MessagePack.Internal
         }
     }
 }
-
-#endif

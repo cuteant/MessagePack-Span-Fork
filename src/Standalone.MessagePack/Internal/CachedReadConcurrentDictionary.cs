@@ -1,6 +1,4 @@
-﻿#if !DEPENDENT_ON_CUTEANT
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -429,5 +427,3 @@ namespace MessagePack.Internal
         }
     }
 }
-
-#endif

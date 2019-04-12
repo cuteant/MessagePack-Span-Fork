@@ -22,9 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MessagePack.ImmutableCollection\MessagePack.ImmutableCollection.Standalone.csproj" />
-    <ProjectReference Include="..\..\src\MessagePack.LZ4\MessagePack.LZ4.Standalone.csproj" />
-    <ProjectReference Include="..\..\src\MessagePack\MessagePack.Standalone.csproj" />
+    <ProjectReference Include="..\..\src\Standalone.MessagePack\MessagePack.csproj" />
+    <ProjectReference Include="..\..\src\Standalone.MessagePack.ImmutableCollection\MessagePack.ImmutableCollection.csproj" />
+    <ProjectReference Include="..\..\src\Standalone.MessagePack.LZ4\MessagePack.LZ4.csproj" />
   </ItemGroup>
 
   <ItemGroup>
