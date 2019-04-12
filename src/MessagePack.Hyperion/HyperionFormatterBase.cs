@@ -13,6 +13,7 @@
 
     public abstract class HyperionFormatterBase<T> : DynamicObjectTypeFormatterBase<T>
     {
+        private const int c_count = 2;
 #if DESKTOPCLR
         private const int c_initialBufferSize = 1024 * 80;
 #else
@@ -47,6 +48,9 @@
         public override T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             if (reader.IsNil()) { return default; }
+
+            var count = reader.ReadArrayHeader();
+            if (count != c_count) { ThrowInvalidOperationException_Format(); }
 
             var actualType = reader.ReadNamedType(true);
             var serializedObject = reader.ReadBytes();
@@ -95,6 +99,8 @@
 
             var actualType = value.GetType();
             if (!IsSupportedType(actualType)) { ThrowInvalidOperationException(actualType); }
+
+            writer.WriteArrayHeader(c_count, ref idx);
 
             writer.WriteNamedType(actualType, ref idx);
 
@@ -162,6 +168,16 @@
             InvalidOperationException GetInvalidOperationException()
             {
                 return new InvalidOperationException($"Type '{type}' is an interface or abstract class and cannot be serialized.");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowInvalidOperationException_Format()
+        {
+            throw GetException();
+            InvalidOperationException GetException()
+            {
+                return new InvalidOperationException("Invalid Hyperion format");
             }
         }
     }
