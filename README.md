@@ -2,6 +2,8 @@
 
 This is a fork from MessagePack project: https://github.com/neuecc/MessagePack-CSharp
 
+See https://github.com/cuteant/MessagePack-Span-Fork/wiki/Performance for Benchmarks
+
 # ~ ORIGINAL README ~
 
 MessagePack for C# (.NET, .NET Core, Unity, Xamarin)
