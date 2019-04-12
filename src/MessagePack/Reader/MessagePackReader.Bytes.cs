@@ -7,7 +7,7 @@
     public ref partial struct MessagePackReader
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetBytesLength()
+        public int GetEncodedBytesLength()
         {
             ref byte position = ref Unsafe.AddByteOffset(ref MemoryMarshal.GetReference(_currentSpan), (IntPtr)_currentSpanIndex);
             return bytesLengthDecoders[position].Read(ref this, ref position);
@@ -21,10 +21,10 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<byte> ReadBytesSegment()
+        public ReadOnlySpan<byte> ReadSpan()
         {
             ref byte position = ref Unsafe.AddByteOffset(ref MemoryMarshal.GetReference(_currentSpan), (IntPtr)_currentSpanIndex);
-            return bytesSegmentDecoders[position].Read(ref this, ref position);
+            return spanDecoders[position].Read(ref this, ref position);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -228,16 +228,16 @@ namespace MessagePack.Decoders
         }
     }
 
-    internal interface IBytesSegmentDecoder
+    internal interface ISpanDecoder
     {
         ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position);
     }
 
-    internal sealed class NilBytesSegment : IBytesSegmentDecoder
+    internal sealed class NilBytesSpan : ISpanDecoder
     {
-        internal static readonly IBytesSegmentDecoder Instance = new NilBytesSegment();
+        internal static readonly ISpanDecoder Instance = new NilBytesSpan();
 
-        NilBytesSegment() { }
+        NilBytesSpan() { }
 
         public ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position)
         {
@@ -246,11 +246,11 @@ namespace MessagePack.Decoders
         }
     }
 
-    internal sealed class Bin8BytesSegment : IBytesSegmentDecoder
+    internal sealed class Bin8Span : ISpanDecoder
     {
-        internal static readonly IBytesSegmentDecoder Instance = new Bin8BytesSegment();
+        internal static readonly ISpanDecoder Instance = new Bin8Span();
 
-        Bin8BytesSegment() { }
+        Bin8Span() { }
 
         public ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position)
         {
@@ -295,11 +295,11 @@ namespace MessagePack.Decoders
         }
     }
 
-    internal sealed class Bin16BytesSegment : IBytesSegmentDecoder
+    internal sealed class Bin16Span : ISpanDecoder
     {
-        internal static readonly IBytesSegmentDecoder Instance = new Bin16BytesSegment();
+        internal static readonly ISpanDecoder Instance = new Bin16Span();
 
-        Bin16BytesSegment() { }
+        Bin16Span() { }
 
         public ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position)
         {
@@ -340,11 +340,11 @@ namespace MessagePack.Decoders
         }
     }
 
-    internal sealed class Bin32BytesSegment : IBytesSegmentDecoder
+    internal sealed class Bin32Span : ISpanDecoder
     {
-        internal static readonly IBytesSegmentDecoder Instance = new Bin32BytesSegment();
+        internal static readonly ISpanDecoder Instance = new Bin32Span();
 
-        Bin32BytesSegment() { }
+        Bin32Span() { }
 
         public ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position)
         {
@@ -389,11 +389,11 @@ namespace MessagePack.Decoders
         }
     }
 
-    internal sealed class InvalidBytesSegment : IBytesSegmentDecoder
+    internal sealed class InvalidSpan : ISpanDecoder
     {
-        internal static readonly IBytesSegmentDecoder Instance = new InvalidBytesSegment();
+        internal static readonly ISpanDecoder Instance = new InvalidSpan();
 
-        InvalidBytesSegment() { }
+        InvalidSpan() { }
 
         public ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position)
         {

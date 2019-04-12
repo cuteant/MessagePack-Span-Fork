@@ -7,7 +7,7 @@
     public ref partial struct MessagePackReader
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetStringLength()
+        public int GetEncodedStringLength()
         {
             ref byte position = ref Unsafe.AddByteOffset(ref MemoryMarshal.GetReference(_currentSpan), (IntPtr)_currentSpanIndex);
             return stringLengthDecoders[position].Read(ref this, ref position);
@@ -21,10 +21,10 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpan<byte> ReadStringSegment()
+        public ReadOnlySpan<byte> ReadUtf8Span()
         {
             ref byte position = ref Unsafe.AddByteOffset(ref MemoryMarshal.GetReference(_currentSpan), (IntPtr)_currentSpanIndex);
-            return stringSegmentDecoders[position].Read(ref this, ref position);
+            return stringSpanDecoders[position].Read(ref this, ref position);
         }
     }
 }
@@ -225,16 +225,16 @@ namespace MessagePack.Decoders
         }
     }
 
-    internal interface IStringSegmentDecoder
+    internal interface IUtf8SpanDecoder
     {
         ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position);
     }
 
-    internal sealed class NilStringSegment : IStringSegmentDecoder
+    internal sealed class NilUtf8Span : IUtf8SpanDecoder
     {
-        internal static readonly IStringSegmentDecoder Instance = new NilStringSegment();
+        internal static readonly IUtf8SpanDecoder Instance = new NilUtf8Span();
 
-        NilStringSegment() { }
+        NilUtf8Span() { }
 
         public ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position)
         {
@@ -243,11 +243,11 @@ namespace MessagePack.Decoders
         }
     }
 
-    internal sealed class FixStringSegment : IStringSegmentDecoder
+    internal sealed class FixUtf8Span : IUtf8SpanDecoder
     {
-        internal static readonly IStringSegmentDecoder Instance = new FixStringSegment();
+        internal static readonly IUtf8SpanDecoder Instance = new FixUtf8Span();
 
-        FixStringSegment() { }
+        FixUtf8Span() { }
 
         public ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position)
         {
@@ -278,11 +278,11 @@ namespace MessagePack.Decoders
         }
     }
 
-    internal sealed class Str8StringSegment : IStringSegmentDecoder
+    internal sealed class Str8Utf8Span : IUtf8SpanDecoder
     {
-        internal static readonly IStringSegmentDecoder Instance = new Str8StringSegment();
+        internal static readonly IUtf8SpanDecoder Instance = new Str8Utf8Span();
 
-        Str8StringSegment() { }
+        Str8Utf8Span() { }
 
         public ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position)
         {
@@ -313,11 +313,11 @@ namespace MessagePack.Decoders
         }
     }
 
-    internal sealed class Str16StringSegment : IStringSegmentDecoder
+    internal sealed class Str16Utf8Span : IUtf8SpanDecoder
     {
-        internal static readonly IStringSegmentDecoder Instance = new Str16StringSegment();
+        internal static readonly IUtf8SpanDecoder Instance = new Str16Utf8Span();
 
-        Str16StringSegment() { }
+        Str16Utf8Span() { }
 
         public ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position)
         {
@@ -353,11 +353,11 @@ namespace MessagePack.Decoders
         }
     }
 
-    internal sealed class Str32StringSegment : IStringSegmentDecoder
+    internal sealed class Str32Utf8Span : IUtf8SpanDecoder
     {
-        internal static readonly IStringSegmentDecoder Instance = new Str32StringSegment();
+        internal static readonly IUtf8SpanDecoder Instance = new Str32Utf8Span();
 
-        Str32StringSegment() { }
+        Str32Utf8Span() { }
 
         public ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position)
         {
@@ -401,11 +401,11 @@ namespace MessagePack.Decoders
         }
     }
 
-    internal sealed class InvalidStringSegment : IStringSegmentDecoder
+    internal sealed class InvalidUtf8Span : IUtf8SpanDecoder
     {
-        internal static readonly IStringSegmentDecoder Instance = new InvalidStringSegment();
+        internal static readonly IUtf8SpanDecoder Instance = new InvalidUtf8Span();
 
-        InvalidStringSegment() { }
+        InvalidUtf8Span() { }
 
         public ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position)
         {

@@ -24,7 +24,7 @@
         {
             if (reader.IsNil()) { return null; }
 
-            var name = MessagePackBinary.ResolveString(reader.ReadStringSegment());
+            var name = MessagePackBinary.ResolveString(reader.ReadUtf8Span());
             var declaringType = reader.ReadNamedType(_throwOnError);
             return (TEvent)declaringType
                 .GetEvent(name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);

@@ -281,7 +281,7 @@
                         var extHeader = reader.ReadExtensionFormatHeader();
 
                         // prepare type name token
-                        var typeNameLen = reader.GetStringLength();
+                        var typeNameLen = reader.GetEncodedStringLength();
                         var typeNameToken = new StringBuilder();
                         ToJsonCore(ref reader, typeNameToken);
                         int startBuilderLength = builder.Length;

@@ -190,7 +190,7 @@
         public Guid Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
 #if NETCOREAPP
-            var valueBytes = reader.ReadBytesSegment();
+            var valueBytes = reader.ReadSpan();
             return new Guid(valueBytes);
 #else
             var valueBytes = reader.ReadBytes();

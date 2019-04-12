@@ -20,7 +20,7 @@
 
             var port = reader.ReadInt32();
 #if NETCOREAPP
-            var addressBytes = reader.ReadBytesSegment();
+            var addressBytes = reader.ReadSpan();
             return new IPEndPoint(new IPAddress(addressBytes), port);
 #else
             var addressBytes = reader.ReadBytes();

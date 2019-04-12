@@ -7,7 +7,7 @@
     {
         public Type ReadNamedType(bool throwOnError)
         {
-            var typeName = ReadStringSegment();
+            var typeName = ReadUtf8Span();
             return MessagePackBinary.ResolveType(typeName, throwOnError);
         }
 

@@ -38,7 +38,7 @@
 
         public T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            var name = MessagePackBinary.ResolveString(reader.ReadStringSegment());
+            var name = MessagePackBinary.ResolveString(reader.ReadUtf8Span());
 
             if (!nameValueMapping.TryGetValue(name, out T value))
             {

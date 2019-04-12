@@ -1143,7 +1143,7 @@ namespace MessagePack.Internal
             public static readonly MethodInfo ReadBytes = typeof(MessagePackReader).GetRuntimeMethod(nameof(MessagePackReader.ReadBytes), Type.EmptyTypes);
             public static readonly MethodInfo ReadInt32 = typeof(MessagePackReader).GetRuntimeMethod(nameof(MessagePackReader.ReadInt32), Type.EmptyTypes);
             public static readonly MethodInfo ReadString = typeof(MessagePackReader).GetRuntimeMethod(nameof(MessagePackReader.ReadString), Type.EmptyTypes);
-            public static readonly MethodInfo ReadStringSegment = typeof(MessagePackReader).GetRuntimeMethod(nameof(MessagePackReader.ReadStringSegment), Type.EmptyTypes);
+            public static readonly MethodInfo ReadStringSegment = typeof(MessagePackReader).GetRuntimeMethod(nameof(MessagePackReader.ReadUtf8Span), Type.EmptyTypes);
             public static readonly MethodInfo IsNil = typeof(MessagePackReader).GetRuntimeMethod(nameof(MessagePackReader.IsNil), Type.EmptyTypes);
             public static readonly MethodInfo ReadNextBlock = typeof(MessagePackReader).GetRuntimeMethod(nameof(MessagePackReader.ReadNextBlock), Type.EmptyTypes);
             public static readonly MethodInfo ReadArrayHeader = typeof(MessagePackReader).GetRuntimeMethod(nameof(MessagePackReader.ReadArrayHeader), Type.EmptyTypes);

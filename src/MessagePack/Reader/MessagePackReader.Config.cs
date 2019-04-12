@@ -13,7 +13,7 @@
         static readonly IByteDecoder[] byteDecoders;
         static readonly IBytesDecoder[] bytesDecoders;
         static readonly IBytesLengthDecoder[] bytesLengthDecoders;
-        static readonly IBytesSegmentDecoder[] bytesSegmentDecoders;
+        static readonly ISpanDecoder[] spanDecoders;
         static readonly ISByteDecoder[] sbyteDecoders;
         static readonly ISingleDecoder[] singleDecoders;
         static readonly IDoubleDecoder[] doubleDecoders;
@@ -26,7 +26,7 @@
         static readonly IUInt64Decoder[] uint64Decoders;
         static readonly IStringDecoder[] stringDecoders;
         static readonly IStringLengthDecoder[] stringLengthDecoders;
-        static readonly IStringSegmentDecoder[] stringSegmentDecoders;
+        static readonly IUtf8SpanDecoder[] stringSpanDecoders;
         static readonly IExtDecoder[] extDecoders;
         static readonly IExtHeaderDecoder[] extHeaderDecoders;
         static readonly IExtTypeCodeDecoder[] extTypeCodeDecoders;
@@ -41,7 +41,7 @@
             byteDecoders = new IByteDecoder[MaxSize];
             bytesDecoders = new IBytesDecoder[MaxSize];
             bytesLengthDecoders = new IBytesLengthDecoder[MaxSize];
-            bytesSegmentDecoders = new IBytesSegmentDecoder[MaxSize];
+            spanDecoders = new ISpanDecoder[MaxSize];
             sbyteDecoders = new ISByteDecoder[MaxSize];
             singleDecoders = new ISingleDecoder[MaxSize];
             doubleDecoders = new IDoubleDecoder[MaxSize];
@@ -54,7 +54,7 @@
             uint64Decoders = new IUInt64Decoder[MaxSize];
             stringDecoders = new IStringDecoder[MaxSize];
             stringLengthDecoders = new IStringLengthDecoder[MaxSize];
-            stringSegmentDecoders = new IStringSegmentDecoder[MaxSize];
+            stringSpanDecoders = new IUtf8SpanDecoder[MaxSize];
             extDecoders = new IExtDecoder[MaxSize];
             extHeaderDecoders = new IExtHeaderDecoder[MaxSize];
             extTypeCodeDecoders = new IExtTypeCodeDecoder[MaxSize];
@@ -70,7 +70,7 @@
                 byteDecoders[i] = Decoders.InvalidByte.Instance;
                 bytesDecoders[i] = Decoders.InvalidBytes.Instance;
                 bytesLengthDecoders[i] = Decoders.InvalidBytesLength.Instance;
-                bytesSegmentDecoders[i] = Decoders.InvalidBytesSegment.Instance;
+                spanDecoders[i] = Decoders.InvalidSpan.Instance;
                 sbyteDecoders[i] = Decoders.InvalidSByte.Instance;
                 singleDecoders[i] = Decoders.InvalidSingle.Instance;
                 doubleDecoders[i] = Decoders.InvalidDouble.Instance;
@@ -83,7 +83,7 @@
                 uint64Decoders[i] = Decoders.InvalidUInt64.Instance;
                 stringDecoders[i] = Decoders.InvalidString.Instance;
                 stringLengthDecoders[i] = Decoders.InvalidStringLength.Instance;
-                stringSegmentDecoders[i] = Decoders.InvalidStringSegment.Instance;
+                stringSpanDecoders[i] = Decoders.InvalidUtf8Span.Instance;
                 extDecoders[i] = Decoders.InvalidExt.Instance;
                 extHeaderDecoders[i] = Decoders.InvalidExtHeader.Instance;
                 extTypeCodeDecoders[i] = Decoders.InvalidExtTypeCode.Instance;
@@ -213,7 +213,7 @@
             {
                 stringDecoders[i] = Decoders.FixString.Instance;
                 stringLengthDecoders[i] = Decoders.FixStringLength.Instance;
-                stringSegmentDecoders[i] = Decoders.FixStringSegment.Instance;
+                stringSpanDecoders[i] = Decoders.FixUtf8Span.Instance;
                 readNextDecoders[i] = Decoders.ReadNextFixStr.Instance;
             }
 
@@ -223,9 +223,9 @@
             stringLengthDecoders[MessagePackCode.Str8] = Decoders.Str8StringLength.Instance;
             stringLengthDecoders[MessagePackCode.Str16] = Decoders.Str16StringLength.Instance;
             stringLengthDecoders[MessagePackCode.Str32] = Decoders.Str32StringLength.Instance;
-            stringSegmentDecoders[MessagePackCode.Str8] = Decoders.Str8StringSegment.Instance;
-            stringSegmentDecoders[MessagePackCode.Str16] = Decoders.Str16StringSegment.Instance;
-            stringSegmentDecoders[MessagePackCode.Str32] = Decoders.Str32StringSegment.Instance;
+            stringSpanDecoders[MessagePackCode.Str8] = Decoders.Str8Utf8Span.Instance;
+            stringSpanDecoders[MessagePackCode.Str16] = Decoders.Str16Utf8Span.Instance;
+            stringSpanDecoders[MessagePackCode.Str32] = Decoders.Str32Utf8Span.Instance;
             readNextDecoders[MessagePackCode.Str8] = Decoders.ReadNextStr8.Instance;
             readNextDecoders[MessagePackCode.Str16] = Decoders.ReadNextStr16.Instance;
             readNextDecoders[MessagePackCode.Str32] = Decoders.ReadNextStr32.Instance;
@@ -233,10 +233,10 @@
             // Others
             stringDecoders[MessagePackCode.Nil] = Decoders.NilString.Instance;
             stringLengthDecoders[MessagePackCode.Nil] = Decoders.NilStringLength.Instance;
-            stringSegmentDecoders[MessagePackCode.Nil] = Decoders.NilStringSegment.Instance;
+            stringSpanDecoders[MessagePackCode.Nil] = Decoders.NilUtf8Span.Instance;
             bytesDecoders[MessagePackCode.Nil] = Decoders.NilBytes.Instance;
             bytesLengthDecoders[MessagePackCode.Nil] = Decoders.NilBytesLength.Instance;
-            bytesSegmentDecoders[MessagePackCode.Nil] = Decoders.NilBytesSegment.Instance;
+            spanDecoders[MessagePackCode.Nil] = Decoders.NilBytesSpan.Instance;
             readNextDecoders[MessagePackCode.Nil] = Decoders.ReadNext1.Instance;
 
             booleanDecoders[MessagePackCode.False] = Decoders.False.Instance;
@@ -250,9 +250,9 @@
             bytesLengthDecoders[MessagePackCode.Bin8] = Decoders.Bin8BytesLength.Instance;
             bytesLengthDecoders[MessagePackCode.Bin16] = Decoders.Bin16BytesLength.Instance;
             bytesLengthDecoders[MessagePackCode.Bin32] = Decoders.Bin32BytesLength.Instance;
-            bytesSegmentDecoders[MessagePackCode.Bin8] = Decoders.Bin8BytesSegment.Instance;
-            bytesSegmentDecoders[MessagePackCode.Bin16] = Decoders.Bin16BytesSegment.Instance;
-            bytesSegmentDecoders[MessagePackCode.Bin32] = Decoders.Bin32BytesSegment.Instance;
+            spanDecoders[MessagePackCode.Bin8] = Decoders.Bin8Span.Instance;
+            spanDecoders[MessagePackCode.Bin16] = Decoders.Bin16Span.Instance;
+            spanDecoders[MessagePackCode.Bin32] = Decoders.Bin32Span.Instance;
             readNextDecoders[MessagePackCode.Bin8] = Decoders.ReadNextBin8.Instance;
             readNextDecoders[MessagePackCode.Bin16] = Decoders.ReadNextBin16.Instance;
             readNextDecoders[MessagePackCode.Bin32] = Decoders.ReadNextBin32.Instance;

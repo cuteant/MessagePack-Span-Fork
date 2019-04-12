@@ -14,7 +14,7 @@
             if (reader.IsNil()) { return null; }
 
 #if NETCOREAPP
-            var addressBytes = reader.ReadBytesSegment();
+            var addressBytes = reader.ReadSpan();
             return new IPAddress(addressBytes);
 #else
             var addressBytes = reader.ReadBytes();

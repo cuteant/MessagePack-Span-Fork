@@ -13,7 +13,7 @@
         {
             if (reader.IsNil()) { return CultureInfo.InvariantCulture; }
 
-            return new CultureInfo(MessagePackBinary.ResolveString(reader.ReadStringSegment()));
+            return new CultureInfo(MessagePackBinary.ResolveString(reader.ReadUtf8Span()));
         }
 
         public void Serialize(ref MessagePackWriter writer, ref int idx, CultureInfo value, IFormatterResolver formatterResolver)

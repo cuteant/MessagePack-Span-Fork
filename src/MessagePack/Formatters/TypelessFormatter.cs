@@ -195,7 +195,7 @@
                 if (ext.TypeCode == ExtensionTypeCode)
                 {
                     // it has type name serialized
-                    var typeName = reader.ReadStringSegment();
+                    var typeName = reader.ReadUtf8Span();
                     var result = DeserializeByTypeName(typeName, ref reader, formatterResolver);
                     return result;
                 }
