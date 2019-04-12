@@ -18,6 +18,8 @@ namespace MessagePack.Formatters
 
     public abstract class DynamicObjectTypeFormatterBase<T> : IMessagePackFormatter<T>
     {
+        const int c_count = 2;
+
         private const string _syncRoot = "_syncRoot";
         private static readonly Func<FieldInfo, bool> DefaultFieldFilter = f =>
         {
@@ -45,10 +47,17 @@ namespace MessagePack.Formatters
         {
             if (reader.IsNil()) { return default; }
 
+            var count = reader.ReadArrayHeader();
+            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_DynamicObject_Count(); }
+
             var actualType = reader.ReadNamedType(true);
             var obj = ActivatorUtils.FastCreateInstance(actualType);
 
             var fields = _filedCache.GetOrAdd(actualType, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer, _isSupportedFieldType);
+
+            count = reader.ReadArrayHeader();
+            if (count != fields.Count) { ThrowHelper.ThrowInvalidOperationException_DynamicObjectField_Count(); }
+
             foreach (var (field, getter, setter) in fields)
             {
                 var fieldType = field.FieldType;
@@ -78,9 +87,14 @@ namespace MessagePack.Formatters
                 ThrowHelper.ThrowInvalidOperationException_InterfaceOrAbstract(actualType);
             }
 
+            writer.WriteArrayHeader(c_count, ref idx);
+
             writer.WriteNamedType(actualType, ref idx);
 
             var fields = _filedCache.GetOrAdd(actualType, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer, _isSupportedFieldType);
+
+            writer.WriteArrayHeader(fields.Count, ref idx);
+
             foreach (var (field, getter, setter) in fields)
             {
                 var fieldType = field.FieldType;
