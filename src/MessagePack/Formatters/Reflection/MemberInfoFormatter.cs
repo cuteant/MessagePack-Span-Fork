@@ -1,8 +1,6 @@
-﻿using System.Reflection;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
-    using MessagePack.Formatters.Internal;
+    using System.Reflection;
 
     public sealed class MemberInfoFormatter : MemberInfoFormatter<MemberInfo>
     {
@@ -15,6 +13,7 @@ namespace MessagePack.Formatters
     public class MemberInfoFormatter<TMember> : IMessagePackFormatter<TMember>
         where TMember : MemberInfo
     {
+        private const int c_count = 2;
         private readonly bool _throwOnError;
 
         public MemberInfoFormatter() : this(true) { }
@@ -25,20 +24,30 @@ namespace MessagePack.Formatters
         {
             if (reader.IsNil()) { return null; }
 
-            var formatter = formatterResolver.GetFormatter<MemberinfoShim>();
-            var shim = formatter.Deserialize(ref reader, formatterResolver);
-            switch (shim.MemberType)
+            var count = reader.ReadArrayHeader();
+            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_MemberInfo_Format(); }
+
+            var typeCode = reader.ReadByte();
+            switch (typeCode)
             {
-                case MemberinfoType.EventInfo:
-                    return (TMember)(object)shim.Event;
-                case MemberinfoType.FieldInfo:
-                    return (TMember)(object)shim.Field;
-                case MemberinfoType.MethodInfo:
-                    return (TMember)(object)shim.Method;
-                case MemberinfoType.PropertyInfo:
-                    return (TMember)(object)shim.Property;
+                case _.EventInfo:
+                    var evtFormatter = formatterResolver.GetFormatterWithVerify<EventInfo>();
+                    return (TMember)(object)evtFormatter.Deserialize(ref reader, formatterResolver);
+
+                case _.FieldInfo:
+                    var fieldFormatter = formatterResolver.GetFormatterWithVerify<FieldInfo>();
+                    return (TMember)(object)fieldFormatter.Deserialize(ref reader, formatterResolver);
+
+                case _.MethodInfo:
+                    var methodFormatter = formatterResolver.GetFormatterWithVerify<MethodInfo>();
+                    return (TMember)(object)methodFormatter.Deserialize(ref reader, formatterResolver);
+
+                case _.PropertyInfo:
+                    var propertyFormatter = formatterResolver.GetFormatterWithVerify<PropertyInfo>();
+                    return (TMember)(object)propertyFormatter.Deserialize(ref reader, formatterResolver);
+
                 default:
-                    return null;
+                    ThrowHelper.ThrowInvalidOperationException_MemberInfo_Format(); return null;
             }
         }
 
@@ -46,60 +55,47 @@ namespace MessagePack.Formatters
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
 
-            var shim = new MemberinfoShim();
             switch (value)
             {
                 case EventInfo ei:
-                    shim.MemberType = MemberinfoType.EventInfo;
-                    shim.Event = ei;
+                    writer.WriteArrayHeader(c_count, ref idx);
+                    writer.WriteByte(_.EventInfo, ref idx);
+                    var evtFormatter = formatterResolver.GetFormatterWithVerify<EventInfo>();
+                    evtFormatter.Serialize(ref writer, ref idx, ei, formatterResolver);
                     break;
 
                 case FieldInfo fi:
-                    shim.MemberType = MemberinfoType.FieldInfo;
-                    shim.Field = fi;
+                    writer.WriteArrayHeader(c_count, ref idx);
+                    writer.WriteByte(_.FieldInfo, ref idx);
+                    var fieldFormatter = formatterResolver.GetFormatterWithVerify<FieldInfo>();
+                    fieldFormatter.Serialize(ref writer, ref idx, fi, formatterResolver);
                     break;
 
                 case MethodInfo mi:
-                    shim.MemberType = MemberinfoType.MethodInfo;
-                    shim.Method = mi;
+                    writer.WriteArrayHeader(c_count, ref idx);
+                    writer.WriteByte(_.MethodInfo, ref idx);
+                    var methodFormatter = formatterResolver.GetFormatterWithVerify<MethodInfo>();
+                    methodFormatter.Serialize(ref writer, ref idx, mi, formatterResolver);
                     break;
 
                 case PropertyInfo pi:
-                    shim.MemberType = MemberinfoType.PropertyInfo;
-                    shim.Property = pi;
+                    writer.WriteArrayHeader(c_count, ref idx);
+                    writer.WriteByte(_.PropertyInfo, ref idx);
+                    var propertyFormatter = formatterResolver.GetFormatterWithVerify<PropertyInfo>();
+                    propertyFormatter.Serialize(ref writer, ref idx, pi, formatterResolver);
                     break;
 
                 default:
                     writer.WriteNil(ref idx); return;
             }
-
-            var formatter = formatterResolver.GetFormatter<MemberinfoShim>();
-            formatter.Serialize(ref writer, ref idx, shim, formatterResolver);
         }
-    }
-}
 
-namespace MessagePack.Formatters.Internal
-{
-    public enum MemberinfoType : byte
-    {
-        EventInfo = 0,
-        FieldInfo = 1,
-        MethodInfo = 2,
-        PropertyInfo = 3
-    }
-    [MessagePackObject]
-    public sealed class MemberinfoShim
-    {
-        [Key(0)]
-        public MemberinfoType MemberType { get; set; }
-        [Key(1)]
-        public EventInfo Event { get; set; }
-        [Key(2)]
-        public FieldInfo Field { get; set; }
-        [Key(3)]
-        public MethodInfo Method { get; set; }
-        [Key(4)]
-        public PropertyInfo Property { get; set; }
+        static class _
+        {
+            public const byte EventInfo = 0;
+            public const byte FieldInfo = 1;
+            public const byte MethodInfo = 2;
+            public const byte PropertyInfo = 3;
+        }
     }
 }

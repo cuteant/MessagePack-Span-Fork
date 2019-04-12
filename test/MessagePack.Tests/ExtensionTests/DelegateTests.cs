@@ -32,6 +32,7 @@ namespace MessagePack.Tests.ExtensionTests
         {
             Func<string> a = 123.ToString;
             var bytes = MessagePackSerializer.Serialize(a);
+            var json = MessagePackSerializer.ToJson(bytes);
             var res = MessagePackSerializer.Deserialize<Func<string>>(bytes);
             Assert.NotNull(res);
             var actual = res();

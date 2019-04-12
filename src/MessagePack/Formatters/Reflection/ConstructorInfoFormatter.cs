@@ -16,6 +16,7 @@ namespace MessagePack.Formatters
     public class ConstructorInfoFormatter<TConstructor> : IMessagePackFormatter<TConstructor>
         where TConstructor : ConstructorInfo
     {
+        private const int c_count = 2;
         private readonly bool _throwOnError;
 
         public ConstructorInfoFormatter() : this(true) { }
@@ -25,6 +26,9 @@ namespace MessagePack.Formatters
         public TConstructor Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             if (reader.IsNil()) { return null; }
+
+            var count = reader.ReadArrayHeader();
+            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_ConstructorInfo_Format(); }
 
             var declaringType = reader.ReadNamedType(_throwOnError);
             var argumentCount = reader.ReadArrayHeader();
@@ -44,6 +48,8 @@ namespace MessagePack.Formatters
         public void Serialize(ref MessagePackWriter writer, ref int idx, TConstructor value, IFormatterResolver formatterResolver)
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
+
+            writer.WriteArrayHeader(c_count, ref idx);
 
             writer.WriteNamedType(value.DeclaringType, ref idx);
             var arguments = value.GetParameters().Select(p => p.ParameterType).ToArray();

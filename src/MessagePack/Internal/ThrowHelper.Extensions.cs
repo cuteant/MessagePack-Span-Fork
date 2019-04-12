@@ -146,42 +146,92 @@ namespace MessagePack
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowInvalidOperationException_DynamicObject_Count()
+        internal static void ThrowInvalidOperationException_ConstructorInfo_Format()
         {
             throw GetException();
             InvalidOperationException GetException()
             {
-                return new InvalidOperationException("Invalid DynamicObject count");
+                return new InvalidOperationException("Invalid ConstructorInfo format");
             }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowInvalidOperationException_DynamicObjectField_Count()
+        internal static void ThrowInvalidOperationException_EventInfo_Format()
         {
             throw GetException();
             InvalidOperationException GetException()
             {
-                return new InvalidOperationException("Invalid DynamicObject field count");
+                return new InvalidOperationException("Invalid EventInfo format");
             }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowInvalidOperationException_Delegate_Count()
+        internal static void ThrowInvalidOperationException_FieldInfo_Format()
         {
             throw GetException();
             InvalidOperationException GetException()
             {
-                return new InvalidOperationException("Invalid Delegate count");
+                return new InvalidOperationException("Invalid FieldInfo format");
             }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static void ThrowInvalidOperationException_IPEndPoint_Count()
+        internal static void ThrowInvalidOperationException_MemberInfo_Format()
         {
             throw GetException();
             InvalidOperationException GetException()
             {
-                return new InvalidOperationException("Invalid IPEndPoint count");
+                return new InvalidOperationException("Invalid MemberInfo format");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowInvalidOperationException_MethodInfo_Format()
+        {
+            throw GetException();
+            InvalidOperationException GetException()
+            {
+                return new InvalidOperationException("Invalid MethodInfo format");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowInvalidOperationException_PropertyInfo_Format()
+        {
+            throw GetException();
+            InvalidOperationException GetException()
+            {
+                return new InvalidOperationException("Invalid PropertyInfo format");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowInvalidOperationException_DynamicObject_Format()
+        {
+            throw GetException();
+            InvalidOperationException GetException()
+            {
+                return new InvalidOperationException("Invalid DynamicObject format");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowInvalidOperationException_Delegate_Format()
+        {
+            throw GetException();
+            InvalidOperationException GetException()
+            {
+                return new InvalidOperationException("Invalid Delegate format");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowInvalidOperationException_IPEndPoint_Format()
+        {
+            throw GetException();
+            InvalidOperationException GetException()
+            {
+                return new InvalidOperationException("Invalid IPEndPoint format");
             }
         }
 

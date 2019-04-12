@@ -17,7 +17,7 @@
             if (reader.IsNil()) { return default; }
 
             var count = reader.ReadArrayHeader();
-            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_Delegate_Count(); }
+            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_Delegate_Format(); }
 
             var delegateType = reader.ReadNamedType(true);
             var target = MessagePackSerializer.Typeless.TypelessFormatter.Deserialize(ref reader, formatterResolver);

@@ -17,6 +17,7 @@
     public class MethodInfoFormatter<TMethod> : IMessagePackFormatter<TMethod>
         where TMethod : MethodInfo
     {
+        private const int c_count = 4;
         private readonly bool _throwOnError;
 
         public MethodInfoFormatter() : this(true) { }
@@ -26,6 +27,9 @@
         public TMethod Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             if (reader.IsNil()) { return null; }
+
+            var count = reader.ReadArrayHeader();
+            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_MethodInfo_Format(); }
 
             var name = MessagePackBinary.ResolveString(reader.ReadUtf8Span());
             var declaringType = reader.ReadNamedType(_throwOnError);
@@ -42,9 +46,9 @@
             var method = GetMethodExt(declaringType, name,
                 BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
                 parameterTypes);
+            argumentCount = reader.ReadArrayHeader();
             if (method.IsGenericMethodDefinition)
             {
-                argumentCount = reader.ReadArrayHeader();
                 var genericTypeArguments = new Type[argumentCount];
                 for (var idx = 0; idx < argumentCount; idx++)
                 {
@@ -58,6 +62,8 @@
         public void Serialize(ref MessagePackWriter writer, ref int idx, TMethod value, IFormatterResolver formatterResolver)
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
+
+            writer.WriteArrayHeader(c_count, ref idx);
 
             var encodedName = MessagePackBinary.GetEncodedStringBytes(value.Name);
             UnsafeMemory.WriteRaw(ref writer, encodedName, ref idx);
@@ -78,6 +84,10 @@
                 {
                     writer.WriteNamedType(genericTypeArguments[i], ref idx);
                 }
+            }
+            else
+            {
+                writer.WriteArrayHeader(0, ref idx);
             }
         }
 

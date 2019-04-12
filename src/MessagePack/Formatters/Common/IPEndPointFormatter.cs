@@ -16,7 +16,7 @@
             if (reader.IsNil()) { return null; }
 
             var count = reader.ReadArrayHeader();
-            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_IPEndPoint_Count(); }
+            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_IPEndPoint_Format(); }
 
             var port = reader.ReadInt32();
 #if NETCOREAPP

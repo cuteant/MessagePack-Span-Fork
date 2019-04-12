@@ -14,6 +14,7 @@
     public class FieldInfoFormatter<TField> : IMessagePackFormatter<TField>
         where TField : FieldInfo
     {
+        private const int c_count = 2;
         private readonly bool _throwOnError;
 
         public FieldInfoFormatter() : this(true) { }
@@ -24,6 +25,9 @@
         {
             if (reader.IsNil()) { return null; }
 
+            var count = reader.ReadArrayHeader();
+            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_FieldInfo_Format(); }
+
             var name = MessagePackBinary.ResolveString(reader.ReadUtf8Span());
             var declaringType = reader.ReadNamedType(_throwOnError);
             return (TField)declaringType
@@ -33,6 +37,8 @@
         public void Serialize(ref MessagePackWriter writer, ref int idx, TField value, IFormatterResolver formatterResolver)
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
+
+            writer.WriteArrayHeader(c_count, ref idx);
 
             var encodedName = MessagePackBinary.GetEncodedStringBytes(value.Name);
             UnsafeMemory.WriteRaw(ref writer, encodedName, ref idx);

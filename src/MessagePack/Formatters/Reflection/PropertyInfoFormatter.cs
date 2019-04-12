@@ -14,6 +14,7 @@
     public class PropertyInfoFormatter<TProperty> : IMessagePackFormatter<TProperty>
         where TProperty : PropertyInfo
     {
+        private const int c_count = 2;
         private readonly bool _throwOnError;
 
         public PropertyInfoFormatter() : this(true) { }
@@ -23,6 +24,9 @@
         public TProperty Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             if (reader.IsNil()) { return null; }
+
+            var count = reader.ReadArrayHeader();
+            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_PropertyInfo_Format(); }
 
             var name = MessagePackBinary.ResolveString(reader.ReadUtf8Span());
             var declaringType = reader.ReadNamedType(_throwOnError);
@@ -34,8 +38,11 @@
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
 
+            writer.WriteArrayHeader(c_count, ref idx);
+
             var encodedName = MessagePackBinary.GetEncodedStringBytes(value.Name);
             UnsafeMemory.WriteRaw(ref writer, encodedName, ref idx);
+
             writer.WriteNamedType(value.DeclaringType, ref idx);
         }
     }

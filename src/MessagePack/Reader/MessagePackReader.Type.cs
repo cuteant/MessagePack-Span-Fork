@@ -1,14 +1,14 @@
 ﻿namespace MessagePack
 {
     using System;
-    using MessagePack.Formatters;
+    using System.Runtime.CompilerServices;
 
     public ref partial struct MessagePackReader
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Type ReadNamedType(bool throwOnError)
         {
-            var typeName = ReadUtf8Span();
-            return MessagePackBinary.ResolveType(typeName, throwOnError);
+            return MessagePackBinary.ResolveType(ReadUtf8Span(), throwOnError);
         }
 
     }

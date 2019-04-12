@@ -48,7 +48,7 @@ namespace MessagePack.Formatters
             if (reader.IsNil()) { return default; }
 
             var count = reader.ReadArrayHeader();
-            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_DynamicObject_Count(); }
+            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_DynamicObject_Format(); }
 
             var actualType = reader.ReadNamedType(true);
             var obj = ActivatorUtils.FastCreateInstance(actualType);
@@ -56,7 +56,7 @@ namespace MessagePack.Formatters
             var fields = _filedCache.GetOrAdd(actualType, s_getFieldsFunc, _fieldFilter, _fieldInfoComparer, _isSupportedFieldType);
 
             count = reader.ReadArrayHeader();
-            if (count != fields.Count) { ThrowHelper.ThrowInvalidOperationException_DynamicObjectField_Count(); }
+            if (count != fields.Count) { ThrowHelper.ThrowInvalidOperationException_DynamicObject_Format(); }
 
             foreach (var (field, getter, setter) in fields)
             {
