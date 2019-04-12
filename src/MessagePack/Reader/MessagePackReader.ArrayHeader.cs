@@ -44,7 +44,7 @@ namespace MessagePack.Decoders
         public uint Read(ref MessagePackReader reader, ref byte position)
         {
             var value = (uint)(position & 0xF);
-            reader.AdvanceWithinSpan(1);
+            reader.Advance(1);
             return value;
         }
     }

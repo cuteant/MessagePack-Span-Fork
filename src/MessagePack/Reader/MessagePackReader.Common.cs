@@ -9,7 +9,7 @@
         {
             if (_currentSpan[_currentSpanIndex] == MessagePackCode.Nil)
             {
-                AdvanceWithinSpan(1);
+                Advance(1);
                 return true;
             }
             return false;
@@ -21,14 +21,11 @@
             var code = _currentSpan[_currentSpanIndex];
             if (code == MessagePackCode.Nil)
             {
-                AdvanceWithinSpan(1);
+                Advance(1);
                 return Nil.Default;
             }
-            else
-            {
-                ThrowHelper.ThrowInvalidOperationException_Code(code);
-                return default;
-            }
+            ThrowHelper.ThrowInvalidOperationException_Code(code);
+            return default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

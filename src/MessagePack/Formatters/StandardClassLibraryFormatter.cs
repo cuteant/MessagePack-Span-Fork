@@ -386,9 +386,8 @@
 
         public Task Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (!reader.IsNil()) { ThrowHelper.ThrowInvalidOperationException_Input(); }
-            reader.AdvanceWithinSpan(1);
-            return CompletedTask;
+            if (reader.IsNil()) { return CompletedTask; }
+            ThrowHelper.ThrowInvalidOperationException_Input(); return null;
         }
     }
 

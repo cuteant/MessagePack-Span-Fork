@@ -35,7 +35,7 @@ namespace MessagePack.Decoders
         public sbyte Read(ref MessagePackReader reader, ref byte position)
         {
             var value = unchecked((sbyte)position);
-            reader.AdvanceWithinSpan(1);
+            reader.Advance(1);
             return value;
         }
     }

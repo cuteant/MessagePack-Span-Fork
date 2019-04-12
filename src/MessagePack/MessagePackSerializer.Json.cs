@@ -334,7 +334,7 @@
                 case MessagePackType.Unknown:
                 case MessagePackType.Nil:
                 default:
-                    reader.AdvanceWithinSpan(1);
+                    reader.Advance(1);
                     builder.Append("null");
                     break;
             }

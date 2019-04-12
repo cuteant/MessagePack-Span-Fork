@@ -42,7 +42,7 @@ namespace MessagePack.Decoders
         public Int32 Read(ref MessagePackReader reader, ref byte position)
         {
             var value = unchecked((sbyte)position);
-            reader.AdvanceWithinSpan(1);
+            reader.Advance(1);
             return value;
         }
     }
@@ -56,7 +56,7 @@ namespace MessagePack.Decoders
         public Int32 Read(ref MessagePackReader reader, ref byte position)
         {
             var value = position;
-            reader.AdvanceWithinSpan(1);
+            reader.Advance(1);
             return value;
         }
     }

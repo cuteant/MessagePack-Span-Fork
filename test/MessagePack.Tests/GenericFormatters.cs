@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace MessagePack.Tests
 {
     public class GenericFormatters
     {
-        T Convert<T>(T value)
+        object Convert(object value)
         {
-            return MessagePackSerializer.Deserialize<T>(MessagePackSerializer.Serialize(value));
+            return MessagePackSerializer.DeepCopy(value);
         }
 
         public static IEnumerable<object[]> tupleTestData = new []
@@ -26,9 +23,9 @@ namespace MessagePack.Tests
             new object[] { Tuple.Create(1,2,3,4,5,6,7,8) },
         };
 
-        [Theory(Skip ="AppVeyor Testing")]
+        [Theory()]
         [MemberData(nameof(tupleTestData))]
-        public void TupleTest<T>(T data)
+        public void TupleTest(object data)
         {
             Convert(data).IsStructuralEqual(data);
         }
@@ -45,10 +42,9 @@ namespace MessagePack.Tests
             new object[] { ValueTuple.Create(1,2,3,4,5,6,7,8) ,null},
         };
 
-        [Theory(Skip = "AppVeyor Testing")]
-        [MemberData(nameof(tupleTestData))]
-        public void TupleTest2<T>(T data, T? @null)
-            where T : struct
+        [Theory()]
+        [MemberData(nameof(valueTupleTestData))]
+        public void TupleTest2(object data, object @null)
         {
             Convert(data).IsStructuralEqual(data);
             Convert(@null).IsNull();
@@ -60,10 +56,9 @@ namespace MessagePack.Tests
             new object[] { new KeyValuePair<int, int>(3,4), new KeyValuePair<int, int>(5,6) },
         };
 
-        [Theory(Skip = "AppVeyor Testing")]
+        [Theory()]
         [MemberData(nameof(keyValuePairData))]
-        public void KeyValuePairTest<T>(T t, T? t2)
-            where T : struct
+        public void KeyValuePairTest(object t, object t2)
         {
             Convert(t).IsStructuralEqual(t);
             Convert(t2).IsStructuralEqual(t2);
@@ -75,12 +70,12 @@ namespace MessagePack.Tests
             new object[] { new ArraySegment<byte>(new byte[0], 0, 0), null, new byte[0] },
         };
 
-        [Theory(Skip = "AppVeyor Testing")]
+        [Theory()]
         [MemberData(nameof(byteArraySegementData))]
         public void ByteArraySegmentTest(ArraySegment<byte> t, ArraySegment<byte>? t2, byte[] reference)
         {
             MessagePackSerializer.Serialize(t).Is(MessagePackSerializer.Serialize(reference));
-            Convert(t).Array.Is(reference);
+            ((ArraySegment<byte>)Convert(t)).Array.Is(reference);
             var reader = new MessagePackReader(MessagePackSerializer.Serialize(t2));
             reader.IsNil().IsTrue();
         }

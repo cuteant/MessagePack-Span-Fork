@@ -222,7 +222,7 @@ namespace MessagePack.Formatters
                         return hash;
                     }
                 case MessagePackType.Nil:
-                    reader.AdvanceWithinSpan(1);
+                    reader.Advance(1);
                     return null;
                 default:
                     ThrowHelper.ThrowInvalidOperationException_Primitive_Bytes(); return null;

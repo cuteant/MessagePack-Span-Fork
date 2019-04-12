@@ -67,7 +67,7 @@ namespace MessagePack.Decoders
         internal static readonly IReadNextDecoder Instance = new ReadNext1();
         ReadNext1() { }
 
-        public void Read(ref MessagePackReader reader, ref byte position) { reader.AdvanceWithinSpan(1); }
+        public void Read(ref MessagePackReader reader, ref byte position) { reader.Advance(1); }
     }
 
     internal sealed class ReadNext2 : IReadNextDecoder

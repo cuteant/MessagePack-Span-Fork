@@ -1,7 +1,7 @@
 <Project>
   <!-- Set common properties regarding assembly information and nuget packages -->
   <PropertyGroup>
-    <Authors>neuecc, Seabiscuit</Authors>
+    <Authors>Seabiscuit</Authors>
     <Product>MessagePack</Product>
     <PackageProjectUrl>https://github.com/cuteant/MessagePack-Span-Fork/</PackageProjectUrl>
     <PackageLicense>https://github.com/cuteant/MessagePack-Span-Fork/blob/master/LICENSE</PackageLicense>

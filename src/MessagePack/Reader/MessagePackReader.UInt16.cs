@@ -39,7 +39,7 @@ namespace MessagePack.Decoders
         public UInt16 Read(ref MessagePackReader reader, ref byte position)
         {
             var value = position;
-            reader.AdvanceWithinSpan(1);
+            reader.Advance(1);
             return value;
         }
     }

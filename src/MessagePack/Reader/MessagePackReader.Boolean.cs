@@ -9,16 +9,16 @@
         public bool ReadBoolean()
         {
             //var value = booleanDecoders[_currentSpan[_currentSpanIndex]].Read();
-            //AdvanceWithinSpan(1);
+            //Advance(1);
             //return value;
             var code = _currentSpan[_currentSpanIndex];
             switch (code)
             {
                 case MessagePackCode.False:
-                    AdvanceWithinSpan(1);
+                    Advance(1);
                     return false;
                 case MessagePackCode.True:
-                    AdvanceWithinSpan(1);
+                    Advance(1);
                     return true;
 
                 default:

@@ -15,6 +15,10 @@ namespace MessagePack.Tests
         {
             return MessagePackSerializer.Deserialize<T>(MessagePackSerializer.Serialize(value));
         }
+        T Convert1<T>(T value)
+        {
+            return MessagePackSerializer.Deserialize<T>(SequenceFactory.CreateSplit(MessagePackSerializer.Serialize(value), 1, 32));
+        }
 
 
         [Fact]
@@ -46,6 +50,7 @@ namespace MessagePack.Tests
             };
 
             Convert(o).IsStructuralEqual(o);
+            Convert1(o).IsStructuralEqual(o);
         }
 
 
@@ -255,6 +260,10 @@ namespace MessagePack.Tests
             var v = Convert(t);
             v.MyProperty0.Is(100);
             v.MyProperty1.Is("aaa");
+
+            v = Convert1(t);
+            v.MyProperty0.Is(100);
+            v.MyProperty1.Is("aaa");
         }
 
         [Fact]
@@ -262,6 +271,10 @@ namespace MessagePack.Tests
         {
             var t = new GenericStruct<int, string> { MyProperty0 = 100, MyProperty1 = "aaa" };
             var v = Convert(t);
+            v.MyProperty0.Is(100);
+            v.MyProperty1.Is("aaa");
+
+            v = Convert1(t);
             v.MyProperty0.Is(100);
             v.MyProperty1.Is("aaa");
         }

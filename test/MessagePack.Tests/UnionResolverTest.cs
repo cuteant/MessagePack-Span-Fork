@@ -16,6 +16,10 @@ namespace MessagePack.Tests
         {
             return MessagePackSerializer.Deserialize<T>(MessagePackSerializer.Serialize(value));
         }
+        T Convert1<T>(T value)
+        {
+            return MessagePackSerializer.Deserialize<T>(SequenceFactory.CreateSplit(MessagePackSerializer.Serialize(value), 1, 32));
+        }
 
         public static IEnumerable<object[]> unionData = new []
         {
@@ -25,21 +29,25 @@ namespace MessagePack.Tests
             new object[]{new MySubUnion4 { Four = 24353 }, new MySubUnion4 { Four = 24353 }},
         };
 
-        // TODO 测试无效
         [Theory]
         [MemberData(nameof(unionData))]
-        public void Hoge<T, U>(T data, U data2)
-            where T : IUnionChecker
-            where U : IUnionChecker2
+        public void Hoge(object data, object data2)
+            //where T : IUnionChecker
+            //where U : IUnionChecker2
         {
-            var unionData1 = MessagePackSerializer.Serialize<IUnionChecker>(data);
-            var unionData2 = MessagePackSerializer.Serialize<IUnionChecker2>(data2);
+            var dataType = data.GetType();
+            var data2Type = data2.GetType();
+
+            var unionData1 = MessagePackSerializer.Serialize<IUnionChecker>((IUnionChecker)data);
+            var unionData2 = MessagePackSerializer.Serialize<IUnionChecker2>((IUnionChecker2)data2);
 
             var reData1 = MessagePackSerializer.Deserialize<IUnionChecker>(unionData1);
-            var reData2 = MessagePackSerializer.Deserialize<IUnionChecker>(unionData1);
+            var reData2 = MessagePackSerializer.Deserialize<IUnionChecker2>(unionData2);
 
-            reData1.IsInstanceOf<T>();
-            reData2.IsInstanceOf<U>();
+            //reData1.IsInstanceOf<IUnionChecker>();
+            //reData2.IsInstanceOf<IUnionChecker2>();
+            Assert.IsType(dataType, reData1);
+            Assert.IsType(data2Type, reData2);
 
             var null1 = MessagePackSerializer.Serialize<IUnionChecker>(null);
             var null2 = MessagePackSerializer.Serialize<IUnionChecker2>(null);
@@ -60,6 +68,15 @@ namespace MessagePack.Tests
 
             var convert1 = Convert(union1);
             var convert2 = Convert(union2);
+
+            convert1[0].IsInstanceOf<B>().Is(x => x.Name == "b" && x.Val == 2);
+            convert1[1].IsInstanceOf<C>().Is(x => x.Name == "t" && x.Val == 5 && x.Valer == 99);
+
+            convert2[0].IsInstanceOf<B2>().Is(x => x.Name == "b" && x.Val == 2);
+            convert2[1].IsInstanceOf<C2>().Is(x => x.Name == "t" && x.Val == 5 && x.Valer == 99);
+
+            convert1 = Convert1(union1);
+            convert2 = Convert1(union2);
 
             convert1[0].IsInstanceOf<B>().Is(x => x.Name == "b" && x.Val == 2);
             convert1[1].IsInstanceOf<C>().Is(x => x.Name == "t" && x.Val == 5 && x.Valer == 99);

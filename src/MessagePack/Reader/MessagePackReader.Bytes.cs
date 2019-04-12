@@ -55,7 +55,7 @@ namespace MessagePack.Decoders
 
         public byte[] Read(ref MessagePackReader reader, ref byte position)
         {
-            reader.AdvanceWithinSpan(1);
+            reader.Advance(1);
             return null;
         }
     }
@@ -241,7 +241,7 @@ namespace MessagePack.Decoders
 
         public ReadOnlySpan<byte> Read(ref MessagePackReader reader, ref byte position)
         {
-            reader.AdvanceWithinSpan(1);
+            reader.Advance(1);
             return ReadOnlySpan<byte>.Empty;
         }
     }
