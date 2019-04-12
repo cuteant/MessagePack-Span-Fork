@@ -26,7 +26,6 @@
         static readonly ThreadsafeTypeKeyHashTable<KeyValuePair<object, SerializeMethod>> s_serializers = new ThreadsafeTypeKeyHashTable<KeyValuePair<object, SerializeMethod>>();
         static readonly ThreadsafeTypeKeyHashTable<KeyValuePair<object, DeserializeMethod>> s_deserializers = new ThreadsafeTypeKeyHashTable<KeyValuePair<object, DeserializeMethod>>();
         static readonly ThreadsafeTypeKeyHashTable<Type> s_typeNameCache = new ThreadsafeTypeKeyHashTable<Type>();
-        static readonly AsymmetricKeyHashTable<Type> s_typeCache = new AsymmetricKeyHashTable<Type>(new StringReadOnlySpanByteAscymmetricEqualityComparer());
 
         static readonly HashSet<string> s_blacklistCheck;
         static readonly HashSet<Type> s_useBuiltinTypes = new HashSet<Type>()
@@ -118,7 +117,7 @@
             var startOffset = idx;
             idx += 6; // mark will be written at the end, when size is known
 
-            var typeName = expectedType.GetEncodedTypeName();
+            var typeName = MessagePackBinary.GetEncodedTypeName(expectedType);
             UnsafeMemory.WriteRaw(ref writer, typeName, ref idx);
             formatterAndDelegate.Value(formatterAndDelegate.Key, ref writer, ref idx, value, formatterResolver);
 
@@ -212,10 +211,7 @@
         private static object DeserializeByTypeName(ReadOnlySpan<byte> typeName, ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             // try get type with assembly name, throw if not found
-            if (!s_typeCache.TryGetValue(typeName, out var type))
-            {
-                ResolveTypeSlow(typeName, true, out type);
-            }
+            var type = MessagePackBinary.ResolveType(typeName, true);
 
             if (!s_deserializers.TryGetValue(type, out var formatterAndDelegate))
             {
@@ -223,32 +219,6 @@
             }
 
             return formatterAndDelegate.Value(formatterAndDelegate.Key, ref reader, formatterResolver);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Type ResolveType(ReadOnlySpan<byte> typeName, bool throwOnError)
-        {
-            if (!s_typeCache.TryGetValue(typeName, out var type))
-            {
-                ResolveTypeSlow(typeName, throwOnError, out type);
-            }
-            return type;
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ResolveTypeSlow(ReadOnlySpan<byte> typeName, bool throwOnError, out Type type)
-        {
-            var buffer = typeName.ToArray();
-            var str = StringEncoding.UTF8.GetString(buffer);
-            if (throwOnError)
-            {
-                type = TypeUtils.ResolveType(str);
-            }
-            else
-            {
-                TypeUtils.TryResolveType(str, out type);
-            }
-            if (type != null) { s_typeCache.TryAdd(buffer, type); }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

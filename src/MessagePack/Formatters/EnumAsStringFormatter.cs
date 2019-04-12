@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System;
+    using System.Collections.Generic;
+    using MessagePack.Internal;
+
     // Note:This implemenataion is 'not' fastest, should more improve.
     public sealed class EnumAsStringFormatter<T> : IMessagePackFormatter<T>
     {
@@ -31,12 +32,13 @@ namespace MessagePack.Formatters
                 name = value.ToString(); // fallback for flags etc, But Enum.ToString is too slow.
             }
 
-            writer.WriteString(name, ref idx);
+            var encodedName = MessagePackBinary.GetEncodedStringBytes(name);
+            UnsafeMemory.WriteRaw(ref writer, encodedName, ref idx);
         }
 
         public T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            var name = reader.ReadString();
+            var name = MessagePackBinary.ResolveString(reader.ReadStringSegment());
 
             if (!nameValueMapping.TryGetValue(name, out T value))
             {

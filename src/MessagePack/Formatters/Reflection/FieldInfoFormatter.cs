@@ -1,7 +1,8 @@
-﻿using System.Reflection;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System.Reflection;
+    using MessagePack.Internal;
+
     public sealed class FieldInfoFormatter : FieldInfoFormatter<FieldInfo>
     {
         public static readonly IMessagePackFormatter<FieldInfo> Instance = new FieldInfoFormatter();
@@ -23,7 +24,7 @@ namespace MessagePack.Formatters
         {
             if (reader.IsNil()) { return null; }
 
-            var name = reader.ReadString();
+            var name = MessagePackBinary.ResolveString(reader.ReadStringSegment());
             var declaringType = reader.ReadNamedType(_throwOnError);
             return (TField)declaringType
                 .GetField(name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -33,7 +34,8 @@ namespace MessagePack.Formatters
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
 
-            writer.WriteString(value.Name, ref idx);
+            var encodedName = MessagePackBinary.GetEncodedStringBytes(value.Name);
+            UnsafeMemory.WriteRaw(ref writer, encodedName, ref idx);
             writer.WriteNamedType(value.DeclaringType, ref idx);
         }
     }

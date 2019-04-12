@@ -4,9 +4,6 @@ namespace MessagePack.Internal
     using System;
     using System.Reflection;
     using System.Runtime.CompilerServices;
-#if DEPENDENT_ON_CUTEANT
-    using CuteAnt.Reflection;
-#endif
 
     internal static class ReflectionExtensions
     {
@@ -33,27 +30,6 @@ namespace MessagePack.Internal
         public static bool IsIndexer(this System.Reflection.PropertyInfo propertyInfo)
         {
             return propertyInfo.GetIndexParameters().Length > 0;
-        }
-
-        static readonly ThreadsafeTypeKeyHashTable<byte[]> s_encodedTypeNameCache = new ThreadsafeTypeKeyHashTable<byte[]>(capacity: 64);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte[] GetEncodedTypeName(this Type type)
-        {
-            if (!s_encodedTypeNameCache.TryGetValue(type, out byte[] typeName))
-            {
-                typeName = GetEncodedTypeNameSlow(type);
-            }
-            return typeName;
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static byte[] GetEncodedTypeNameSlow(Type type)
-        {
-            var typeName = RuntimeTypeNameFormatter.Format(type);
-            var encodedTypeName = MessagePackBinary.GetEncodedStringBytes(typeName);
-            s_encodedTypeNameCache.TryAdd(type, encodedTypeName);
-            return encodedTypeName;
         }
     }
 }

@@ -8,7 +8,7 @@
         public Type ReadNamedType(bool throwOnError)
         {
             var typeName = ReadStringSegment();
-            return TypelessFormatter.ResolveType(typeName, throwOnError);
+            return MessagePackBinary.ResolveType(typeName, throwOnError);
         }
 
     }

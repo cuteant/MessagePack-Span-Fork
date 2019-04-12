@@ -1,9 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System;
+    using System.Linq;
+    using System.Reflection;
+    using MessagePack.Internal;
+
     public sealed class MethodInfoFormatter : MethodInfoFormatter<MethodInfo>
     {
         public static readonly IMessagePackFormatter<MethodInfo> Instance = new MethodInfoFormatter();
@@ -26,7 +27,7 @@ namespace MessagePack.Formatters
         {
             if (reader.IsNil()) { return null; }
 
-            var name = reader.ReadString();
+            var name = MessagePackBinary.ResolveString(reader.ReadStringSegment());
             var declaringType = reader.ReadNamedType(_throwOnError);
             var argumentCount = reader.ReadArrayHeader();
             var parameterTypes = Type.EmptyTypes;
@@ -58,7 +59,8 @@ namespace MessagePack.Formatters
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
 
-            writer.WriteString(value.Name, ref idx);
+            var encodedName = MessagePackBinary.GetEncodedStringBytes(value.Name);
+            UnsafeMemory.WriteRaw(ref writer, encodedName, ref idx);
 
             writer.WriteNamedType(value.DeclaringType, ref idx);
 

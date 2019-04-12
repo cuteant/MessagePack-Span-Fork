@@ -1,7 +1,8 @@
-﻿using System.Globalization;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System.Globalization;
+    using MessagePack.Internal;
+
     public sealed class CultureInfoFormatter : IMessagePackFormatter<CultureInfo>
     {
         public static readonly IMessagePackFormatter<CultureInfo> Instance = new CultureInfoFormatter();
@@ -11,14 +12,16 @@ namespace MessagePack.Formatters
         public CultureInfo Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             if (reader.IsNil()) { return CultureInfo.InvariantCulture; }
-            return new CultureInfo(reader.ReadString());
+
+            return new CultureInfo(MessagePackBinary.ResolveString(reader.ReadStringSegment()));
         }
 
         public void Serialize(ref MessagePackWriter writer, ref int idx, CultureInfo value, IFormatterResolver formatterResolver)
         {
             if (value != null)
             {
-                writer.WriteString(value.Name, ref idx);
+                var encodedBytes = MessagePackBinary.GetEncodedStringBytes(value.Name);
+                UnsafeMemory.WriteRaw(ref writer, encodedBytes, ref idx);
                 return;
             }
             writer.WriteNil(ref idx);

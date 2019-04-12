@@ -2,11 +2,17 @@
 {
     using System;
     using System.Buffers;
+    using System.Collections.Concurrent;
     using System.IO;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using System.Text;
     using System.Threading;
+    using MessagePack.Internal;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Collections;
+    using CuteAnt.Reflection;
+#endif
 
     public static class MessagePackBinary
     {
@@ -203,8 +209,50 @@
             }
         }
 
+
+        static readonly AsymmetricKeyHashTable<string> s_stringCache = new AsymmetricKeyHashTable<string>(new StringReadOnlySpanByteAscymmetricEqualityComparer());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string ResolveString(ReadOnlySpan<byte> utf8Source)
+        {
+            if (utf8Source.IsEmpty) { return string.Empty; }
+            if (!s_stringCache.TryGetValue(utf8Source, out var value))
+            {
+                ResolveStringSlow(utf8Source, out value);
+            }
+            return value;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ResolveStringSlow(ReadOnlySpan<byte> typeName, out string value)
+        {
+            if (typeName.IsEmpty)
+            {
+                value = string.Empty;
+                s_stringCache.TryAdd(Empty, value);
+            }
+            else
+            {
+                var buffer = typeName.ToArray();
+                value = Encoding.UTF8.GetString(buffer);
+                s_stringCache.TryAdd(buffer, value);
+            }
+        }
+
+
+        static readonly CachedReadConcurrentDictionary<string, byte[]> s_encodedStringCache =
+            new CachedReadConcurrentDictionary<string, byte[]>(DictionaryCacheConstants.SIZE_MEDIUM, StringComparer.Ordinal);
+        static readonly Func<string, byte[]> s_getEncodedStringBytesFunc = s => GetEncodedStringBytesImpl(s);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetEncodedStringBytes(string value)
         {
+            return s_encodedStringCache.GetOrAdd(value, s_getEncodedStringBytesFunc);
+        }
+
+        private static byte[] GetEncodedStringBytesImpl(string value)
+        {
+            //s_encodedStringCache.GetOrAdd(value,)
             var byteCount = StringEncoding.UTF8.GetByteCount(value);
             if (byteCount <= MessagePackRange.MaxFixStringLength)
             {
@@ -242,6 +290,57 @@
                 return bytes;
             }
         }
+
+
+        static readonly AsymmetricKeyHashTable<Type> s_typeCache = new AsymmetricKeyHashTable<Type>(new StringReadOnlySpanByteAscymmetricEqualityComparer());
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Type ResolveType(ReadOnlySpan<byte> typeName, bool throwOnError)
+        {
+            if (!s_typeCache.TryGetValue(typeName, out var type))
+            {
+                ResolveTypeSlow(typeName, throwOnError, out type);
+            }
+            return type;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ResolveTypeSlow(ReadOnlySpan<byte> typeName, bool throwOnError, out Type type)
+        {
+            var buffer = typeName.ToArray();
+            var str = Encoding.UTF8.GetString(buffer);
+            if (throwOnError)
+            {
+                type = TypeUtils.ResolveType(str);
+            }
+            else
+            {
+                TypeUtils.TryResolveType(str, out type);
+            }
+            if (type != null) { s_typeCache.TryAdd(buffer, type); }
+        }
+
+        static readonly ThreadsafeTypeKeyHashTable<byte[]> s_encodedTypeNameCache = new ThreadsafeTypeKeyHashTable<byte[]>(capacity: 64);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte[] GetEncodedTypeName(Type type)
+        {
+            if (!s_encodedTypeNameCache.TryGetValue(type, out byte[] typeName))
+            {
+                typeName = GetEncodedTypeNameSlow(type);
+            }
+            return typeName;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static byte[] GetEncodedTypeNameSlow(Type type)
+        {
+            var typeName = RuntimeTypeNameFormatter.Format(type);
+            var encodedTypeName = MessagePackBinary.GetEncodedStringBytes(typeName);
+            s_encodedTypeNameCache.TryAdd(type, encodedTypeName);
+            return encodedTypeName;
+        }
+
 
         /// <summary>Read MessageBlock, returns byte[] block is in MemoryPool so careful to use.</summary>
         internal static void ReadMessageBlockFromStreamUnsafe(Stream stream, IArrayBufferWriter<byte> output)
