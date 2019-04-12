@@ -1,17 +1,22 @@
-﻿using System;
-using System.Net;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System;
+    using System.Net;
+
     public sealed class IPEndPointFormatter : IMessagePackFormatter<IPEndPoint>
     {
         public static readonly IMessagePackFormatter<IPEndPoint> Instance = new IPEndPointFormatter();
 
-        public IPEndPointFormatter() { }
+        private IPEndPointFormatter() { }
+
+        const int c_count = 2;
 
         public IPEndPoint Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             if (reader.IsNil()) { return null; }
+
+            var count = reader.ReadArrayHeader();
+            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_IPEndPoint_Count(); }
 
             var port = reader.ReadInt32();
 #if NETCOREAPP
@@ -26,6 +31,8 @@ namespace MessagePack.Formatters
         public void Serialize(ref MessagePackWriter writer, ref int idx, IPEndPoint value, IFormatterResolver formatterResolver)
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
+
+            writer.WriteArrayHeader(c_count, ref idx);
 
             writer.WriteInt32(value.Port, ref idx);
 

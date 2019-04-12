@@ -165,15 +165,14 @@
                 if ((uint)serializedDataLen < NotCompressionSize)
                 {
                     // can't write direct, shoganai...
-                    writer.Ensure(idx, serializedDataLen);
-                    UnsafeMemory.WriteRaw(ref writer, ref MemoryMarshal.GetReference(serializedData.Span), serializedData.Count, ref idx);
+                    UnsafeMemory.WriteRaw(ref writer.PinnableAddress, ref MemoryMarshal.GetReference(serializedData.Span), serializedDataLen, ref idx);
                     return;
                 }
 
 #if NET451
-                var maxOutCount = LZ4Codec.MaximumOutputLength(serializedData.Count);
+                var maxOutCount = LZ4Codec.MaximumOutputLength(serializedDataLen);
 #else
-                var maxOutCount = LZ4Codec.MaximumOutputSize(serializedData.Count);
+                var maxOutCount = LZ4Codec.MaximumOutputSize(serializedDataLen);
 #endif
 
                 writer.Ensure(idx, c_lz4PackageHeaderSize + maxOutCount);
@@ -199,7 +198,7 @@
 
                 // write length(always 5 bytes)
                 MessagePackBinary.WriteInt32ForceInt32Block(
-                    ref pinnableAddr, startOffset + 6, serializedData.Count);
+                    ref pinnableAddr, startOffset + 6, serializedDataLen);
             }
         }
 

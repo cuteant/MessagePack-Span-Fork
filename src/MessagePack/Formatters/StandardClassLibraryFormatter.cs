@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
+    using System.Text;
+    using System.Threading.Tasks;
+    using MessagePack.Internal;
+
     // NET40 -> BigInteger, Complex, Tuple
 
     // byte[] is special. represents bin type.
@@ -155,11 +157,28 @@ namespace MessagePack.Formatters
         GuidFormatter() { }
 
         const int c_totalSize = 18;
-        const int c_valueSize = 16;
+        const byte c_valueSize = 16;
 
         public void Serialize(ref MessagePackWriter writer, ref int idx, Guid value, IFormatterResolver formatterResolver)
         {
-            writer.WriteBytes(value.ToByteArray(), ref idx);
+            writer.Ensure(idx, c_totalSize);
+
+            var buffer = value.ToByteArray();
+
+            ref byte pinnableAddr = ref writer.PinnableAddress;
+            IntPtr offset = (IntPtr)idx;
+            Unsafe.AddByteOffset(ref pinnableAddr, offset) = MessagePackCode.Bin8;
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 1) = c_valueSize;
+            idx += 2;
+
+            if (UnsafeMemory.Is64BitProcess)
+            {
+                UnsafeMemory64.WriteRaw16(ref pinnableAddr, ref buffer[0], ref idx);
+            }
+            else
+            {
+                UnsafeMemory32.WriteRaw16(ref pinnableAddr, ref buffer[0], ref idx);
+            }
             //MessagePackBinary.EnsureCapacity( 38);
 
             //bytes[offset] = MessagePackCode.Str8;

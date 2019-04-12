@@ -146,6 +146,16 @@ namespace MessagePack
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static void ThrowInvalidOperationException_IPEndPoint_Count()
+        {
+            throw GetException();
+            InvalidOperationException GetException()
+            {
+                return new InvalidOperationException("Invalid IPEndPoint count");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ThrowInvalidOperationException_Tuple_Count()
         {
             throw GetException();

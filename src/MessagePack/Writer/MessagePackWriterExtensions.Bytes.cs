@@ -43,7 +43,7 @@
                 WriteInt(ref pinnableAddr, MessagePackCode.Bin32, nCount, ref idx);
             }
 
-            UnsafeMemory.WriteRaw(ref writer, ref value[offset], count, ref idx);
+            UnsafeMemory.WriteRaw(ref pinnableAddr, ref value[offset], count, ref idx);
             //MessagePackBinary.CopyMemory(value, offset, writer._borrowedBuffer, idx, count);
             //idx += count;
         }

@@ -9,7 +9,7 @@ namespace MessagePack.Tests
     public class UnsafeMemoryTest
     {
         delegate void WriteDelegate(ref MessagePackWriter writer, byte[] ys, ref int idx);
-        delegate void WriteDelegate1(ref MessagePackWriter writer, ref byte src, int srcCount, ref int idx);
+        delegate void WriteDelegate1(ref byte writerSpace, ref byte src, ref int idx);
 
         [Theory]
         [InlineData('a', 1)]
@@ -121,9 +121,9 @@ namespace MessagePack.Tests
 
                 writer.Ensure(idx, i);
                 ((typeof(UnsafeMemory32)
-                    .GetMethod("WriteRaw" + i, new Type[] { typeof(MessagePackWriter).MakeByRefType(), typeof(byte).MakeByRefType(), typeof(int), typeof(int).MakeByRefType() }))
+                    .GetMethod("WriteRaw" + i, new Type[] { typeof(byte).MakeByRefType(), typeof(byte).MakeByRefType(), typeof(int).MakeByRefType() }))
                     .CreateDelegate(typeof(WriteDelegate1)) as WriteDelegate1)
-                    .Invoke(ref writer, ref MemoryMarshal.GetReference(src), i, ref idx);
+                    .Invoke(ref writer.PinnableAddress, ref MemoryMarshal.GetReference(src), ref idx);
 
                 idx.Is(i);
 
@@ -138,9 +138,9 @@ namespace MessagePack.Tests
 
                 writer.Ensure(idx, i);
                 ((typeof(UnsafeMemory64)
-                    .GetMethod("WriteRaw" + i, new Type[] { typeof(MessagePackWriter).MakeByRefType(), typeof(byte).MakeByRefType(), typeof(int), typeof(int).MakeByRefType() }))
+                    .GetMethod("WriteRaw" + i, new Type[] { typeof(byte).MakeByRefType(), typeof(byte).MakeByRefType(), typeof(int).MakeByRefType() }))
                     .CreateDelegate(typeof(WriteDelegate1)) as WriteDelegate1)
-                    .Invoke(ref writer, ref MemoryMarshal.GetReference(src), i, ref idx);
+                    .Invoke(ref writer.PinnableAddress, ref MemoryMarshal.GetReference(src), ref idx);
 
                 idx.Is(i);
 
@@ -155,9 +155,9 @@ namespace MessagePack.Tests
 
                 writer.Ensure(idx, i);
                 ((typeof(UnsafeMemory32)
-                    .GetMethod("WriteRaw" + i, new Type[] { typeof(MessagePackWriter).MakeByRefType(), typeof(byte).MakeByRefType(), typeof(int), typeof(int).MakeByRefType() }))
+                    .GetMethod("WriteRaw" + i, new Type[] { typeof(byte).MakeByRefType(), typeof(byte).MakeByRefType(), typeof(int).MakeByRefType() }))
                     .CreateDelegate(typeof(WriteDelegate1)) as WriteDelegate1)
-                    .Invoke(ref writer, ref MemoryMarshal.GetReference(src), i, ref idx);
+                    .Invoke(ref writer.PinnableAddress, ref MemoryMarshal.GetReference(src), ref idx);
 
                 idx.Is(i + 3);
 
@@ -172,9 +172,9 @@ namespace MessagePack.Tests
 
                 writer.Ensure(idx, i);
                 ((typeof(UnsafeMemory64)
-                    .GetMethod("WriteRaw" + i, new Type[] { typeof(MessagePackWriter).MakeByRefType(), typeof(byte).MakeByRefType(), typeof(int), typeof(int).MakeByRefType() }))
+                    .GetMethod("WriteRaw" + i, new Type[] { typeof(byte).MakeByRefType(), typeof(byte).MakeByRefType(), typeof(int).MakeByRefType() }))
                     .CreateDelegate(typeof(WriteDelegate1)) as WriteDelegate1)
-                    .Invoke(ref writer, ref MemoryMarshal.GetReference(src), i, ref idx);
+                    .Invoke(ref writer.PinnableAddress, ref MemoryMarshal.GetReference(src), ref idx);
 
                 idx.Is(i + 3);
 

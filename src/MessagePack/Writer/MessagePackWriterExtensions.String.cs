@@ -39,7 +39,7 @@
                 WriteInt(ref pinnableAddr, MessagePackCode.Str32, nLen, ref idx);
             }
 
-            UnsafeMemory.WriteRaw(ref writer, ref utf8stringBytes[0], byteCount, ref idx);
+            UnsafeMemory.WriteRaw(ref pinnableAddr, ref utf8stringBytes[0], byteCount, ref idx);
         }
 
         public static void WriteString(this ref MessagePackWriter writer, string value, ref int idx)

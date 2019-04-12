@@ -29,16 +29,16 @@ namespace MessagePack.Internal
             }
         }
 
-        public static void WriteRaw(ref MessagePackWriter writer, ref byte source, int sourceBytesToCopy, ref int idx)
+        public static void WriteRaw(ref byte writerSpace, ref byte source, int sourceBytesToCopy, ref int idx)
         {
             var nCount = (uint)sourceBytesToCopy;
             switch (nCount)
             {
                 case 0u: return;
 <# for(var i = 1; i <= Max; i++) { #>
-                case <#= i #>u: WriteRaw<#= i #>(ref writer, ref source, sourceBytesToCopy, ref idx); return;
+                case <#= i #>u: WriteRaw<#= i #>(ref writerSpace, ref source, ref idx); return;
 <# } #>
-                default: UnsafeMemory.WriteRawBytes(ref writer, ref source, sourceBytesToCopy, ref idx); return;
+                default: UnsafeMemory.WriteRawBytes(ref writerSpace, ref source, sourceBytesToCopy, ref idx); return;
             }
         }
 
@@ -147,9 +147,9 @@ if (i % 2 != 0)
 
 <# for(var i = 2; i <= Max; i++) { #>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteRaw<#= i #>(ref MessagePackWriter writer, ref byte src, int srcBytesToCopy, ref int idx)
+        public static void WriteRaw<#= i #>(ref byte writerSpace, ref byte src, ref int idx)
         {
-            ref byte dest = ref Unsafe.Add(ref writer.PinnableAddress, (IntPtr)(ulong)idx);
+            ref byte dest = ref Unsafe.Add(ref writerSpace, (IntPtr)(ulong)idx);
 
 <#
 int index_0 = 0;

@@ -1,13 +1,13 @@
-﻿using System;
-using System.Net;
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
+    using System;
+    using System.Net;
+
     public sealed class IPAddressFormatter : IMessagePackFormatter<IPAddress>
     {
         public static readonly IMessagePackFormatter<IPAddress> Instance = new IPAddressFormatter();
 
-        public IPAddressFormatter() { }
+        private IPAddressFormatter() { }
 
         public IPAddress Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
