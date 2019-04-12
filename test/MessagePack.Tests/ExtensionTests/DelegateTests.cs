@@ -61,6 +61,41 @@ namespace MessagePack.Tests.ExtensionTests
             Assert.Equal(1, d.Prop);
         }
 
+        delegate bool TryGet(int key, out int value);
+
+        private bool TryGetImpl(int key, out int value)
+        {
+            value = key + 1;
+            return true;
+        }
+
+        delegate void TransIndex(ref int index);
+
+        private void TransIndexImpl(ref int index)
+        {
+            index += 10;
+        }
+
+        [Fact]
+        public void CanSerializeMemberMethod1()
+        {
+            TryGet tryGet = TryGetImpl;
+            var bytes = MessagePackSerializer.Serialize(tryGet, DefaultResolver.Instance);
+            var res = MessagePackSerializer.Deserialize<TryGet>(bytes, DefaultResolver.Instance);
+            Assert.NotNull(res);
+            var key = 1;
+            Assert.True(res(key, out var value));
+            Assert.Equal(2, value);
+
+            TransIndex trans = TransIndexImpl;
+            bytes = MessagePackSerializer.Serialize(trans, DefaultResolver.Instance);
+            var res1 = MessagePackSerializer.Deserialize<TransIndex>(bytes, DefaultResolver.Instance);
+            Assert.NotNull(res1);
+            var idx = 1;
+            res1(ref idx);
+            Assert.Equal(11, idx);
+        }
+
         private static int StaticFunc(int a)
         {
             return a + 1;

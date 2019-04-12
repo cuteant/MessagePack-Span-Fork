@@ -1,14 +1,7 @@
-﻿using System;
-using System.Reflection;
-#if DEPENDENT_ON_CUTEANT
-using CuteAnt.Reflection;
-#else
-using MessagePack.Internal;
-#endif
-
-namespace MessagePack.Formatters
+﻿namespace MessagePack.Formatters
 {
-    using MessagePack.Formatters.Internal;
+    using System;
+    using System.Reflection;
 
     public sealed class DelegateFormatter : DelegateFormatter<Delegate>
     {
@@ -17,62 +10,35 @@ namespace MessagePack.Formatters
 
     public class DelegateFormatter<TDelegate> : IMessagePackFormatter<TDelegate>
     {
+        const int c_count = 3;
+
         public TDelegate Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
             if (reader.IsNil()) { return default; }
 
-            var delegateShim = (IDelegateShim)MessagePackSerializer.Typeless.TypelessFormatter.Deserialize(ref reader, formatterResolver);
-            return (TDelegate)(object)delegateShim.Method.CreateDelegate(delegateShim.DelegateType, delegateShim.GetTarget());
+            var count = reader.ReadArrayHeader();
+            if (count != c_count) { ThrowHelper.ThrowInvalidOperationException_Delegate_Count(); }
+
+            var delegateType = reader.ReadNamedType(true);
+            var target = MessagePackSerializer.Typeless.TypelessFormatter.Deserialize(ref reader, formatterResolver);
+            var miFormatter = formatterResolver.GetFormatterWithVerify<MethodInfo>();
+            var mi = miFormatter.Deserialize(ref reader, formatterResolver);
+
+            return (TDelegate)(object)mi.CreateDelegate(delegateType, target);
 
         }
 
         public void Serialize(ref MessagePackWriter writer, ref int idx, TDelegate value, IFormatterResolver formatterResolver)
         {
-            if (value == null)
-            {
-                writer.WriteNil(ref idx); return;
-            }
+            if (value == null) { writer.WriteNil(ref idx); return; }
 
+            writer.WriteArrayHeader(c_count, ref idx);
+
+            writer.WriteNamedType(value.GetType(), ref idx);
             var d = value as Delegate;
-            var target = d.Target;
-            IDelegateShim delegateShim;
-            if (target != null)
-            {
-                delegateShim = ActivatorUtils.FastCreateInstance<IDelegateShim>(typeof(DelegateShim<>).GetCachedGenericType(target.GetType()));
-            }
-            else
-            {
-                delegateShim = new DelegateShim<object>();
-            }
-            delegateShim.DelegateType = value.GetType();
-            delegateShim.SetTarget(target);
-            delegateShim.Method = d.GetMethodInfo();
-            MessagePackSerializer.Typeless.TypelessFormatter.Serialize(ref writer, ref idx, delegateShim, formatterResolver);
+            MessagePackSerializer.Typeless.TypelessFormatter.Serialize(ref writer, ref idx, d.Target, formatterResolver);
+            var miFormatter = formatterResolver.GetFormatterWithVerify<MethodInfo>();
+            miFormatter.Serialize(ref writer, ref idx, d.GetMethodInfo(), formatterResolver);
         }
-    }
-}
-
-namespace MessagePack.Formatters.Internal
-{
-    [MessagePackObject]
-    public class DelegateShim<T> : IDelegateShim
-    {
-        [Key(0)]
-        public Type DelegateType { get; set; }
-        [Key(1)]
-        public T Target { get; set; }
-        [Key(2)]
-        public MethodInfo Method { get; set; }
-
-        public object GetTarget() => Target;
-        public void SetTarget(object target) => Target = (T)target;
-    }
-
-    public interface IDelegateShim
-    {
-        Type DelegateType { get; set; }
-        MethodInfo Method { get; set; }
-        object GetTarget();
-        void SetTarget(object target);
     }
 }
