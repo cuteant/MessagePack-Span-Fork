@@ -40,5 +40,10 @@
     <xUnitPackageVersion>2.4.1</xUnitPackageVersion>
     <xUnitAnalyzersPackageVersion>0.10.0</xUnitAnalyzersPackageVersion>
     <xUnitRunnerVsPackageVersion>2.4.1</xUnitRunnerVsPackageVersion>
+
+    <NETCoreApp2RuntimeFrameworkVersion>2.0.9</NETCoreApp2RuntimeFrameworkVersion>
+    <MicrosoftNETCoreApp20PackageVersion>2.0.9</MicrosoftNETCoreApp20PackageVersion>
+    <MicrosoftNETCoreApp21PackageVersion>2.1.9</MicrosoftNETCoreApp21PackageVersion>
+    <MicrosoftNETCoreApp22PackageVersion>2.2.3</MicrosoftNETCoreApp22PackageVersion>
   </PropertyGroup>
 </Project>
