@@ -14,7 +14,7 @@
     /// <summary>For `object` field that holds derived from `object` value, ex: var arr = new object[] { 1, "a", new Model() };</summary>
     public class TypelessFormatter : IMessagePackFormatter<object>
     {
-        public const sbyte ExtensionTypeCode = 100;
+        public const sbyte ExtensionTypeCode = ReservedMessagePackExtensionTypeCode.Typeless;
 
         static readonly Regex SubtractFullNameRegex = new Regex(@", Version=\d+.\d+.\d+.\d+, Culture=\w+, PublicKeyToken=\w+", RegexOptions.Compiled);
 

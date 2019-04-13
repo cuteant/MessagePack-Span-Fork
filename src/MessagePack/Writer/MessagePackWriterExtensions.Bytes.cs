@@ -56,11 +56,11 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteBin8Header(ref byte pinnableAddr, int count, ref int idx)
+        private static void WriteBin8Header(ref byte destination, int count, ref int idx)
         {
             IntPtr offset = (IntPtr)idx;
-            Unsafe.AddByteOffset(ref pinnableAddr, offset) = MessagePackCode.Bin8;
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 1) = unchecked((byte)count);
+            Unsafe.AddByteOffset(ref destination, offset) = MessagePackCode.Bin8;
+            Unsafe.AddByteOffset(ref destination, offset + 1) = unchecked((byte)count);
             idx += 2;
         }
 

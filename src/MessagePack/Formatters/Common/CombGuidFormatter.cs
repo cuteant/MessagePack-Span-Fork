@@ -24,8 +24,8 @@ namespace MessagePack.Formatters
 
             ref byte pinnableAddr = ref writer.PinnableAddress;
             IntPtr offset = (IntPtr)idx;
-            Unsafe.AddByteOffset(ref pinnableAddr, offset) = MessagePackCode.Bin8;
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 1) = c_valueSize;
+            Unsafe.AddByteOffset(ref pinnableAddr, offset) = MessagePackCode.FixExt16;
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 1) = unchecked((byte)ReservedMessagePackExtensionTypeCode.ComgGuid);
             idx += 2;
 
             if (UnsafeMemory.Is64BitProcess)
@@ -40,8 +40,13 @@ namespace MessagePack.Formatters
 
         public CombGuid Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            var valueBytes = reader.ReadBytes();
-            return new CombGuid(valueBytes, CombGuidSequentialSegmentType.Guid, true);
+            var result = reader.ReadExtensionFormat();
+            var typeCode = result.TypeCode;
+            if (typeCode != ReservedMessagePackExtensionTypeCode.ComgGuid)
+            {
+                ThrowHelper.ThrowInvalidOperationException_TypeCode(typeCode);
+            }
+            return new CombGuid(result.Data.ToArray(), CombGuidSequentialSegmentType.Guid, true);
         }
     }
 }

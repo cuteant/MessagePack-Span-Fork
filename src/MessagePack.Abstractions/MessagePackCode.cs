@@ -181,9 +181,12 @@
     {
         public const sbyte DateTime = -1;
 
+        public const sbyte Guid = -100;
+        public const sbyte ComgGuid = -101;
+        public const sbyte Decimal = -102;
+
         public const sbyte LZ4 = 99;
         public const sbyte Typeless = 100;
-
     }
 
     public static class MessagePackRange

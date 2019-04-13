@@ -162,9 +162,9 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static byte Parse(ref byte pinnableAddr, IntPtr highOffset)
+        static byte Parse(ref byte source, IntPtr highOffset)
         {
-            return unchecked((byte)(SwitchParse(Unsafe.AddByteOffset(ref pinnableAddr, highOffset)) * 16 + SwitchParse(Unsafe.AddByteOffset(ref pinnableAddr, highOffset + 1))));
+            return unchecked((byte)(SwitchParse(Unsafe.AddByteOffset(ref source, highOffset)) * 16 + SwitchParse(Unsafe.AddByteOffset(ref source, highOffset + 1))));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -287,84 +287,84 @@
         }
 
         // 4(x2) - 2(x2) - 2(x2) - 2(x2) - 6(x2)
-        public void Write(ref byte pinnableAddr, ref int idx)
+        public void Write(ref byte destination, ref int idx)
         {
             IntPtr offset = (IntPtr)idx;
             if (BitConverter.IsLittleEndian)
             {
                 // int(_a)
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 6) = byteToHexStringHigh[Byte0];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 7) = byteToHexStringLow[Byte0];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 4) = byteToHexStringHigh[Byte1];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 5) = byteToHexStringLow[Byte1];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 2) = byteToHexStringHigh[Byte2];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 3) = byteToHexStringLow[Byte2];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset) = byteToHexStringHigh[Byte3];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 1) = byteToHexStringLow[Byte3];
+                Unsafe.AddByteOffset(ref destination, offset + 6) = byteToHexStringHigh[Byte0];
+                Unsafe.AddByteOffset(ref destination, offset + 7) = byteToHexStringLow[Byte0];
+                Unsafe.AddByteOffset(ref destination, offset + 4) = byteToHexStringHigh[Byte1];
+                Unsafe.AddByteOffset(ref destination, offset + 5) = byteToHexStringLow[Byte1];
+                Unsafe.AddByteOffset(ref destination, offset + 2) = byteToHexStringHigh[Byte2];
+                Unsafe.AddByteOffset(ref destination, offset + 3) = byteToHexStringLow[Byte2];
+                Unsafe.AddByteOffset(ref destination, offset) = byteToHexStringHigh[Byte3];
+                Unsafe.AddByteOffset(ref destination, offset + 1) = byteToHexStringLow[Byte3];
 
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 8) = (byte)'-';
+                Unsafe.AddByteOffset(ref destination, offset + 8) = (byte)'-';
 
                 // short(_b)
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 11) = byteToHexStringHigh[Byte4];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 12) = byteToHexStringLow[Byte4];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 9) = byteToHexStringHigh[Byte5];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 10) = byteToHexStringLow[Byte5];
+                Unsafe.AddByteOffset(ref destination, offset + 11) = byteToHexStringHigh[Byte4];
+                Unsafe.AddByteOffset(ref destination, offset + 12) = byteToHexStringLow[Byte4];
+                Unsafe.AddByteOffset(ref destination, offset + 9) = byteToHexStringHigh[Byte5];
+                Unsafe.AddByteOffset(ref destination, offset + 10) = byteToHexStringLow[Byte5];
 
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 13) = (byte)'-';
+                Unsafe.AddByteOffset(ref destination, offset + 13) = (byte)'-';
 
                 // short(_c)
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 16) = byteToHexStringHigh[Byte6];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 17) = byteToHexStringLow[Byte6];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 14) = byteToHexStringHigh[Byte7];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 15) = byteToHexStringLow[Byte7];
+                Unsafe.AddByteOffset(ref destination, offset + 16) = byteToHexStringHigh[Byte6];
+                Unsafe.AddByteOffset(ref destination, offset + 17) = byteToHexStringLow[Byte6];
+                Unsafe.AddByteOffset(ref destination, offset + 14) = byteToHexStringHigh[Byte7];
+                Unsafe.AddByteOffset(ref destination, offset + 15) = byteToHexStringLow[Byte7];
             }
             else
             {
-                Unsafe.AddByteOffset(ref pinnableAddr, offset) = byteToHexStringHigh[Byte0];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 1) = byteToHexStringLow[Byte0];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 2) = byteToHexStringHigh[Byte1];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 3) = byteToHexStringLow[Byte1];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 4) = byteToHexStringHigh[Byte2];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 5) = byteToHexStringLow[Byte2];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 6) = byteToHexStringHigh[Byte3];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 7) = byteToHexStringLow[Byte3];
+                Unsafe.AddByteOffset(ref destination, offset) = byteToHexStringHigh[Byte0];
+                Unsafe.AddByteOffset(ref destination, offset + 1) = byteToHexStringLow[Byte0];
+                Unsafe.AddByteOffset(ref destination, offset + 2) = byteToHexStringHigh[Byte1];
+                Unsafe.AddByteOffset(ref destination, offset + 3) = byteToHexStringLow[Byte1];
+                Unsafe.AddByteOffset(ref destination, offset + 4) = byteToHexStringHigh[Byte2];
+                Unsafe.AddByteOffset(ref destination, offset + 5) = byteToHexStringLow[Byte2];
+                Unsafe.AddByteOffset(ref destination, offset + 6) = byteToHexStringHigh[Byte3];
+                Unsafe.AddByteOffset(ref destination, offset + 7) = byteToHexStringLow[Byte3];
 
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 8) = (byte)'-';
+                Unsafe.AddByteOffset(ref destination, offset + 8) = (byte)'-';
 
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 9) = byteToHexStringHigh[Byte4];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 10) = byteToHexStringLow[Byte4];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 11) = byteToHexStringHigh[Byte5];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 12) = byteToHexStringLow[Byte5];
+                Unsafe.AddByteOffset(ref destination, offset + 9) = byteToHexStringHigh[Byte4];
+                Unsafe.AddByteOffset(ref destination, offset + 10) = byteToHexStringLow[Byte4];
+                Unsafe.AddByteOffset(ref destination, offset + 11) = byteToHexStringHigh[Byte5];
+                Unsafe.AddByteOffset(ref destination, offset + 12) = byteToHexStringLow[Byte5];
 
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 13) = (byte)'-';
+                Unsafe.AddByteOffset(ref destination, offset + 13) = (byte)'-';
 
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 14) = byteToHexStringHigh[Byte6];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 15) = byteToHexStringLow[Byte6];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 16) = byteToHexStringHigh[Byte7];
-                Unsafe.AddByteOffset(ref pinnableAddr, offset + 17) = byteToHexStringLow[Byte7];
+                Unsafe.AddByteOffset(ref destination, offset + 14) = byteToHexStringHigh[Byte6];
+                Unsafe.AddByteOffset(ref destination, offset + 15) = byteToHexStringLow[Byte6];
+                Unsafe.AddByteOffset(ref destination, offset + 16) = byteToHexStringHigh[Byte7];
+                Unsafe.AddByteOffset(ref destination, offset + 17) = byteToHexStringLow[Byte7];
             }
 
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 18) = (byte)'-';
+            Unsafe.AddByteOffset(ref destination, offset + 18) = (byte)'-';
 
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 19) = byteToHexStringHigh[Byte8];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 20) = byteToHexStringLow[Byte8];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 21) = byteToHexStringHigh[Byte9];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 22) = byteToHexStringLow[Byte9];
+            Unsafe.AddByteOffset(ref destination, offset + 19) = byteToHexStringHigh[Byte8];
+            Unsafe.AddByteOffset(ref destination, offset + 20) = byteToHexStringLow[Byte8];
+            Unsafe.AddByteOffset(ref destination, offset + 21) = byteToHexStringHigh[Byte9];
+            Unsafe.AddByteOffset(ref destination, offset + 22) = byteToHexStringLow[Byte9];
 
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 23) = (byte)'-';
+            Unsafe.AddByteOffset(ref destination, offset + 23) = (byte)'-';
 
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 24) = byteToHexStringHigh[Byte10];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 25) = byteToHexStringLow[Byte10];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 26) = byteToHexStringHigh[Byte11];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 27) = byteToHexStringLow[Byte11];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 28) = byteToHexStringHigh[Byte12];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 29) = byteToHexStringLow[Byte12];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 30) = byteToHexStringHigh[Byte13];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 31) = byteToHexStringLow[Byte13];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 32) = byteToHexStringHigh[Byte14];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 33) = byteToHexStringLow[Byte14];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 34) = byteToHexStringHigh[Byte15];
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 35) = byteToHexStringLow[Byte15];
+            Unsafe.AddByteOffset(ref destination, offset + 24) = byteToHexStringHigh[Byte10];
+            Unsafe.AddByteOffset(ref destination, offset + 25) = byteToHexStringLow[Byte10];
+            Unsafe.AddByteOffset(ref destination, offset + 26) = byteToHexStringHigh[Byte11];
+            Unsafe.AddByteOffset(ref destination, offset + 27) = byteToHexStringLow[Byte11];
+            Unsafe.AddByteOffset(ref destination, offset + 28) = byteToHexStringHigh[Byte12];
+            Unsafe.AddByteOffset(ref destination, offset + 29) = byteToHexStringLow[Byte12];
+            Unsafe.AddByteOffset(ref destination, offset + 30) = byteToHexStringHigh[Byte13];
+            Unsafe.AddByteOffset(ref destination, offset + 31) = byteToHexStringLow[Byte13];
+            Unsafe.AddByteOffset(ref destination, offset + 32) = byteToHexStringHigh[Byte14];
+            Unsafe.AddByteOffset(ref destination, offset + 33) = byteToHexStringLow[Byte14];
+            Unsafe.AddByteOffset(ref destination, offset + 34) = byteToHexStringHigh[Byte15];
+            Unsafe.AddByteOffset(ref destination, offset + 35) = byteToHexStringLow[Byte15];
 
             idx += 36;
         }

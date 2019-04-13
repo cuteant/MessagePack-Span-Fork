@@ -2,7 +2,6 @@
 {
     using System;
     using System.Buffers;
-    using System.Collections.Concurrent;
     using System.IO;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
@@ -39,6 +38,24 @@
         {
             return (byte*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(span));
         }
+
+        static readonly int MaxBytesPerCharUtf8 = Encoding.UTF8.GetMaxByteCount(1);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Utf8MaxBytes(string seq) => seq.Length * MaxBytesPerCharUtf8;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe int SingleToInt32Bits(float value)
+        {
+            return *((int*)&value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe float Int32BitsToSingle(int value)
+        {
+            return *((float*)&value);
+        }
+
+        #region -- CopyMemory --
 
 #if NET451
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -86,21 +103,9 @@
         }
 #endif
 
-        static readonly int MaxBytesPerCharUtf8 = Encoding.UTF8.GetMaxByteCount(1);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Utf8MaxBytes(string seq) => seq.Length * MaxBytesPerCharUtf8;
+        #endregion
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe int SingleToInt32Bits(float value)
-        {
-            return *((int*)&value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe float Int32BitsToSingle(int value)
-        {
-            return *((float*)&value);
-        }
+        #region -- WriteInt32ForceInt32Block --
 
         /// <summary>Acquire static message block(always 5 bytes).</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -115,6 +120,27 @@
                 Unsafe.AddByteOffset(ref destinationSpace, offset + 2) = (byte)(nValue >> 16);
                 Unsafe.AddByteOffset(ref destinationSpace, offset + 3) = (byte)(nValue >> 8);
                 Unsafe.AddByteOffset(ref destinationSpace, offset + 4) = (byte)nValue;
+            }
+        }
+
+        #endregion
+
+        #region -- ArrayHeader --
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GetArrayHeaderLength(int count)
+        {
+            if (count <= MessagePackRange.MaxFixArrayCount)
+            {
+                return 1;
+            }
+            else if (count <= ushort.MaxValue)
+            {
+                return 3;
+            }
+            else
+            {
+                return 5;
             }
         }
 
@@ -133,6 +159,10 @@
             }
         }
 
+        #endregion
+
+        #region -- WriteMapHeaderForceMap32Block --
+
         /// <summary>Write map format header, always use map32 format(length is fixed, 5).</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteMapHeaderForceMap32Block(ref byte destinationSpace, int destOffset, uint count)
@@ -145,6 +175,39 @@
                 Unsafe.AddByteOffset(ref destinationSpace, offset + 2) = (byte)(count >> 16);
                 Unsafe.AddByteOffset(ref destinationSpace, offset + 3) = (byte)(count >> 8);
                 Unsafe.AddByteOffset(ref destinationSpace, offset + 4) = (byte)count;
+            }
+        }
+
+        #endregion
+
+        #region -- ExtensionFormat --
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GetExtensionFormatHeaderLength(int dataLength)
+        {
+            const uint ByteMaxValue = byte.MaxValue;
+            const uint UShortMaxValue = ushort.MaxValue;
+
+            uint nLen = (uint)dataLength;
+
+            switch (nLen)
+            {
+                case 1u:
+                case 2u:
+                case 4u:
+                case 8u:
+                case 16u:
+                    return 2;
+                default:
+                    if (nLen <= ByteMaxValue)
+                    {
+                        return 3;
+                    }
+                    else if (nLen <= UShortMaxValue)
+                    {
+                        return 4;
+                    }
+                    return 6;
             }
         }
 
@@ -165,49 +228,9 @@
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetArrayHeaderLength(int count)
-        {
-            if (count <= MessagePackRange.MaxFixArrayCount)
-            {
-                return 1;
-            }
-            else if (count <= ushort.MaxValue)
-            {
-                return 3;
-            }
-            else
-            {
-                return 5;
-            }
-        }
+        #endregion
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetExtensionFormatHeaderLength(int dataLength)
-        {
-            switch (dataLength)
-            {
-                case 1:
-                case 2:
-                case 4:
-                case 8:
-                case 16:
-                    return 2;
-                default:
-                    if (dataLength <= byte.MaxValue)
-                    {
-                        return 3;
-                    }
-                    else if (dataLength <= ushort.MaxValue)
-                    {
-                        return 4;
-                    }
-                    else
-                    {
-                        return 6;
-                    }
-            }
-        }
+        #region -- Short strings --
 
 
         static readonly AsymmetricKeyHashTable<string> s_stringCache = new AsymmetricKeyHashTable<string>(new StringReadOnlySpanByteAscymmetricEqualityComparer());
@@ -291,6 +314,9 @@
             }
         }
 
+        #endregion
+
+        #region -- Type --
 
         static readonly AsymmetricKeyHashTable<Type> s_typeCache = new AsymmetricKeyHashTable<Type>(new StringReadOnlySpanByteAscymmetricEqualityComparer());
 
@@ -341,6 +367,9 @@
             return encodedTypeName;
         }
 
+        #endregion
+
+        #region == ReadMessageBlockFromStreamUnsafe ==
 
         /// <summary>Read MessageBlock, returns byte[] block is in MemoryPool so careful to use.</summary>
         internal static void ReadMessageBlockFromStreamUnsafe(Stream stream, IArrayBufferWriter<byte> output)
@@ -600,5 +629,7 @@
             }
         }
 #endif
+
+        #endregion
     }
 }

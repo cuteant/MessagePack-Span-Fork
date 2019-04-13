@@ -60,6 +60,7 @@
             s_defaultResolvers = new IFormatterResolver[]
             {
                 NativeDateTimeResolver.Instance, // Native c# DateTime format, preserving timezone
+                ExtBinaryResolver.Instance,
 
                 BuiltinResolver.Instance, // Try Builtin
                 AttributeFormatterResolver.Instance, // Try use [MessagePackFormatter]

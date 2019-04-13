@@ -19,7 +19,7 @@
         private const uint c_zeroSize = 0u;
         private const int c_lz4PackageHeaderSize = 6 + 5; // (ext header size + fixed length size)
 
-        public const sbyte ExtensionTypeCode = 99;
+        public const sbyte ExtensionTypeCode = ReservedMessagePackExtensionTypeCode.LZ4;
 
         public const uint NotCompressionSize = 64u;
 

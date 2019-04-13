@@ -24,15 +24,15 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteRaw(ref byte writerSpace, ref byte source, int sourceBytesToCopy, ref int idx)
+        public static void WriteRaw(ref byte destination, ref byte source, int sourceBytesToCopy, ref int idx)
         {
             if (Is64BitProcess)
             {
-                UnsafeMemory64.WriteRaw(ref writerSpace, ref source, sourceBytesToCopy, ref idx);
+                UnsafeMemory64.WriteRaw(ref destination, ref source, sourceBytesToCopy, ref idx);
             }
             else
             {
-                UnsafeMemory32.WriteRaw(ref writerSpace, ref source, sourceBytesToCopy, ref idx);
+                UnsafeMemory32.WriteRaw(ref destination, ref source, sourceBytesToCopy, ref idx);
             }
         }
 
@@ -46,11 +46,11 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void WriteRawBytes(ref byte writerSpace, ref byte source, int sourceBytesToCopy, ref int idx)
+        internal static void WriteRawBytes(ref byte destination, ref byte source, int sourceBytesToCopy, ref int idx)
         {
             //if (0u >= (uint)sourceBytesToCopy) { return; }
 
-            MessagePackBinary.CopyMemory(ref source, ref Unsafe.AddByteOffset(ref writerSpace, (IntPtr)idx), sourceBytesToCopy);
+            MessagePackBinary.CopyMemory(ref source, ref Unsafe.AddByteOffset(ref destination, (IntPtr)idx), sourceBytesToCopy);
             idx += sourceBytesToCopy;
         }
     }
@@ -69,9 +69,9 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteRaw1(ref byte writerSpace, ref byte source, ref int idx)
+        public static void WriteRaw1(ref byte destination, ref byte source, ref int idx)
         {
-            Unsafe.AddByteOffset(ref writerSpace, (IntPtr)idx) = source;
+            Unsafe.AddByteOffset(ref destination, (IntPtr)idx) = source;
 
             idx += 1;
         }
@@ -91,9 +91,9 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteRaw1(ref byte writerSpace, ref byte source, ref int idx)
+        public static void WriteRaw1(ref byte destination, ref byte source, ref int idx)
         {
-            Unsafe.AddByteOffset(ref writerSpace, (IntPtr)idx) = source;
+            Unsafe.AddByteOffset(ref destination, (IntPtr)idx) = source;
 
             idx += 1;
         }
