@@ -67,7 +67,7 @@ namespace MessagePack.Tests.ExtensionTests
             Assert.Throws<InvalidOperationException>(() => MessagePackSerializer.Deserialize<SubUnionType1>(bytes));
 
             bytes = MessagePackSerializer.Serialize<object>(subUnionType1, DefaultResolver.Instance);
-            var newSubUnionType1 = MessagePackSerializer.Deserialize<SubUnionType1>(bytes);
+            var newSubUnionType1 = MessagePackSerializer.Deserialize<SubUnionType1>(bytes, DefaultResolver.Instance);
             Assert.Equal(guid, newSubUnionType1.MyProperty); Assert.Equal(20, newSubUnionType1.MyProperty1);
 
             bytes = MessagePackSerializer.Typeless.Serialize(subUnionType1);

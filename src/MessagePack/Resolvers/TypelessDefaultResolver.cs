@@ -51,7 +51,6 @@
         {
             s_defaultResolvers = new IFormatterResolver[]
             {
-                NativeDateTimeResolver.Instance, // Native c# DateTime format, preserving timezone
                 ExtBinaryResolver.Instance,
 
                 BuiltinResolver.Instance, // Try Builtin
