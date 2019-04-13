@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-using GrEmit;
+using Newtonsoft.Json;
+using MessagePack.Resolvers;
 
 namespace MessagePack.Examples
 {
@@ -11,67 +13,46 @@ namespace MessagePack.Examples
     {
         static void Main(string[] args)
         {
-            var idx = 1;
-            var writer = new MessagePackWriterShim();
+            var token = new AccessToken
+            {
+                Token = Guid.NewGuid().ToString(),
+                ExpiresOnDate = DateTime.Now,
+                AccountId = 1,
+                Scope = new List<string> { "a", "b" }
+            };
 
-            var serialize = TestSuccess();
-            serialize(ref writer, ref idx, "ssssssss");
+            var serializeData = MessagePackSerializer.Serialize<object>(token, TypelessDefaultResolver.Instance);
+            var json = MessagePackSerializer.ToJson(serializeData);
+
+            Console.WriteLine(json);
+
+            var js = JsonConvert.DeserializeObject(json);
+            Console.WriteLine(JsonConvert.SerializeObject(js, Formatting.Indented));
+            //Console.WriteLine(JsonConvert.SerializeObject(token, new JsonSerializerSettings
+            //{
+            //    Formatting = Formatting.Indented,
+            //    TypeNameHandling = TypeNameHandling.All,
+            //    TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple
+            //}));
 
             Console.WriteLine("press any key to exit");
             Console.ReadKey();
         }
+    }
 
-        delegate void RawFormatterSerialize(ref MessagePackWriterShim writer, ref int idx, object value);
+    //[MessagePackObject]
+    public class AccessToken
+    {
+        //[Key(0)]
+        public string Token { get; set; }
 
-        ref struct MessagePackWriterShim
-        {
-            public void WriteNil(ref int idx)
-            {
-                Console.WriteLine("idx: " + idx++);
-                Console.WriteLine("null");
-            }
+        //[Key(1)]
+        public DateTime? ExpiresOnDate { get; set; }
 
-            public void WriterString(string str, ref int idx)
-            {
-                Console.WriteLine("idx: " + idx++);
-                Console.WriteLine(str);
-            }
-        }
+        //[Key(2)]
+        public int? AccountId { get; set; }
 
-        private static RawFormatterSerialize TestSuccess()
-        {
-            var method = new DynamicMethod(Guid.NewGuid().ToString(),
-                typeof(void),
-                new[] { typeof(MessagePackWriterShim).MakeByRefType(), typeof(int).MakeByRefType(), typeof(object) }, typeof(Program).Module, true);
-
-            using (var il = new GroboIL(method))
-            {
-                if (typeof(object).IsClass)
-                {
-                    var elseBody = il.DefineLabel("");
-                    il.Ldarg(2);
-                    il.Brtrue(elseBody);
-
-                    il.Ldarg(0);
-                    il.Ldarg(1);
-
-                    il.Call(typeof(MessagePackWriterShim).GetMethod(nameof(MessagePackWriterShim.WriteNil)));
-                    il.Ret();
-
-                    il.MarkLabel(elseBody);
-                }
-
-                il.Ldarg(0);
-                il.Ldarg(2);
-                il.Castclass(typeof(string));
-                il.Ldarg(1);
-                il.Call(typeof(MessagePackWriterShim).GetMethod(nameof(MessagePackWriterShim.WriterString)));
-
-                il.Ret();
-                Console.WriteLine(il.GetILCode());
-                return (RawFormatterSerialize)method.CreateDelegate(typeof(RawFormatterSerialize));
-            }
-        }
-        private static readonly MethodInfo getTypeMethod = ((MethodCallExpression)((Expression<Func<object, Type>>)(obj => obj.GetType())).Body).Method;
+        //[Key(3)]
+        public List<string> Scope { get; set; }
     }
 }
