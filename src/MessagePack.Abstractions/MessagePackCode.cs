@@ -180,6 +180,10 @@
     public static class ReservedMessagePackExtensionTypeCode
     {
         public const sbyte DateTime = -1;
+
+        public const sbyte LZ4 = 99;
+        public const sbyte Typeless = 100;
+
     }
 
     public static class MessagePackRange

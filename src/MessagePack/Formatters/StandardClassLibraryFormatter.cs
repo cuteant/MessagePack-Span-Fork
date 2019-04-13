@@ -3,6 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading.Tasks;
@@ -84,28 +85,12 @@
 
         public void Serialize(ref MessagePackWriter writer, ref int idx, decimal value, IFormatterResolver formatterResolver)
         {
-            //return MessagePackBinary.WriteString( value.ToString(CultureInfo.InvariantCulture));
-            var bits = decimal.GetBits(value);
-            writer.WriteArrayHeader(4, ref idx);
-            writer.WriteInt32(bits[0], ref idx); // lo
-            writer.WriteInt32(bits[1], ref idx); // mid
-            writer.WriteInt32(bits[2], ref idx); // hi
-            writer.WriteInt32(bits[3], ref idx); // flags
+            writer.WriteString(value.ToString(CultureInfo.InvariantCulture), ref idx);
         }
 
         public decimal Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            //return decimal.Parse(MessagePackBinary.ReadString(), CultureInfo.InvariantCulture);
-            var count = reader.ReadArrayHeader();
-
-            if (count != 4) ThrowHelper.ThrowInvalidOperationException_Decimal_Format();
-
-            var lo = reader.ReadInt32();
-            var mid = reader.ReadInt32();
-            var hi = reader.ReadInt32();
-            var flags = reader.ReadInt32();
-
-            return new decimal(new int[] { lo, mid, hi, flags });
+            return decimal.Parse(reader.ReadString(), CultureInfo.InvariantCulture);
         }
     }
 
@@ -156,48 +141,24 @@
 
         GuidFormatter() { }
 
-        const int c_totalSize = 18;
-        const byte c_valueSize = 16;
-
         public void Serialize(ref MessagePackWriter writer, ref int idx, Guid value, IFormatterResolver formatterResolver)
         {
-            writer.Ensure(idx, c_totalSize);
+            writer.Ensure(idx, 38);
 
             var buffer = value.ToByteArray();
 
             ref byte pinnableAddr = ref writer.PinnableAddress;
             IntPtr offset = (IntPtr)idx;
-            Unsafe.AddByteOffset(ref pinnableAddr, offset) = MessagePackCode.Bin8;
-            Unsafe.AddByteOffset(ref pinnableAddr, offset + 1) = c_valueSize;
+            Unsafe.AddByteOffset(ref pinnableAddr, offset) = MessagePackCode.Str8;
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 1) = unchecked((byte)36);
             idx += 2;
-
-            if (UnsafeMemory.Is64BitProcess)
-            {
-                UnsafeMemory64.WriteRaw16(ref pinnableAddr, ref buffer[0], ref idx);
-            }
-            else
-            {
-                UnsafeMemory32.WriteRaw16(ref pinnableAddr, ref buffer[0], ref idx);
-            }
-            //MessagePackBinary.EnsureCapacity( 38);
-
-            //bytes[offset] = MessagePackCode.Str8;
-            //bytes[offset + 1] = unchecked((byte)36);
-            //new GuidBits(ref value).Write(bytes, offset + 2);
-            //return 38;
+            new GuidBits(ref value).Write(ref pinnableAddr, ref idx);
         }
 
         public Guid Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-#if NETCOREAPP
-            var valueBytes = reader.ReadSpan();
-            return new Guid(valueBytes);
-#else
-            var valueBytes = reader.ReadBytes();
-            return new Guid(valueBytes);
-#endif
-            //var segment = MessagePackBinary.ReadStringSegment();
-            //return new GuidBits(segment).Value;
+            var utf8Span = reader.ReadUtf8Span();
+            return new GuidBits(utf8Span).Value;
         }
     }
 

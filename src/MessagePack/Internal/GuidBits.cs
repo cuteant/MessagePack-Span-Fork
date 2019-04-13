@@ -1,9 +1,9 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-
-namespace MessagePack.Internal
+﻿namespace MessagePack.Internal
 {
+    using System;
+    using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
+
     [StructLayout(LayoutKind.Explicit, Pack = 1)]
     internal struct GuidBits
     {
@@ -56,115 +56,115 @@ namespace MessagePack.Internal
         }
 
         // 4-pattern, lower/upper and '-' or no
-        public GuidBits(in ArraySegment<byte> utf8string)
+        public GuidBits(ReadOnlySpan<byte> utf8string)
         {
             this = default(GuidBits);
 
-            var array = utf8string.Array;
-            var offset = utf8string.Offset;
+            ref byte pinnableAddr = ref MemoryMarshal.GetReference(utf8string);
+            var offset = (IntPtr)0;
 
             // 32
-            if (utf8string.Count == 32)
+            if (utf8string.Length == 32)
             {
                 if (BitConverter.IsLittleEndian)
                 {
-                    this.Byte0 = Parse(array, offset + 6);
-                    this.Byte1 = Parse(array, offset + 4);
-                    this.Byte2 = Parse(array, offset + 2);
-                    this.Byte3 = Parse(array, offset + 0);
+                    this.Byte0 = Parse(ref pinnableAddr, offset + 6);
+                    this.Byte1 = Parse(ref pinnableAddr, offset + 4);
+                    this.Byte2 = Parse(ref pinnableAddr, offset + 2);
+                    this.Byte3 = Parse(ref pinnableAddr, offset + 0);
 
-                    this.Byte4 = Parse(array, offset + 10);
-                    this.Byte5 = Parse(array, offset + 8);
+                    this.Byte4 = Parse(ref pinnableAddr, offset + 10);
+                    this.Byte5 = Parse(ref pinnableAddr, offset + 8);
 
-                    this.Byte6 = Parse(array, offset + 14);
-                    this.Byte7 = Parse(array, offset + 12);
+                    this.Byte6 = Parse(ref pinnableAddr, offset + 14);
+                    this.Byte7 = Parse(ref pinnableAddr, offset + 12);
                 }
                 else
                 {
-                    this.Byte0 = Parse(array, offset + 0);
-                    this.Byte1 = Parse(array, offset + 2);
-                    this.Byte2 = Parse(array, offset + 4);
-                    this.Byte3 = Parse(array, offset + 6);
+                    this.Byte0 = Parse(ref pinnableAddr, offset + 0);
+                    this.Byte1 = Parse(ref pinnableAddr, offset + 2);
+                    this.Byte2 = Parse(ref pinnableAddr, offset + 4);
+                    this.Byte3 = Parse(ref pinnableAddr, offset + 6);
 
-                    this.Byte4 = Parse(array, offset + 8);
-                    this.Byte5 = Parse(array, offset + 10);
+                    this.Byte4 = Parse(ref pinnableAddr, offset + 8);
+                    this.Byte5 = Parse(ref pinnableAddr, offset + 10);
 
-                    this.Byte6 = Parse(array, offset + 12);
-                    this.Byte7 = Parse(array, offset + 14);
+                    this.Byte6 = Parse(ref pinnableAddr, offset + 12);
+                    this.Byte7 = Parse(ref pinnableAddr, offset + 14);
                 }
-                this.Byte8 = Parse(array, offset + 16);
-                this.Byte9 = Parse(array, offset + 18);
+                this.Byte8 = Parse(ref pinnableAddr, offset + 16);
+                this.Byte9 = Parse(ref pinnableAddr, offset + 18);
 
-                this.Byte10 = Parse(array, offset + 20);
-                this.Byte11 = Parse(array, offset + 22);
-                this.Byte12 = Parse(array, offset + 24);
-                this.Byte13 = Parse(array, offset + 26);
-                this.Byte14 = Parse(array, offset + 28);
-                this.Byte15 = Parse(array, offset + 30);
+                this.Byte10 = Parse(ref pinnableAddr, offset + 20);
+                this.Byte11 = Parse(ref pinnableAddr, offset + 22);
+                this.Byte12 = Parse(ref pinnableAddr, offset + 24);
+                this.Byte13 = Parse(ref pinnableAddr, offset + 26);
+                this.Byte14 = Parse(ref pinnableAddr, offset + 28);
+                this.Byte15 = Parse(ref pinnableAddr, offset + 30);
                 return;
             }
-            else if (utf8string.Count == 36)
+            else if (utf8string.Length == 36)
             {
                 // '-' => 45
                 if (BitConverter.IsLittleEndian)
                 {
-                    this.Byte0 = Parse(array, offset + 6);
-                    this.Byte1 = Parse(array, offset + 4);
-                    this.Byte2 = Parse(array, offset + 2);
-                    this.Byte3 = Parse(array, offset + 0);
+                    this.Byte0 = Parse(ref pinnableAddr, offset + 6);
+                    this.Byte1 = Parse(ref pinnableAddr, offset + 4);
+                    this.Byte2 = Parse(ref pinnableAddr, offset + 2);
+                    this.Byte3 = Parse(ref pinnableAddr, offset + 0);
 
-                    if (array[offset + 8] != '-') goto ERROR;
+                    if (Unsafe.AddByteOffset(ref pinnableAddr, offset + 8) != '-') goto ERROR;
 
-                    this.Byte4 = Parse(array, offset + 11);
-                    this.Byte5 = Parse(array, offset + 9);
+                    this.Byte4 = Parse(ref pinnableAddr, offset + 11);
+                    this.Byte5 = Parse(ref pinnableAddr, offset + 9);
 
-                    if (array[offset + 13] != '-') goto ERROR;
+                    if (Unsafe.AddByteOffset(ref pinnableAddr, offset + 13) != '-') goto ERROR;
 
-                    this.Byte6 = Parse(array, offset + 16);
-                    this.Byte7 = Parse(array, offset + 14);
+                    this.Byte6 = Parse(ref pinnableAddr, offset + 16);
+                    this.Byte7 = Parse(ref pinnableAddr, offset + 14);
                 }
                 else
                 {
-                    this.Byte0 = Parse(array, offset + 0);
-                    this.Byte1 = Parse(array, offset + 2);
-                    this.Byte2 = Parse(array, offset + 4);
-                    this.Byte3 = Parse(array, offset + 6);
+                    this.Byte0 = Parse(ref pinnableAddr, offset + 0);
+                    this.Byte1 = Parse(ref pinnableAddr, offset + 2);
+                    this.Byte2 = Parse(ref pinnableAddr, offset + 4);
+                    this.Byte3 = Parse(ref pinnableAddr, offset + 6);
 
-                    if (array[offset + 8] != '-') goto ERROR;
+                    if (Unsafe.AddByteOffset(ref pinnableAddr, offset + 8) != '-') goto ERROR;
 
-                    this.Byte4 = Parse(array, offset + 9);
-                    this.Byte5 = Parse(array, offset + 11);
+                    this.Byte4 = Parse(ref pinnableAddr, offset + 9);
+                    this.Byte5 = Parse(ref pinnableAddr, offset + 11);
 
-                    if (array[offset + 13] != '-') goto ERROR;
+                    if (Unsafe.AddByteOffset(ref pinnableAddr, offset + 13) != '-') goto ERROR;
 
-                    this.Byte6 = Parse(array, offset + 14);
-                    this.Byte7 = Parse(array, offset + 16);
+                    this.Byte6 = Parse(ref pinnableAddr, offset + 14);
+                    this.Byte7 = Parse(ref pinnableAddr, offset + 16);
                 }
 
-                if (array[offset + 18] != '-') goto ERROR;
+                if (Unsafe.AddByteOffset(ref pinnableAddr, offset + 18) != '-') goto ERROR;
 
-                this.Byte8 = Parse(array, offset + 19);
-                this.Byte9 = Parse(array, offset + 21);
+                this.Byte8 = Parse(ref pinnableAddr, offset + 19);
+                this.Byte9 = Parse(ref pinnableAddr, offset + 21);
 
-                if (array[offset + 23] != '-') goto ERROR;
+                if (Unsafe.AddByteOffset(ref pinnableAddr, offset + 23) != '-') goto ERROR;
 
-                this.Byte10 = Parse(array, offset + 24);
-                this.Byte11 = Parse(array, offset + 26);
-                this.Byte12 = Parse(array, offset + 28);
-                this.Byte13 = Parse(array, offset + 30);
-                this.Byte14 = Parse(array, offset + 32);
-                this.Byte15 = Parse(array, offset + 34);
+                this.Byte10 = Parse(ref pinnableAddr, offset + 24);
+                this.Byte11 = Parse(ref pinnableAddr, offset + 26);
+                this.Byte12 = Parse(ref pinnableAddr, offset + 28);
+                this.Byte13 = Parse(ref pinnableAddr, offset + 30);
+                this.Byte14 = Parse(ref pinnableAddr, offset + 32);
+                this.Byte15 = Parse(ref pinnableAddr, offset + 34);
                 return;
             }
 
-            ERROR:
+        ERROR:
             ThrowHelper.ThrowArgumentException_Guid_Pattern(); ;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static byte Parse(byte[] bytes, int highOffset)
+        static byte Parse(ref byte pinnableAddr, IntPtr highOffset)
         {
-            return unchecked((byte)(SwitchParse(bytes[highOffset]) * 16 + SwitchParse(bytes[highOffset + 1])));
+            return unchecked((byte)(SwitchParse(Unsafe.AddByteOffset(ref pinnableAddr, highOffset)) * 16 + SwitchParse(Unsafe.AddByteOffset(ref pinnableAddr, highOffset + 1))));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -287,83 +287,86 @@ namespace MessagePack.Internal
         }
 
         // 4(x2) - 2(x2) - 2(x2) - 2(x2) - 6(x2)
-        public void Write(byte[] buffer, int offset)
+        public void Write(ref byte pinnableAddr, ref int idx)
         {
+            IntPtr offset = (IntPtr)idx;
             if (BitConverter.IsLittleEndian)
             {
                 // int(_a)
-                buffer[offset + 6] = byteToHexStringHigh[Byte0];
-                buffer[offset + 7] = byteToHexStringLow[Byte0];
-                buffer[offset + 4] = byteToHexStringHigh[Byte1];
-                buffer[offset + 5] = byteToHexStringLow[Byte1];
-                buffer[offset + 2] = byteToHexStringHigh[Byte2];
-                buffer[offset + 3] = byteToHexStringLow[Byte2];
-                buffer[offset + 0] = byteToHexStringHigh[Byte3];
-                buffer[offset + 1] = byteToHexStringLow[Byte3];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 6) = byteToHexStringHigh[Byte0];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 7) = byteToHexStringLow[Byte0];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 4) = byteToHexStringHigh[Byte1];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 5) = byteToHexStringLow[Byte1];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 2) = byteToHexStringHigh[Byte2];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 3) = byteToHexStringLow[Byte2];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset) = byteToHexStringHigh[Byte3];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 1) = byteToHexStringLow[Byte3];
 
-                buffer[offset + 8] = (byte)'-';
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 8) = (byte)'-';
 
                 // short(_b)
-                buffer[offset + 11] = byteToHexStringHigh[Byte4];
-                buffer[offset + 12] = byteToHexStringLow[Byte4];
-                buffer[offset + 9] = byteToHexStringHigh[Byte5];
-                buffer[offset + 10] = byteToHexStringLow[Byte5];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 11) = byteToHexStringHigh[Byte4];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 12) = byteToHexStringLow[Byte4];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 9) = byteToHexStringHigh[Byte5];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 10) = byteToHexStringLow[Byte5];
 
-                buffer[offset + 13] = (byte)'-';
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 13) = (byte)'-';
 
                 // short(_c)
-                buffer[offset + 16] = byteToHexStringHigh[Byte6];
-                buffer[offset + 17] = byteToHexStringLow[Byte6];
-                buffer[offset + 14] = byteToHexStringHigh[Byte7];
-                buffer[offset + 15] = byteToHexStringLow[Byte7];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 16) = byteToHexStringHigh[Byte6];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 17) = byteToHexStringLow[Byte6];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 14) = byteToHexStringHigh[Byte7];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 15) = byteToHexStringLow[Byte7];
             }
             else
             {
-                buffer[offset + 0] = byteToHexStringHigh[Byte0];
-                buffer[offset + 1] = byteToHexStringLow[Byte0];
-                buffer[offset + 2] = byteToHexStringHigh[Byte1];
-                buffer[offset + 3] = byteToHexStringLow[Byte1];
-                buffer[offset + 4] = byteToHexStringHigh[Byte2];
-                buffer[offset + 5] = byteToHexStringLow[Byte2];
-                buffer[offset + 6] = byteToHexStringHigh[Byte3];
-                buffer[offset + 7] = byteToHexStringLow[Byte3];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset) = byteToHexStringHigh[Byte0];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 1) = byteToHexStringLow[Byte0];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 2) = byteToHexStringHigh[Byte1];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 3) = byteToHexStringLow[Byte1];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 4) = byteToHexStringHigh[Byte2];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 5) = byteToHexStringLow[Byte2];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 6) = byteToHexStringHigh[Byte3];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 7) = byteToHexStringLow[Byte3];
 
-                buffer[offset + 8] = (byte)'-';
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 8) = (byte)'-';
 
-                buffer[offset + 9] = byteToHexStringHigh[Byte4];
-                buffer[offset + 10] = byteToHexStringLow[Byte4];
-                buffer[offset + 11] = byteToHexStringHigh[Byte5];
-                buffer[offset + 12] = byteToHexStringLow[Byte5];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 9) = byteToHexStringHigh[Byte4];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 10) = byteToHexStringLow[Byte4];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 11) = byteToHexStringHigh[Byte5];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 12) = byteToHexStringLow[Byte5];
 
-                buffer[offset + 13] = (byte)'-';
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 13) = (byte)'-';
 
-                buffer[offset + 14] = byteToHexStringHigh[Byte6];
-                buffer[offset + 15] = byteToHexStringLow[Byte6];
-                buffer[offset + 16] = byteToHexStringHigh[Byte7];
-                buffer[offset + 17] = byteToHexStringLow[Byte7];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 14) = byteToHexStringHigh[Byte6];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 15) = byteToHexStringLow[Byte6];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 16) = byteToHexStringHigh[Byte7];
+                Unsafe.AddByteOffset(ref pinnableAddr, offset + 17) = byteToHexStringLow[Byte7];
             }
 
-            buffer[offset + 18] = (byte)'-';
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 18) = (byte)'-';
 
-            buffer[offset + 19] = byteToHexStringHigh[Byte8];
-            buffer[offset + 20] = byteToHexStringLow[Byte8];
-            buffer[offset + 21] = byteToHexStringHigh[Byte9];
-            buffer[offset + 22] = byteToHexStringLow[Byte9];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 19) = byteToHexStringHigh[Byte8];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 20) = byteToHexStringLow[Byte8];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 21) = byteToHexStringHigh[Byte9];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 22) = byteToHexStringLow[Byte9];
 
-            buffer[offset + 23] = (byte)'-';
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 23) = (byte)'-';
 
-            buffer[offset + 24] = byteToHexStringHigh[Byte10];
-            buffer[offset + 25] = byteToHexStringLow[Byte10];
-            buffer[offset + 26] = byteToHexStringHigh[Byte11];
-            buffer[offset + 27] = byteToHexStringLow[Byte11];
-            buffer[offset + 28] = byteToHexStringHigh[Byte12];
-            buffer[offset + 29] = byteToHexStringLow[Byte12];
-            buffer[offset + 30] = byteToHexStringHigh[Byte13];
-            buffer[offset + 31] = byteToHexStringLow[Byte13];
-            buffer[offset + 32] = byteToHexStringHigh[Byte14];
-            buffer[offset + 33] = byteToHexStringLow[Byte14];
-            buffer[offset + 34] = byteToHexStringHigh[Byte15];
-            buffer[offset + 35] = byteToHexStringLow[Byte15];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 24) = byteToHexStringHigh[Byte10];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 25) = byteToHexStringLow[Byte10];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 26) = byteToHexStringHigh[Byte11];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 27) = byteToHexStringLow[Byte11];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 28) = byteToHexStringHigh[Byte12];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 29) = byteToHexStringLow[Byte12];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 30) = byteToHexStringHigh[Byte13];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 31) = byteToHexStringLow[Byte13];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 32) = byteToHexStringHigh[Byte14];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 33) = byteToHexStringLow[Byte14];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 34) = byteToHexStringHigh[Byte15];
+            Unsafe.AddByteOffset(ref pinnableAddr, offset + 35) = byteToHexStringLow[Byte15];
+
+            idx += 36;
         }
     }
 }

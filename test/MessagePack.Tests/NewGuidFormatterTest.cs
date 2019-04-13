@@ -44,11 +44,11 @@ namespace MessagePack.Tests
                 var idx = 0;
                 var writer = new MessagePackWriter(16);
                 GuidFormatter.Instance.Serialize(ref writer, ref idx, original, null);
-                idx.Is(18/*38*/);
+                idx.Is(38);
 
                 var reader = new MessagePackReader(writer.ToArray(idx));
                 GuidFormatter.Instance.Deserialize(ref reader, null).Is(original);
-                reader.CurrentSpanIndex.Is(18/*38*/);
+                reader.CurrentSpanIndex.Is(38);
             }
             {
                 var c = new InClass() { MyProperty = 3414141, Guid = Guid.NewGuid() };

@@ -17,12 +17,12 @@ namespace MessagePack.Tests
 
             var idx = 0;
             var writer = new MessagePackWriter(16);
-            GuidFormatter.Instance.Serialize(ref writer, ref idx, guid, null);
+            BinaryGuidFormatter.Instance.Serialize(ref writer, ref idx, guid, null);
             idx.Is(18);
             var buffer = writer.ToArray(idx);
 
             var reader = new MessagePackReader(buffer);
-            GuidFormatter.Instance.Deserialize(ref reader, null).Is(guid);
+            BinaryGuidFormatter.Instance.Deserialize(ref reader, null).Is(guid);
             reader.CurrentSpanIndex.Is(18);
         }
 
