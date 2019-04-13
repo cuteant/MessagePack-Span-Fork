@@ -3,6 +3,195 @@
     using System;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
+    using MessagePack.Internal;
+
+    public sealed class ExtDateTimeOffsetFormatter : IMessagePackFormatter<DateTimeOffset>
+    {
+        public static readonly IMessagePackFormatter<DateTimeOffset> Instance = new ExtDateTimeOffsetFormatter();
+
+        ExtDateTimeOffsetFormatter() { }
+
+        public void Serialize(ref MessagePackWriter writer, ref int idx, DateTimeOffset value, IFormatterResolver formatterResolver)
+        {
+            var dateTime = new DateTime(value.Ticks, DateTimeKind.Utc);
+            var dtOffsetMinutes = (short)value.Offset.TotalMinutes;
+
+            var secondsSinceBclEpoch = dateTime.Ticks / TimeSpan.TicksPerSecond;
+            var seconds = secondsSinceBclEpoch - DateTimeConstants.BclSecondsAtUnixEpoch;
+            var nanoseconds = (dateTime.Ticks % TimeSpan.TicksPerSecond) * DateTimeConstants.NanosecondsPerTick;
+
+            writer.Ensure(idx, 15);
+
+            ref byte b = ref writer.PinnableAddress;
+            IntPtr offset = (IntPtr)idx;
+            unchecked
+            {
+                if ((seconds >> 34) == 0)
+                {
+                    var data64 = (ulong)((nanoseconds << 34) | seconds);
+                    if ((data64 & 0xffffffff00000000L) == 0)
+                    {
+                        // timestamp 32(seconds in 32-bit unsigned int)
+                        var data32 = (UInt32)data64;
+                        Unsafe.AddByteOffset(ref b, offset) = MessagePackCode.Ext8;
+                        Unsafe.AddByteOffset(ref b, offset + 1) = (byte)6;
+                        Unsafe.AddByteOffset(ref b, offset + 2) = (byte)ReservedMessagePackExtensionTypeCode.DateTimeOffset;
+                        Unsafe.AddByteOffset(ref b, offset + 3) = (byte)(data32 >> 24);
+                        Unsafe.AddByteOffset(ref b, offset + 4) = (byte)(data32 >> 16);
+                        Unsafe.AddByteOffset(ref b, offset + 5) = (byte)(data32 >> 8);
+                        Unsafe.AddByteOffset(ref b, offset + 6) = (byte)data32;
+                        Unsafe.AddByteOffset(ref b, offset + 7) = (byte)(dtOffsetMinutes >> 8);
+                        Unsafe.AddByteOffset(ref b, offset + 8) = (byte)dtOffsetMinutes;
+                        idx += 9;
+                    }
+                    else
+                    {
+                        // timestamp 64(nanoseconds in 30-bit unsigned int | seconds in 34-bit unsigned int)
+                        Unsafe.AddByteOffset(ref b, offset) = MessagePackCode.Ext8;
+                        Unsafe.AddByteOffset(ref b, offset + 1) = (byte)10;
+                        Unsafe.AddByteOffset(ref b, offset + 2) = (byte)ReservedMessagePackExtensionTypeCode.DateTimeOffset;
+                        Unsafe.AddByteOffset(ref b, offset + 3) = (byte)(data64 >> 56);
+                        Unsafe.AddByteOffset(ref b, offset + 4) = (byte)(data64 >> 48);
+                        Unsafe.AddByteOffset(ref b, offset + 5) = (byte)(data64 >> 40);
+                        Unsafe.AddByteOffset(ref b, offset + 6) = (byte)(data64 >> 32);
+                        Unsafe.AddByteOffset(ref b, offset + 7) = (byte)(data64 >> 24);
+                        Unsafe.AddByteOffset(ref b, offset + 8) = (byte)(data64 >> 16);
+                        Unsafe.AddByteOffset(ref b, offset + 9) = (byte)(data64 >> 8);
+                        Unsafe.AddByteOffset(ref b, offset + 10) = (byte)data64;
+                        Unsafe.AddByteOffset(ref b, offset + 11) = (byte)(dtOffsetMinutes >> 8);
+                        Unsafe.AddByteOffset(ref b, offset + 12) = (byte)dtOffsetMinutes;
+                        idx += 13;
+                    }
+                }
+                else
+                {
+                    // timestamp 96( nanoseconds in 32-bit unsigned int | seconds in 64-bit signed int )
+                    Unsafe.AddByteOffset(ref b, offset) = MessagePackCode.Ext8;
+                    Unsafe.AddByteOffset(ref b, offset + 1) = (byte)14;
+                    Unsafe.AddByteOffset(ref b, offset + 2) = (byte)ReservedMessagePackExtensionTypeCode.DateTimeOffset;
+                    Unsafe.AddByteOffset(ref b, offset + 3) = (byte)(nanoseconds >> 24);
+                    Unsafe.AddByteOffset(ref b, offset + 4) = (byte)(nanoseconds >> 16);
+                    Unsafe.AddByteOffset(ref b, offset + 5) = (byte)(nanoseconds >> 8);
+                    Unsafe.AddByteOffset(ref b, offset + 6) = (byte)nanoseconds;
+                    Unsafe.AddByteOffset(ref b, offset + 7) = (byte)(seconds >> 56);
+                    Unsafe.AddByteOffset(ref b, offset + 8) = (byte)(seconds >> 48);
+                    Unsafe.AddByteOffset(ref b, offset + 9) = (byte)(seconds >> 40);
+                    Unsafe.AddByteOffset(ref b, offset + 10) = (byte)(seconds >> 32);
+                    Unsafe.AddByteOffset(ref b, offset + 11) = (byte)(seconds >> 24);
+                    Unsafe.AddByteOffset(ref b, offset + 12) = (byte)(seconds >> 16);
+                    Unsafe.AddByteOffset(ref b, offset + 13) = (byte)(seconds >> 8);
+                    Unsafe.AddByteOffset(ref b, offset + 14) = (byte)seconds;
+                    Unsafe.AddByteOffset(ref b, offset + 15) = (byte)(dtOffsetMinutes >> 8);
+                    Unsafe.AddByteOffset(ref b, offset + 16) = (byte)dtOffsetMinutes;
+                    idx += 17;
+                }
+            }
+        }
+
+        public DateTimeOffset Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
+        {
+            var result = reader.ReadExtensionFormat();
+            var typeCode = result.TypeCode;
+            if (typeCode != ReservedMessagePackExtensionTypeCode.DateTimeOffset)
+            {
+                ThrowHelper.ThrowInvalidOperationException_TypeCode(typeCode);
+            }
+
+            var valueSpan = result.Data;
+            var dataLength = valueSpan.Length;
+            switch (dataLength)
+            {
+                case 6:
+                    return Read6(ref MemoryMarshal.GetReference(valueSpan));
+                case 10:
+                    return Read10(ref MemoryMarshal.GetReference(valueSpan));
+                case 14:
+                    return Read14(ref MemoryMarshal.GetReference(valueSpan));
+                default:
+                    throw GetInvalidOperationException();
+            }
+        }
+
+        private static DateTimeOffset Read6(ref byte source)
+        {
+            IntPtr offset = (IntPtr)0;
+            unchecked
+            {
+                var seconds =
+                    (UInt32)(Unsafe.AddByteOffset(ref source, offset) << 24) |
+                    (UInt32)(Unsafe.AddByteOffset(ref source, offset + 1) << 16) |
+                    (UInt32)(Unsafe.AddByteOffset(ref source, offset + 2) << 8) |
+                    (UInt32)Unsafe.AddByteOffset(ref source, offset + 3);
+
+                var dtOffsetMinutes = (short)(
+                    (Unsafe.AddByteOffset(ref source, offset + 4) << 8) |
+                    Unsafe.AddByteOffset(ref source, offset + 5));
+
+                return new DateTimeOffset(DateTimeConstants.UnixEpoch.AddSeconds(seconds).Ticks, TimeSpan.FromMinutes(dtOffsetMinutes));
+            }
+        }
+
+        private static DateTimeOffset Read10(ref byte source)
+        {
+            IntPtr offset = (IntPtr)0;
+            unchecked
+            {
+                var data64 = (UInt64)Unsafe.AddByteOffset(ref source, offset) << 56
+                           | (UInt64)Unsafe.AddByteOffset(ref source, offset + 1) << 48
+                           | (UInt64)Unsafe.AddByteOffset(ref source, offset + 2) << 40
+                           | (UInt64)Unsafe.AddByteOffset(ref source, offset + 3) << 32
+                           | (UInt64)Unsafe.AddByteOffset(ref source, offset + 4) << 24
+                           | (UInt64)Unsafe.AddByteOffset(ref source, offset + 5) << 16
+                           | (UInt64)Unsafe.AddByteOffset(ref source, offset + 6) << 8
+                           | (UInt64)Unsafe.AddByteOffset(ref source, offset + 7);
+
+                var dtOffsetMinutes = (short)(
+                    (Unsafe.AddByteOffset(ref source, offset + 8) << 8) |
+                    Unsafe.AddByteOffset(ref source, offset + 9));
+
+                var nanoseconds = (long)(data64 >> 34);
+                var seconds = data64 & 0x00000003ffffffffL;
+
+                var utc = DateTimeConstants.UnixEpoch.AddSeconds(seconds).AddTicks(nanoseconds / DateTimeConstants.NanosecondsPerTick);
+                return new DateTimeOffset(utc.Ticks, TimeSpan.FromMinutes(dtOffsetMinutes));
+            }
+        }
+
+        private static DateTimeOffset Read14(ref byte source)
+        {
+            IntPtr offset = (IntPtr)0;
+            unchecked
+            {
+                var nanoseconds =
+                    (UInt32)(Unsafe.AddByteOffset(ref source, offset) << 24) |
+                    (UInt32)(Unsafe.AddByteOffset(ref source, offset + 1) << 16) |
+                    (UInt32)(Unsafe.AddByteOffset(ref source, offset + 2) << 8) |
+                    (UInt32)Unsafe.AddByteOffset(ref source, offset + 3);
+                var seconds =
+                    (long)Unsafe.AddByteOffset(ref source, offset + 4) << 56 |
+                    (long)Unsafe.AddByteOffset(ref source, offset + 5) << 48 |
+                    (long)Unsafe.AddByteOffset(ref source, offset + 6) << 40 |
+                    (long)Unsafe.AddByteOffset(ref source, offset + 7) << 32 |
+                    (long)Unsafe.AddByteOffset(ref source, offset + 8) << 24 |
+                    (long)Unsafe.AddByteOffset(ref source, offset + 9) << 16 |
+                    (long)Unsafe.AddByteOffset(ref source, offset + 10) << 8 |
+                    (long)Unsafe.AddByteOffset(ref source, offset + 11);
+
+                var dtOffsetMinutes = (short)(
+                    (Unsafe.AddByteOffset(ref source, offset + 12) << 8) |
+                    Unsafe.AddByteOffset(ref source, offset + 13));
+
+                var utc = DateTimeConstants.UnixEpoch.AddSeconds(seconds).AddTicks(nanoseconds / DateTimeConstants.NanosecondsPerTick);
+                return new DateTimeOffset(utc.Ticks, TimeSpan.FromMinutes(dtOffsetMinutes));
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static InvalidOperationException GetInvalidOperationException()
+        {
+            return new InvalidOperationException("Invalid DateTimeOffset format");
+        }
+    }
 
     public sealed class ExtBinaryGuidFormatter : IMessagePackFormatter<Guid>
     {

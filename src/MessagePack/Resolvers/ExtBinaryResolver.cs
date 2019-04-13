@@ -49,6 +49,14 @@ namespace MessagePack.Internal
             {
                 return new StaticNullableFormatter<Decimal>(ExtBinaryDecimalFormatter.Instance);
             }
+            else if (t == typeof(DateTimeOffset))
+            {
+                return ExtDateTimeOffsetFormatter.Instance;
+            }
+            else if (t == typeof(DateTimeOffset?))
+            {
+                return new StaticNullableFormatter<DateTimeOffset>(ExtDateTimeOffsetFormatter.Instance);
+            }
 
             return null;
         }
