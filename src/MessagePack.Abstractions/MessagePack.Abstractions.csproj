@@ -10,8 +10,8 @@
   </PropertyGroup>
   
   <PropertyGroup Label="NuGet">
-    <PackageId>MessagePack.Abstractions</PackageId>
-    <Title>MessagePack.Abstractions (Unofficial).</Title>
+    <PackageId>MessagePack.Span.Abstractions</PackageId>
+    <Title>MessagePack.Span.Abstractions (Unofficial).</Title>
     <Description>This package includes a mostly complete port of the MessagePack(for more info see: https://github.com/neuecc/MessagePack-CSharp/) assembly to support .NET 4.5.1 and newer.</Description>
     <PackageTags>MsgPack, MessagePack, Serialization, Formatter, Serializer</PackageTags>
   </PropertyGroup>

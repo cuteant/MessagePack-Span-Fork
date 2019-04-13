@@ -4,7 +4,7 @@
     <Authors>Seabiscuit</Authors>
     <Product>MessagePack</Product>
     <PackageProjectUrl>https://github.com/cuteant/MessagePack-Span-Fork/</PackageProjectUrl>
-    <PackageLicense>https://github.com/cuteant/MessagePack-Span-Fork/blob/master/LICENSE</PackageLicense>
+    <PackageLicenseUrl>https://github.com/cuteant/MessagePack-Span-Fork/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/cuteant/MessagePack-Span-Fork.git</RepositoryUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
