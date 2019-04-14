@@ -335,12 +335,15 @@
                     builder.Append(guid.ToString("D"));
                     builder.Append("\"");
                     break;
+
+#if DEPENDENT_ON_CUTEANT
                 case ReservedMessagePackExtensionTypeCode.ComgGuid:
                     var comb = CombGuidFormatter.Instance.Deserialize(ref reader, null);
                     builder.Append("\"");
                     builder.Append(comb.ToString(CuteAnt.CombGuidFormatStringType.Comb));
                     builder.Append("\"");
                     break;
+#endif
 
                 case ReservedMessagePackExtensionTypeCode.Decimal:
                     var decimalValue = ExtBinaryDecimalFormatter.Instance.Deserialize(ref reader, null);

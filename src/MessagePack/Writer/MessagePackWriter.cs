@@ -33,19 +33,9 @@
         {
             if (useThreadLocalBuffer)
             {
-                var buffer = InternalMemoryPool.GetBuffer();
-                if (buffer != null)
-                {
-                    _useThreadLocal = true;
-                    _arrayPool = null;
-                    _borrowedBuffer = buffer;
-                }
-                else
-                {
-                    _useThreadLocal = false;
-                    _arrayPool = MessagePackBinary.Shared;
-                    _borrowedBuffer = _arrayPool.Rent(c_defaultBufferSize);
-                }
+                _useThreadLocal = true;
+                _arrayPool = null;
+                _borrowedBuffer = InternalMemoryPool.GetBuffer();
             }
             else
             {
@@ -75,13 +65,9 @@
 
             var destination = new byte[alreadyWritten];
             MessagePackBinary.CopyMemory(_borrowedBuffer, 0, destination, 0, alreadyWritten);
-            if (_useThreadLocal)
+            if (_arrayPool != null)
             {
-                Release();
-            }
-            else
-            {
-                _arrayPool?.Return(_borrowedBuffer);
+                _arrayPool.Return(_borrowedBuffer);
                 _arrayPool = null;
             }
             return destination;
@@ -90,7 +76,9 @@
         public IOwnedBuffer<byte> ToOwnedBuffer(int alreadyWritten)
         {
             Debug.Assert(alreadyWritten >= 0);
-            return new ArrayWrittenBuffer(_arrayPool, _borrowedBuffer, alreadyWritten);
+            var arrayPool = _arrayPool;
+            _arrayPool = null;
+            return new ArrayWrittenBuffer(arrayPool, _borrowedBuffer, alreadyWritten);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -127,28 +115,22 @@
                 Debug.Assert(oldBuffer.Length >= alreadyWritten);
                 Debug.Assert(_borrowedBuffer.Length >= alreadyWritten);
 
-                var previousBuffer = oldBuffer.AsSpan(0, alreadyWritten);
-                previousBuffer.CopyTo(_borrowedBuffer);
-                previousBuffer.Clear();
+                //var previousBuffer = oldBuffer.AsSpan(0, alreadyWritten);
+                //previousBuffer.CopyTo(_borrowedBuffer);
+                //previousBuffer.Clear();
+                MessagePackBinary.CopyMemory(oldBuffer, 0, _borrowedBuffer, 0, alreadyWritten);
 
                 _capacity = _borrowedBuffer.Length;
 
                 if (_useThreadLocal)
                 {
-                    Release();
+                    _useThreadLocal = false;
                 }
                 else
                 {
                     _arrayPool.Return(oldBuffer);
                 }
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Release()
-        {
-            _useThreadLocal = false;
-            InternalMemoryPool.Free();
         }
     }
 
@@ -157,8 +139,8 @@
     sealed class ArrayWrittenBuffer : IOwnedBuffer<byte>
     {
         private ArrayPool<byte> _arrayPool;
-        private byte[] _buffer;
-        private int _alreadyWritten;
+        private readonly byte[] _buffer;
+        private readonly int _alreadyWritten;
 
         public ArrayWrittenBuffer(ArrayPool<byte> arrayPool, byte[] buffer, int alreadyWritten)
         {
@@ -190,11 +172,6 @@
 
     #region ** InternalMemoryPool **
 
-    sealed class InternalWrappingBuffer
-    {
-        public byte[] Buffer;
-        public bool Idle;
-    }
     static class InternalMemoryPool
     {
         private static readonly int s_initialCapacity;
@@ -207,26 +184,12 @@
         }
 
         [ThreadStatic]
-        static InternalWrappingBuffer s_wrappingBuffer = null;
+        static byte[] s_buffer = null;
 
         public static byte[] GetBuffer()
         {
-            if (s_wrappingBuffer == null)
-            {
-                s_wrappingBuffer = new InternalWrappingBuffer { Buffer = new byte[s_initialCapacity], Idle = true };
-            }
-            if (s_wrappingBuffer.Idle)
-            {
-                s_wrappingBuffer.Idle = false;
-                return s_wrappingBuffer.Buffer;
-            }
-            return null;
-        }
-
-        public static void Free()
-        {
-            Debug.Assert(s_wrappingBuffer != null);
-            s_wrappingBuffer.Idle = true;
+            if (s_buffer == null) { s_buffer = new byte[s_initialCapacity]; }
+            return s_buffer;
         }
     }
 

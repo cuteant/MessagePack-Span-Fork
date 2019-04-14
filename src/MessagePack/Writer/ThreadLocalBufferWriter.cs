@@ -70,11 +70,11 @@ namespace MessagePack
             _borrowedBuffer = null;
             if (_useThreadLocal)
             {
-                Release();
+                _useThreadLocal = false;
             }
             else
             {
-                _arrayPool.Return(borrowedBuffer);
+                _arrayPool?.Return(borrowedBuffer);
             }
             _arrayPool = null;
         }
@@ -110,7 +110,7 @@ namespace MessagePack
 
                 if (_useThreadLocal)
                 {
-                    Release();
+                    _useThreadLocal = false;
                 }
                 else
                 {
@@ -122,20 +122,8 @@ namespace MessagePack
             Debug.Assert(_borrowedBuffer.Length - _writerIndex >= sizeHint);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Release()
-        {
-            _useThreadLocal = false;
-            InternalMemoryPool.Free();
-        }
-
         #region == InternalMemoryPool ==
 
-        sealed class InternalWrappingBuffer
-        {
-            public T[] Buffer;
-            public bool Idle;
-        }
         static class InternalMemoryPool
         {
             private static readonly int s_initialCapacity;
@@ -148,26 +136,12 @@ namespace MessagePack
             }
 
             [ThreadStatic]
-            static InternalWrappingBuffer s_wrappingBuffer = null;
+            static T[] s_buffer = null;
 
             public static T[] GetBuffer()
             {
-                if (s_wrappingBuffer == null)
-                {
-                    s_wrappingBuffer = new InternalWrappingBuffer { Buffer = new T[s_initialCapacity], Idle = true };
-                }
-                if (s_wrappingBuffer.Idle)
-                {
-                    s_wrappingBuffer.Idle = false;
-                    return s_wrappingBuffer.Buffer;
-                }
-                return null;
-            }
-
-            public static void Free()
-            {
-                Debug.Assert(s_wrappingBuffer != null);
-                s_wrappingBuffer.Idle = true;
+                if (s_buffer == null) { s_buffer = new T[s_initialCapacity]; }
+                return s_buffer;
             }
         }
 
