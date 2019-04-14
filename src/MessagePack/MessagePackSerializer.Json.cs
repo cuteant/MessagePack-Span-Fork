@@ -182,16 +182,44 @@
             {
                 case MessagePackType.Integer:
                     var code = reader.Peek();
-                    if (MessagePackCode.MinNegativeFixInt <= code && code <= MessagePackCode.MaxNegativeFixInt) builder.Append(reader.ReadSByte().ToString(System.Globalization.CultureInfo.InvariantCulture));
-                    else if (MessagePackCode.MinFixInt <= code && code <= MessagePackCode.MaxFixInt) builder.Append(reader.ReadByte().ToString(System.Globalization.CultureInfo.InvariantCulture));
-                    else if (code == MessagePackCode.Int8) builder.Append(reader.ReadSByte().ToString(System.Globalization.CultureInfo.InvariantCulture));
-                    else if (code == MessagePackCode.Int16) builder.Append(reader.ReadInt16().ToString(System.Globalization.CultureInfo.InvariantCulture));
-                    else if (code == MessagePackCode.Int32) builder.Append(reader.ReadInt32().ToString(System.Globalization.CultureInfo.InvariantCulture));
-                    else if (code == MessagePackCode.Int64) builder.Append(reader.ReadInt64().ToString(System.Globalization.CultureInfo.InvariantCulture));
-                    else if (code == MessagePackCode.UInt8) builder.Append(reader.ReadByte().ToString(System.Globalization.CultureInfo.InvariantCulture));
-                    else if (code == MessagePackCode.UInt16) builder.Append(reader.ReadUInt16().ToString(System.Globalization.CultureInfo.InvariantCulture));
-                    else if (code == MessagePackCode.UInt32) builder.Append(reader.ReadUInt32().ToString(System.Globalization.CultureInfo.InvariantCulture));
-                    else if (code == MessagePackCode.UInt64) builder.Append(reader.ReadUInt64().ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    if (MessagePackCode.MinNegativeFixInt <= code && code <= MessagePackCode.MaxNegativeFixInt)
+                    {
+                        builder.Append(reader.ReadSByte().ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    }
+                    else if (MessagePackCode.MinFixInt <= code && code <= MessagePackCode.MaxFixInt)
+                    {
+                        builder.Append(reader.ReadByte().ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    }
+                    else
+                    {
+                        switch (code)
+                        {
+                            case MessagePackCode.Int8:
+                                builder.Append(reader.ReadSByte().ToString(System.Globalization.CultureInfo.InvariantCulture));
+                                break;
+                            case MessagePackCode.Int16:
+                                builder.Append(reader.ReadInt16().ToString(System.Globalization.CultureInfo.InvariantCulture));
+                                break;
+                            case MessagePackCode.Int32:
+                                builder.Append(reader.ReadInt32().ToString(System.Globalization.CultureInfo.InvariantCulture));
+                                break;
+                            case MessagePackCode.Int64:
+                                builder.Append(reader.ReadInt64().ToString(System.Globalization.CultureInfo.InvariantCulture));
+                                break;
+                            case MessagePackCode.UInt8:
+                                builder.Append(reader.ReadByte().ToString(System.Globalization.CultureInfo.InvariantCulture));
+                                break;
+                            case MessagePackCode.UInt16:
+                                builder.Append(reader.ReadUInt16().ToString(System.Globalization.CultureInfo.InvariantCulture));
+                                break;
+                            case MessagePackCode.UInt32:
+                                builder.Append(reader.ReadUInt32().ToString(System.Globalization.CultureInfo.InvariantCulture));
+                                break;
+                            case MessagePackCode.UInt64:
+                                builder.Append(reader.ReadUInt64().ToString(System.Globalization.CultureInfo.InvariantCulture));
+                                break;
+                        }
+                    }
                     break;
                 case MessagePackType.Boolean:
                     builder.Append(reader.ReadBoolean() ? "true" : "false");
@@ -268,68 +296,7 @@
                         return;
                     }
                 case MessagePackType.Extension:
-                    var extHeaderTypeCode = reader.GetExtensionFormatTypeCode();
-                    if (extHeaderTypeCode == ReservedMessagePackExtensionTypeCode.DateTime)
-                    {
-                        var dt = reader.ReadDateTime();
-                        builder.Append("\"");
-                        builder.Append(dt.ToString("o", CultureInfo.InvariantCulture));
-                        builder.Append("\"");
-                    }
-                    else if (extHeaderTypeCode == TypelessFormatter.ExtensionTypeCode)
-                    {
-                        var extHeader = reader.ReadExtensionFormatHeader();
-
-                        // prepare type name token
-                        var typeNameLen = reader.GetEncodedStringLength();
-                        var typeNameToken = new StringBuilder();
-                        ToJsonCore(ref reader, typeNameToken);
-                        int startBuilderLength = builder.Length;
-                        if (extHeader.Length > typeNameLen)
-                        {
-                            // object map or array
-                            var typeInside = reader.GetMessagePackType();
-                            if (typeInside != MessagePackType.Array && typeInside != MessagePackType.Map)
-                            {
-                                builder.Append("{");
-                            }
-
-                            ToJsonCore(ref reader, builder);
-                            // insert type name token to start of object map or array
-                            if (typeInside != MessagePackType.Array)
-                            {
-                                typeNameToken.Insert(0, "\"$type\":");
-                            }
-                            if (typeInside != MessagePackType.Array && typeInside != MessagePackType.Map)
-                            {
-                                builder.Append("}");
-                            }
-                            if (builder.Length - startBuilderLength > 2)
-                            {
-                                typeNameToken.Append(",");
-                            }
-                            builder.Insert(startBuilderLength + 1, typeNameToken.ToString());
-                        }
-                        else
-                        {
-                            builder.Append("{\"$type\":\"" + typeNameToken.ToString() + "}");
-                        }
-                    }
-                    else
-                    {
-                        var ext = reader.ReadExtensionFormat();
-                        builder.Append("[");
-                        builder.Append(ext.TypeCode);
-                        builder.Append(",");
-                        builder.Append("\"");
-#if NETCOREAPP
-                        builder.Append(Convert.ToBase64String(ext.Data));
-#else
-                        builder.Append(Convert.ToBase64String(ext.Data.ToArray()));
-#endif
-                        builder.Append("\"");
-                        builder.Append("]");
-                    }
+                    WriteExtensionFormat(ref reader, builder);
                     break;
                 case MessagePackType.Unknown:
                 case MessagePackType.Nil:
@@ -340,6 +307,103 @@
             }
 
             return;
+        }
+
+        private static void WriteExtensionFormat(ref MessagePackReader reader, StringBuilder builder)
+        {
+            var extHeaderTypeCode = reader.GetExtensionFormatTypeCode();
+
+            switch (extHeaderTypeCode)
+            {
+                case ReservedMessagePackExtensionTypeCode.DateTime:
+                    var dt = reader.ReadDateTime();
+                    builder.Append("\"");
+                    builder.Append(dt.ToString("o", CultureInfo.InvariantCulture));
+                    builder.Append("\"");
+                    break;
+
+                case ReservedMessagePackExtensionTypeCode.DateTimeOffset:
+                    var dts = ExtDateTimeOffsetFormatter.Instance.Deserialize(ref reader, null);
+                    builder.Append("\"");
+                    builder.Append(dts.ToString("u", CultureInfo.InvariantCulture));
+                    builder.Append("\"");
+                    break;
+
+                case ReservedMessagePackExtensionTypeCode.Guid:
+                    var guid = ExtBinaryGuidFormatter.Instance.Deserialize(ref reader, null);
+                    builder.Append("\"");
+                    builder.Append(guid.ToString("D"));
+                    builder.Append("\"");
+                    break;
+
+#if DEPENDENT_ON_CUTEANT
+                case ReservedMessagePackExtensionTypeCode.ComgGuid:
+                    var comb = CombGuidFormatter.Instance.Deserialize(ref reader, null);
+                    builder.Append("\"");
+                    builder.Append(comb.ToString(CuteAnt.CombGuidFormatStringType.Comb));
+                    builder.Append("\"");
+                    break;
+#endif
+
+                case ReservedMessagePackExtensionTypeCode.Decimal:
+                    var decimalValue = ExtBinaryDecimalFormatter.Instance.Deserialize(ref reader, null);
+                    builder.Append(decimalValue.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                    break;
+
+                case ReservedMessagePackExtensionTypeCode.Typeless:
+                    var extHeader = reader.ReadExtensionFormatHeader();
+
+                    // prepare type name token
+                    var typeNameLen = reader.GetEncodedStringLength();
+                    var typeNameToken = new StringBuilder();
+                    ToJsonCore(ref reader, typeNameToken);
+                    int startBuilderLength = builder.Length;
+                    if (extHeader.Length > typeNameLen)
+                    {
+                        // object map or array
+                        var typeInside = reader.GetMessagePackType();
+                        if (typeInside != MessagePackType.Array && typeInside != MessagePackType.Map)
+                        {
+                            builder.Append("{");
+                        }
+
+                        ToJsonCore(ref reader, builder);
+                        // insert type name token to start of object map or array
+                        if (typeInside != MessagePackType.Array)
+                        {
+                            typeNameToken.Insert(0, "\"$type\":");
+                        }
+                        if (typeInside != MessagePackType.Array && typeInside != MessagePackType.Map)
+                        {
+                            builder.Append("}");
+                        }
+                        if (builder.Length - startBuilderLength > 2)
+                        {
+                            typeNameToken.Append(",");
+                        }
+                        builder.Insert(startBuilderLength + 1, typeNameToken.ToString());
+                    }
+                    else
+                    {
+                        builder.Append("{\"$type\":\"" + typeNameToken.ToString() + "}");
+                    }
+                    break;
+
+                default:
+                    var ext = reader.ReadExtensionFormat();
+                    builder.Append("[");
+                    builder.Append(ext.TypeCode);
+                    builder.Append(",");
+                    builder.Append("\"");
+#if NETCOREAPP
+                    builder.Append(Convert.ToBase64String(ext.Data));
+#else
+                    builder.Append(Convert.ToBase64String(ext.Data.ToArray()));
+#endif
+                    builder.Append("\"");
+                    builder.Append("]");
+                    break;
+            }
         }
 
         // escape string

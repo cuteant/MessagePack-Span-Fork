@@ -267,6 +267,7 @@
             new CachedReadConcurrentDictionary<string, byte[]>(DictionaryCacheConstants.SIZE_MEDIUM, StringComparer.Ordinal);
         static readonly Func<string, byte[]> s_getEncodedStringBytesFunc = s => GetEncodedStringBytesImpl(s);
 
+        /// <summary>For short strings use only.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte[] GetEncodedStringBytes(string value)
         {
