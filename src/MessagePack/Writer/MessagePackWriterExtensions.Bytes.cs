@@ -64,14 +64,21 @@
             idx += 2;
         }
 
-        public static void WriteRawBytes(this ref MessagePackWriter writer, ReadOnlySpan<byte> source, ref int idx)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteRawBytes(this ref MessagePackWriter writer, byte[] value, ref int idx)
         {
-            var count = source.Length;
+            if (null == value) { return; }
+            UnsafeMemory.WriteRaw(ref writer, value, ref idx);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteRawBytes(this ref MessagePackWriter writer, ReadOnlySpan<byte> value, ref int idx)
+        {
+            var count = value.Length;
             if (0u >= (uint)count) { return; }
 
             writer.Ensure(idx, count);
-            MessagePackBinary.CopyMemory(ref MemoryMarshal.GetReference(source), ref Unsafe.AddByteOffset(ref writer.PinnableAddress, (IntPtr)idx), count);
-            idx += count;
+            UnsafeMemory.WriteRaw(ref MemoryMarshal.GetReference(value), ref Unsafe.AddByteOffset(ref writer.PinnableAddress, (IntPtr)idx), count, ref idx);
         }
     }
 }
