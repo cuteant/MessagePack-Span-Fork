@@ -108,7 +108,7 @@
 
         /// <summary>Read the next value and advance the reader.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public byte Read()
+        public byte ReadRawByte()
         {
             //if (_noMoreData) { ThrowHelper.ThrowArgumentException_NeedMoreData(); }
 
