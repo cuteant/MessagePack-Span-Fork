@@ -20,7 +20,7 @@
             var seconds = secondsSinceBclEpoch - DateTimeConstants.BclSecondsAtUnixEpoch;
             var nanoseconds = (dateTime.Ticks % TimeSpan.TicksPerSecond) * DateTimeConstants.NanosecondsPerTick;
 
-            writer.Ensure(idx, 15);
+            writer.Ensure(idx, 17);
 
             ref byte b = ref writer.PinnableAddress;
             IntPtr offset = (IntPtr)idx;
