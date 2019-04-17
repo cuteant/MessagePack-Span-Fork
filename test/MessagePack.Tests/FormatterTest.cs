@@ -238,7 +238,6 @@ namespace MessagePack.Tests
 
             var idx = 0;
             var writer = new MessagePackWriter(16);
-
             writer.WriteString(a, ref idx);
             idx.Is(Encoding.UTF8.GetByteCount(a) + 1);
             var reader = new MessagePackReader(writer.ToArray(idx));
@@ -246,10 +245,24 @@ namespace MessagePack.Tests
 
             writer = new MessagePackWriter(16);
             idx = 0;
+            writer.WriteStringWithCache(a, ref idx);
+            idx.Is(Encoding.UTF8.GetByteCount(a) + 1);
+            reader = new MessagePackReader(writer.ToArray(idx));
+            reader.ReadStringWithCache().Is(a);
+
+            writer = new MessagePackWriter(16);
+            idx = 0;
             writer.WriteString(b, ref idx);
             idx.Is(Encoding.UTF8.GetByteCount(b) + 2);
             reader = new MessagePackReader(writer.ToArray(idx));
             reader.ReadString().Is(b);
+
+            writer = new MessagePackWriter(16);
+            idx = 0;
+            writer.WriteStringWithCache(b, ref idx);
+            idx.Is(Encoding.UTF8.GetByteCount(b) + 2);
+            reader = new MessagePackReader(writer.ToArray(idx));
+            reader.ReadStringWithCache().Is(b);
 
             writer = new MessagePackWriter(16);
             idx = 0;
@@ -276,7 +289,6 @@ namespace MessagePack.Tests
 
             var idx = 0;
             var writer = new MessagePackWriter(16);
-
             writer.WriteString(a, ref idx);
             idx.Is(Encoding.UTF8.GetByteCount(a) + 2);
             var reader = new MessagePackReader(writer.ToArray(idx));
@@ -284,10 +296,24 @@ namespace MessagePack.Tests
 
             writer = new MessagePackWriter(16);
             idx = 0;
+            writer.WriteStringWithCache(a, ref idx);
+            idx.Is(Encoding.UTF8.GetByteCount(a) + 2);
+            reader = new MessagePackReader(writer.ToArray(idx));
+            reader.ReadStringWithCache().Is(a);
+
+            writer = new MessagePackWriter(16);
+            idx = 0;
             writer.WriteString(b, ref idx);
             idx.Is(Encoding.UTF8.GetByteCount(b) + 2);
             reader = new MessagePackReader(writer.ToArray(idx));
             reader.ReadString().Is(b);
+
+            writer = new MessagePackWriter(16);
+            idx = 0;
+            writer.WriteStringWithCache(b, ref idx);
+            idx.Is(Encoding.UTF8.GetByteCount(b) + 2);
+            reader = new MessagePackReader(writer.ToArray(idx));
+            reader.ReadStringWithCache().Is(b);
 
             writer = new MessagePackWriter(16);
             idx = 0;

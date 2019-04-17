@@ -20,6 +20,18 @@
             return stringDecoders[position].Read(ref this, ref position);
         }
 
+        /// <summary>For short strings use only.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ReadStringWithCache()
+        {
+            ref byte position = ref Unsafe.AddByteOffset(ref MemoryMarshal.GetReference(_currentSpan), (IntPtr)_currentSpanIndex);
+
+            if (MessagePackCode.Nil == position) { Advance(1); return null; }
+
+            var utf8Span = stringSpanDecoders[position].Read(ref this, ref position);
+            return MessagePackBinary.ResolveString(utf8Span);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<byte> ReadUtf8Span()
         {

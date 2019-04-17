@@ -149,7 +149,7 @@
         }
 
         /// <summary>Unsafe. If value is guranteed length is 0 ~ 31, can use this method.</summary>
-        [Obsolete("=> GetEncodedStringBytes.MessagePackBinary + UnsafeMemory.WriteRaw")]
+        [Obsolete("=> WriteStringWithCache")]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteFixedStringUnsafe(this ref MessagePackWriter writer, string value, int byteCount, ref int idx)
         {
@@ -164,6 +164,16 @@
             EncodingUtils.ToUtf8(ref MemoryMarshal.GetReference(utf16Source), utf16Source.Length,
                 ref Unsafe.AddByteOffset(ref pinnableAddr, (IntPtr)idx), writer._capacity - idx, out _, out int written);
             idx += written;
+        }
+
+        /// <summary>For short strings use only.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteStringWithCache(this ref MessagePackWriter writer, string value, ref int idx)
+        {
+            if (value == null) { WriteNil(ref writer, ref idx); return; }
+
+            var encodedStr = MessagePackBinary.GetEncodedStringBytes(value);
+            UnsafeMemory.WriteRaw(ref writer, encodedStr, ref idx);
         }
     }
 }
