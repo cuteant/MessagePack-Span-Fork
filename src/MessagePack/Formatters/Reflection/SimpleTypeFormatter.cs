@@ -21,15 +21,11 @@ namespace MessagePack.Formatters
 
         public TType Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (reader.IsNil()) { return null; }
-
             return (TType)reader.ReadNamedType(_throwOnError);
         }
 
         public void Serialize(ref MessagePackWriter writer, ref int idx, TType value, IFormatterResolver formatterResolver)
         {
-            if (value == null) { writer.WriteNil(ref idx); return; }
-
             writer.WriteNamedType(value, ref idx);
         }
     }
