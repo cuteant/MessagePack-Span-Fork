@@ -58,28 +58,28 @@
             switch (value)
             {
                 case EventInfo ei:
-                    writer.WriteArrayHeader(c_count, ref idx);
+                    writer.WriteFixedArrayHeaderUnsafe(c_count, ref idx);
                     writer.WriteByte(_.EventInfo, ref idx);
                     var evtFormatter = formatterResolver.GetFormatterWithVerify<EventInfo>();
                     evtFormatter.Serialize(ref writer, ref idx, ei, formatterResolver);
                     break;
 
                 case FieldInfo fi:
-                    writer.WriteArrayHeader(c_count, ref idx);
+                    writer.WriteFixedArrayHeaderUnsafe(c_count, ref idx);
                     writer.WriteByte(_.FieldInfo, ref idx);
                     var fieldFormatter = formatterResolver.GetFormatterWithVerify<FieldInfo>();
                     fieldFormatter.Serialize(ref writer, ref idx, fi, formatterResolver);
                     break;
 
                 case MethodInfo mi:
-                    writer.WriteArrayHeader(c_count, ref idx);
+                    writer.WriteFixedArrayHeaderUnsafe(c_count, ref idx);
                     writer.WriteByte(_.MethodInfo, ref idx);
                     var methodFormatter = formatterResolver.GetFormatterWithVerify<MethodInfo>();
                     methodFormatter.Serialize(ref writer, ref idx, mi, formatterResolver);
                     break;
 
                 case PropertyInfo pi:
-                    writer.WriteArrayHeader(c_count, ref idx);
+                    writer.WriteFixedArrayHeaderUnsafe(c_count, ref idx);
                     writer.WriteByte(_.PropertyInfo, ref idx);
                     var propertyFormatter = formatterResolver.GetFormatterWithVerify<PropertyInfo>();
                     propertyFormatter.Serialize(ref writer, ref idx, pi, formatterResolver);

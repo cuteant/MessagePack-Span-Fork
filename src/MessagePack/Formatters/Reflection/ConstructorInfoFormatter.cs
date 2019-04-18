@@ -49,7 +49,7 @@ namespace MessagePack.Formatters
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
 
-            writer.WriteArrayHeader(c_count, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(c_count, ref idx);
 
             writer.WriteNamedType(value.DeclaringType, ref idx);
             var arguments = value.GetParameters().Select(p => p.ParameterType).ToArray();

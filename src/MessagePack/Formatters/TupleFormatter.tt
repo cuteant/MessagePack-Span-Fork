@@ -22,7 +22,7 @@ namespace MessagePack.Formatters
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
 
-            writer.WriteArrayHeader(<#= i #>, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(<#= i #>, ref idx);
 
 <# for(var j = 1; j <= i; j++) { #>
             formatterResolver.GetFormatterWithVerify<<#= toT(j) #>>().Serialize(ref writer, ref idx, value.<#= toItem(j) #>, formatterResolver);

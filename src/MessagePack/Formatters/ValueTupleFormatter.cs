@@ -8,7 +8,7 @@ namespace MessagePack.Formatters
     {
         public void Serialize(ref MessagePackWriter writer, ref int idx, ValueTuple<T1> value, IFormatterResolver formatterResolver)
         {
-            writer.WriteArrayHeader(1, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(1, ref idx);
 
             formatterResolver.GetFormatterWithVerify<T1>().Serialize(ref writer, ref idx, value.Item1, formatterResolver);
         }
@@ -31,7 +31,7 @@ namespace MessagePack.Formatters
     {
         public void Serialize(ref MessagePackWriter writer, ref int idx, ValueTuple<T1, T2> value, IFormatterResolver formatterResolver)
         {
-            writer.WriteArrayHeader(2, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(2, ref idx);
 
             formatterResolver.GetFormatterWithVerify<T1>().Serialize(ref writer, ref idx, value.Item1, formatterResolver);
             formatterResolver.GetFormatterWithVerify<T2>().Serialize(ref writer, ref idx, value.Item2, formatterResolver);
@@ -56,7 +56,7 @@ namespace MessagePack.Formatters
     {
         public void Serialize(ref MessagePackWriter writer, ref int idx, ValueTuple<T1, T2, T3> value, IFormatterResolver formatterResolver)
         {
-            writer.WriteArrayHeader(3, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(3, ref idx);
 
             formatterResolver.GetFormatterWithVerify<T1>().Serialize(ref writer, ref idx, value.Item1, formatterResolver);
             formatterResolver.GetFormatterWithVerify<T2>().Serialize(ref writer, ref idx, value.Item2, formatterResolver);
@@ -83,7 +83,7 @@ namespace MessagePack.Formatters
     {
         public void Serialize(ref MessagePackWriter writer, ref int idx, ValueTuple<T1, T2, T3, T4> value, IFormatterResolver formatterResolver)
         {
-            writer.WriteArrayHeader(4, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(4, ref idx);
 
             formatterResolver.GetFormatterWithVerify<T1>().Serialize(ref writer, ref idx, value.Item1, formatterResolver);
             formatterResolver.GetFormatterWithVerify<T2>().Serialize(ref writer, ref idx, value.Item2, formatterResolver);
@@ -112,7 +112,7 @@ namespace MessagePack.Formatters
     {
         public void Serialize(ref MessagePackWriter writer, ref int idx, ValueTuple<T1, T2, T3, T4, T5> value, IFormatterResolver formatterResolver)
         {
-            writer.WriteArrayHeader(5, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(5, ref idx);
 
             formatterResolver.GetFormatterWithVerify<T1>().Serialize(ref writer, ref idx, value.Item1, formatterResolver);
             formatterResolver.GetFormatterWithVerify<T2>().Serialize(ref writer, ref idx, value.Item2, formatterResolver);
@@ -143,7 +143,7 @@ namespace MessagePack.Formatters
     {
         public void Serialize(ref MessagePackWriter writer, ref int idx, ValueTuple<T1, T2, T3, T4, T5, T6> value, IFormatterResolver formatterResolver)
         {
-            writer.WriteArrayHeader(6, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(6, ref idx);
 
             formatterResolver.GetFormatterWithVerify<T1>().Serialize(ref writer, ref idx, value.Item1, formatterResolver);
             formatterResolver.GetFormatterWithVerify<T2>().Serialize(ref writer, ref idx, value.Item2, formatterResolver);
@@ -176,7 +176,7 @@ namespace MessagePack.Formatters
     {
         public void Serialize(ref MessagePackWriter writer, ref int idx, ValueTuple<T1, T2, T3, T4, T5, T6, T7> value, IFormatterResolver formatterResolver)
         {
-            writer.WriteArrayHeader(7, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(7, ref idx);
 
             formatterResolver.GetFormatterWithVerify<T1>().Serialize(ref writer, ref idx, value.Item1, formatterResolver);
             formatterResolver.GetFormatterWithVerify<T2>().Serialize(ref writer, ref idx, value.Item2, formatterResolver);
@@ -211,7 +211,7 @@ namespace MessagePack.Formatters
     {
         public void Serialize(ref MessagePackWriter writer, ref int idx, ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> value, IFormatterResolver formatterResolver)
         {
-            writer.WriteArrayHeader(8, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(8, ref idx);
 
             formatterResolver.GetFormatterWithVerify<T1>().Serialize(ref writer, ref idx, value.Item1, formatterResolver);
             formatterResolver.GetFormatterWithVerify<T2>().Serialize(ref writer, ref idx, value.Item2, formatterResolver);

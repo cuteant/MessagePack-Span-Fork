@@ -15,8 +15,6 @@
             }
         }
 
-        const uint MaxFixArrayCount = MessagePackRange.MaxFixArrayCount;
-
         /// <summary>Write array count.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteArrayHeader(this ref MessagePackWriter writer, uint count, ref int idx)

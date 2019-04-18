@@ -6,6 +6,8 @@
     {
         const uint IntMaxValue = int.MaxValue;
         const uint MaxFixPositiveInt = MessagePackRange.MaxFixPositiveInt;
+        const uint MaxFixMapCount = MessagePackRange.MaxFixMapCount;
+        const uint MaxFixArrayCount = MessagePackRange.MaxFixArrayCount;
         const uint ByteMaxValue = byte.MaxValue;
         const uint UShortMaxValue = ushort.MaxValue;
         const uint MinFixNegativeInt = unchecked((uint)MessagePackRange.MinFixNegativeInt);

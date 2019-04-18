@@ -32,7 +32,7 @@
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
 
-            writer.WriteArrayHeader(c_count, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(c_count, ref idx);
 
             writer.WriteInt32(value.Port, ref idx);
 

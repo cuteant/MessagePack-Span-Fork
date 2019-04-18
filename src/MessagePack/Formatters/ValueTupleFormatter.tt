@@ -20,7 +20,7 @@ namespace MessagePack.Formatters
     {
         public void Serialize(ref MessagePackWriter writer, ref int idx, <#= t #> value, IFormatterResolver formatterResolver)
         {
-            writer.WriteArrayHeader(<#= i #>, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(<#= i #>, ref idx);
 
 <# for(var j = 1; j <= i; j++) { #>
             formatterResolver.GetFormatterWithVerify<<#= toT(j) #>>().Serialize(ref writer, ref idx, value.<#= toItem(j) #>, formatterResolver);

@@ -15,7 +15,7 @@
 
             var formatter = formatterResolver.GetFormatterWithVerify<T>();
 
-            writer.WriteArrayHeader(ArrayLength, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(ArrayLength, ref idx);
             writer.WriteInt32(i, ref idx);
             writer.WriteInt32(j, ref idx);
 
@@ -76,7 +76,7 @@
 
             var formatter = formatterResolver.GetFormatterWithVerify<T>();
 
-            writer.WriteArrayHeader(ArrayLength, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(ArrayLength, ref idx);
             writer.WriteInt32(i, ref idx);
             writer.WriteInt32(j, ref idx);
             writer.WriteInt32(k, ref idx);
@@ -147,7 +147,7 @@
 
             var formatter = formatterResolver.GetFormatterWithVerify<T>();
 
-            writer.WriteArrayHeader(ArrayLength, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(ArrayLength, ref idx);
             writer.WriteInt32(i, ref idx);
             writer.WriteInt32(j, ref idx);
             writer.WriteInt32(k, ref idx);

@@ -333,7 +333,7 @@ namespace MessagePack.Formatters
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
 
-            writer.WriteArrayHeader(2, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(2, ref idx);
             formatterResolver.GetFormatterWithVerify<TKey>().Serialize(ref writer, ref idx, value.Key, formatterResolver);
             formatterResolver.GetFormatterWithVerify<IEnumerable<TElement>>().Serialize(ref writer, ref idx, value, formatterResolver);
         }

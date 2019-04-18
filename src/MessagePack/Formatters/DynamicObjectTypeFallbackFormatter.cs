@@ -33,7 +33,7 @@
             if (type == typeof(object))
             {
                 // serialize to empty map
-                writer.WriteMapHeader(0, ref idx); return;
+                writer.WriteFixedMapHeaderUnsafe(0, ref idx); return;
             }
 
             if (!serializers.TryGetValue(type, out var formatterAndDelegate))

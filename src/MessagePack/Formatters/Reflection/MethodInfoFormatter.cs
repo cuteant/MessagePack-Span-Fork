@@ -63,7 +63,7 @@
         {
             if (value == null) { writer.WriteNil(ref idx); return; }
 
-            writer.WriteArrayHeader(c_count, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(c_count, ref idx);
 
             var encodedName = MessagePackBinary.GetEncodedStringBytes(value.Name);
             UnsafeMemory.WriteRaw(ref writer, encodedName, ref idx);
@@ -87,7 +87,7 @@
             }
             else
             {
-                writer.WriteArrayHeader(0, ref idx);
+                writer.WriteFixedArrayHeaderUnsafe(0, ref idx);
             }
         }
 

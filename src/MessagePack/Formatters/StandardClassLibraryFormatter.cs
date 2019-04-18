@@ -119,7 +119,7 @@
 
         public void Serialize(ref MessagePackWriter writer, ref int idx, DateTimeOffset value, IFormatterResolver formatterResolver)
         {
-            writer.WriteArrayHeader(2, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(2, ref idx);
             writer.WriteDateTime(new DateTime(value.Ticks, DateTimeKind.Utc), ref idx); // current ticks as is
             writer.WriteInt16((short)value.Offset.TotalMinutes, ref idx); // offset is normalized in minutes
         }
@@ -204,7 +204,7 @@
     {
         public void Serialize(ref MessagePackWriter writer, ref int idx, KeyValuePair<TKey, TValue> value, IFormatterResolver formatterResolver)
         {
-            writer.WriteArrayHeader(2, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(2, ref idx);
             formatterResolver.GetFormatterWithVerify<TKey>().Serialize(ref writer, ref idx, value.Key, formatterResolver);
             formatterResolver.GetFormatterWithVerify<TValue>().Serialize(ref writer, ref idx, value.Value, formatterResolver);
         }
@@ -296,7 +296,7 @@
 
         public void Serialize(ref MessagePackWriter writer, ref int idx, System.Numerics.Complex value, IFormatterResolver formatterResolver)
         {
-            writer.WriteArrayHeader(2, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(2, ref idx);
             writer.WriteDouble(value.Real, ref idx);
             writer.WriteDouble(value.Imaginary, ref idx);
         }

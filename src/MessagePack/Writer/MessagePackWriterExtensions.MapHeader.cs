@@ -17,7 +17,7 @@
         public static void WriteMapHeader(this ref MessagePackWriter writer, uint count, ref int idx)
         {
             writer.Ensure(idx, 5);
-            if (count <= MessagePackRange.MaxFixMapCount)
+            if (count <= MaxFixMapCount)
             {
                 Unsafe.AddByteOffset(ref writer.PinnableAddress, (IntPtr)idx) = unchecked((byte)(MessagePackCode.MinFixMap | count));
                 idx++;

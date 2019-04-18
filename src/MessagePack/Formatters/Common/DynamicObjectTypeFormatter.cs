@@ -87,7 +87,7 @@ namespace MessagePack.Formatters
                 ThrowHelper.ThrowInvalidOperationException_InterfaceOrAbstract(actualType);
             }
 
-            writer.WriteArrayHeader(c_count, ref idx);
+            writer.WriteFixedArrayHeaderUnsafe(c_count, ref idx);
 
             writer.WriteNamedType(actualType, ref idx);
 
