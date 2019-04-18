@@ -27,6 +27,15 @@
             ref byte position = ref Unsafe.AddByteOffset(ref MemoryMarshal.GetReference(_currentSpan), (IntPtr)_currentSpanIndex);
             return extHeaderDecoders[position].Read(ref this, ref position);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool IsLZ4Binary()
+        {
+            ref byte position = ref Unsafe.AddByteOffset(ref MemoryMarshal.GetReference(_currentSpan), (IntPtr)_currentSpanIndex);
+            return (MessagePackCode.ToMessagePackType(position) == MessagePackType.Extension &&
+                    extTypeCodeDecoders[position].Read(ref this, ref position) == ReservedMessagePackExtensionTypeCode.LZ4)
+                    ? true : false;
+        }
     }
 }
 

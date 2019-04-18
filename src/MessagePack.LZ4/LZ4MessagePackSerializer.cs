@@ -351,7 +351,7 @@
             if (resolver == null) { resolver = MessagePackSerializer.DefaultResolver; }
             var formatter = resolver.GetFormatterWithVerify<T>();
 
-            if (reader.GetMessagePackType() == MessagePackType.Extension)
+            if (reader.IsLZ4Binary())
             {
                 var header = reader.ReadExtensionFormatHeader();
                 if (header.TypeCode == ExtensionTypeCode)
@@ -387,7 +387,7 @@
         public static byte[] Decode(byte[] lz4Data)
         {
             var reader = new MessagePackReader(lz4Data);
-            if (reader.GetMessagePackType() != MessagePackType.Extension) { return lz4Data; }
+            if (!reader.IsLZ4Binary()) { return lz4Data; }
 
             using (var output = new LZ4ThreadLocalBufferWriter())
             {
@@ -399,7 +399,7 @@
         public static ReadOnlySpan<byte> Decode(ReadOnlySpan<byte> lz4Data)
         {
             var reader = new MessagePackReader(lz4Data);
-            if (reader.GetMessagePackType() != MessagePackType.Extension) { return lz4Data; }
+            if (!reader.IsLZ4Binary()) { return lz4Data; }
 
             using (var output = new LZ4ThreadLocalBufferWriter())
             {
@@ -443,7 +443,7 @@
 
         static void DecodeCore(ref MessagePackReader reader, IArrayBufferWriter<byte> output)
         {
-            if (reader.GetMessagePackType() != MessagePackType.Extension) { return; }
+            if (!reader.IsLZ4Binary()) { return; }
 
             var header = reader.ReadExtensionFormatHeader();
             if (header.TypeCode == ExtensionTypeCode)
