@@ -1556,8 +1556,7 @@ namespace MessagePack.Internal
                         {
                             if (intMembers.TryGetValue(ctorParamIndex, out paramMember))
                             {
-                                if ((item.ParameterType == paramMember.Type || item.ParameterType.IsAssignableFrom(paramMember.Type))
-                                    && paramMember.IsReadable)
+                                if (paramMember.IsReadable && IsSimilarType(item.ParameterType, paramMember.Type))
                                 {
                                     constructorParameters.Add(paramMember);
                                 }
@@ -1607,7 +1606,7 @@ namespace MessagePack.Internal
                                 }
 
                                 paramMember = hasKey.First().Value;
-                                if (item.ParameterType == paramMember.Type && paramMember.IsReadable)
+                                if (paramMember.IsReadable && IsSimilarType(item.ParameterType, paramMember.Type))
                                 {
                                     constructorParameters.Add(paramMember);
                                 }
@@ -1673,6 +1672,45 @@ namespace MessagePack.Internal
                 IsIntKey = isIntKey,
                 Members = members,
             };
+        }
+
+        static bool IsSimilarType(Type thisType, Type type)
+        {
+            // Ignore any 'ref' types
+            if (thisType.IsByRef) { thisType = thisType.GetElementType(); }
+            if (type.IsByRef) { type = type.GetElementType(); }
+
+            // Handle array types
+            if (thisType.IsArray && type.IsArray)
+            {
+                return IsSimilarType(thisType.GetElementType(), type.GetElementType());
+            }
+
+            // If the types are identical, or they're both generic parameters
+            if (thisType == type ||
+                thisType.IsGenericParameter ||
+                type.IsGenericParameter ||
+                thisType.IsAssignableFrom(type))
+            {
+                return true;
+            }
+
+            // Handle any generic arguments
+            if (thisType.IsGenericType && type.IsGenericType)
+            {
+                Type[] thisArguments = thisType.GetGenericArguments();
+                Type[] arguments = type.GetGenericArguments();
+                if (thisArguments.Length == arguments.Length)
+                {
+                    for (int i = 0; i < thisArguments.Length; ++i)
+                    {
+                        if (!IsSimilarType(thisArguments[i], arguments[i])) { return false; }
+                    }
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         static bool TryGetNextConstructor(IEnumerator<ConstructorInfo> ctorEnumerator, ref ConstructorInfo ctor)
