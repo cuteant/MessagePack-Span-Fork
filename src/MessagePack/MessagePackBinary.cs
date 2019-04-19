@@ -39,10 +39,6 @@
             return (byte*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(span));
         }
 
-        static readonly int MaxBytesPerCharUtf8 = Encoding.UTF8.GetMaxByteCount(1);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int Utf8MaxBytes(string seq) => seq.Length * MaxBytesPerCharUtf8;
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int SingleToInt32Bits(float value)
         {

@@ -84,7 +84,7 @@
         {
             if (value == null) { WriteNil(ref writer, ref idx); return; }
 
-            writer.Ensure(idx, MessagePackBinary.Utf8MaxBytes(value) + 5);
+            writer.Ensure(idx, EncodingUtils.Utf8MaxBytes(value) + 5);
 
             ref byte pinnableAddr = ref writer.PinnableAddress;
 

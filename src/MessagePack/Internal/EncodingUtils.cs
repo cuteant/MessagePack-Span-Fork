@@ -7,14 +7,19 @@ namespace MessagePack.Internal
     using System.Numerics;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
+    using System.Text;
 
-    internal static class EncodingUtils
+    public static class EncodingUtils
     {
         // Encoding Helpers
         const char HighSurrogateStart = '\ud800';
         const char HighSurrogateEnd = '\udbff';
         const char LowSurrogateStart = '\udc00';
         const char LowSurrogateEnd = '\udfff';
+
+        static readonly int MaxBytesPerCharUtf8 = Encoding.UTF8.GetMaxByteCount(1);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int Utf8MaxBytes(string seq) => seq.Length * MaxBytesPerCharUtf8;
 
         /// <summary>
         /// Calculates the byte count needed to encode the UTF-8 bytes from the specified UTF-16 sequence.
