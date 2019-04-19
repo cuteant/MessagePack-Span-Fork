@@ -186,19 +186,15 @@
 
         public object Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (reader.IsNil()) { return null; }
+            var isTypeless = reader.IsTypelessFormat(out var isNil);
+            if (isNil) { return null; }
 
-            var packType = reader.GetMessagePackType();
-            if (packType == MessagePackType.Extension)
+            if (isTypeless)
             {
-                var ext = reader.ReadExtensionFormatHeader();
-                if (ext.TypeCode == ExtensionTypeCode)
-                {
-                    // it has type name serialized
-                    var typeName = reader.ReadUtf8Span();
-                    var result = DeserializeByTypeName(typeName, ref reader, formatterResolver);
-                    return result;
-                }
+                // it has type name serialized
+                var typeName = reader.ReadUtf8Span();
+                var result = DeserializeByTypeName(typeName, ref reader, formatterResolver);
+                return result;
             }
 
             // fallback

@@ -36,6 +36,26 @@
                     extTypeCodeDecoders[position].Read(ref this, ref position) == ReservedMessagePackExtensionTypeCode.LZ4)
                     ? true : false;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool IsTypelessFormat(out bool isNil)
+        {
+            ref byte position = ref Unsafe.AddByteOffset(ref MemoryMarshal.GetReference(_currentSpan), (IntPtr)_currentSpanIndex);
+
+            if (MessagePackCode.Nil == position)
+            {
+                isNil = true;
+                Advance(1);
+                return false;
+            }
+
+            var isTypeless = (MessagePackCode.ToMessagePackType(position) == MessagePackType.Extension &&
+                    extTypeCodeDecoders[position].Read(ref this, ref position) == ReservedMessagePackExtensionTypeCode.Typeless)
+                    ? true : false;
+            if (isTypeless) { Advance(6); }
+            isNil = false;
+            return isTypeless;
+        }
     }
 }
 
