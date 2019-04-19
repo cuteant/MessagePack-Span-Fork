@@ -1,6 +1,9 @@
 ﻿namespace MessagePack
 {
     using System.Buffers;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Buffers;
+#endif
 
     internal sealed class LZ4ThreadLocalBufferWriter : ThreadLocalBufferWriter<LZ4ThreadLocalBufferWriter>
     {

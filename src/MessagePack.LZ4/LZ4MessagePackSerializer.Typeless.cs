@@ -6,6 +6,9 @@
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using MessagePack.Formatters;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Buffers;
+#endif
 
     // Typeless API
     public static partial class LZ4MessagePackSerializer

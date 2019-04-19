@@ -6,6 +6,9 @@
     using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Buffers;
+#endif
 
     /// <summary>High-Level API of MessagePack for C#.</summary>
     public static partial class MessagePackSerializer

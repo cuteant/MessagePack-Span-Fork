@@ -25,6 +25,7 @@ MessagePack.Formatters.HyperionExpressionFormatter
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CuteAnt.Runtime" Version="$(CuteAntRuntimePackageVersion)" />
     <PackageReference Include="Hyperion.Unofficial" Version="$(HyperionUnofficialPackageVersion)" />
   </ItemGroup>
 

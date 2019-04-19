@@ -7,6 +7,9 @@
     using System.Runtime.InteropServices;
     using System.Threading.Tasks;
     using MessagePack.Internal;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Buffers;
+#endif
 #if NET451
     using LZ4;
 #else

@@ -7,6 +7,9 @@
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Runtime.CompilerServices;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Buffers;
+#endif
 
     // NonGeneric API
     public static partial class MessagePackSerializer

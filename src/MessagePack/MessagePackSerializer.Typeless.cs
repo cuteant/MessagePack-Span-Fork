@@ -7,6 +7,9 @@
     using System.Threading;
     using System.Threading.Tasks;
     using MessagePack.Formatters;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Buffers;
+#endif
 
     // Typeless API
     public static partial class MessagePackSerializer

@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EA7DA5A5-A451-4637-8D7F-E54727C68BD3}"
 	ProjectSection(SolutionItems) = preProject
 		Clean.cmd = Clean.cmd
+		build\Dependencies.props = build\Dependencies.props
 		NuGet.Config = NuGet.Config
 	EndProjectSection
 EndProject
@@ -22,6 +23,20 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagePack.LZ4", "src\Standalone.MessagePack.LZ4\MessagePack.LZ4.csproj", "{3D78494F-116A-4DAB-AD1A-6AFEAE2DEBB6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagePack.Tests", "test\MessagePack.Tests.Standalone\MessagePack.Tests.csproj", "{CC9B4751-4C8C-41C5-97F9-9F7C12005C3D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FD17C14E-88A4-4D7B-8FC0-7F8BD965C734}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+		src\nuget.props = src\nuget.props
+		src\version.abstractions.props = src\version.abstractions.props
+		src\version.props = src\version.props
+		src\version.standalone.props = src\version.standalone.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{AED67837-43B6-4D3E-B793-125B45B10295}"
+	ProjectSection(SolutionItems) = preProject
+		test\Directory.Build.props = test\Directory.Build.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +74,8 @@ Global
 		{549AF85E-5B18-42A4-B425-5AF1752F9722} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{3D78494F-116A-4DAB-AD1A-6AFEAE2DEBB6} = {1F97D5A4-285F-4962-8F8C-BCEF8278143B}
 		{CC9B4751-4C8C-41C5-97F9-9F7C12005C3D} = {4744CD6C-82C3-4D38-A708-3D301A74397F}
+		{FD17C14E-88A4-4D7B-8FC0-7F8BD965C734} = {EA7DA5A5-A451-4637-8D7F-E54727C68BD3}
+		{AED67837-43B6-4D3E-B793-125B45B10295} = {EA7DA5A5-A451-4637-8D7F-E54727C68BD3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93230366-D5C3-4397-83D3-ED46E43B8121}

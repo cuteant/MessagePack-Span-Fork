@@ -6,6 +6,9 @@
     using System.Runtime.CompilerServices;
     using System.Text;
     using MessagePack.Formatters;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Buffers;
+#endif
 
     // JSON API
     public static partial class MessagePackSerializer

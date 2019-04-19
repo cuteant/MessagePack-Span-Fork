@@ -4,6 +4,9 @@
     using System.Buffers;
     using System.Diagnostics;
     using System.Runtime.CompilerServices;
+#if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Buffers;
+#endif
 
     public ref partial struct MessagePackWriter
     {

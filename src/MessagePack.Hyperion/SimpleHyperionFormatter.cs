@@ -32,9 +32,9 @@
 
         public T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (reader.IsNil()) { return default; }
-
             var serializedObject = reader.ReadBytes();
+            if (null == serializedObject) { return default; }
+
             using (var ms = new MemoryStream(serializedObject, false))
             {
                 var result = _serializer.Deserialize<T>(ms);

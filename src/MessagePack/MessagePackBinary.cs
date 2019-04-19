@@ -9,6 +9,7 @@
     using System.Threading;
     using MessagePack.Internal;
 #if DEPENDENT_ON_CUTEANT
+    using CuteAnt.Buffers;
     using CuteAnt.Collections;
     using CuteAnt.Reflection;
 #endif

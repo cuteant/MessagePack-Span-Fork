@@ -19,10 +19,10 @@
 
         public T Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
         {
-            if (reader.IsNil()) { return default; }
+            var serializedObject = reader.ReadBytes();
+            if (null == serializedObject) { return default; }
 
             var serializer = ((IFormatterResolverContext<Serializer>)formatterResolver).Value;
-            var serializedObject = reader.ReadBytes();
             using (var ms = new MemoryStream(serializedObject, false))
             {
                 var result = serializer.Deserialize<T>(ms);
