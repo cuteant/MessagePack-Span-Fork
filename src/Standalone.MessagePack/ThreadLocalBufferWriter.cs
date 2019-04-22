@@ -26,6 +26,8 @@ namespace MessagePack
 
         public override byte[] ToArray()
         {
+            CheckIfDisposed();
+
             uint nLen = (uint)_writerIndex;
             if (0u >= nLen) { return MessagePackBinary.Empty; }
 
@@ -60,6 +62,17 @@ namespace MessagePack
                 buffer = _arrayPool.Rent(initialCapacity);
             }
             _borrowedBuffer = buffer;
+        }
+
+        public override int DiscardWrittenBuffer(out ArrayPool<T> arrayPool, out T[] writtenBuffer)
+        {
+            CheckIfDisposed();
+
+            arrayPool = _useThreadLocal ? null : _arrayPool;
+            _arrayPool = null;
+            writtenBuffer = _borrowedBuffer;
+            _borrowedBuffer = null;
+            return _writerIndex;
         }
 
         // Returns the rented buffer back to the pool

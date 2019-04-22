@@ -30,6 +30,8 @@ namespace MessagePack
 
         public override byte[] ToArray()
         {
+            CheckIfDisposed();
+
             uint nLen = (uint)_writerIndex;
             if (0u >= nLen) { return MessagePackBinary.Empty; }
 
@@ -153,6 +155,17 @@ namespace MessagePack
             }
         }
 
+        public virtual int DiscardWrittenBuffer(out ArrayPool<T> arrayPool, out T[] writtenBuffer)
+        {
+            CheckIfDisposed();
+
+            arrayPool = _arrayPool;
+            _arrayPool = null;
+            writtenBuffer = _borrowedBuffer;
+            _borrowedBuffer = null;
+            return _writerIndex;
+        }
+
         public virtual T[] ToArray() => WrittenSpan.ToArray();
 
         public void Clear()
@@ -187,7 +200,7 @@ namespace MessagePack
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CheckIfDisposed()
+        protected void CheckIfDisposed()
         {
             if (_borrowedBuffer == null) ThrowObjectDisposedException();
         }
@@ -284,12 +297,8 @@ namespace MessagePack
 
             public void Dispose()
             {
-                var writer = _writer;
-                if (writer != null)
-                {
-                    _writer = null;
-                    writer.Dispose();
-                }
+                var writer = Interlocked.Exchange(ref _writer, null);
+                writer?.Dispose();
             }
         }
 

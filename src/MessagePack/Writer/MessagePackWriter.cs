@@ -4,6 +4,7 @@
     using System.Buffers;
     using System.Diagnostics;
     using System.Runtime.CompilerServices;
+    using System.Threading;
 #if DEPENDENT_ON_CUTEANT
     using CuteAnt.Buffers;
 #endif
@@ -58,6 +59,12 @@
             _arrayPool = MessagePackBinary.Shared;
             _borrowedBuffer = _arrayPool.Rent(c_defaultBufferSize);
             _capacity = _borrowedBuffer.Length;
+        }
+
+        public void DiscardBuffer(out ArrayPool<byte> arrayPool, out byte[] writtenBuffer)
+        {
+            arrayPool = _arrayPool;
+            writtenBuffer = _borrowedBuffer;
         }
 
         public byte[] ToArray(int alreadyWritten)
@@ -142,7 +149,7 @@
     sealed class ArrayWrittenBuffer : IOwnedBuffer<byte>
     {
         private ArrayPool<byte> _arrayPool;
-        private readonly byte[] _buffer;
+        private byte[] _buffer;
         private readonly int _alreadyWritten;
 
         public ArrayWrittenBuffer(ArrayPool<byte> arrayPool, byte[] buffer, int alreadyWritten)
@@ -162,11 +169,11 @@
 
         public void Dispose()
         {
-            var arrayPool = _arrayPool;
+            var arrayPool = Interlocked.Exchange(ref _arrayPool, null);
             if (arrayPool != null)
             {
                 arrayPool.Return(_buffer);
-                _arrayPool = null;
+                _buffer = null;
             }
         }
     }
