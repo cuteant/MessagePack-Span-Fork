@@ -49,10 +49,9 @@
                 return false;
             }
 
-            var isTypeless = (MessagePackCode.ToMessagePackType(position) == MessagePackType.Extension &&
-                    extTypeCodeDecoders[position].Read(ref this, ref position) == ReservedMessagePackExtensionTypeCode.Typeless)
-                    ? true : false;
-            if (isTypeless) { Advance(6); }
+            var isExtension = MessagePackCode.ToMessagePackType(position) == MessagePackType.Extension;
+            var isTypeless = isExtension && extTypeCodeDecoders[position].Read(ref this, ref position) == ReservedMessagePackExtensionTypeCode.Typeless;
+            if (isExtension) { Advance(6); }
             isNil = false;
             return isTypeless;
         }
