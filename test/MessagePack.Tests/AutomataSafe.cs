@@ -21,19 +21,8 @@ namespace MessagePack.Tests
         [InlineData("abcdefgh")]
         public unsafe void KeyGen(string str)
         {
-            var bytes = Encoding.UTF8.GetBytes(str);
-            var rest = bytes.Length;
-            fixed (byte* buf = bytes)
-            {
-                var p = buf;
-                var l1 = AutomataKeyGen.GetKey(ref p, ref rest);
-
-                var offset = 0;
-                rest = bytes.Length;
-                var l2 = AutomataKeyGen.GetKeySafe(bytes, ref offset, ref rest);
-
-                l1.Is(l2);
-            }
+            ReadOnlySpan<byte> bytes = Encoding.UTF8.GetBytes(str);
+            var l1 = AutomataKeyGen.GetKey(ref bytes);
         }
 
         [Fact]
@@ -62,9 +51,9 @@ namespace MessagePack.Tests
 
             for (int i = 0; i < keys.Length; i++)
             {
-                var enc = Encoding.UTF8.GetBytes(keys[i]);
+                var enc = StringEncoding.UTF8.GetBytes(keys[i]);
                 int v;
-                automata.TryGetValueSafe(new ArraySegment<byte>(enc, 0, enc.Length), out v).IsTrue();
+                automata.TryGetValue(new ReadOnlySpan<byte>(enc), out v).IsTrue();
                 v.Is(i);
             }
         }

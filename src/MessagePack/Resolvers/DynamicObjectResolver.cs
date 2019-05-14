@@ -850,8 +850,6 @@ namespace MessagePack.Internal
 
                 var keyArraySegment = il.DeclareLocal(typeof(ReadOnlySpan<byte>));
                 var longKey = il.DeclareLocal(typeof(ulong));
-                var p = il.DeclareLocal(typeof(byte*));
-                var rest = il.DeclareLocal(typeof(int));
 
                 // for (int i = 0; i < len; i++)
                 il.EmitIncrementFor(length, forILocal =>
@@ -863,21 +861,8 @@ namespace MessagePack.Internal
                     il.EmitCall(MessagePackBinaryTypeInfo.ReadStringSegment);
                     il.EmitStloc(keyArraySegment);
 
-                    il.EmitLdloca(keyArraySegment);
-                    il.EmitCall(MessagePackBinaryTypeInfo.GetPointer);
-                    il.EmitStloc(p);
-
-                    // rest = arraySegment.Count
-                    il.EmitLdloca(keyArraySegment);
-                    il.EmitCall(typeof(ReadOnlySpan<byte>).GetRuntimeProperty(nameof(ReadOnlySpan<byte>.Length)).GetGetMethod());
-                    il.EmitStloc(rest);
-
-                    // if(rest == 0) goto End
-                    il.EmitLdloc(rest);
-                    il.Emit(OpCodes.Brfalse, readNext);
-
                     // gen automata name lookup
-                    automata.EmitMatch(il, p, rest, longKey, x =>
+                    automata.EmitMatch(il, keyArraySegment, longKey, x =>
                     {
                         var i = x.Value;
                         if (infoList[i].MemberInfo != null)
@@ -1125,7 +1110,6 @@ namespace MessagePack.Internal
             public static readonly TypeInfo ReaderTypeInfo = typeof(MessagePackReader).GetTypeInfo();
 
             public static readonly MethodInfo GetEncodedStringBytes = typeof(MessagePackBinary).GetRuntimeMethod(nameof(MessagePackBinary.GetEncodedStringBytes), new[] { typeof(string) });
-            public static readonly MethodInfo GetPointer = typeof(MessagePackBinary).GetRuntimeMethod(nameof(MessagePackBinary.GetPointer), new[] { typeof(ReadOnlySpan<byte>) });
 
             public static readonly MethodInfo WriteFixedMapHeaderUnsafe = typeof(MessagePackWriterExtensions).GetRuntimeMethod(nameof(MessagePackWriterExtensions.WriteFixedMapHeaderUnsafe), new[] { s_refWriter, typeof(int), s_refInt });
             public static readonly MethodInfo WriteFixedArrayHeaderUnsafe = typeof(MessagePackWriterExtensions).GetRuntimeMethod(nameof(MessagePackWriterExtensions.WriteFixedArrayHeaderUnsafe), new[] { s_refWriter, typeof(int), s_refInt });

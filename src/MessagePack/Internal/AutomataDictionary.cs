@@ -1,85 +1,57 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace MessagePack.Internal
 {
     // Key = long, Value = int for UTF8String Dictionary
+
+    /// <remarks>
+    /// This code is used by dynamically generated code as well as AOT generated code,
+    /// and thus must be public for the "C# generated and compiled into saved assembly" scenario.
+    /// </remarks>
     public class AutomataDictionary : IEnumerable<KeyValuePair<string, int>>
     {
-        readonly AutomataNode root;
+        private readonly AutomataNode root;
 
         public AutomataDictionary()
         {
             root = new AutomataNode(0);
         }
 
-        public unsafe void Add(string str, int value)
+        public void Add(string str, int value)
         {
-            var bytes = Encoding.UTF8.GetBytes(str);
-            fixed (byte* buffer = &bytes[0])
+            ReadOnlySpan<byte> bytes = StringEncoding.UTF8.GetBytes(str);
+            var node = root;
+
+            while (bytes.Length > 0)
             {
-                var node = root;
+                var key = AutomataKeyGen.GetKey(ref bytes);
 
-                var p = buffer;
-                var rest = bytes.Length;
-                while (rest != 0)
+                if (bytes.Length == 0)
                 {
-                    var key = AutomataKeyGen.GetKey(ref p, ref rest);
-
-                    if (0u >= (uint)rest)
-                    {
-                        node = node.Add(key, value, str);
-                    }
-                    else
-                    {
-                        node = node.Add(key);
-                    }
-                }
-            }
-        }
-
-        public unsafe bool TryGetValue(ReadOnlySpan<byte> bytes, out int value)
-        {
-            fixed (byte* p = &MemoryMarshal.GetReference(bytes))
-            {
-                var p1 = p;
-                var node = root;
-                var rest = bytes.Length;
-
-                while (rest != 0 && node != null)
-                {
-                    node = node.SearchNext(ref p1, ref rest);
-                }
-
-                if (node == null)
-                {
-                    value = -1;
-                    return false;
+                    node = node.Add(key, value, str);
                 }
                 else
                 {
-                    value = node.Value;
-                    return true;
+                    node = node.Add(key);
                 }
             }
         }
 
-        public bool TryGetValueSafe(in ArraySegment<byte> key, out int value)
+        public bool TryGetValue(ReadOnlySpan<byte> bytes, out int value)
         {
             var node = root;
-            var bytes = key.Array;
-            var offset = key.Offset;
-            var rest = key.Count;
 
-            while (rest != 0 && node != null)
+            while (bytes.Length > 0 && node != null)
             {
-                node = node.SearchNextSafe(bytes, ref offset, ref rest);
+                node = node.SearchNext(ref bytes);
             }
 
             if (node == null)
@@ -102,7 +74,7 @@ namespace MessagePack.Internal
             return sb.ToString();
         }
 
-        static void ToStringCore(IEnumerable<AutomataNode> nexts, StringBuilder sb, int depth)
+        private static void ToStringCore(IEnumerable<AutomataNode> nexts, StringBuilder sb, int depth)
         {
             foreach (var item in nexts)
             {
@@ -132,34 +104,40 @@ namespace MessagePack.Internal
             return YieldCore(this.root.YieldChildren()).GetEnumerator();
         }
 
-        static IEnumerable<KeyValuePair<string, int>> YieldCore(IEnumerable<AutomataNode> nexts)
+        private static IEnumerable<KeyValuePair<string, int>> YieldCore(IEnumerable<AutomataNode> nexts)
         {
             foreach (var item in nexts)
             {
-                if (item.Value != -1) yield return new KeyValuePair<string, int>(item.originalKey, item.Value);
-                foreach (var x in YieldCore(item.YieldChildren())) yield return x;
+                if (item.Value != -1)
+                {
+                    yield return new KeyValuePair<string, int>(item.originalKey, item.Value);
+                }
+
+                foreach (var x in YieldCore(item.YieldChildren()))
+                {
+                    yield return x;
+                }
             }
         }
 
         // IL Emit
 
-        public void EmitMatch(ILGenerator il, LocalBuilder p, LocalBuilder rest, LocalBuilder key, Action<KeyValuePair<string, int>> onFound, Action onNotFound)
+        public void EmitMatch(ILGenerator il, LocalBuilder bytesSpan, LocalBuilder key, Action<KeyValuePair<string, int>> onFound, Action onNotFound)
         {
-            root.EmitSearchNext(il, p, rest, key, onFound, onNotFound);
+            root.EmitSearchNext(il, bytesSpan, key, onFound, onNotFound);
         }
 
-        class AutomataNode : IComparable<AutomataNode>
+        private class AutomataNode : IComparable<AutomataNode>
         {
-            static readonly AutomataNode[] emptyNodes = new AutomataNode[0];
-            static readonly ulong[] emptyKeys = new ulong[0];
+            private static readonly AutomataNode[] emptyNodes = new AutomataNode[0];
+            private static readonly ulong[] emptyKeys = new ulong[0];
 
             public ulong Key;
             public int Value;
             public string originalKey;
-
-            AutomataNode[] nexts;
-            ulong[] nextKeys;
-            int count;
+            private AutomataNode[] nexts;
+            private ulong[] nextKeys;
+            private int count;
 
             public bool HasChildren { get { return count != 0; } }
 
@@ -180,8 +158,8 @@ namespace MessagePack.Internal
                 {
                     if (nexts.Length == count)
                     {
-                        Array.Resize<AutomataNode>(ref nexts, (0u >= (uint)count) ? 4 : (count * 2));
-                        Array.Resize<ulong>(ref nextKeys, (0u >= (uint)count) ? 4 : (count * 2));
+                        Array.Resize<AutomataNode>(ref nexts, (count == 0) ? 4 : (count * 2));
+                        Array.Resize<ulong>(ref nextKeys, (count == 0) ? 4 : (count * 2));
                     }
                     count++;
 
@@ -206,36 +184,9 @@ namespace MessagePack.Internal
                 return v;
             }
 
-            public unsafe AutomataNode SearchNext(ref byte* p, ref int rest)
+            public AutomataNode SearchNext(ref ReadOnlySpan<byte> value)
             {
-                var key = AutomataKeyGen.GetKey(ref p, ref rest);
-                if (count < 4)
-                {
-                    // linear search
-                    for (int i = 0; i < count; i++)
-                    {
-                        if (nextKeys[i] == key)
-                        {
-                            return nexts[i];
-                        }
-                    }
-                }
-                else
-                {
-                    // binary search
-                    var index = BinarySearch(nextKeys, 0, count, key);
-                    if (index >= 0)
-                    {
-                        return nexts[index];
-                    }
-                }
-
-                return null;
-            }
-
-            public AutomataNode SearchNextSafe(byte[] p, ref int offset, ref int rest)
-            {
-                var key = AutomataKeyGen.GetKeySafe(p, ref offset, ref rest);
+                var key = AutomataKeyGen.GetKey(ref value);
                 if (count < 4)
                 {
                     // linear search
@@ -262,9 +213,6 @@ namespace MessagePack.Internal
 
             internal static int BinarySearch(ulong[] array, int index, int length, ulong value)
             {
-                const int IndexNotFound = -1;
-                const uint NIndexNotFound = unchecked((uint)IndexNotFound);
-
                 int lo = index;
                 int hi = index + length - 1;
                 while (lo <= hi)
@@ -272,32 +220,33 @@ namespace MessagePack.Internal
                     int i = lo + ((hi - lo) >> 1);
 
                     var arrayValue = array[i];
-                    uint order;
-                    if (arrayValue < value) order = NIndexNotFound;
-                    else if (arrayValue > value) order = 1u;
-                    else order = 0u;
-
-                    if (0u >= order) return i;
-                    if (order < NIndexNotFound)
+                    int order;
+                    if (arrayValue < value)
                     {
-                        hi = i - 1;
+                        order = -1;
+                    }
+                    else if (arrayValue > value)
+                    {
+                        order = 1;
                     }
                     else
                     {
+                        order = 0;
+                    }
+
+                    if (order == 0)
+                    {
+                        return i;
+                    }
+
+                    if (order < 0)
+                    {
                         lo = i + 1;
                     }
-                    //int order;
-                    //if (arrayValue < value) order = IndexNotFound;
-                    //else if (arrayValue > value) order = 1;
-                    //else order = 0;
-                    //if (order < 0)
-                    //{
-                    //    lo = i + 1;
-                    //}
-                    //else
-                    //{
-                    //    hi = i - 1;
-                    //}
+                    else
+                    {
+                        hi = i - 1;
+                    }
                 }
 
                 return ~lo;
@@ -316,20 +265,19 @@ namespace MessagePack.Internal
                 }
             }
 
-            // SearchNext(ref byte* p, ref int rest, ref ulong key)
-            public void EmitSearchNext(ILGenerator il, LocalBuilder p, LocalBuilder rest, LocalBuilder key, Action<KeyValuePair<string, int>> onFound, Action onNotFound)
+            // SearchNext(ref ReadOnlySpan<byte> bytes)
+            public void EmitSearchNext(ILGenerator il, LocalBuilder bytesSpan, LocalBuilder key, Action<KeyValuePair<string, int>> onFound, Action onNotFound)
             {
-                // key = AutomataKeyGen.GetKey(ref p, ref rest);
-                il.EmitLdloca(p);
-                il.EmitLdloca(rest);
+                // key = AutomataKeyGen.GetKey(ref bytesSpan);
+                il.EmitLdloca(bytesSpan);
                 il.EmitCall(AutomataKeyGen.GetKeyMethod);
                 il.EmitStloc(key);
 
                 // match children.
-                EmitSearchNextCore(il, p, rest, key, onFound, onNotFound, nexts, count);
+                EmitSearchNextCore(il, bytesSpan, key, onFound, onNotFound, nexts, count);
             }
 
-            static void EmitSearchNextCore(ILGenerator il, LocalBuilder p, LocalBuilder rest, LocalBuilder key, Action<KeyValuePair<string, int>> onFound, Action onNotFound, AutomataNode[] nexts, int count)
+            private static void EmitSearchNextCore(ILGenerator il, LocalBuilder bytesSpan, LocalBuilder key, Action<KeyValuePair<string, int>> onFound, Action onNotFound, AutomataNode[] nexts, int count)
             {
                 if (count < 4)
                 {
@@ -340,15 +288,17 @@ namespace MessagePack.Internal
                     var gotoNotFound = il.DefineLabel();
 
                     {
-                        il.EmitLdloc(rest);
-                        if (childrenExists.Length != 0 && 0u >= (uint)valueExists.Length)
+                        // bytesSpan.Length
+                        il.EmitLdloca(bytesSpan);
+                        il.EmitCall(typeof(ReadOnlySpan<byte>).GetRuntimeProperty(nameof(ReadOnlySpan<byte>.Length)).GetMethod);
+                        if (childrenExists.Length != 0 && valueExists.Length == 0)
                         {
 
-                            il.Emit(OpCodes.Brfalse, gotoNotFound); // if(rest == 0)
+                            il.Emit(OpCodes.Brfalse, gotoNotFound); // if(bytesSpan.Length == 0)
                         }
                         else
                         {
-                            il.Emit(OpCodes.Brtrue, gotoSearchNext); // if(rest != 0)
+                            il.Emit(OpCodes.Brtrue, gotoSearchNext); // if(bytesSpan.Length != 0)
                         }
                     }
                     {
@@ -394,7 +344,7 @@ namespace MessagePack.Internal
                         il.EmitULong(childrenExists[i].Key);
                         il.Emit(OpCodes.Bne_Un, notFoundLabel);
                         // found
-                        childrenExists[i].EmitSearchNext(il, p, rest, key, onFound, onNotFound);
+                        childrenExists[i].EmitSearchNext(il, bytesSpan, key, onFound, onNotFound);
                         // notfound
                         il.MarkLabel(notFoundLabel);
                         if (i != childrenExists.Length - 1)
@@ -424,245 +374,96 @@ namespace MessagePack.Internal
                     il.EmitLdloc(key);
                     il.EmitULong(mid);
                     il.Emit(OpCodes.Bge, gotoRight);
-                    EmitSearchNextCore(il, p, rest, key, onFound, onNotFound, l, l.Length);
+                    EmitSearchNextCore(il, bytesSpan, key, onFound, onNotFound, l, l.Length);
 
                     // else
                     il.MarkLabel(gotoRight);
-                    EmitSearchNextCore(il, p, rest, key, onFound, onNotFound, r, r.Length);
+                    EmitSearchNextCore(il, bytesSpan, key, onFound, onNotFound, r, r.Length);
                 }
             }
         }
     }
 
+    /// <remarks>
+    /// This is used by dynamically generated code. It can be made internal after we enable our dynamic assemblies to access internals.
+    /// But that trick may require net46, so maybe we should leave this as public.
+    /// </remarks>
     public static class AutomataKeyGen
     {
-        public delegate ulong PointerDelegate<T>(ref T p, ref int rest);
+        public static readonly MethodInfo GetKeyMethod = typeof(AutomataKeyGen).GetRuntimeMethod(nameof(GetKey), new[] { typeof(ReadOnlySpan<byte>).MakeByRefType() });
 
-        public static readonly MethodInfo GetKeyMethod = typeof(AutomataKeyGen).GetRuntimeMethod("GetKey", new[] { typeof(byte).MakePointerType().MakeByRefType(), typeof(int).MakeByRefType() });
-
-        public static unsafe ulong GetKey(ref byte* p, ref int rest)
+        public static ulong GetKey(ref ReadOnlySpan<byte> span)
         {
-            int readSize = 0;
-            ulong key = 0;
+            ulong key;
 
             unchecked
             {
-                if (rest >= 8)
+                if (span.Length >= 8)
                 {
-                    key = *(ulong*)p;
-                    readSize = 8;
+                    key = MemoryMarshal.Cast<byte, ulong>(span)[0];
+                    span = span.Slice(8);
                 }
                 else
                 {
-                    switch (rest)
+                    switch (span.Length)
                     {
                         case 1:
                             {
-                                key = *(byte*)p;
-                                readSize = 1;
+                                key = span[0];
+                                span = span.Slice(1);
                                 break;
                             }
                         case 2:
                             {
-                                key = *(ushort*)p;
-                                readSize = 2;
+                                key = MemoryMarshal.Cast<byte, ushort>(span)[0];
+                                span = span.Slice(2);
                                 break;
                             }
                         case 3:
                             {
-                                var a = *p;
-                                var b = *(ushort*)(p + 1);
-                                key = ((ulong)a | (ulong)b << 8);
-                                readSize = 3;
+                                var a = span[0];
+                                var b = MemoryMarshal.Cast<byte, ushort>(span.Slice(1))[0];
+                                key = (a | (ulong)b << 8);
+                                span = span.Slice(3);
                                 break;
                             }
                         case 4:
                             {
-                                key = *(uint*)p;
-                                readSize = 4;
+                                key = MemoryMarshal.Cast<byte, uint>(span)[0];
+                                span = span.Slice(4);
                                 break;
                             }
                         case 5:
                             {
-                                var a = *p;
-                                var b = *(uint*)(p + 1);
-                                key = ((ulong)a | (ulong)b << 8);
-                                readSize = 5;
+                                var a = span[0];
+                                var b = MemoryMarshal.Cast<byte, uint>(span.Slice(1))[0];
+                                key = (a | (ulong)b << 8);
+                                span = span.Slice(5);
                                 break;
                             }
                         case 6:
                             {
-                                ulong a = *(ushort*)p;
-                                ulong b = *(uint*)(p + 2);
+                                ulong a = MemoryMarshal.Cast<byte, ushort>(span)[0];
+                                ulong b = MemoryMarshal.Cast<byte, uint>(span.Slice(2))[0];
                                 key = (a | (b << 16));
-                                readSize = 6;
+                                span = span.Slice(6);
                                 break;
                             }
                         case 7:
                             {
-                                var a = *(byte*)p;
-                                var b = *(ushort*)(p + 1);
-                                var c = *(uint*)(p + 3);
-                                key = ((ulong)a | (ulong)b << 8 | (ulong)c << 24);
-                                readSize = 7;
+                                var a = span[0];
+                                var b = MemoryMarshal.Cast<byte, ushort>(span.Slice(1))[0];
+                                var c = MemoryMarshal.Cast<byte, uint>(span.Slice(3))[0];
+                                key = (a | (ulong)b << 8 | (ulong)c << 24);
+                                span = span.Slice(7);
                                 break;
                             }
                         default:
-                            ThrowHelper.ThrowInvalidOperationException_Not_Supported_Length();
-                            break;
+                            throw new InvalidOperationException("Not Supported Length");
                     }
                 }
 
-                p += readSize;
-                rest -= readSize;
                 return key;
-            }
-        }
-
-        public static ulong GetKeySafe(byte[] bytes, ref int offset, ref int rest)
-        {
-            int readSize = 0;
-            ulong key = 0;
-
-            if (BitConverter.IsLittleEndian)
-            {
-                unchecked
-                {
-                    if (rest >= 8)
-                    {
-                        key = (ulong)bytes[offset] << 0 | (ulong)bytes[offset + 1] << 8 | (ulong)bytes[offset + 2] << 16 | (ulong)bytes[offset + 3] << 24
-                            | (ulong)bytes[offset + 4] << 32 | (ulong)bytes[offset + 5] << 40 | (ulong)bytes[offset + 6] << 48 | (ulong)bytes[offset + 7] << 56;
-                        readSize = 8;
-                    }
-                    else
-                    {
-                        switch (rest)
-                        {
-                            case 1:
-                                {
-                                    key = bytes[offset];
-                                    readSize = 1;
-                                    break;
-                                }
-                            case 2:
-                                {
-                                    key = (ulong)bytes[offset] << 0 | (ulong)bytes[offset + 1] << 8;
-                                    readSize = 2;
-                                    break;
-                                }
-                            case 3:
-                                {
-                                    key = (ulong)bytes[offset] << 0 | (ulong)bytes[offset + 1] << 8 | (ulong)bytes[offset + 2] << 16;
-                                    readSize = 3;
-                                    break;
-                                }
-                            case 4:
-                                {
-                                    key = (ulong)bytes[offset] << 0 | (ulong)bytes[offset + 1] << 8 | (ulong)bytes[offset + 2] << 16 | (ulong)bytes[offset + 3] << 24;
-                                    readSize = 4;
-                                    break;
-                                }
-                            case 5:
-                                {
-                                    key = (ulong)bytes[offset] << 0 | (ulong)bytes[offset + 1] << 8 | (ulong)bytes[offset + 2] << 16 | (ulong)bytes[offset + 3] << 24
-                                        | (ulong)bytes[offset + 4] << 32;
-                                    readSize = 5;
-                                    break;
-                                }
-                            case 6:
-                                {
-                                    key = (ulong)bytes[offset] << 0 | (ulong)bytes[offset + 1] << 8 | (ulong)bytes[offset + 2] << 16 | (ulong)bytes[offset + 3] << 24
-                                        | (ulong)bytes[offset + 4] << 32 | (ulong)bytes[offset + 5] << 40;
-                                    readSize = 6;
-                                    break;
-                                }
-                            case 7:
-                                {
-                                    key = (ulong)bytes[offset] << 0 | (ulong)bytes[offset + 1] << 8 | (ulong)bytes[offset + 2] << 16 | (ulong)bytes[offset + 3] << 24
-                                        | (ulong)bytes[offset + 4] << 32 | (ulong)bytes[offset + 5] << 40 | (ulong)bytes[offset + 6] << 48;
-                                    readSize = 7;
-                                    break;
-                                }
-                            default:
-                                ThrowHelper.ThrowInvalidOperationException_Not_Supported_Length();
-                                break;
-                        }
-                    }
-
-                    offset += readSize;
-                    rest -= readSize;
-                    return key;
-                }
-            }
-            else
-            {
-                unchecked
-                {
-                    if (rest >= 8)
-                    {
-                        key = (ulong)bytes[offset] << 56 | (ulong)bytes[offset + 1] << 48 | (ulong)bytes[offset + 2] << 40 | (ulong)bytes[offset + 3] << 32
-                            | (ulong)bytes[offset + 4] << 24 | (ulong)bytes[offset + 5] << 16 | (ulong)bytes[offset + 6] << 8 | (ulong)bytes[offset + 7];
-                        readSize = 8;
-                    }
-                    else
-                    {
-                        switch (rest)
-                        {
-                            case 1:
-                                {
-                                    key = bytes[offset];
-                                    readSize = 1;
-                                    break;
-                                }
-                            case 2:
-                                {
-                                    key = (ulong)bytes[offset] << 8 | (ulong)bytes[offset + 1] << 0;
-                                    readSize = 2;
-                                    break;
-                                }
-                            case 3:
-                                {
-                                    key = (ulong)bytes[offset] << 16 | (ulong)bytes[offset + 1] << 8 | (ulong)bytes[offset + 2] << 0;
-                                    readSize = 3;
-                                    break;
-                                }
-                            case 4:
-                                {
-                                    key = (ulong)bytes[offset] << 24 | (ulong)bytes[offset + 1] << 16 | (ulong)bytes[offset + 2] << 8 | (ulong)bytes[offset + 3] << 0;
-                                    readSize = 4;
-                                    break;
-                                }
-                            case 5:
-                                {
-                                    key = (ulong)bytes[offset] << 32 | (ulong)bytes[offset + 1] << 24 | (ulong)bytes[offset + 2] << 16 | (ulong)bytes[offset + 3] << 8
-                                        | (ulong)bytes[offset + 4] << 0;
-                                    readSize = 5;
-                                    break;
-                                }
-                            case 6:
-                                {
-                                    key = (ulong)bytes[offset] << 40 | (ulong)bytes[offset + 1] << 32 | (ulong)bytes[offset + 2] << 24 | (ulong)bytes[offset + 3] << 16
-                                        | (ulong)bytes[offset + 4] << 8 | (ulong)bytes[offset + 5] << 0;
-                                    readSize = 6;
-                                    break;
-                                }
-                            case 7:
-                                {
-                                    key = (ulong)bytes[offset] << 48 | (ulong)bytes[offset + 1] << 40 | (ulong)bytes[offset + 2] << 32 | (ulong)bytes[offset + 3] << 24
-                                        | (ulong)bytes[offset + 4] << 16 | (ulong)bytes[offset + 5] << 8 | (ulong)bytes[offset + 6] << 0;
-                                    readSize = 7;
-                                    break;
-                                }
-                            default:
-                                ThrowHelper.ThrowInvalidOperationException_Not_Supported_Length();
-                                break;
-                        }
-                    }
-
-                    offset += readSize;
-                    rest -= readSize;
-                    return key;
-                }
             }
         }
     }

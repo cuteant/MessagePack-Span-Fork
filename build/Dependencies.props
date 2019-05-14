@@ -1,8 +1,8 @@
 <Project>
   <!-- Shared Package Versions -->
   <PropertyGroup>
-    <CuteAntCorePackageVersion>2.2.0-rtm-190421-01</CuteAntCorePackageVersion>
-    <CuteAntRuntimePackageVersion>2.2.0-rtm-190421-01</CuteAntRuntimePackageVersion>
+    <CuteAntCorePackageVersion>2.2.0-rtm-190429-01</CuteAntCorePackageVersion>
+    <CuteAntRuntimePackageVersion>2.2.0-rtm-190429-01</CuteAntRuntimePackageVersion>
 
     <HyperionPackageVersion>0.9.8</HyperionPackageVersion>
     <HyperionUnofficialPackageVersion>0.9.8-rtm-190310-01</HyperionUnofficialPackageVersion>
