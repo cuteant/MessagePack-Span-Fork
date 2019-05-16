@@ -29,12 +29,12 @@
     <SystemReflectionExtensionsPackageVersion>4.3.0</SystemReflectionExtensionsPackageVersion>
     <SystemReflectionTypeExtensionsPackageVersion>4.5.1</SystemReflectionTypeExtensionsPackageVersion>
 
-    <K4osCompressionLZ4PackageVersion>1.1.1</K4osCompressionLZ4PackageVersion>
-    <K4osCompressionLZ4StreamsPackageVersion>1.1.1</K4osCompressionLZ4StreamsPackageVersion>
+    <K4osCompressionLZ4PackageVersion>1.1.9</K4osCompressionLZ4PackageVersion>
+    <K4osCompressionLZ4StreamsPackageVersion>1.1.9</K4osCompressionLZ4StreamsPackageVersion>
     <K4osHashxxHashPackageVersion>1.0.5</K4osHashxxHashPackageVersion>
     <Lz4netPackageVersion>1.0.15.93</Lz4netPackageVersion>
 
-    <MicrosoftNetTestSdkPackageVersion>16.0.1</MicrosoftNetTestSdkPackageVersion>
+    <MicrosoftNetTestSdkPackageVersion>16.1.0</MicrosoftNetTestSdkPackageVersion>
     <BenchmarkDotNetPackageVersion>0.11.3</BenchmarkDotNetPackageVersion>
     <BenchmarkDotNetDiagnosticsWindowsPackageVersion>0.11.3</BenchmarkDotNetDiagnosticsWindowsPackageVersion>
     <xUnitPackageVersion>2.4.1</xUnitPackageVersion>
@@ -43,7 +43,7 @@
 
     <NETCoreApp2RuntimeFrameworkVersion>2.0.9</NETCoreApp2RuntimeFrameworkVersion>
     <MicrosoftNETCoreApp20PackageVersion>2.0.9</MicrosoftNETCoreApp20PackageVersion>
-    <MicrosoftNETCoreApp21PackageVersion>2.1.9</MicrosoftNETCoreApp21PackageVersion>
-    <MicrosoftNETCoreApp22PackageVersion>2.2.3</MicrosoftNETCoreApp22PackageVersion>
+    <MicrosoftNETCoreApp21PackageVersion>2.1.11</MicrosoftNETCoreApp21PackageVersion>
+    <MicrosoftNETCoreApp22PackageVersion>2.2.5</MicrosoftNETCoreApp22PackageVersion>
   </PropertyGroup>
 </Project>
