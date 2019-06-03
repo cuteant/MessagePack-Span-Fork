@@ -78,7 +78,7 @@
             if (0u >= (uint)count) { return; }
 
             writer.Ensure(idx, count);
-            UnsafeMemory.WriteRaw(ref MemoryMarshal.GetReference(value), ref Unsafe.AddByteOffset(ref writer.PinnableAddress, (IntPtr)idx), count, ref idx);
+            UnsafeMemory.WriteRaw(ref writer.PinnableAddress, ref MemoryMarshal.GetReference(value), count, ref idx);
         }
     }
 }
