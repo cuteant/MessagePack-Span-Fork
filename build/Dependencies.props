@@ -7,7 +7,7 @@
     <HyperionPackageVersion>0.9.8</HyperionPackageVersion>
     <HyperionUnofficialPackageVersion>0.9.8-rtm-190310-01</HyperionUnofficialPackageVersion>
     <ProtobufNetPackageVersion>2.4.0</ProtobufNetPackageVersion>
-    <NewtonsoftJsonPackageVersion>12.0.1</NewtonsoftJsonPackageVersion>
+    <NewtonsoftJsonPackageVersion>12.0.2</NewtonsoftJsonPackageVersion>
     <SpanJsonPackageVersion>2.0.8</SpanJsonPackageVersion>
     <Utf8JsonPackageVersion>1.3.7</Utf8JsonPackageVersion>
     <Utf8JsonUnofficialPackageVersion>1.3.6-rtm-190310-01</Utf8JsonUnofficialPackageVersion>
@@ -15,7 +15,7 @@
     <SystemBuffersPackageVersion>4.5.0</SystemBuffersPackageVersion>
     <SystemCollectionsImmutablePackageVersion>1.5.0</SystemCollectionsImmutablePackageVersion>
     <SystemIOPipelinesPackageVersion>4.5.3</SystemIOPipelinesPackageVersion>
-    <SystemMemoryPackageVersion>4.5.2</SystemMemoryPackageVersion>
+    <SystemMemoryPackageVersion>4.5.3</SystemMemoryPackageVersion>
     <SystemNumericsVectorsPackageVersion>4.5.0</SystemNumericsVectorsPackageVersion>
     <SystemThreadingTasksExtensionsPackageVersion>4.5.2</SystemThreadingTasksExtensionsPackageVersion>
     <SystemValueTuplePackageVersion>4.5.0</SystemValueTuplePackageVersion>
@@ -29,12 +29,12 @@
     <SystemReflectionExtensionsPackageVersion>4.3.0</SystemReflectionExtensionsPackageVersion>
     <SystemReflectionTypeExtensionsPackageVersion>4.5.1</SystemReflectionTypeExtensionsPackageVersion>
 
-    <K4osCompressionLZ4PackageVersion>1.1.9</K4osCompressionLZ4PackageVersion>
-    <K4osCompressionLZ4StreamsPackageVersion>1.1.9</K4osCompressionLZ4StreamsPackageVersion>
+    <K4osCompressionLZ4PackageVersion>1.1.10</K4osCompressionLZ4PackageVersion>
+    <K4osCompressionLZ4StreamsPackageVersion>1.1.10</K4osCompressionLZ4StreamsPackageVersion>
     <K4osHashxxHashPackageVersion>1.0.5</K4osHashxxHashPackageVersion>
     <Lz4netPackageVersion>1.0.15.93</Lz4netPackageVersion>
 
-    <MicrosoftNetTestSdkPackageVersion>16.1.0</MicrosoftNetTestSdkPackageVersion>
+    <MicrosoftNetTestSdkPackageVersion>16.1.1</MicrosoftNetTestSdkPackageVersion>
     <BenchmarkDotNetPackageVersion>0.11.3</BenchmarkDotNetPackageVersion>
     <BenchmarkDotNetDiagnosticsWindowsPackageVersion>0.11.3</BenchmarkDotNetDiagnosticsWindowsPackageVersion>
     <xUnitPackageVersion>2.4.1</xUnitPackageVersion>

@@ -4,6 +4,7 @@
     using System.Buffers;
     using System.Diagnostics;
     using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
     using System.Threading;
 #if DEPENDENT_ON_CUTEANT
     using CuteAnt.Buffers;
@@ -16,8 +17,8 @@
         private const int c_defaultBufferSize = 64 * 1024;
 
         private ArrayPool<byte> _arrayPool;
-        private bool _useThreadLocal;
 
+        private Span<byte> _bufferSpan;
         internal byte[] _borrowedBuffer;
         internal int _capacity;
 
@@ -25,10 +26,10 @@
         public ref byte PinnableAddress
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref _borrowedBuffer[0];
+            get => ref MemoryMarshal.GetReference(_bufferSpan);
         }
 
-        public byte[] Buffer => _borrowedBuffer;
+        public Span<byte> Buffer => _bufferSpan;
 
         public int Capacity => _capacity;
 
@@ -37,17 +38,15 @@
         {
             if (useThreadLocalBuffer)
             {
-                _useThreadLocal = true;
                 _arrayPool = null;
-                _borrowedBuffer = InternalMemoryPool.GetBuffer();
+                _bufferSpan = _borrowedBuffer = InternalMemoryPool.GetBuffer();
             }
             else
             {
-                _useThreadLocal = false;
                 _arrayPool = MessagePackBinary.Shared;
-                _borrowedBuffer = _arrayPool.Rent(c_defaultBufferSize);
+                _bufferSpan = _borrowedBuffer = _arrayPool.Rent(c_defaultBufferSize);
             }
-            _capacity = _borrowedBuffer.Length;
+            _capacity = _bufferSpan.Length;
         }
 
         /// <summary>Constructs a new <see cref="MessagePackWriter"/> instance.</summary>
@@ -55,10 +54,9 @@
         {
             if (((uint)(initialCapacity - 1)) > c_maximumBufferSize) { initialCapacity = c_defaultBufferSize; }
 
-            _useThreadLocal = false;
             _arrayPool = MessagePackBinary.Shared;
-            _borrowedBuffer = _arrayPool.Rent(c_defaultBufferSize);
-            _capacity = _borrowedBuffer.Length;
+            _bufferSpan = _borrowedBuffer = _arrayPool.Rent(c_defaultBufferSize);
+            _capacity = _bufferSpan.Length;
         }
 
         public void DiscardBuffer(out ArrayPool<byte> arrayPool, out byte[] writtenBuffer)
@@ -118,28 +116,21 @@
                 int newSize = checked(_capacity + growBy);
 
                 var oldBuffer = _borrowedBuffer;
+                var previousBuffer = _bufferSpan;
 
-                if (null == _arrayPool) { _arrayPool = MessagePackBinary.Shared; }
-                _borrowedBuffer = _arrayPool.Rent(newSize);
+                var useThreadLocal = null == _arrayPool ? true : false;
+                if (useThreadLocal) { _arrayPool = MessagePackBinary.Shared; }
+                _bufferSpan = _borrowedBuffer = _arrayPool.Rent(newSize);
 
-                Debug.Assert(oldBuffer.Length >= alreadyWritten);
-                Debug.Assert(_borrowedBuffer.Length >= alreadyWritten);
+                Debug.Assert(previousBuffer.Length >= alreadyWritten);
+                Debug.Assert(_bufferSpan.Length >= alreadyWritten);
 
-                //var previousBuffer = oldBuffer.AsSpan(0, alreadyWritten);
-                //previousBuffer.CopyTo(_borrowedBuffer);
+                previousBuffer.Slice(0, alreadyWritten).CopyTo(_bufferSpan);
                 //previousBuffer.Clear();
-                MessagePackBinary.CopyMemory(oldBuffer, 0, _borrowedBuffer, 0, alreadyWritten);
 
-                _capacity = _borrowedBuffer.Length;
+                _capacity = _bufferSpan.Length;
 
-                if (_useThreadLocal)
-                {
-                    _useThreadLocal = false;
-                }
-                else
-                {
-                    _arrayPool.Return(oldBuffer);
-                }
+                if (!useThreadLocal) { _arrayPool.Return(oldBuffer); }
             }
         }
     }
