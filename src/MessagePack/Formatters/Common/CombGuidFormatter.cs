@@ -5,7 +5,9 @@ namespace MessagePack.Formatters
     using System;
     using System.Runtime.CompilerServices;
     using CuteAnt;
+#if !NETCOREAPP
     using MessagePack.Internal;
+#endif
 
     public sealed class CombGuidFormatter : IMessagePackFormatter<CombGuid>
     {
@@ -14,13 +16,10 @@ namespace MessagePack.Formatters
         CombGuidFormatter() { }
 
         const int c_totalSize = 18;
-        const byte c_valueSize = 16;
 
         public void Serialize(ref MessagePackWriter writer, ref int idx, CombGuid value, IFormatterResolver formatterResolver)
         {
             writer.Ensure(idx, c_totalSize);
-
-            var buffer = value.GetByteArray(CombGuidSequentialSegmentType.Guid);
 
             ref byte pinnableAddr = ref writer.PinnableAddress;
             IntPtr offset = (IntPtr)idx;
@@ -28,6 +27,11 @@ namespace MessagePack.Formatters
             Unsafe.AddByteOffset(ref pinnableAddr, offset + 1) = unchecked((byte)ReservedMessagePackExtensionTypeCode.ComgGuid);
             idx += 2;
 
+#if NETCOREAPP
+            value.TryWriteBytes(writer.Buffer.Slice(idx));
+            idx += 16;
+#else
+            var buffer = value.GetByteArray(CombGuidSequentialSegmentType.Guid);
             if (UnsafeMemory.Is64BitProcess)
             {
                 UnsafeMemory64.WriteRaw16(ref pinnableAddr, ref buffer[0], ref idx);
@@ -36,6 +40,7 @@ namespace MessagePack.Formatters
             {
                 UnsafeMemory32.WriteRaw16(ref pinnableAddr, ref buffer[0], ref idx);
             }
+#endif
         }
 
         public CombGuid Deserialize(ref MessagePackReader reader, IFormatterResolver formatterResolver)
@@ -46,7 +51,11 @@ namespace MessagePack.Formatters
             {
                 ThrowHelper.ThrowInvalidOperationException_TypeCode(typeCode);
             }
+#if NETCOREAPP
+            return new CombGuid(result.Data, CombGuidSequentialSegmentType.Guid);
+#else
             return new CombGuid(result.Data.ToArray(), CombGuidSequentialSegmentType.Guid, true);
+#endif
         }
     }
 }

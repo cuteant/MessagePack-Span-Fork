@@ -20,8 +20,8 @@
     <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="$(BenchmarkDotNetDiagnosticsWindowsPackageVersion)" />
     <PackageReference Include="Hyperion.Unofficial" Version="$(HyperionUnofficialPackageVersion)" />
     <PackageReference Include="protobuf-net" Version="$(ProtobufNetPackageVersion)" />
-    <PackageReference Include="SpanJson" Version="$(SpanJsonPackageVersion)" />
-    <PackageReference Include="Utf8Json.Unofficial" Version="$(Utf8JsonUnofficialPackageVersion)" />
+    <PackageReference Include="SpanJson.Unofficial" Version="$(SpanJsonUnofficialPackageVersion)" />
+    <PackageReference Include="Utf8Json" Version="$(Utf8JsonPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
