@@ -1,5 +1,6 @@
 ﻿namespace MessagePack
 {
+    using System;
     using System.Runtime.CompilerServices;
     using System.Threading;
     using MessagePack.Formatters;
@@ -69,6 +70,29 @@
             if (!DefaultResolverCore.TryRegister(formatters, resolvers)) { return false; }
             if (!TypelessDefaultResolverCore.TryRegister(formatters, resolvers)) { return false; }
             return true;
+        }
+
+        public static bool ForceRegister<T>(IMessagePackFormatter<T> formatter)
+        {
+            IMessagePackFormatter<T> f = null;
+            try
+            {
+                f = DefaultResolverCore.Instance.GetFormatter<T>();
+            }
+            catch (TypeInitializationException ex)
+            {
+                ThrowTypeInitializationException(ex);
+            }
+
+            if (null == f)
+            {
+                ThrowFormatterNotRegisteredException<T>(resolver);
+            }
+
+            if (DefaultResolverCore.Instance.GetFormatterWithVerify<T>() != null)
+            {
+
+            }
         }
     }
 }

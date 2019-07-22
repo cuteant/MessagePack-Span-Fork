@@ -616,6 +616,12 @@ namespace MessagePack
         #region -- FormatterNotRegisteredException --
 
         [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static FormatterNotRegisteredException GetFormatterNotRegisteredException<T>()
+        {
+            return new FormatterNotRegisteredException(typeof(T).FullName + " is not registered in global resolver.");
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         internal static void ThrowFormatterNotRegisteredException(Type type, IFormatterResolver formatterResolver)
         {
             throw GetException();

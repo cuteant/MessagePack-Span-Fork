@@ -4,10 +4,10 @@
     using System.Buffers.Binary;
     using System.Runtime.CompilerServices;
 
-    public static partial class MessagePackWriterExtensions
+    partial struct MessagePackWriter
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteNil(this ref MessagePackWriter writer, ref int idx)
+        public  void WriteNil(this ref MessagePackWriter writer, ref int idx)
         {
             writer.Ensure(idx, 1);
             Unsafe.AddByteOffset(ref writer.PinnableAddress, (IntPtr)idx) = MessagePackCode.Nil;
@@ -15,7 +15,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteBoolean(this ref MessagePackWriter writer, bool value, ref int idx)
+        public  void WriteBoolean(this ref MessagePackWriter writer, bool value, ref int idx)
         {
             writer.Ensure(idx, 1);
             Unsafe.AddByteOffset(ref writer.PinnableAddress, (IntPtr)idx) = (value ? MessagePackCode.True : MessagePackCode.False);
@@ -23,7 +23,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteSByte(this ref MessagePackWriter writer, sbyte value, ref int idx)
+        public  void WriteSByte(this ref MessagePackWriter writer, sbyte value, ref int idx)
         {
             writer.Ensure(idx, 2);
             ref byte pinnableAddr = ref writer.PinnableAddress;
@@ -42,7 +42,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteSByteForceSByteBlock(this ref MessagePackWriter writer, sbyte value, ref int idx)
+        public  void WriteSByteForceSByteBlock(this ref MessagePackWriter writer, sbyte value, ref int idx)
         {
             writer.Ensure(idx, 2);
             ref byte pinnableAddr = ref writer.PinnableAddress;
@@ -53,7 +53,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteByte(this ref MessagePackWriter writer, byte value, ref int idx)
+        public  void WriteByte(this ref MessagePackWriter writer, byte value, ref int idx)
         {
             writer.Ensure(idx, 2);
             ref byte pinnableAddr = ref writer.PinnableAddress;
@@ -72,7 +72,7 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteByteForceByteBlock(this ref MessagePackWriter writer, byte value, ref int idx)
+        public  void WriteByteForceByteBlock(this ref MessagePackWriter writer, byte value, ref int idx)
         {
             writer.Ensure(idx, 2);
             ref byte pinnableAddr = ref writer.PinnableAddress;
@@ -83,13 +83,13 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteChar(this ref MessagePackWriter writer, char value, ref int idx)
+        public  void WriteChar(this ref MessagePackWriter writer, char value, ref int idx)
         {
             writer.WriteUInt16((ushort)value, ref idx);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteInt16(this ref MessagePackWriter writer, short value, ref int idx)
+        public  void WriteInt16(this ref MessagePackWriter writer, short value, ref int idx)
         {
             writer.Ensure(idx, 3);
             ref byte pinnableAddr = ref writer.PinnableAddress;
@@ -137,14 +137,14 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteInt16ForceInt16Block(this ref MessagePackWriter writer, short value, ref int idx)
+        public  void WriteInt16ForceInt16Block(this ref MessagePackWriter writer, short value, ref int idx)
         {
             writer.Ensure(idx, 3);
             WriteShort(ref writer.PinnableAddress, MessagePackCode.Int16, (ushort)value, ref idx);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteUInt16(this ref MessagePackWriter writer, ushort value, ref int idx)
+        public  void WriteUInt16(this ref MessagePackWriter writer, ushort value, ref int idx)
         {
             writer.Ensure(idx, 3);
             ref byte pinnableAddr = ref writer.PinnableAddress;
@@ -168,14 +168,14 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteUInt16ForceUInt16Block(this ref MessagePackWriter writer, ushort value, ref int idx)
+        public  void WriteUInt16ForceUInt16Block(this ref MessagePackWriter writer, ushort value, ref int idx)
         {
             writer.Ensure(idx, 3);
             WriteShort(ref writer.PinnableAddress, MessagePackCode.UInt16, value, ref idx);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WriteInt32(this ref MessagePackWriter writer, int value, ref int idx)
+        public  void WriteInt32(this ref MessagePackWriter writer, int value, ref int idx)
         {
             writer.Ensure(idx, 5);
             ref byte pinnableAddr = ref writer.PinnableAddress;
@@ -388,119 +388,6 @@
         {
             writer.Ensure(idx, 9);
             WriteLong(ref writer.PinnableAddress, MessagePackCode.UInt64, value, ref idx);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteShort(ref byte destination, byte packCode, ushort value, ref int idx)
-        {
-            IntPtr offset = (IntPtr)idx;
-            unchecked
-            {
-                Unsafe.AddByteOffset(ref destination, offset) = packCode;
-                Unsafe.AddByteOffset(ref destination, offset + 1) = (byte)(value >> 8);
-                Unsafe.AddByteOffset(ref destination, offset + 2) = (byte)value;
-            }
-            idx += 3;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteInt(ref byte destination, byte packCode, uint value, ref int idx)
-        {
-            IntPtr offset = (IntPtr)idx;
-            unchecked
-            {
-                Unsafe.AddByteOffset(ref destination, offset) = packCode;
-                Unsafe.AddByteOffset(ref destination, offset + 1) = (byte)(value >> 24);
-                Unsafe.AddByteOffset(ref destination, offset + 2) = (byte)(value >> 16);
-                Unsafe.AddByteOffset(ref destination, offset + 3) = (byte)(value >> 8);
-                Unsafe.AddByteOffset(ref destination, offset + 4) = (byte)value;
-            }
-            idx += 5;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteLong(ref byte destination, byte packCode, ulong value, ref int idx)
-        {
-            IntPtr offset = (IntPtr)idx;
-            unchecked
-            {
-                Unsafe.AddByteOffset(ref destination, offset) = packCode;
-                Unsafe.AddByteOffset(ref destination, offset + 1) = (byte)(value >> 56);
-                Unsafe.AddByteOffset(ref destination, offset + 2) = (byte)(value >> 48);
-                Unsafe.AddByteOffset(ref destination, offset + 3) = (byte)(value >> 40);
-                Unsafe.AddByteOffset(ref destination, offset + 4) = (byte)(value >> 32);
-                Unsafe.AddByteOffset(ref destination, offset + 5) = (byte)(value >> 24);
-                Unsafe.AddByteOffset(ref destination, offset + 6) = (byte)(value >> 16);
-                Unsafe.AddByteOffset(ref destination, offset + 7) = (byte)(value >> 8);
-                Unsafe.AddByteOffset(ref destination, offset + 8) = (byte)value;
-            }
-            idx += 9;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteNumber(ref byte destination, byte packCode, short value, ref int idx)
-        {
-            IntPtr offset = (IntPtr)idx;
-            Unsafe.AddByteOffset(ref destination, offset) = packCode;
-
-            if (BitConverter.IsLittleEndian) { value = BinaryPrimitives.ReverseEndianness(value); }
-            Unsafe.WriteUnaligned(ref Unsafe.AddByteOffset(ref destination, offset + 1), value);
-            idx += 3;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteNumber(ref byte destination, byte packCode, ushort value, ref int idx)
-        {
-            IntPtr offset = (IntPtr)idx;
-            Unsafe.AddByteOffset(ref destination, offset) = packCode;
-
-            if (BitConverter.IsLittleEndian) { value = BinaryPrimitives.ReverseEndianness(value); }
-            Unsafe.WriteUnaligned(ref Unsafe.AddByteOffset(ref destination, offset + 1), value);
-            idx += 3;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteNumber(ref byte destination, byte packCode, int value, ref int idx)
-        {
-            IntPtr offset = (IntPtr)idx;
-            Unsafe.AddByteOffset(ref destination, offset) = packCode;
-
-            if (BitConverter.IsLittleEndian) { value = BinaryPrimitives.ReverseEndianness(value); }
-            Unsafe.WriteUnaligned(ref Unsafe.AddByteOffset(ref destination, offset + 1), value);
-            idx += 5;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteNumber(ref byte destination, byte packCode, uint value, ref int idx)
-        {
-            IntPtr offset = (IntPtr)idx;
-            Unsafe.AddByteOffset(ref destination, offset) = packCode;
-
-            if (BitConverter.IsLittleEndian) { value = BinaryPrimitives.ReverseEndianness(value); }
-            Unsafe.WriteUnaligned(ref Unsafe.AddByteOffset(ref destination, offset + 1), value);
-            idx += 5;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteNumber(ref byte destination, byte packCode, long value, ref int idx)
-        {
-            IntPtr offset = (IntPtr)idx;
-            Unsafe.AddByteOffset(ref destination, offset) = packCode;
-
-            if (BitConverter.IsLittleEndian) { value = BinaryPrimitives.ReverseEndianness(value); }
-            Unsafe.WriteUnaligned(ref Unsafe.AddByteOffset(ref destination, offset + 1), value);
-            idx += 9;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteNumber(ref byte destination, byte packCode, ulong value, ref int idx)
-        {
-            IntPtr offset = (IntPtr)idx;
-            Unsafe.AddByteOffset(ref destination, offset) = packCode;
-
-            if (BitConverter.IsLittleEndian) { value = BinaryPrimitives.ReverseEndianness(value); }
-            Unsafe.WriteUnaligned(ref Unsafe.AddByteOffset(ref destination, offset + 1), value);
-            idx += 9;
         }
     }
 }

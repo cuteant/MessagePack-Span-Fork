@@ -170,6 +170,11 @@
             {
                 Interlocked.CompareExchange(ref s_isFreezed, Locked, Unlocked);
 
+                Formatter = GetFormatter();
+            }
+
+            private static IMessagePackFormatter<T> GetFormatter()
+            {
                 var formatters = Volatile.Read(ref s_formatters);
                 foreach (var item in formatters)
                 {
@@ -177,8 +182,7 @@
                     {
                         if (implInterface.IsGenericType && implInterface.GenericTypeArguments[0] == typeof(T))
                         {
-                            Formatter = (IMessagePackFormatter<T>)item;
-                            return;
+                            return (IMessagePackFormatter<T>)item;
                         }
                     }
                 }
@@ -189,10 +193,11 @@
                     var f = item.GetFormatter<T>();
                     if (f != null)
                     {
-                        Formatter = f;
-                        return;
+                        return f;
                     }
                 }
+
+                throw ThrowHelper.GetFormatterNotRegisteredException<T>();
             }
         }
     }
