@@ -3,7 +3,7 @@
   <Import Project="..\nuget.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.2;netstandard2.0;net471;net451</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;netstandard2.0;net471;net451</TargetFrameworks>
     <RootNamespace>MessagePack</RootNamespace>
     <AssemblyName>MessagePack</AssemblyName>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -42,7 +42,7 @@ System.Linq.Expressions.*
     <PackageReference Include="CuteAnt.Core" Version="$(CuteAntCorePackageVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' != 'netcoreapp2.2' ">
+  <ItemGroup Condition=" '$(TargetFramework)' != 'netcoreapp2.1' ">
     <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
     <PackageReference Include="System.ValueTuple" Version="$(SystemValueTuplePackageVersion)" />

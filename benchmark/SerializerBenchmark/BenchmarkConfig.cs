@@ -1,4 +1,8 @@
-﻿using Benchmark.Serializers;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using Benchmark.Serializers;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
@@ -9,9 +13,6 @@ using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Order;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Benchmark
 {
@@ -23,7 +24,7 @@ namespace Benchmark
             var baseConfig = Job.ShortRun.WithIterationCount(1).WithWarmupCount(1);
 
             // Add(baseConfig.With(Runtime.Clr).With(Jit.RyuJit).With(Platform.X64));
-            Add(baseConfig.With(Runtime.Core).With(Jit.RyuJit).With(Platform.X64));
+            this.Add(baseConfig.With(CoreRuntime.Core30).With(Jit.RyuJit).With(Platform.X64));
 
             Add(MarkdownExporter.GitHub);
             Add(CsvExporter.Default);
@@ -31,7 +32,7 @@ namespace Benchmark
 
             Add(new DataSizeColumn());
 
-            this.Set(new CustomOrderer());
+            this.Orderer = new CustomOrderer();
         }
 
         // 0.11.4 has bug of set CustomOrderer https://github.com/dotnet/BenchmarkDotNet/issues/1070
@@ -41,7 +42,7 @@ namespace Benchmark
         {
             public bool SeparateLogicalGroups => false;
 
-            public IEnumerable<BenchmarkCase> GetExecutionOrder(BenchmarkCase[] benchmarksCase)
+            public IEnumerable<BenchmarkCase> GetExecutionOrder(ImmutableArray<BenchmarkCase> benchmarksCase)
             {
                 return benchmarksCase;
             }
@@ -51,7 +52,7 @@ namespace Benchmark
                 return benchmarkCase.Descriptor.MethodIndex.ToString();
             }
 
-            public string GetLogicalGroupKey(IConfig config, BenchmarkCase[] allBenchmarksCases, BenchmarkCase benchmarkCase)
+            public string GetLogicalGroupKey(ImmutableArray<BenchmarkCase> allBenchmarksCases, BenchmarkCase benchmarkCase)
             {
                 return null;
             }
@@ -61,7 +62,7 @@ namespace Benchmark
                 return logicalGroups;
             }
 
-            public IEnumerable<BenchmarkCase> GetSummaryOrder(BenchmarkCase[] benchmarksCases, Summary summary)
+            public IEnumerable<BenchmarkCase> GetSummaryOrder(ImmutableArray<BenchmarkCase> benchmarksCases, Summary summary)
             {
                 return benchmarksCases
                     .OrderBy(x => x.Descriptor.WorkloadMethod.Name)
@@ -92,13 +93,14 @@ namespace Benchmark
                 return GetValue(summary, benchmarkCase, null);
             }
 
-            public string GetValue(Summary summary, BenchmarkCase benchmarkCase, ISummaryStyle style)
+            public string GetValue(Summary summary, BenchmarkCase benchmarkCase, SummaryStyle style)
             {
-                var mi = benchmarkCase.Descriptor.WorkloadMethod;
+                System.Reflection.MethodInfo mi = benchmarkCase.Descriptor.WorkloadMethod;
                 if (mi.Name.Contains("Serialize"))
                 {
                     var instance = Activator.CreateInstance(mi.DeclaringType);
                     mi.DeclaringType.GetField("Serializer").SetValue(instance, benchmarkCase.Parameters[0].Value);
+                    mi.DeclaringType.GetMethod("Setup").Invoke(instance, null);
 
                     var bytes = (byte[])mi.Invoke(instance, null);
                     return ToHumanReadableSize(bytes.Length);
@@ -121,34 +123,58 @@ namespace Benchmark
 
             static string ToHumanReadableSize(long size)
             {
-                return ToHumanReadableSize(new Nullable<long>(size));
+                return ToHumanReadableSize(new long?(size));
             }
 
-            static string ToHumanReadableSize(long? size)
+            private static string ToHumanReadableSize(long? size)
             {
-                if (size == null) return "NULL";
+                if (size == null)
+                {
+                    return "NULL";
+                }
 
                 double bytes = size.Value;
 
-                if (bytes <= 1024) return bytes.ToString("f2") + " B";
+                if (bytes <= 1024)
+                {
+                    return bytes.ToString("f2") + " B";
+                }
 
                 bytes = bytes / 1024;
-                if (bytes <= 1024) return bytes.ToString("f2") + " KB";
+                if (bytes <= 1024)
+                {
+                    return bytes.ToString("f2") + " KB";
+                }
 
                 bytes = bytes / 1024;
-                if (bytes <= 1024) return bytes.ToString("f2") + " MB";
+                if (bytes <= 1024)
+                {
+                    return bytes.ToString("f2") + " MB";
+                }
 
                 bytes = bytes / 1024;
-                if (bytes <= 1024) return bytes.ToString("f2") + " GB";
+                if (bytes <= 1024)
+                {
+                    return bytes.ToString("f2") + " GB";
+                }
 
                 bytes = bytes / 1024;
-                if (bytes <= 1024) return bytes.ToString("f2") + " TB";
+                if (bytes <= 1024)
+                {
+                    return bytes.ToString("f2") + " TB";
+                }
 
                 bytes = bytes / 1024;
-                if (bytes <= 1024) return bytes.ToString("f2") + " PB";
+                if (bytes <= 1024)
+                {
+                    return bytes.ToString("f2") + " PB";
+                }
 
                 bytes = bytes / 1024;
-                if (bytes <= 1024) return bytes.ToString("f2") + " EB";
+                if (bytes <= 1024)
+                {
+                    return bytes.ToString("f2") + " EB";
+                }
 
                 bytes = bytes / 1024;
                 return bytes + " ZB";
